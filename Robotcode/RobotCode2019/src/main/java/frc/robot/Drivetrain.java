@@ -2,7 +2,6 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 public class Drivetrain {
@@ -26,10 +25,10 @@ public class Drivetrain {
 	}
     private Drivetrain() {
 
-        R1 = new WPI_TalonSRX(2);
-        R2 = new WPI_TalonSRX(3);
-        L1 = new WPI_TalonSRX(4);
-        L2 = new WPI_TalonSRX(5);
+        R1 = new WPI_TalonSRX(0);
+        R2 = new WPI_TalonSRX(1);
+        L1 = new WPI_TalonSRX(14);
+        L2 = new WPI_TalonSRX(15);
 
         driverController = new XboxController(0);
     }

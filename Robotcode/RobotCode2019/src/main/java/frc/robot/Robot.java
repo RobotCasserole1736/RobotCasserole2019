@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
@@ -39,7 +40,7 @@ public class Robot extends TimedRobot {
   //Top level telemetry signals
   Signal rioCPULoad;
   Signal rioMemLoad;
-
+  Compressor compressor;
 
   /**
    * This function is run when the robot is first started up and should be
@@ -50,6 +51,10 @@ public class Robot extends TimedRobot {
     /* Init website utilties */
     webserver = new CasseroleWebServer();
     wrangler = new CalWrangler();
+
+    Drivetrain.getInstance();
+
+    compressor = new Compressor();
 
     /* Init Robot parts */
     pdp = new PowerDistributionPanel();
@@ -73,7 +78,7 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() {
     CasseroleDataServer.getInstance().logger.stopLogging();
-
+    Drivetrain.getInstance().update();
 
   }
 
@@ -98,7 +103,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-
+    Drivetrain.getInstance().update();
     telemetryUpdate();
   }
 
