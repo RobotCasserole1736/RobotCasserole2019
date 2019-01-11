@@ -37,6 +37,8 @@ public class Robot extends TimedRobot {
   //Physical devices
   PowerDistributionPanel pdp;
 
+  Drivetrain drivetrain;
+
   //Top level telemetry signals
   Signal rioCPULoad;
   Signal rioMemLoad;
@@ -52,7 +54,7 @@ public class Robot extends TimedRobot {
     webserver = new CasseroleWebServer();
     wrangler = new CalWrangler();
 
-    Drivetrain.getInstance();
+    drivetrain = Drivetrain.getInstance();
 
     compressor = new Compressor();
 
@@ -78,7 +80,7 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() {
     CasseroleDataServer.getInstance().logger.stopLogging();
-    Drivetrain.getInstance().update();
+    drivetrain.update();
 
   }
 
@@ -103,7 +105,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    Drivetrain.getInstance().update();
+    drivetrain.update();
     telemetryUpdate();
   }
 

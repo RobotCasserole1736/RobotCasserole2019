@@ -5,76 +5,71 @@ import edu.wpi.first.wpilibj.GenericHID;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 public class Drivetrain {
-    private static Drivetrain  dTrain = null;
+   private static Drivetrain dTrain = null;
+   
+   XboxController driverController;
+
+   WPI_TalonSRX rightTalon1;
+   WPI_TalonSRX rightTalon2;
+   WPI_TalonSRX leftTalon1;
+   WPI_TalonSRX leftTalon2;
+
+   public static synchronized Drivetrain getInstance() {
+	  if ( dTrain == null)
+       dTrain = new Drivetrain();
+     return dTrain;
+   }
+   
+   private Drivetrain() {
+     rightTalon1 = new WPI_TalonSRX(RobotConstants.DRIVETRAIN_RIGHT_1_CANID);
+     rightTalon2 = new WPI_TalonSRX(RobotConstants.DRIVETRAIN_RIGHT_2_CANID);
+     leftTalon1 = new WPI_TalonSRX(RobotConstants.DRIVETRAIN_LEFT_1_CANID);
+     leftTalon2 = new WPI_TalonSRX(RobotConstants.DRIVETRAIN_LEFT_2_CANID);
+
+     driverController = new XboxController(0);
+   }
+
+   public double getdirectionCMD() {
+     double joyVal = Math.pow(driverController.getY(GenericHID.Hand.kLeft),3);
+     return joyVal;
+   }
     
-    XboxController driverController;
-    double Direction = 0;
-    double Turn = 0;
-    double motorSpeedLeft = 0;
-    double motorSpeedRight = 0;
+   public double getturnCMD() {
+     double joyVal = Math.pow(driverController.getX(GenericHID.Hand.kRight),3);
+     return joyVal;
+   }
 
-    WPI_TalonSRX R1;
-    WPI_TalonSRX R2;
-    WPI_TalonSRX L1;
-    WPI_TalonSRX L2;
+   public void setMotorCMD(double command){
+     rightTalon1.set(-1*command);
+     rightTalon2.set(-1*command);
+     leftTalon1.set(command);
+     leftTalon2.set(command);
+     //System.out.println("command:" + Double.toString(command));
+   }
 
-    public static synchronized Drivetrain getInstance() {
-		if ( dTrain == null)
-         dTrain = new Drivetrain();
-		return dTrain;
-	}
-    private Drivetrain() {
-
-        R1 = new WPI_TalonSRX(0);
-        R2 = new WPI_TalonSRX(1);
-        L1 = new WPI_TalonSRX(14);
-        L2 = new WPI_TalonSRX(15);
-
-        driverController = new XboxController(0);
-    }
-
-    public double getDirectionCMD() {
-        double joyVal = Math.pow(driverController.getY(GenericHID.Hand.kLeft),3);
-        return joyVal;
-     }
-     
-     public double getTurnCMD() {
-        double joyVal = Math.pow(driverController.getX(GenericHID.Hand.kRight),3);
-        return joyVal;
-     }
-
-     public void setMotorCMD(double command){
-        R1.set(-1*command);
-        R2.set(-1*command);
-        L1.set(command);
-        L2.set(command);
-        System.out.println("command:" + Double.toString(command));
-     }
-
-     public void update() {
+    public void update() {
+      double directionCMD;
+      double turnCMD;
+      double motorSpeedLeftCMD = 0;
+      double motorSpeedRightCMD = 0;
+  
+      directionCMD = getdirectionCMD();
+      turnCMD = getturnCMD();
         
-        double DirectionCMD;
-        double TurnCMD;
-        double motorSpeedLeftCMD = 0;
-        double motorSpeedRightCMD = 0;
+      if(Math.abs(directionCMD) < 0.15){
+         directionCMD = 0;
+      }
   
-        DirectionCMD = getDirectionCMD();
-        TurnCMD = getTurnCMD();
-         
-        if(Math.abs(DirectionCMD) < 0.15){
-           DirectionCMD = 0;
-        }
-  
-        if(Math.abs(TurnCMD) < 0.15){
-           TurnCMD = 0;
-        }
+      if(Math.abs(turnCMD) < 0.15){
+         turnCMD = 0;
+      }
 
-        motorSpeedLeftCMD = DirectionCMD - TurnCMD;
-        motorSpeedRightCMD = -1 * (DirectionCMD + TurnCMD);
+      motorSpeedLeftCMD = directionCMD - turnCMD;
+      motorSpeedRightCMD = -1 * (directionCMD + turnCMD);
   
-        R1.set(motorSpeedRightCMD);
-        R2.set(motorSpeedRightCMD);
-        L1.set(motorSpeedLeftCMD);
-        L2.set(motorSpeedLeftCMD);
-    }
+      rightTalon1.set(motorSpeedRightCMD);
+      rightTalon2.set(motorSpeedRightCMD);
+      leftTalon1.set(motorSpeedLeftCMD);
+      leftTalon2.set(motorSpeedLeftCMD);
+   }
 }
