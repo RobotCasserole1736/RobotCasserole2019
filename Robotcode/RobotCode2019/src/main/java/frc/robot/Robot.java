@@ -7,7 +7,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
@@ -37,13 +36,14 @@ public class Robot extends TimedRobot {
   //Physical devices
   PowerDistributionPanel pdp;
 
+  PneumaticsControl pneumatics;
   Drivetrain drivetrain;
 
   //Top level telemetry signals
   Signal rioCPULoad;
   Signal rioMemLoad;
-  Compressor compressor;
-
+  Signal pneumaticsPressure;
+  
   /**
    * This function is run when the robot is first started up and should be
    * used for any initialization code.
@@ -54,9 +54,8 @@ public class Robot extends TimedRobot {
     webserver = new CasseroleWebServer();
     wrangler = new CalWrangler();
 
+    pneumatics = PneumaticsControl.getInstance();
     drivetrain = Drivetrain.getInstance();
-
-    compressor = new Compressor();
 
     /* Init Robot parts */
     pdp = new PowerDistributionPanel();
@@ -67,6 +66,7 @@ public class Robot extends TimedRobot {
     /* Init local telemetry signals */
     rioCPULoad = new Signal("roboRIO CPU Load", "Pct");
     rioMemLoad = new Signal("roboRIO Memory Load", "Pct"); 
+    pneumaticsPressure = new Signal("Main system pressure", "Psi");
 
     /* Fire up webserver & telemetry dataserver */
     webserver.startServer();
@@ -107,6 +107,8 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     drivetrain.update();
     telemetryUpdate();
+
+    System.out.println(PneumaticsControl.getInstance().GetPressure());
   }
 
   @Override
@@ -134,6 +136,8 @@ public class Robot extends TimedRobot {
 
     rioCPULoad.addSample(sample_time_ms,loadMon.getCPULoadPct());
     rioMemLoad.addSample(sample_time_ms,loadMon.getMemLoadPct());
+    pneumaticsPressure.addSample(sample_time_ms,PneumaticsControl.getInstance().GetPressure());
+
   }
 
 
