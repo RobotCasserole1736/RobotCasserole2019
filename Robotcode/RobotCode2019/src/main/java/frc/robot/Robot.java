@@ -111,8 +111,6 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     drivetrain.update();
     telemetryUpdate();
-
-    System.out.println(PneumaticsControl.getInstance().GetPressure());
   }
 
   @Override
@@ -141,7 +139,7 @@ public class Robot extends TimedRobot {
     rioCPULoad.addSample(sample_time_ms,loadMon.getCPULoadPct());
     rioMemLoad.addSample(sample_time_ms,loadMon.getMemLoadPct());
     pneumaticsPressure.addSample(sample_time_ms,PneumaticsControl.getInstance().GetPressure());
-
+    CasseroleDriverView.setDialValue("Main System Pressure", PneumaticsControl.getInstance().GetPressure());
   }
     
   /**
@@ -150,7 +148,7 @@ public class Robot extends TimedRobot {
   private void initDriverView(){
     String[] gpOptions =  {"Cargo (ball)", "Hatch Panel", "Nothing"};
     CasseroleDriverView.newAutoSelector("Starting Gamepiece", gpOptions);
-
+    CasseroleDriverView.newDial("Main System Pressure", 0, 140, 10, 80, 125);
     CasseroleDriverView.newWebcam("cam1", "http://10.17.36.10:1181/stream.mjpg", 0, 0, 0);
     CasseroleDriverView.newWebcam("cam2", "http://10.17.36.10:1182/stream.mjpg", 0, 0, 0);
   }
