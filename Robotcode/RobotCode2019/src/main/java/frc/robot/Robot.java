@@ -14,6 +14,7 @@ import frc.lib.Calibration.CalWrangler;
 import frc.lib.DataServer.CasseroleDataServer;
 import frc.lib.DataServer.Signal;
 import frc.lib.LoadMon.CasseroleRIOLoadMonitor;
+import frc.lib.WebServer.CasseroleDriverView;
 import frc.lib.WebServer.CasseroleWebServer;
 
 
@@ -67,6 +68,9 @@ public class Robot extends TimedRobot {
     rioCPULoad = new Signal("roboRIO CPU Load", "Pct");
     rioMemLoad = new Signal("roboRIO Memory Load", "Pct"); 
     pneumaticsPressure = new Signal("Main system pressure", "Psi");
+
+    /* Website setup */
+    initDriverView();
 
     /* Fire up webserver & telemetry dataserver */
     webserver.startServer();
@@ -131,7 +135,7 @@ public class Robot extends TimedRobot {
   //////////////////////////////////////////////////////////////////////////
   // Utilties
   //////////////////////////////////////////////////////////////////////////
-  public void telemetryUpdate(){
+  private void telemetryUpdate(){
     double sample_time_ms = Timer.getFPGATimestamp()*1000.0;
 
     rioCPULoad.addSample(sample_time_ms,loadMon.getCPULoadPct());
@@ -139,7 +143,15 @@ public class Robot extends TimedRobot {
     pneumaticsPressure.addSample(sample_time_ms,PneumaticsControl.getInstance().GetPressure());
 
   }
+    
+  /**
+   * This function sets up the driver view website
+   */
+  private void initDriverView(){
+    String[] gpOptions =  {"Cargo (ball)", "Hatch Panel", "Nothing"};
+    CasseroleDriverView.newAutoSelector("Starting Gamepiece", gpOptions);
 
-
-
+    CasseroleDriverView.newWebcam("cam1", "http://10.17.36.10:1181/stream.mjpg", 0, 0, 0);
+    CasseroleDriverView.newWebcam("cam2", "http://10.17.36.10:1182/stream.mjpg", 0, 0, 0);
+  }
 }
