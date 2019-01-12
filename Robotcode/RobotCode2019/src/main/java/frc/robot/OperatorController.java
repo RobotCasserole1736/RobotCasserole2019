@@ -1,6 +1,8 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.GenericHID.Hand;
+import frc.robot.IntakeControl.IntakePos;
 
 public class OperatorController {
 
@@ -12,7 +14,7 @@ public class OperatorController {
 
     boolean armTopPosReq;
     boolean armMidPosReq;
-    boolean armBotPosReq;
+    boolean armLowPosReq;
 
     double armManualPosCmd;
 
@@ -22,8 +24,10 @@ public class OperatorController {
 
     boolean intakeIntakeReq;
     boolean intakeEjectReq;
-    boolean intakeExtendReq;
-    boolean intakeRetractReq;
+    
+    IntakePos intakePosReq;
+
+    
 
     /* Singleton stuff */
     private static OperatorController opCtrl = null;
@@ -38,6 +42,54 @@ public class OperatorController {
 
 
     public void update(){
+        ballPickupReq = xb.getAButton();
+        hatchPickupReq = xb.getYButton();
+        releaseReq = xb.getBButton();
+
+        armTopPosReq = false;
+        armMidPosReq = false;
+        armLowPosReq = false;
+        autoAlignHighReq = false;
+        autoAlignMidReq = false;
+        autoAlignLowReq = false;
+        int povAngle = xb.getPOV(0);
+        if(xb.getXButton()){
+            if(povAngle == 0){
+                autoAlignHighReq = true;
+            } else if(povAngle == 90 || povAngle == 270) {
+                autoAlignMidReq = true;
+            } else if(povAngle == 180) {
+                autoAlignLowReq = true;
+            }
+        } else {
+            if(povAngle == 0){
+                armTopPosReq = true;
+            } else if(povAngle == 90 || povAngle == 270) {
+                armMidPosReq = true;
+            } else if(povAngle == 180) {
+                armLowPosReq = true;
+            }
+        }
+
+        if(xb.getBumper(Hand.kRight)){
+            intakePosReq = IntakePos.Extend;
+        } else {
+            intakePosReq = IntakePos.Retract;
+        }
+
+        if(xb.getTriggerAxis(Hand.kRight) > 0.5){
+            intakeIntakeReq = true;
+            intakeEjectReq = false;
+
+            //When pulling a ball in, override the intake to be extended.
+            intakePosReq = IntakePos.Extend;
+        } else if(xb.getTriggerAxis(Hand.kLeft) > 0.5){
+            intakeIntakeReq = false;
+            intakeEjectReq = true;
+        } else {
+            intakeIntakeReq = false;
+            intakeEjectReq = false;
+        }
 
     }
 
@@ -83,12 +135,12 @@ public class OperatorController {
         return this.armMidPosReq;
     }
 
-    public boolean getArmBotPosReq() {
-        return this.armBotPosReq;
+    public boolean getArmLowPosReq() {
+        return this.armLowPosReq;
     }
 
-    public boolean isArmBotPosReq() {
-        return this.armBotPosReq;
+    public boolean isArmLowPosReq() {
+        return this.armLowPosReq;
     }
 
     public double getArmManualPosCmd() {
@@ -135,20 +187,8 @@ public class OperatorController {
         return this.intakeEjectReq;
     }
 
-    public boolean getIntakeExtendReq() {
-        return this.intakeExtendReq;
-    }
-
-    public boolean isIntakeExtendReq() {
-        return this.intakeExtendReq;
-    }
-
-    public boolean getIntakeRetractReq() {
-        return this.intakeRetractReq;
-    }
-
-    public boolean isIntakeRetractReq() {
-        return this.intakeRetractReq;
+    public IntakePos getIntakePosReq() {
+        return this.intakePosReq;
     }
     
 }
