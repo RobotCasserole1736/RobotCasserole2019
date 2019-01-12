@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+
+<html>
+
+<title>Casserole Data Live State View</title>
+
+<head>
+  <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="table_highlight.css">
+</head>
+
+<body>
+
+<h1>Data From Robot</h1>
+<hr>
+</div>
+<div id="id01">COM Status: Socket Not Yet Opened...</div>
+
+<div id="UserInput">
+<table border="1">
+  <br>
+  <tr><td>
+      <input id="filterTextInput" type="text" placeholder="Name Filter" onkeyup="filterChangeHandler(this.value)">
+    </td></tr>
+</table>
+</div>
+
+<div id="id02"></div>
+
+<!-- Common navigation bar -->
+<div id="navbar">
+<p>
+<a href="index.html">Home</a>
+<a href="presentState.html">State Data</a>   
+<a href="calibration.html">Calibration</a>
+<a href="driverView.html">Driver View</a>
+<a href="rtplot.html">Plot View</a>
+<a href="robotPose.html">Pose View</a>
+<a href="ControllerMap.html">Controller Map</a>
+</p>
+</div>
+<!-- END Common navigation bar -->
+
+<script type="text/javascript" src="/presentState.js" >
+</script>
+
+</body>
+</html>
+

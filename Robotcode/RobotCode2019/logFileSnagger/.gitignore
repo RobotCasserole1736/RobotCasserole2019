@@ -1,0 +1,5 @@
+file_snagger/logs/*.txt
+downloaded_logs/*.csv
+downloaded_logs/*/*.csv
+crash_logs/*.txt
+crash_logs/*/*.txt

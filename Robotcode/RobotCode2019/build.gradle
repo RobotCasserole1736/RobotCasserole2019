@@ -24,12 +24,12 @@ deploy {
             debug = frc.getDebugOrDefault(false)
         }
         // Built in artifact to deploy arbitrary files to the roboRIO.
-        fileTreeArtifact('frcStaticFileDeploy') {
+        fileTreeArtifact('CasseroleWebServerFileDeploy') {
             // The directory below is the local directory to deploy
-            files = fileTree(dir: 'src/main/deploy')
+            files = fileTree(dir: './resources')
             // Deploy to RoboRIO target, into /home/lvuser/deploy
             targets << "roborio"
-            directory = '/home/lvuser/deploy'
+            directory = '/home/lvuser/resources/'
         }
     }
 }
@@ -50,6 +50,21 @@ dependencies {
     nativeZip wpi.deps.vendor.jni(wpi.platforms.roborio)
     nativeDesktopZip wpi.deps.vendor.jni(wpi.platforms.desktop)
     testCompile 'junit:junit:4.12'
+
+    //Casserole WebServer Deps
+    compile 'com.googlecode.json-simple:json-simple:1.1.1'
+    compile group: 'org.eclipse.jetty', name: 'jetty-http', version: '9.3.9.v20160517'
+    compile group: 'org.eclipse.jetty', name: 'jetty-server', version: '9.3.9.v20160517'
+    compile group: 'org.eclipse.jetty', name: 'jetty-servlet', version: '9.3.9.v20160517'
+    compile group: 'org.eclipse.jetty', name: 'jetty-util', version: '9.3.9.v20160517'
+    compile group: 'org.eclipse.jetty', name: 'jetty-security', version: '9.3.9.v20160517'
+    compile group: 'org.eclipse.jetty.websocket', name: 'websocket-server', version: '9.3.9.v20160517'
+    compile group: 'org.eclipse.jetty.websocket', name: 'websocket-client', version: '9.3.9.v20160517'
+    compile group: 'org.eclipse.jetty.websocket', name: 'websocket-servlet', version: '9.3.9.v20160517'
+    compile group: 'org.eclipse.jetty.websocket', name: 'websocket-api', version: '9.3.9.v20160517'
+    compile group: 'org.eclipse.jetty.websocket', name: 'websocket-common', version: '9.3.9.v20160517'
+    compile group: 'org.eclipse.jetty', name: 'jetty-io', version: '9.3.9.v20160517'
+    compile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
 }
 
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')
