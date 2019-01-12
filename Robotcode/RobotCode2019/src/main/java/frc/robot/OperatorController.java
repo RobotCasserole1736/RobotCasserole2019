@@ -3,6 +3,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import frc.robot.IntakeControl.IntakePos;
+import frc.robot.IntakeControl.IntakeSpd;
 
 public class OperatorController {
 
@@ -22,9 +23,7 @@ public class OperatorController {
     boolean autoAlignMidReq;
     boolean autoAlignLowReq;
 
-    boolean intakeIntakeReq;
-    boolean intakeEjectReq;
-    
+    IntakeSpd intakeSpdReq;
     IntakePos intakePosReq;
 
     
@@ -78,17 +77,13 @@ public class OperatorController {
         }
 
         if(xb.getTriggerAxis(Hand.kRight) > 0.5){
-            intakeIntakeReq = true;
-            intakeEjectReq = false;
-
+            intakeSpdReq = IntakeSpd.Intake;
             //When pulling a ball in, override the intake to be extended.
             intakePosReq = IntakePos.Extend;
         } else if(xb.getTriggerAxis(Hand.kLeft) > 0.5){
-            intakeIntakeReq = false;
-            intakeEjectReq = true;
+            intakeSpdReq = IntakeSpd.Eject;
         } else {
-            intakeIntakeReq = false;
-            intakeEjectReq = false;
+            intakeSpdReq = IntakeSpd.Stop;
         }
 
     }
@@ -171,20 +166,8 @@ public class OperatorController {
         return this.autoAlignLowReq;
     }
 
-    public boolean getIntakeIntakeReq() {
-        return this.intakeIntakeReq;
-    }
-
-    public boolean isIntakeIntakeReq() {
-        return this.intakeIntakeReq;
-    }
-
-    public boolean getIntakeEjectReq() {
-        return this.intakeEjectReq;
-    }
-
-    public boolean isIntakeEjectReq() {
-        return this.intakeEjectReq;
+    public IntakeSpd getIntakeIntakeReq() {
+        return this.intakeSpdReq;
     }
 
     public IntakePos getIntakePosReq() {
