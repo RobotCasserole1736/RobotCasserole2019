@@ -55,7 +55,11 @@ public class IntakeControl {
 
 		private IntakePos(int value) {
             this.value = value;
-        }
+		}
+				
+		public int toInt(){
+			return this.value;
+		}
 	}
 	
 	
@@ -67,7 +71,11 @@ public class IntakeControl {
 
 		private IntakeSpd(int value) {
             this.value = value;
-        }
+		}
+		
+		public int toInt(){
+			return this.value;
+		}
 	}
 
 	//Start with intake retracted and stopped

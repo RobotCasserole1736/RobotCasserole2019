@@ -62,8 +62,13 @@ public class Robot extends TimedRobot {
     /* Init Robot parts */
     pdp = new PowerDistributionPanel();
 
+    /* Init input from humans */
+    OperatorController.getInstance();
+    DriverController.getInstance();
+
     /* Init software utilities */
     loadMon= new CasseroleRIOLoadMonitor();
+    LoopTiming.getInstance();
 
     /* Init local telemetry signals */
     rioCPULoad = new Signal("roboRIO CPU Load", "Pct");
@@ -110,8 +115,12 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
+    LoopTiming.getInstance().markLoopStart();
+
     drivetrain.update();
     telemetryUpdate();
+    
+    LoopTiming.getInstance().markLoopEnd();
   }
 
   @Override
@@ -135,7 +144,7 @@ public class Robot extends TimedRobot {
   // Utilties
   //////////////////////////////////////////////////////////////////////////
   private void telemetryUpdate(){
-    double sample_time_ms = Timer.getFPGATimestamp()*1000.0;
+    double sample_time_ms = LoopTiming.getInstance().getLoopStartTime_sec()*1000.0;
 
     rioCPULoad.addSample(sample_time_ms,loadMon.getCPULoadPct());
     rioMemLoad.addSample(sample_time_ms,loadMon.getMemLoadPct());

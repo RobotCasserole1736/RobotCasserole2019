@@ -2,6 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
+import frc.lib.DataServer.Signal;
 import frc.robot.IntakeControl.IntakePos;
 import frc.robot.IntakeControl.IntakeSpd;
 
@@ -26,6 +27,9 @@ public class OperatorController {
     IntakeSpd intakeSpdReq;
     IntakePos intakePosReq;
 
+    /* Telemetry */
+    Signal intakeSpdReqSig;
+    Signal intakePosReqSig;
     
 
     /* Singleton stuff */
@@ -86,6 +90,10 @@ public class OperatorController {
             intakeSpdReq = IntakeSpd.Stop;
         }
 
+        double sample_time_ms = LoopTiming.getInstance().getLoopStartTime_sec()*1000.0;
+        intakeSpdReqSig.addSample(sample_time_ms, intakeSpdReq.toInt());
+        intakePosReqSig.addSample(sample_time_ms, intakePosReq.toInt());
+
     }
 
 
@@ -94,15 +102,7 @@ public class OperatorController {
         return this.ballPickupReq;
     }
 
-    public boolean isBallPickupReq() {
-        return this.ballPickupReq;
-    }
-
     public boolean getHatchPickupReq() {
-        return this.hatchPickupReq;
-    }
-
-    public boolean isHatchPickupReq() {
         return this.hatchPickupReq;
     }
 
@@ -110,15 +110,7 @@ public class OperatorController {
         return this.releaseReq;
     }
 
-    public boolean isReleaseReq() {
-        return this.releaseReq;
-    }
-
     public boolean getArmTopPosReq() {
-        return this.armTopPosReq;
-    }
-
-    public boolean isArmTopPosReq() {
         return this.armTopPosReq;
     }
 
@@ -126,15 +118,7 @@ public class OperatorController {
         return this.armMidPosReq;
     }
 
-    public boolean isArmMidPosReq() {
-        return this.armMidPosReq;
-    }
-
     public boolean getArmLowPosReq() {
-        return this.armLowPosReq;
-    }
-
-    public boolean isArmLowPosReq() {
         return this.armLowPosReq;
     }
 
@@ -146,23 +130,11 @@ public class OperatorController {
         return this.autoAlignHighReq;
     }
 
-    public boolean isAutoAlignHighReq() {
-        return this.autoAlignHighReq;
-    }
-
     public boolean getAutoAlignMidReq() {
         return this.autoAlignMidReq;
     }
 
-    public boolean isAutoAlignMidReq() {
-        return this.autoAlignMidReq;
-    }
-
     public boolean getAutoAlignLowReq() {
-        return this.autoAlignLowReq;
-    }
-
-    public boolean isAutoAlignLowReq() {
         return this.autoAlignLowReq;
     }
 

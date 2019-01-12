@@ -64,23 +64,11 @@ public class DriverController {
         return this.slowMoveReq;
     }
 
-    public boolean isSlowMoveReq() {
-        return this.slowMoveReq;
-    }
-
     public boolean getCompressorDisableReq() {
         return this.compressorDisableReq;
     }
 
-    public boolean isCompressorDisableReq() {
-        return this.compressorDisableReq;
-    }
-
     public boolean getCompressorEnableReq() {
-        return this.compressorEnableReq;
-    }
-
-    public boolean isCompressorEnableReq() {
         return this.compressorEnableReq;
     }
 
