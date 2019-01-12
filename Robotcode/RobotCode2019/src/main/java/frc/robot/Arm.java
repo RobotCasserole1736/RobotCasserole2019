@@ -38,7 +38,7 @@ public class Arm {
     private Arm() {
         
         armEncoder = new Encoder(0,1);
-        armPotPos = AnalogPotentiometer();
+        //armPotPos = AnalogPotentiometer(); WIP needs fix
     } 
 
     public enum armPos {
@@ -53,10 +53,12 @@ public class Arm {
     /////Use Sensor Data in Calculations\\\\\
     public void update() {
         
-        double convertVoltsToDeg(double voltage_in) {
-            return (x - LowerLimitVoltage) * (UpperLimitDegrees - LowerLimitDegrees) / (UpperLimitVoltage - LowerLimitVoltage) + LowerLimitDegrees;
-        }
+
     }
+
+    //double convertVoltsToDeg(double voltage_in) {
+    //    return (x - LowerLimitVoltage) * (UpperLimitDegrees - LowerLimitDegrees) / (UpperLimitVoltage - LowerLimitVoltage) + LowerLimitDegrees;
+    //}
 
     public void setPositionCmd(armPos pos_in) {
 
