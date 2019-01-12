@@ -20,29 +20,19 @@ package frc.robot;
  *   if you would consider donating to our club to help further STEM education.
  */
 
-public class EmptyClass {
+public class LEDController {
 	// You will want to rename all instances of "EmptyClass" with your actual class name and "empty" with a variable name
-	private static EmptyClass empty = null;
+	private static LEDController ledCtrl = null;
 
-	public static synchronized EmptyClass getInstance() {
-		if(empty == null)
-			empty = new EmptyClass();
-		return empty;
+	public static synchronized LEDController getInstance() {
+		if(ledCtrl == null)
+			ledCtrl = new LEDController();
+		return ledCtrl;
 	}
 
 	// This is the private constructor that will be called once by getInstance() and it should instantiate anything that will be required by the class
-	private EmptyClass() {
+	private LEDController() {
 
 	}
 
-	//This is a dummy variable that you will probably want to delete
-	private boolean testIsEverythingOK = false;
-
-	// This is a dummy method that you will probably want to delete
-	public double TestCommand() {
-		if(testIsEverythingOK)
-			System.out.println("OK");
-		else
-			System.out.println("NOT OK");
-	}
 }

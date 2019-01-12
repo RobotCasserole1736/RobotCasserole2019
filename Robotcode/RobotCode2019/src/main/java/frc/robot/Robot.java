@@ -9,7 +9,6 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.Timer;
 import frc.lib.Calibration.CalWrangler;
 import frc.lib.DataServer.CasseroleDataServer;
 import frc.lib.DataServer.Signal;
@@ -61,6 +60,7 @@ public class Robot extends TimedRobot {
 
     /* Init Robot parts */
     pdp = new PowerDistributionPanel();
+    LEDController.getInstance();
 
     /* Init input from humans */
     OperatorController.getInstance();
