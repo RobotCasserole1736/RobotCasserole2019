@@ -17,6 +17,11 @@ public class RobotConstants {
     /////////////////////////////////////////////////////////////////////////////////////
     public static final int ANALOG_PRESSURE_SENSOR_PORT = 0;
 
+    public static final int LINE_FOLLOWING_SENSOR_1 = 4;
+    public static final int LINE_FOLLOWING_SENSOR_2 = 5;
+    public static final int LINE_FOLLOWING_SENSOR_3 = 6;
+    public static final int LINE_FOLLOWING_SENSOR_4 = 7;
+    public static final int LINE_FOLLOWING_SENSOR_5 = 8;
 
     /////////////////////////////////////////////////////////////////////////////////////
 	// PDP Ports
