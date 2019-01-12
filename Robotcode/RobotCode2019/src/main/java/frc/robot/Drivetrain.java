@@ -1,13 +1,12 @@
 package frc.robot;
 
-import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.GenericHID;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 public class Drivetrain {
    private static Drivetrain dTrain = null;
    
-   XboxController driverController;
+  public double forwardReverseCmd;
+  public double rotationCmd;
 
    WPI_TalonSRX rightTalon1;
    WPI_TalonSRX rightTalon2;
@@ -26,17 +25,11 @@ public class Drivetrain {
      leftTalon1 = new WPI_TalonSRX(RobotConstants.DRIVETRAIN_LEFT_1_CANID);
      leftTalon2 = new WPI_TalonSRX(RobotConstants.DRIVETRAIN_LEFT_2_CANID);
 
-     driverController = new XboxController(0);
    }
 
-   public double getdirectionCMD() {
-     double joyVal = Math.pow(driverController.getY(GenericHID.Hand.kLeft),3);
-     return joyVal;
-   }
-    
-   public double getturnCMD() {
-     double joyVal = Math.pow(driverController.getX(GenericHID.Hand.kRight),3);
-     return joyVal;
+
+   public void setOpenLoopCmd(double forwardReverseCmd, double rotaionCmd){
+   
    }
 
    public void setMotorCMD(double command){
@@ -53,8 +46,8 @@ public class Drivetrain {
       double motorSpeedLeftCMD = 0;
       double motorSpeedRightCMD = 0;
   
-      directionCMD = getdirectionCMD();
-      turnCMD = getturnCMD();
+      directionCMD = forwardReverseCmd;
+      turnCMD = rotationCmd;
         
       if(Math.abs(directionCMD) < 0.15){
          directionCMD = 0;

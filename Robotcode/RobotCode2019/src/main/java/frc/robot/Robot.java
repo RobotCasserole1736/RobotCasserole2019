@@ -85,6 +85,7 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() {
     CasseroleDataServer.getInstance().logger.stopLogging();
+    drivetrain.setOpenLoopCmd(DriverController.getInstance().getDriverFwdRevCmd(), DriverController.getInstance().getDriverRotateCmd());
     drivetrain.update();
 
   }
