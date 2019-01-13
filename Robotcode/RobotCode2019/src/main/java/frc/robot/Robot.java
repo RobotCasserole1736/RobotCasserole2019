@@ -60,7 +60,6 @@ public class Robot extends TimedRobot {
   //Top level telemetry signals
   Signal rioCPULoad;
   Signal rioMemLoad;
-  Signal pneumaticsPressure;
   
   /**
    * This function is run when the robot is first started up and should be
@@ -92,7 +91,6 @@ public class Robot extends TimedRobot {
     /* Init local telemetry signals */
     rioCPULoad = new Signal("roboRIO CPU Load", "Pct");
     rioMemLoad = new Signal("roboRIO Memory Load", "Pct"); 
-    pneumaticsPressure = new Signal("Main system pressure", "Psi");
 
     /* Website setup */
     initDriverView();
@@ -175,10 +173,9 @@ public class Robot extends TimedRobot {
     /* Update main loop signals */
     rioCPULoad.addSample(sample_time_ms,loadMon.getCPULoadPct());
     rioMemLoad.addSample(sample_time_ms,loadMon.getMemLoadPct());
-    pneumaticsPressure.addSample(sample_time_ms,PneumaticsControl.getInstance().GetPressure());
 
     /* Update driver view */
-    CasseroleDriverView.setDialValue("Main System Pressure", PneumaticsControl.getInstance().GetPressure());
+    CasseroleDriverView.setDialValue("Main System Pressure", PneumaticsControl.getInstance().getPressure());
   }
     
   /**
