@@ -74,6 +74,8 @@ public class OperatorController {
             }
         }
 
+        armManualPosCmd = Utils.ctrlAxisScale(xb.getY(Hand.kLeft), 3, 0.15)
+
         if(xb.getBumper(Hand.kRight)){
             intakePosReq = IntakePos.Extend;
         } else {
