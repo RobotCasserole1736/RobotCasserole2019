@@ -1,8 +1,8 @@
 /*----------------------------------------------------------------------------*/
-/* Copyright (c) 2017-2018 FIRST. All Rights Reserved.                        */
-/* Open Source Software - may be modified and shared by FRC teams. The code   */
+/* Copyright (c) 2017-2018 FIRST. All Rights Reserved.                                                */
+/* Open Source Software - may be modified and shared by FRC teams. The code     */
 /* must be accompanied by the FIRST BSD license file in the root directory of */
-/* the project.                                                               */
+/* the project.                                                                                                                             */
 /*----------------------------------------------------------------------------*/
 
 package frc.robot;
@@ -13,18 +13,18 @@ package frc.robot;
  *******************************************************************************************
  *
  * This software is released under the MIT Licence - see the license.txt
- *  file in the root of this repo.
+ *    file in the root of this repo.
  *
  * Non-legally-binding statement from Team 1736:
- *  Thank you for taking the time to read through our software! We hope you
- *   find it educational and informative! 
- *  Please feel free to snag our software for your own use in whatever project
- *   you have going on right now! We'd love to be able to help out! Shoot us 
- *   any questions you may have, all our contact info should be on our website
- *   (listed above).
- *  If you happen to end up using our software to make money, that is wonderful!
- *   Robot Casserole is always looking for more sponsors, so we'd be very appreciative
- *   if you would consider donating to our club to help further STEM education.
+ *    Thank you for taking the time to read through our software! We hope you
+ *     find it educational and informative! 
+ *    Please feel free to snag our software for your own use in whatever project
+ *     you have going on right now! We'd love to be able to help out! Shoot us 
+ *     any questions you may have, all our contact info should be on our website
+ *     (listed above).
+ *    If you happen to end up using our software to make money, that is wonderful!
+ *     Robot Casserole is always looking for more sponsors, so we'd be very appreciative
+ *     if you would consider donating to our club to help further STEM education.
  */
 
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
@@ -47,145 +47,158 @@ import frc.lib.WebServer.CasseroleWebServer;
  */
 public class Robot extends TimedRobot {
 
-  //Website Utilities
-  CasseroleWebServer webserver;
-  CalWrangler wrangler;
+    //Website Utilities
+    CasseroleWebServer webserver;
+    CalWrangler wrangler;
 
-  //Processor metric utilities
-  CasseroleRIOLoadMonitor loadMon;
+    //Processor metric utilities
+    CasseroleRIOLoadMonitor loadMon;
 
-  //Physical devices
-  PowerDistributionPanel pdp;
+    //Physical devices
+    PowerDistributionPanel pdp;
 
-  //Top level telemetry signals
-  Signal rioCPULoad;
-  Signal rioMemLoad;
-  
-  /**
-   * This function is run when the robot is first started up and should be
-   * used for any initialization code.
-   */
-  @Override
-  public void robotInit() {
-    /* Init website utilties */
-    webserver = new CasseroleWebServer();
-    wrangler = new CalWrangler();
-
-    /* Init Robot parts */
-    pdp = new PowerDistributionPanel();
-    LEDController.getInstance();
-    PneumaticsControl.getInstance();
-    Arm.getInstance();
-    Drivetrain.getInstance();
-    Climber.getInstance();
-
-
-    /* Init input from humans */
-    OperatorController.getInstance();
-    DriverController.getInstance();
-
-    /* Init software utilities */
-    loadMon= new CasseroleRIOLoadMonitor();
-    LoopTiming.getInstance();
-
-    /* Init local telemetry signals */
-    rioCPULoad = new Signal("roboRIO CPU Load", "Pct");
-    rioMemLoad = new Signal("roboRIO Memory Load", "Pct"); 
-
-    /* Website setup */
-    initDriverView();
-
-    /* Fire up webserver & telemetry dataserver */
-    webserver.startServer();
-    CasseroleDataServer.getInstance().startServer();
-
-  }
-
-  /**
-   * This function is called once right before the start of disabled mode.
-   */
-  @Override
-  public void disabledInit() {
-    CasseroleDataServer.getInstance().logger.stopLogging();
+    //Top level telemetry signals
+    Signal rioCPULoad;
+    Signal rioMemLoad;
     
-    Drivetrain.getInstance().update();
+    /**
+     * This function is run when the robot is first started up and should be
+     * used for any initialization code.
+     */
+    @Override
+    public void robotInit() {
+        /* Init website utilties */
+        webserver = new CasseroleWebServer();
+        wrangler = new CalWrangler();
 
-  }
-
-  /**
-   * This function is called periodically during disabled mode.
-   */
-  @Override
-  public void disabledPeriodic() {
-
-    telemetryUpdate();
-  }
-
-  @Override
-  public void teleopInit() {
-    CasseroleDataServer.getInstance().logger.startLoggingTeleop();
+        /* Init Robot parts */
+        pdp = new PowerDistributionPanel();
+        LEDController.getInstance();
+        PneumaticsControl.getInstance();
+        Arm.getInstance();
+        Drivetrain.getInstance();
+        Climber.getInstance();
 
 
-  }
+        /* Init input from humans */
+        OperatorController.getInstance();
+        DriverController.getInstance();
 
-  /**
-   * This function is called periodically during operator control.
-   */
-  @Override
-  public void teleopPeriodic() {
-    LoopTiming.getInstance().markLoopStart();
+        /* Init software utilities */
+        loadMon= new CasseroleRIOLoadMonitor();
+        LoopTiming.getInstance();
 
-    /* Sample inputs from humans */
-    DriverController.getInstance().update();
-    OperatorController.getInstance().update();
+        /* Init local telemetry signals */
+        rioCPULoad = new Signal("roboRIO CPU Load", "Pct");
+        rioMemLoad = new Signal("roboRIO Memory Load", "Pct"); 
 
-    Drivetrain.getInstance().setOpenLoopCmd(DriverController.getInstance().getDriverFwdRevCmd(), DriverController.getInstance().getDriverRotateCmd());
+        /* Website setup */
+        initDriverView();
 
-    Drivetrain.getInstance().update();
-    telemetryUpdate();
+        /* Fire up webserver & telemetry dataserver */
+        webserver.startServer();
+        CasseroleDataServer.getInstance().startServer();
+    }
+
+/////////////////////////////////////////////////////////////////////////////////////
+// Match-active Init & Periodic Functions
+/////////////////////////////////////////////////////////////////////////////////////
+    @Override
+    public void teleopInit() {
+        CasseroleDataServer.getInstance().logger.startLoggingTeleop();
+    }
+
+    @Override
+    public void autonomousInit() {
+        CasseroleDataServer.getInstance().logger.startLoggingAuto();
+    }
+
+
+    /**
+     * This function is called periodically in both Auto("sandstorm") and Teleop
+     */
+    private void matchPeriodicCommon(){
+        LoopTiming.getInstance().markLoopStart();
+
+        /* Sample inputs from humans */
+        DriverController.getInstance().update();
+        OperatorController.getInstance().update();
+
+        Drivetrain.getInstance().setOpenLoopCmd(DriverController.getInstance().getDriverFwdRevCmd(), DriverController.getInstance().getDriverRotateCmd());
+
+        Drivetrain.getInstance().update();
+        telemetryUpdate();
+        
+        LoopTiming.getInstance().markLoopEnd();
+
+    }
+
+    /**
+     * This function is called periodically during operator control only.
+     */
+    @Override
+    public void teleopPeriodic() {
+        matchPeriodicCommon();
+    }
+
+    /**
+     * This function is called periodically during sandstorm only.
+     */
+    @Override
+    public void autonomousPeriodic() {
+        matchPeriodicCommon();
+    }
+
+
+/////////////////////////////////////////////////////////////////////////////////////
+// Disabled Init & Periodic Functions
+/////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * This function is called once right before the start of disabled mode.
+     */
+    @Override
+    public void disabledInit() {
+        CasseroleDataServer.getInstance().logger.stopLogging();
+    }
+
+    /**
+     * This function is called periodically during disabled mode.
+     */
+    @Override
+    public void disabledPeriodic() {
+        LoopTiming.getInstance().markLoopStart();
+        
+        /*Set commands to safe stopped state */
+        Drivetrain.getInstance().setOpenLoopCmd(0,0);
+
+        Drivetrain.getInstance().update();
+
+        telemetryUpdate();
+        LoopTiming.getInstance().markLoopEnd();
+    }
     
-    LoopTiming.getInstance().markLoopEnd();
-  }
+//////////////////////////////////////////////////////////////////////////
+// Utilties
+//////////////////////////////////////////////////////////////////////////
+    private void telemetryUpdate(){
+        double sample_time_ms = LoopTiming.getInstance().getLoopStartTime_sec()*1000.0;
 
-  @Override
-  public void autonomousInit() {
-    CasseroleDataServer.getInstance().logger.startLoggingAuto();
+        /* Update main loop signals */
+        rioCPULoad.addSample(sample_time_ms,loadMon.getCPULoadPct());
+        rioMemLoad.addSample(sample_time_ms,loadMon.getMemLoadPct());
 
-
-  }
-
-  /**
-   * This function is called periodically during autonomous.
-   */
-  @Override
-  public void autonomousPeriodic() {
-
-    telemetryUpdate();
-  }
-
-  
-  //////////////////////////////////////////////////////////////////////////
-  // Utilties
-  //////////////////////////////////////////////////////////////////////////
-  private void telemetryUpdate(){
-    double sample_time_ms = LoopTiming.getInstance().getLoopStartTime_sec()*1000.0;
-
-    /* Update main loop signals */
-    rioCPULoad.addSample(sample_time_ms,loadMon.getCPULoadPct());
-    rioMemLoad.addSample(sample_time_ms,loadMon.getMemLoadPct());
-
-    /* Update driver view */
-    CasseroleDriverView.setDialValue("Main System Pressure", PneumaticsControl.getInstance().getPressure());
-  }
-    
-  /**
-   * This function sets up the driver view website
-   */
-  private void initDriverView(){
-    String[] gpOptions =  {"Cargo (ball)", "Hatch Panel", "Nothing"};
-    CasseroleDriverView.newAutoSelector("Starting Gamepiece", gpOptions);
-    CasseroleDriverView.newDial("Main System Pressure", 0, 140, 10, 80, 125);
-    CasseroleDriverView.newWebcam("cam1", "http://10.17.36.10:1181/stream.mjpg", 0, 0, 0);
-    CasseroleDriverView.newWebcam("cam2", "http://10.17.36.10:1182/stream.mjpg", 0, 0, 0);
-  }
+        /* Update driver view */
+        CasseroleDriverView.setDialValue("Main System Pressure", PneumaticsControl.getInstance().getPressure());
+    }
+        
+    /**
+     * This function sets up the driver view website
+     */
+    private void initDriverView(){
+        String[] gpOptions =    {"Cargo (ball)", "Hatch Panel", "Nothing"};
+        CasseroleDriverView.newAutoSelector("Starting Gamepiece", gpOptions);
+        CasseroleDriverView.newDial("Main System Pressure", 0, 140, 10, 80, 125);
+        CasseroleDriverView.newWebcam("cam1", RobotConstants.CAM_1_STREAM_URL, 0, 0, 0);
+        CasseroleDriverView.newWebcam("cam2", RobotConstants.CAM_2_STREAM_URL, 0, 0, 0);
+    }
 }
