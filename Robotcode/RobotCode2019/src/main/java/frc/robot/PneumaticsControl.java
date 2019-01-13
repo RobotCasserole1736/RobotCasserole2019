@@ -24,37 +24,37 @@ import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.AnalogInput;
 
 public class PneumaticsControl {
-	
-	Compressor compressor;
-	AnalogInput pressureSensor;
-
-	private static PneumaticsControl pneumatics = null;
     
-	public static synchronized PneumaticsControl getInstance() {
-		if(pneumatics == null)
-		 pneumatics = new PneumaticsControl();
-		return pneumatics;
-	}
+    Compressor compressor;
+    AnalogInput pressureSensor;
 
-	private PneumaticsControl() {
-		compressor = new Compressor();
-		pressureSensor = new AnalogInput(RobotConstants.ANALOG_PRESSURE_SENSOR_PORT);
-	}
-	
-	// start method for the compressor
-	public void Start(){
-		compressor.start();
-	}
+    private static PneumaticsControl pneumatics = null;
+    
+    public static synchronized PneumaticsControl getInstance() {
+        if(pneumatics == null)
+         pneumatics = new PneumaticsControl();
+        return pneumatics;
+    }
 
-	// stop method for the compressor
-	public void Stop(){
-		compressor.stop();
-	}
-	
-	public double GetPressure(){
-		double voltage = pressureSensor.getVoltage();
-		double pressure = ((voltage/5.0)-0.1)*(150/0.8);
-		return pressure;
-	}
+    private PneumaticsControl() {
+        compressor = new Compressor();
+        pressureSensor = new AnalogInput(RobotConstants.ANALOG_PRESSURE_SENSOR_PORT);
+    }
+    
+    // start method for the compressor
+    public void Start(){
+        compressor.start();
+    }
+
+    // stop method for the compressor
+    public void Stop(){
+        compressor.stop();
+    }
+    
+    public double GetPressure(){
+        double voltage = pressureSensor.getVoltage();
+        double pressure = ((voltage/5.0)-0.1)*(150/0.8);
+        return pressure;
+    }
 
 }

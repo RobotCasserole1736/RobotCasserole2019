@@ -21,18 +21,18 @@ package frc.robot;
  */
 
 public class LEDController {
-	// You will want to rename all instances of "EmptyClass" with your actual class name and "empty" with a variable name
-	private static LEDController ledCtrl = null;
+    // You will want to rename all instances of "EmptyClass" with your actual class name and "empty" with a variable name
+    private static LEDController ledCtrl = null;
 
-	public static synchronized LEDController getInstance() {
-		if(ledCtrl == null)
-			ledCtrl = new LEDController();
-		return ledCtrl;
-	}
+    public static synchronized LEDController getInstance() {
+        if(ledCtrl == null)
+            ledCtrl = new LEDController();
+        return ledCtrl;
+    }
 
-	// This is the private constructor that will be called once by getInstance() and it should instantiate anything that will be required by the class
-	private LEDController() {
+    // This is the private constructor that will be called once by getInstance() and it should instantiate anything that will be required by the class
+    private LEDController() {
 
-	}
+    }
 
 }

@@ -34,7 +34,7 @@ public class Drivetrain {
    WPI_TalonSRX leftTalon2;
 
    public static synchronized Drivetrain getInstance() {
-	  if ( dTrain == null)
+      if ( dTrain == null)
        dTrain = new Drivetrain();
      return dTrain;
    }

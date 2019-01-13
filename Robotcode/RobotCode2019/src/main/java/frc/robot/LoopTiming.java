@@ -38,10 +38,10 @@ class LoopTiming{
 
     /* Singleton stuff */
     private static LoopTiming loopTiming = null;
-	public static synchronized LoopTiming getInstance() {
-		if(loopTiming == null) loopTiming = new LoopTiming();
-		return loopTiming;
-	}
+    public static synchronized LoopTiming getInstance() {
+        if(loopTiming == null) loopTiming = new LoopTiming();
+        return loopTiming;
+    }
 
     private LoopTiming(){
         loopDuration_sec = new Signal("Main Loop Process Duration", "sec");
