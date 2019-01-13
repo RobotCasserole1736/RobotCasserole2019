@@ -1,8 +1,5 @@
 package frc.robot;
 
-import edu.wpi.first.wpilibj.Compressor;
-import edu.wpi.first.wpilibj.AnalogInput;
-
 /*
  *******************************************************************************************
  * Copyright (C) 2019 FRC Team 1736 Robot Casserole - www.robotcasserole.org
@@ -22,6 +19,9 @@ import edu.wpi.first.wpilibj.AnalogInput;
  *   Robot Casserole is always looking for more sponsors, so we'd be very appreciative
  *   if you would consider donating to our club to help further STEM education.
  */
+
+import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.AnalogInput;
 
 public class PneumaticsControl {
 	

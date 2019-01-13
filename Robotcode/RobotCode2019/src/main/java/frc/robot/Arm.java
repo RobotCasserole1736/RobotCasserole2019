@@ -1,5 +1,25 @@
 package frc.robot;
 
+/*
+ *******************************************************************************************
+ * Copyright (C) 2019 FRC Team 1736 Robot Casserole - www.robotcasserole.org
+ *******************************************************************************************
+ *
+ * This software is released under the MIT Licence - see the license.txt
+ *  file in the root of this repo.
+ *
+ * Non-legally-binding statement from Team 1736:
+ *  Thank you for taking the time to read through our software! We hope you
+ *   find it educational and informative! 
+ *  Please feel free to snag our software for your own use in whatever project
+ *   you have going on right now! We'd love to be able to help out! Shoot us 
+ *   any questions you may have, all our contact info should be on our website
+ *   (listed above).
+ *  If you happen to end up using our software to make money, that is wonderful!
+ *   Robot Casserole is always looking for more sponsors, so we'd be very appreciative
+ *   if you would consider donating to our club to help further STEM education.
+ */
+
 //import org.usfirst.frc.team1736.lib.Calibration.Calibration;
 //import org.usfirst.frc.team1736.lib.Util.CrashTracker;
 
@@ -64,8 +84,8 @@ public class Arm {
     private static Arm  singularInstance = null;
 
     public static synchronized Arm getInstance() {
-		if ( singularInstance == null)
-			singularInstance = new Arm();
+        if ( singularInstance == null)
+            singularInstance = new Arm();
         return singularInstance;
     }
 
@@ -81,8 +101,18 @@ public class Arm {
 
     } 
 
-    public enum armPos {
-        Top, Middle, Lower, Intake
+    public enum ArmPosReq {
+        Top(4), Middle(3), Lower(2), Intake(1), None(0);
+
+        public final int value;
+
+        private ArmPosReq(int value) {
+            this.value = value;
+        }
+                
+        public int toInt(){
+            return this.value;
+        }
     }
 
     double convertVoltsToDeg(double voltage_in) {
@@ -102,8 +132,8 @@ public class Arm {
         
     }
    
-    armPos pos_in;
-    public void setPositionCmd(armPos pos_in) {
+    ArmPosReq pos_in;
+    public void setPositionCmd(ArmPosReq pos_in) {
         this.pos_in = pos_in;
     }
     
@@ -124,6 +154,10 @@ public class Arm {
 
             case Intake:
             desiredArmAngle = intakeHeight;
+            break;
+
+            case None:
+            // Don't change desiredArmAngle
             break;
             
         }

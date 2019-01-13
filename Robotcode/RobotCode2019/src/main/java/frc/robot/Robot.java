@@ -7,6 +7,26 @@
 
 package frc.robot;
 
+/*
+ *******************************************************************************************
+ * Copyright (C) 2019 FRC Team 1736 Robot Casserole - www.robotcasserole.org
+ *******************************************************************************************
+ *
+ * This software is released under the MIT Licence - see the license.txt
+ *  file in the root of this repo.
+ *
+ * Non-legally-binding statement from Team 1736:
+ *  Thank you for taking the time to read through our software! We hope you
+ *   find it educational and informative! 
+ *  Please feel free to snag our software for your own use in whatever project
+ *   you have going on right now! We'd love to be able to help out! Shoot us 
+ *   any questions you may have, all our contact info should be on our website
+ *   (listed above).
+ *  If you happen to end up using our software to make money, that is wonderful!
+ *   Robot Casserole is always looking for more sponsors, so we'd be very appreciative
+ *   if you would consider donating to our club to help further STEM education.
+ */
+
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.TimedRobot;
 import frc.lib.Calibration.CalWrangler;
@@ -37,9 +57,6 @@ public class Robot extends TimedRobot {
   //Physical devices
   PowerDistributionPanel pdp;
 
-  PneumaticsControl pneumatics;
-  Drivetrain drivetrain;
-
   //Top level telemetry signals
   Signal rioCPULoad;
   Signal rioMemLoad;
@@ -55,12 +72,14 @@ public class Robot extends TimedRobot {
     webserver = new CasseroleWebServer();
     wrangler = new CalWrangler();
 
-    pneumatics = PneumaticsControl.getInstance();
-    drivetrain = Drivetrain.getInstance();
-
     /* Init Robot parts */
     pdp = new PowerDistributionPanel();
     LEDController.getInstance();
+    PneumaticsControl.getInstance();
+    Arm.getInstance();
+    Drivetrain.getInstance();
+    Climber.getInstance();
+
 
     /* Init input from humans */
     OperatorController.getInstance();
@@ -90,8 +109,8 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() {
     CasseroleDataServer.getInstance().logger.stopLogging();
-    drivetrain.setOpenLoopCmd(DriverController.getInstance().getDriverFwdRevCmd(), DriverController.getInstance().getDriverRotateCmd());
-    drivetrain.update();
+    
+    Drivetrain.getInstance().update();
 
   }
 
@@ -118,7 +137,13 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     LoopTiming.getInstance().markLoopStart();
 
-    drivetrain.update();
+    /* Sample inputs from humans */
+    DriverController.getInstance().update();
+    OperatorController.getInstance().update();
+
+    Drivetrain.getInstance().setOpenLoopCmd(DriverController.getInstance().getDriverFwdRevCmd(), DriverController.getInstance().getDriverRotateCmd());
+
+    Drivetrain.getInstance().update();
     telemetryUpdate();
     
     LoopTiming.getInstance().markLoopEnd();
@@ -147,9 +172,12 @@ public class Robot extends TimedRobot {
   private void telemetryUpdate(){
     double sample_time_ms = LoopTiming.getInstance().getLoopStartTime_sec()*1000.0;
 
+    /* Update main loop signals */
     rioCPULoad.addSample(sample_time_ms,loadMon.getCPULoadPct());
     rioMemLoad.addSample(sample_time_ms,loadMon.getMemLoadPct());
     pneumaticsPressure.addSample(sample_time_ms,PneumaticsControl.getInstance().GetPressure());
+
+    /* Update driver view */
     CasseroleDriverView.setDialValue("Main System Pressure", PneumaticsControl.getInstance().GetPressure());
   }
     
