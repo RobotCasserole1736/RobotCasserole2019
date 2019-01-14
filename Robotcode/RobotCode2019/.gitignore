@@ -156,5 +156,7 @@ gradle-app.setting
 .settings/
 bin/
 
+# Temporary build files
+resources/buildinfo.html
 
 # End of https://www.gitignore.io/api/c++,java,linux,macos,gradle,windows,visualstudiocode
