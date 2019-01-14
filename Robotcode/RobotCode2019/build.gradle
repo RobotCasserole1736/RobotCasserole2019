@@ -51,6 +51,10 @@ dependencies {
     nativeDesktopZip wpi.deps.vendor.jni(wpi.platforms.desktop)
     testCompile 'junit:junit:4.12'
 
+    //Simulation only
+    simulation "edu.wpi.first.halsim:halsim_lowfi:${wpi.wpilibVersion}:${wpi.platforms.desktop}@zip"
+
+
     //Casserole WebServer Deps
     compile 'com.googlecode.json-simple:json-simple:1.1.1'
     compile group: 'org.eclipse.jetty', name: 'jetty-http', version: '9.3.9.v20160517'
