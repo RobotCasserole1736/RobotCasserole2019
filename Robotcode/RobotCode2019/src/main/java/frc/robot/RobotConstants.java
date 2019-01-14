@@ -26,22 +26,36 @@ public class RobotConstants {
     /////////////////////////////////////////////////////////////////////////////////////
     // RoboRIO Output Ports
     /////////////////////////////////////////////////////////////////////////////////////
+    // PWM Motors
+    public static final int ARM_MOTOR_PORT = 0;
+
+    /////////////////////////////////////////////////////////////////////////////////////
+    // CAN Device ID's
+    /////////////////////////////////////////////////////////////////////////////////////
     public static final int DRIVETRAIN_LEFT_1_CANID = 14;
     public static final int DRIVETRAIN_LEFT_2_CANID = 15;
     public static final int DRIVETRAIN_RIGHT_1_CANID = 0;
     public static final int DRIVETRAIN_RIGHT_2_CANID = 1;
+    public static final int PNEUMATICS_CONTROL_MODULE_CANID = 0;
+    public static final int POWER_DISTRIBUTION_PANEL_CANID = 0;
 
 
     /////////////////////////////////////////////////////////////////////////////////////
     // RoboRIO Input Ports
     /////////////////////////////////////////////////////////////////////////////////////
+    //Analog
     public static final int ANALOG_PRESSURE_SENSOR_PORT = 0;
+    public static final int ARM_POS_SENSOR_PORT = 1;
+    public static final int WRIST_POS_SENSOR_PORT = 2;
 
-    public static final int LINE_FOLLOWING_SENSOR_1 = 4;
-    public static final int LINE_FOLLOWING_SENSOR_2 = 5;
-    public static final int LINE_FOLLOWING_SENSOR_3 = 6;
-    public static final int LINE_FOLLOWING_SENSOR_4 = 7;
-    public static final int LINE_FOLLOWING_SENSOR_5 = 8;
+    //Digital
+    public static final int ARM_UPPER_LIMIT_SWITCH_PORT  = 0;
+    public static final int ARM_LOWER_LIMIT_SWITCH_PORT  = 1;
+    public static final int LINE_FOLLOWING_SENSOR_1_PORT = 4;
+    public static final int LINE_FOLLOWING_SENSOR_2_PORT = 5;
+    public static final int LINE_FOLLOWING_SENSOR_3_PORT = 6;
+    public static final int LINE_FOLLOWING_SENSOR_4_PORT = 7;
+    public static final int LINE_FOLLOWING_SENSOR_5_PORT = 8;
 
     /////////////////////////////////////////////////////////////////////////////////////
     // PDP Ports

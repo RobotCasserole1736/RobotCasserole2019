@@ -43,7 +43,7 @@ public class PneumaticsControl {
     }
 
     private PneumaticsControl() {
-        compressor = new Compressor();
+        compressor = new Compressor(RobotConstants.PNEUMATICS_CONTROL_MODULE_CANID);
         pressureSensor = new AnalogInput(RobotConstants.ANALOG_PRESSURE_SENSOR_PORT);
         pressSig = new Signal("Pneumatics Main System Pressure", "psi");
         pressSwVallSig = new Signal("Pneumatics Cutoff Switch State", "bool");
@@ -53,7 +53,7 @@ public class PneumaticsControl {
     public void update(){
 
         double voltage = pressureSensor.getVoltage();
-        curPressure_psi = ((voltage/5.0)-0.1)*(150/0.8);
+        curPressure_psi = ((voltage/5.0)-0.1)*(150/0.8); /*Equation derived from datasheet */
 
         double sample_time_ms = LoopTiming.getInstance().getLoopStartTime_sec()*1000.0;
         pressSig.addSample(sample_time_ms,curPressure_psi);

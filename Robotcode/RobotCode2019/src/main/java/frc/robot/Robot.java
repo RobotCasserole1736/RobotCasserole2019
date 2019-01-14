@@ -72,7 +72,7 @@ public class Robot extends TimedRobot {
         wrangler = new CalWrangler();
 
         /* Init Robot parts */
-        pdp = new PowerDistributionPanel();
+        pdp = new PowerDistributionPanel(RobotConstants.POWER_DISTRIBUTION_PANEL_CANID);
         LEDController.getInstance();
         PneumaticsControl.getInstance();
         Arm.getInstance();
@@ -124,9 +124,21 @@ public class Robot extends TimedRobot {
         DriverController.getInstance().update();
         OperatorController.getInstance().update();
 
-        Drivetrain.getInstance().setOpenLoopCmd(DriverController.getInstance().getDriverFwdRevCmd(), DriverController.getInstance().getDriverRotateCmd());
+        /* Map subsystem IO */
+        if(DriverController.getInstance().getGyroAngleLockReq()){
+            //Map driver inputs to drivetrain in gyro-lock mode
+            Drivetrain.getInstance().setGyroLockCmd(DriverController.getInstance().getDriverFwdRevCmd());
+        } else {
+            // Map driver inputs to drivetrain open loop
+            Drivetrain.getInstance().setOpenLoopCmd(DriverController.getInstance().getDriverFwdRevCmd(), DriverController.getInstance().getDriverRotateCmd());
+        }
 
+        /* Update subsytems */
+        LEDController.getInstance().update();
         Drivetrain.getInstance().update();
+        PneumaticsControl.getInstance().update();
+        Arm.getInstance().update();
+        Climber.getInstance().update();
         telemetryUpdate();
         
         LoopTiming.getInstance().markLoopEnd();
@@ -167,11 +179,20 @@ public class Robot extends TimedRobot {
     @Override
     public void disabledPeriodic() {
         LoopTiming.getInstance().markLoopStart();
+
+        /* Read from humans to keep telemetry up to date */
+        DriverController.getInstance().update();
+        OperatorController.getInstance().update();
         
         /*Set commands to safe stopped state */
         Drivetrain.getInstance().setOpenLoopCmd(0,0);
 
+        /* Update subsystems */
+        LEDController.getInstance().update();
         Drivetrain.getInstance().update();
+        PneumaticsControl.getInstance().update();
+        Arm.getInstance().update();
+        Climber.getInstance().update();
 
         telemetryUpdate();
         LoopTiming.getInstance().markLoopEnd();

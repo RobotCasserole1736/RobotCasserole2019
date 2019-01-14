@@ -25,7 +25,6 @@ package frc.robot;
 
 
 import edu.wpi.first.wpilibj.Spark;
-import frc.lib.WebServer.DriverViewBoolean;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -91,13 +90,13 @@ public class Arm {
 
     private Arm() {
     /////Analog Inputs\\\\\\\\
-        armPot = new AnalogPotentiometer(potChannel, voltageToDegreeMult, zeroOffset);
+        armPot = new AnalogPotentiometer(RobotConstants.ARM_POS_SENSOR_PORT, voltageToDegreeMult, zeroOffset);
     /////Movers\\\\\
-        armBreak = new Compressor(0);
-        armMotor = new Spark(0);
+        //armBreak = new Compressor(0);
+        armMotor = new Spark(RobotConstants.ARM_MOTOR_PORT);
     /////Digital Inputs\\\\\\\
-        upperLimSwitch = new DigitalInput(0);
-        lowLimSwitch = new DigitalInput(1);
+        upperLimSwitch = new DigitalInput(RobotConstants.ARM_UPPER_LIMIT_SWITCH_PORT);
+        lowLimSwitch = new DigitalInput(RobotConstants.ARM_LOWER_LIMIT_SWITCH_PORT);
 
     } 
 

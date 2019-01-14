@@ -21,7 +21,7 @@ package frc.robot;
  */
 
 public class LEDController {
-    // You will want to rename all instances of "EmptyClass" with your actual class name and "empty" with a variable name
+
     private static LEDController ledCtrl = null;
 
     public static synchronized LEDController getInstance() {
@@ -30,9 +30,37 @@ public class LEDController {
         return ledCtrl;
     }
 
+    public enum LEDPatterns {
+        Pattern1(0), /* TODO- what pattern is this? */
+        Pattern2(1), /* TODO- what pattern is this? */
+        Pattern3(2), /* TODO- what pattern is this? */
+        Pattern4(3); /* TODO- what pattern is this? */
+
+        public final int value;
+
+        private LEDPatterns(int value) {
+            this.value = value;
+        }
+                
+        public int toInt(){
+            return this.value;
+        }
+    }
+
+
+    
+
     // This is the private constructor that will be called once by getInstance() and it should instantiate anything that will be required by the class
     private LEDController() {
+        //TODO
+    }
 
+    public void update(){
+        //TODO
+    }
+
+    public void setPattern(LEDPatterns pattern_in){
+        //TODO
     }
 
 }

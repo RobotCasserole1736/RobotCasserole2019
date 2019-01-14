@@ -166,4 +166,8 @@ public class DriverController {
         return this.compressorEnableReq;
     }
 
+    public boolean getGyroAngleLockReq() {
+        return this.gyroAngleLockReq;
+    }
+
 }

@@ -49,11 +49,11 @@ public class lineFolower {
     DigitalInput digitalInput5;
 
         private lineFolower(){
-            digitalInput1 = new DigitalInput(RobotConstants.LINE_FOLLOWING_SENSOR_1);
-            digitalInput2 = new DigitalInput(RobotConstants.LINE_FOLLOWING_SENSOR_2);
-            digitalInput3 = new DigitalInput(RobotConstants.LINE_FOLLOWING_SENSOR_3);
-            digitalInput4 = new DigitalInput(RobotConstants.LINE_FOLLOWING_SENSOR_4);
-            digitalInput5 = new DigitalInput(RobotConstants.LINE_FOLLOWING_SENSOR_5);
+            digitalInput1 = new DigitalInput(RobotConstants.LINE_FOLLOWING_SENSOR_1_PORT);
+            digitalInput2 = new DigitalInput(RobotConstants.LINE_FOLLOWING_SENSOR_2_PORT);
+            digitalInput3 = new DigitalInput(RobotConstants.LINE_FOLLOWING_SENSOR_3_PORT);
+            digitalInput4 = new DigitalInput(RobotConstants.LINE_FOLLOWING_SENSOR_4_PORT);
+            digitalInput5 = new DigitalInput(RobotConstants.LINE_FOLLOWING_SENSOR_5_PORT);
         }
         public double getForwardCmd() {
             return forwardReverseCmd;
