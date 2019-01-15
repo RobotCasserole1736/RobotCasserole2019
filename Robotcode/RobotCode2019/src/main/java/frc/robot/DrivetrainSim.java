@@ -33,6 +33,10 @@ public class DrivetrainSim implements DrivetrainInterface {
 
     }
 
+    public boolean isGyroOnline(){
+        return true;
+    }
+
     public void setGyroLockCmd(double forwardReverseCmd_in) {
 
     }

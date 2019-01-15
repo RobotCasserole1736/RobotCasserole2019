@@ -68,6 +68,14 @@ public class Drivetrain implements DrivetrainInterface {
         }
     }
 
+    public boolean isGyroOnline(){
+        if(dTrainR != null){
+            return dTrainR.isGyroOnline();
+        } else {
+            return dTrainS.isGyroOnline();
+        }
+    }
+
     public void update(){
         if(dTrainR != null){
             dTrainR.update();

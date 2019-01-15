@@ -51,8 +51,8 @@ class LoopTiming{
     public void markLoopStart(){
         prevLoopStartTime_sec =loopStartTime_sec;
         loopStartTime_sec = Timer.getFPGATimestamp();
-        loopDuration_sec.addSample(prevLoopStartTime_sec, prevLoopEndTime_sec - prevLoopStartTime_sec);
-        loopPeriod_sec.addSample(loopStartTime_sec, loopStartTime_sec - prevLoopStartTime_sec);
+        loopDuration_sec.addSample(prevLoopStartTime_sec*1000, loopEndTime_sec - prevLoopStartTime_sec);
+        loopPeriod_sec.addSample(loopStartTime_sec*1000, loopStartTime_sec - prevLoopStartTime_sec);
     }
 
     public void markLoopEnd(){

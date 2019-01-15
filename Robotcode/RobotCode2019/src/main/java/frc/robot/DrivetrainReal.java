@@ -23,12 +23,14 @@ import com.ctre.phoenix.motorcontrol.InvertType;
  */
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import frc.lib.DataServer.Signal;
 
 public class DrivetrainReal implements DrivetrainInterface {
 
-    private static ADXRS453_Gyro adxrs453;
-	private static int angleOffset;
+    private ADXRS450_Gyro gyro;
+	private int angleOffset;
     public double forwardReverseCmd;
     public double rotationCmd;
 
@@ -49,8 +51,8 @@ public class DrivetrainReal implements DrivetrainInterface {
 
     public DrivetrainReal() {
 
-        adxrs453 = new ADXRS453_Gyro();
-		angleOffset = 0;
+        gyro = new ADXRS450_Gyro();
+        angleOffset = 0;
 
         rightTalon1 = new WPI_TalonSRX(RobotConstants.DRIVETRAIN_RIGHT_1_CANID);
         rightTalon2 = new WPI_TalonSRX(RobotConstants.DRIVETRAIN_RIGHT_2_CANID);
@@ -87,25 +89,26 @@ public class DrivetrainReal implements DrivetrainInterface {
         forwardReverseCmd = forwardReverseCmd_in;
         rotationCmd = 0;
     }
-    public double getAngle() {
-		return angleOffset - adxrs453.getAngle();
+
+    public double getGyroAngle() {
+		return angleOffset - gyro.getAngle();
 	}
 
-	public void reset() {
-		adxrs453.reset();
+	public void resetGyro() {
+		gyro.reset();
 	}
 
-	public void setAngleOffset(int angle) {
+	public void setGyroAngleOffset(int angle) {
 		angleOffset = angle;
 	}
 
-	public int getAngleOffset() {
+	public int getGyroAngleOffset() {
 		return angleOffset;
 	}
 
-	public boolean isOnline() {
-		return adxrs453.isOnline();
-		//return true; // Temp, for bench debugging
+	public boolean isGyroOnline() {
+		//return gyro.isOnline();
+		return gyro.isConnected(); // Temp, for bench debugging
     }
     
     public void update() {
@@ -133,7 +136,7 @@ public class DrivetrainReal implements DrivetrainInterface {
         currentL1Sig.addSample(sample_time_ms, leftTalon1.getOutputCurrent());
         currentL2Sig.addSample(sample_time_ms, leftTalon2.getOutputCurrent());
         opModeSig.addSample(sample_time_ms, opMode.toInt());
-        gyroscopeSig.addSample(sample_time_ms, getAngle());
+        gyroscopeSig.addSample(sample_time_ms, getGyroAngle());
 
     }
 }
