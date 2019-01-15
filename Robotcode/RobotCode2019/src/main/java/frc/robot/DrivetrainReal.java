@@ -23,11 +23,12 @@ import com.ctre.phoenix.motorcontrol.InvertType;
  */
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-
 import frc.lib.DataServer.Signal;
 
 public class DrivetrainReal implements DrivetrainInterface {
 
+    private static ADXRS453_Gyro adxrs453;
+	private static int angleOffset;
     public double forwardReverseCmd;
     public double rotationCmd;
 
@@ -44,8 +45,13 @@ public class DrivetrainReal implements DrivetrainInterface {
     Signal currentL1Sig;
     Signal currentL2Sig;
     Signal opModeSig;
+    Signal gyroscopeSig;
 
     public DrivetrainReal() {
+
+        adxrs453 = new ADXRS453_Gyro();
+		angleOffset = 0;
+
         rightTalon1 = new WPI_TalonSRX(RobotConstants.DRIVETRAIN_RIGHT_1_CANID);
         rightTalon2 = new WPI_TalonSRX(RobotConstants.DRIVETRAIN_RIGHT_2_CANID);
         leftTalon1 = new WPI_TalonSRX(RobotConstants.DRIVETRAIN_LEFT_1_CANID);
@@ -65,7 +71,7 @@ public class DrivetrainReal implements DrivetrainInterface {
         currentL1Sig = new Signal("Drivetrain L1 Motor Current", "A");
         currentL2Sig = new Signal("Drivetrain L2 Motor Current", "A");
         opModeSig    = new Signal("Drivetrain Operation Mode", "Op Mode Enum");
-
+        gyroscopeSig = new Signal("Drivetrain Pos Angle","Deg");
     }
 
     public void setOpenLoopCmd(double forwardReverseCmd_in, double rotaionCmd_in) {
@@ -81,7 +87,27 @@ public class DrivetrainReal implements DrivetrainInterface {
         forwardReverseCmd = forwardReverseCmd_in;
         rotationCmd = 0;
     }
+    public double getAngle() {
+		return angleOffset - adxrs453.getAngle();
+	}
 
+	public void reset() {
+		adxrs453.reset();
+	}
+
+	public void setAngleOffset(int angle) {
+		angleOffset = angle;
+	}
+
+	public int getAngleOffset() {
+		return angleOffset;
+	}
+
+	public boolean isOnline() {
+		return adxrs453.isOnline();
+		//return true; // Temp, for bench debugging
+    }
+    
     public void update() {
 
         if (opMode == DrivetrainOpMode.OpenLoop) {
@@ -107,6 +133,7 @@ public class DrivetrainReal implements DrivetrainInterface {
         currentL1Sig.addSample(sample_time_ms, leftTalon1.getOutputCurrent());
         currentL2Sig.addSample(sample_time_ms, leftTalon2.getOutputCurrent());
         opModeSig.addSample(sample_time_ms, opMode.toInt());
+        gyroscopeSig.addSample(sample_time_ms, getAngle());
 
     }
 }
