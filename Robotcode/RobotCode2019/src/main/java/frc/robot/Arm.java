@@ -23,18 +23,20 @@ package frc.robot;
 //import org.usfirst.frc.team1736.lib.Calibration.Calibration;
 //import org.usfirst.frc.team1736.lib.Util.CrashTracker;
 
+import frc.lib.Calibration.*;
 
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
-import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.DigitalInput;
+
 
 
 
 public class Arm {
 
     /////////Moving Things\\\\\\\\\
-    Compressor armBreak;
+    Solenoid armBreak;
     Spark armMotor;
 
     /////////Sensors\\\\\\\\\
@@ -57,13 +59,23 @@ public class Arm {
     public double   potUpVolt;
     public double   potLowVolt;
     public boolean  brakeActivated;
+    public double   uncompensatedMotorCmd = 0;
+    public boolean  brake_in = false;
     //Arm State Heights\\
-    public double topRocket = 20;
-    public double midRocket = 15;
-    public double lowRocket = 12;
-    public double intakeHeight = 2;
+    
+    public double topRocket;
+    public double midRocket;
+    public double lowRocket;
+    public double intakeHeight;
+    
+    
+    
+    Calibration topRocketCal;
+    Calibration midRocketCal;
+    Calibration lowRocketCal;
+    Calibration intakeHeightCal;
 
-    ///////Pot State\\\\\\\\\\\\
+    ///////////Pot State\\\\\\\\\\\\
     public double UpperLimitDegrees = 270;
     public double UpperLimitVoltage = 12;
     public double LowerLimitDegrees = 0;
@@ -71,15 +83,13 @@ public class Arm {
     public double armPotPos;
 
 
-    /////////Limit Switches\\\\\\
+    /////////Limit Switches\\\\\\\\\\
     public boolean topOfMotion ;
     public boolean bottomOfMotion ; 
-    
-    
-    
 
 
-    /////Initialization Code\\\\\\
+    
+    /////////Initialization Code\\\\\\\\\\\
     private static Arm  singularInstance = null;
 
     public static synchronized Arm getInstance() {
@@ -92,11 +102,18 @@ public class Arm {
     /////Analog Inputs\\\\\\\\
         armPot = new AnalogPotentiometer(RobotConstants.ARM_POS_SENSOR_PORT, voltageToDegreeMult, zeroOffset);
     /////Movers\\\\\
-        //armBreak = new Compressor(0);
+        armBreak = new Solenoid(0);
         armMotor = new Spark(RobotConstants.ARM_MOTOR_PORT);
     /////Digital Inputs\\\\\\\
         upperLimSwitch = new DigitalInput(RobotConstants.ARM_UPPER_LIMIT_SWITCH_PORT);
         lowLimSwitch = new DigitalInput(RobotConstants.ARM_LOWER_LIMIT_SWITCH_PORT);
+        
+    /////Calibration Things\\\\\
+        topRocketCal = new Calibration("Top Level Rocket Placement Placement", 0);
+        midRocketCal = new Calibration("Mid level Rocket Placement Placement", 0);
+        lowRocketCal = new Calibration("Bottom Level Placement Postition", 0);
+        intakeHeightCal = new Calibration("Cube from Intake", 0);
+        //armPotPosCal = new Calibration("Actual Values", 1)
 
     } 
 
@@ -162,26 +179,36 @@ public class Arm {
         }
     }
 
-    public void setSolBrake(Boolean brake_in) {
+    public void setSolBrake(boolean brake_in) {
         if(brake_in) {
-            
+         armBreak.set(true); 
         }
         else {
-             
+         armBreak.set(true);
         }
     }
 
     public void setManualMovementCmd(double mov_cmd_in) {
         
         if(mov_cmd_in>0.5 || mov_cmd_in<-0.5) {    
-            
+            uncompensatedMotorCmd = mov_cmd_in;
+            brake_in = false;
         }
-        else if(mov_cmd_in < 0.5 && mov_cmd_in > -0.5 && !brakeActivated) {
+        else if(mov_cmd_in < 0.5 && mov_cmd_in > -0.5 /*&& !brakeActivated*/) {
         
+            uncompensatedMotorCmd = 0;
+            brake_in = true;
+
         }
         else {
-            mov_cmd_in = 0;
+            uncompensatedMotorCmd = 0;
             
         }
-        }
+        
     }
+
+    }
+
+
+
+    
