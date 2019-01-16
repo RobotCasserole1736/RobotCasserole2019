@@ -2,6 +2,8 @@ package frc.robot;
 
 import java.awt.geom.Point2D;
 
+import frc.lib.DataServer.Signal;
+
 
 public class RobotPose {
 
@@ -11,10 +13,26 @@ public class RobotPose {
 	public final double robotRadius_Ft  = 0.9;
 	public double poseX = 0;
 	public double poseY = 0;
-	public double poseTheta = 90;
+	public double poseThadus = 90;
 	public double velosityX = 0;
 	public double velosityY = 0;
-	
+
+	Signal DesX;
+	Signal DesY;
+	Signal DesT;
+	Signal ActX;
+	Signal ActY;
+	Signal ActT;
+
+	public void robotPose() {
+		DesX = new Signal("botDesPoseX", "in");
+		DesY = new Signal("botDesPoseY", "in");
+		DesT = new Signal("botDesPoseT", "deg");
+		ActX = new Signal("botActPoseX", "in");
+		ActY = new Signal("botActPoseY", "in");
+		ActT = new Signal("botActPoseT", "deg");
+	}
+
 	public void setLeftMotorSpeed(double speed) {
 		leftVelosity_RPM = speed;
 	}
@@ -29,8 +47,8 @@ public class RobotPose {
 		double robotAngle_DPS = ((rightVelosity_FPS-leftVelosity_FPS)/(2*robotRadius_Ft) * 180/3.14);
 		double X_dot = (rightVelosity_FPS+leftVelosity_FPS)/2; 
 		
-		velosityX = 0.02 * (X_dot*Math.cos(poseTheta*(3.14/180)));
-		velosityY = 0.02 * (X_dot*Math.sin(poseTheta*(3.14/180)));
+		velosityX = 0.02 * (X_dot*Math.cos(poseThadus*(3.14/180)));
+		velosityY = 0.02 * (X_dot*Math.sin(poseThadus*(3.14/180)));
 		
 		if(poseY < 0) { 
 			velosityY = 0;
@@ -53,7 +71,7 @@ public class RobotPose {
 		
 		poseX += velosityX;
 		poseY += velosityY;
-		poseTheta += 0.02 * robotAngle_DPS;
+		poseThadus += 0.02 * robotAngle_DPS;
 		//CasseroleRobotPoseView.setRobotPose(poseX, poseY, poseTheta - 90);
 	
 		System.out.println("x");
@@ -61,13 +79,22 @@ public class RobotPose {
 		System.out.println("y");
 		System.out.println(poseY);
 		System.out.println("Thadus");
-		System.out.println(poseTheta);
+		System.out.println(poseThadus);
+
+		double sample_time_ms = LoopTiming.getInstance().getLoopStartTime_sec()*1000.0;
+
+		DesX.addSample(sample_time_ms,0);
+		DesY.addSample(sample_time_ms,0);
+		DesT.addSample(sample_time_ms,0);
+		ActX.addSample(sample_time_ms,poseX);
+		ActY.addSample(sample_time_ms,poseY);
+		ActT.addSample(sample_time_ms,poseThadus);
 		}
 	
 	public void reset() {
 		poseX = 0;
 		poseY = 0;
-		poseTheta = 90;
+		poseThadus = 90;
 		leftVelosity_RPM = 0;
 		rightVelosity_RPM = 0;
 	}

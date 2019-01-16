@@ -47,6 +47,9 @@ import frc.lib.WebServer.CasseroleWebServer;
  */
 public class Robot extends TimedRobot {
 
+
+    RobotPose RobotPose;
+
     //Website Utilities
     CasseroleWebServer webserver;
     CalWrangler wrangler;
@@ -71,6 +74,9 @@ public class Robot extends TimedRobot {
         webserver = new CasseroleWebServer();
         wrangler = new CalWrangler();
 
+        RobotPose = new RobotPose();
+
+        RobotPose.robotPose();
         /* Init Robot parts */
         pdp = new PowerDistributionPanel(RobotConstants.POWER_DISTRIBUTION_PANEL_CANID);
         LEDController.getInstance();
@@ -140,6 +146,7 @@ public class Robot extends TimedRobot {
         Arm.getInstance().update();
         Climber.getInstance().update();
         telemetryUpdate();
+        RobotPose.update();
         
         LoopTiming.getInstance().markLoopEnd();
 
@@ -193,6 +200,7 @@ public class Robot extends TimedRobot {
         PneumaticsControl.getInstance().update();
         Arm.getInstance().update();
         Climber.getInstance().update();
+        RobotPose.update();
 
         telemetryUpdate();
         LoopTiming.getInstance().markLoopEnd();
