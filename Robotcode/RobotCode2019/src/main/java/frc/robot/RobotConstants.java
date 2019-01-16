@@ -64,18 +64,15 @@ public class RobotConstants {
     /////////////////////////////////////////////////////////////////////////////////////
     // Other Constants
     /////////////////////////////////////////////////////////////////////////////////////
-<<<<<<< HEAD
 
     public static final int LONG_SOLENOID_FORWARD_CHANNEL = 0;
     public static final int LONG_SOLENOID_REVERSE_CHANNEL = 1;
     public static final int SHORT_SOLENOID_FORWARD_CHANNEL = 2;
     public static final int SHORT_SOLENOID_REVERSE_CHANNEL = 3;
 
-=======
     public static final int DRIVER_CONTROLLER_USB_IDX = 0;
     public static final int OPERATOR_CONTROLLER_USB_IDX = 1;
     public static final String CAM_1_STREAM_URL = "http://10.17.36.10:1181/stream.mjpg";
     public static final String CAM_2_STREAM_URL = "http://10.17.36.10:1182/stream.mjpg";
     
->>>>>>> origin/chrisg_add_op_driver_cmd_classes
 }

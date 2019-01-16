@@ -72,17 +72,8 @@ public class RobotPose {
 		poseX += velosityX;
 		poseY += velosityY;
 		poseThadus += 0.02 * robotAngle_DPS;
-		//CasseroleRobotPoseView.setRobotPose(poseX, poseY, poseTheta - 90);
-	
-		System.out.println("x");
-		System.out.println(poseX);
-		System.out.println("y");
-		System.out.println(poseY);
-		System.out.println("Thadus");
-		System.out.println(poseThadus);
 
 		double sample_time_ms = LoopTiming.getInstance().getLoopStartTime_sec()*1000.0;
-
 		DesX.addSample(sample_time_ms,0);
 		DesY.addSample(sample_time_ms,0);
 		DesT.addSample(sample_time_ms,0);

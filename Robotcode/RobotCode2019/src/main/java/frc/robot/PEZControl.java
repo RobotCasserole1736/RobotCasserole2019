@@ -23,7 +23,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
  */
 
 public class PEZControl {
-	// You will want to rename all instances of "EmptyClass" with your actual class name and "empty" with a variable name
+    
 	private static PEZControl empty = null;
 
     DoubleSolenoid longS;
@@ -50,5 +50,7 @@ public class PEZControl {
 
 	}
 
-	public void setPositionCmd(PEZPos cmd_in)
+	public void setPositionCmd(PEZPos cmd_in){
+
+    }
 }
