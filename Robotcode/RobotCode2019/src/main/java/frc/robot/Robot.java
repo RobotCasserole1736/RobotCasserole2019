@@ -63,6 +63,15 @@ public class Robot extends TimedRobot {
     //Top level telemetry signals
     Signal rioCPULoad;
     Signal rioMemLoad;
+    Signal rioDS_SAMPLoad;
+    Signal rioCurr_DrawLoad;
+    Signal rioBat_VolLoad;
+    /**
+     * @param rioCPULoad the rioCPULoad to set
+     */
+    public void setRioCPULoad(Signal rioCPULoad) {
+        this.rioCPULoad = rioCPULoad;
+    }
     
     /**
      * This function is run when the robot is first started up and should be
@@ -81,7 +90,7 @@ public class Robot extends TimedRobot {
         pdp = new PowerDistributionPanel(RobotConstants.POWER_DISTRIBUTION_PANEL_CANID);
         LEDController.getInstance();
         PneumaticsControl.getInstance();
-        Arm.getInstance();
+        //Arm.getInstance();
         Drivetrain.getInstance();
         Climber.getInstance();
 
@@ -97,7 +106,10 @@ public class Robot extends TimedRobot {
         /* Init local telemetry signals */
         rioCPULoad = new Signal("roboRIO CPU Load", "Pct");
         rioMemLoad = new Signal("roboRIO Memory Load", "Pct"); 
-
+        rioDS_SAMPLoad = new Signal("dataserver stored samples", "Pct"); 
+        rioCurr_DrawLoad = new Signal("overall current draw", "A");
+        rioBat_VolLoad = new Signal("battery voltage", "V");
+        
         /* Website setup */
         initDriverView();
 
@@ -143,7 +155,7 @@ public class Robot extends TimedRobot {
         LEDController.getInstance().update();
         Drivetrain.getInstance().update();
         PneumaticsControl.getInstance().update();
-        Arm.getInstance().update();
+        //Arm.getInstance().update();
         Climber.getInstance().update();
         telemetryUpdate();
         RobotPose.update();
@@ -198,7 +210,7 @@ public class Robot extends TimedRobot {
         LEDController.getInstance().update();
         Drivetrain.getInstance().update();
         PneumaticsControl.getInstance().update();
-        Arm.getInstance().update();
+        //Arm.getInstance().update();
         Climber.getInstance().update();
         RobotPose.update();
 
@@ -215,8 +227,10 @@ public class Robot extends TimedRobot {
         /* Update main loop signals */
         rioCPULoad.addSample(sample_time_ms,loadMon.getCPULoadPct());
         rioMemLoad.addSample(sample_time_ms,loadMon.getMemLoadPct());
-
-        /* Update driver view */
+        rioDS_SAMPLoad.addSample(sample_time_ms,CasseroleDataServer.getInstance().getTotalStoredSamples());
+        rioCurr_DrawLoad.addSample(sample_time_ms,pdp.getTotalCurrent());
+        rioBat_VolLoad.addSample(sample_time_ms,pdp.getVoltage());  
+    
         CasseroleDriverView.setDialValue("Main System Pressure", PneumaticsControl.getInstance().getPressure());
         CasseroleDriverView.setBoolean("Gyro Offline", !Drivetrain.getInstance().isGyroOnline());
     }
