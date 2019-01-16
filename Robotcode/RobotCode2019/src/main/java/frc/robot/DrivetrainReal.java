@@ -24,12 +24,11 @@ import com.ctre.phoenix.motorcontrol.InvertType;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
-import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import frc.lib.DataServer.Signal;
 
 public class DrivetrainReal implements DrivetrainInterface {
 
-    private ADXRS450_Gyro gyro;
+    private ADXRS453_Gyro gyro;
 	private int angleOffset;
     public double forwardReverseCmd;
     public double rotationCmd;
@@ -51,7 +50,7 @@ public class DrivetrainReal implements DrivetrainInterface {
 
     public DrivetrainReal() {
 
-        gyro = new ADXRS450_Gyro();
+        gyro = new ADXRS453_Gyro();
         angleOffset = 0;
 
         rightTalon1 = new WPI_TalonSRX(RobotConstants.DRIVETRAIN_RIGHT_1_CANID);
@@ -107,8 +106,7 @@ public class DrivetrainReal implements DrivetrainInterface {
 	}
 
 	public boolean isGyroOnline() {
-		//return gyro.isOnline();
-		return gyro.isConnected(); // Temp, for bench debugging
+		return gyro.isOnline();
     }
     
     public void update() {
