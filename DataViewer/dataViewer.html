@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+
+<html>
+
+<style>
+    #myProgress {
+  position: relative;
+  width: 100%;
+  height: 3px;
+  background-color: #ddd;
+}
+
+#myBar {
+  position: absolute;
+  width: 1%;
+  height: 100%;
+  background-color: #FF0000;
+}
+</style>
+
+
+<title>Local Data Log Viewer</title>
+
+<head>
+    <link rel="stylesheet" href="main.css">
+
+    <script src="highcharts/jquery-1.11.0.min.js"></script>
+    <script src="highcharts/highcharts.js"></script>
+    <script src="highcharts/boost.js"></script>
+    <script src="highcharts/exporting.js"></script>
+    <script src="dataViewer.js"></script>
+</head>
+
+<body>
+
+    <div class="container">
+        <header>
+            <h2>Local Data Log Viewer</h2>
+        </header>
+
+        <hr>
+
+        <aside>
+
+            <div>
+                Choose file: <input type="file" id="files" value="../logFileSnagger/downloaded_logs" onchange="handleFileSelect(this.files)"
+                 accept=".csv" autofocus="autofocus" />
+            </div>
+
+            <hr>
+
+            <div>
+                <input type="button" value="Clear All" onclick="hideAll()">
+                <input type="button" value="Input Power" onclick="setPreset(0)">
+                <input type="button" value="All Currents" onclick="setPreset(1)">
+                <input type="button" value="DT Motion" onclick="setPreset(2)">
+                <input type="button" value="RIO Stats" onclick="setPreset(3)">
+                <input type="button" value="DT Closed Loop" onclick="setPreset(4)">
+                <input type="button" value="DT Open Loop" onclick="setPreset(5)">
+                <input type="button" value="Elevator" onclick="setPreset(6)">
+            </div>
+        </aside>
+
+        <article>
+            <hr>
+            <div id="container" style="width:100%; height:1200px;border-style: solid; border-width: 3px; border-color: #999; background-color:black"></div>
+        </article>
+
+        <hr>
+
+        <footer>FRC 1736 Robot Casserole</footer>
+
+    </div>
+
+</body>
+
+</html>
