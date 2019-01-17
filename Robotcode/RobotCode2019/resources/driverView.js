@@ -439,7 +439,7 @@ dataSocket.onmessage = function (event) {
         }
 
         //Part 2 - update the HTML on the page
-        document.getElementById("webcams").innerHTML = webcamTexts;
+        //document.getElementById("webcams").innerHTML = webcamTexts;
         document.getElementById("booleans").innerHTML = booleansCanvasTexts;
         document.getElementById("stringboxes").innerHTML = stringboxCanvasTexts;
         document.getElementById("dials").innerHTML = dialCanvasTexts;
@@ -461,8 +461,8 @@ dataSocket.onmessage = function (event) {
     } else if (arr.step == "valUpdate") {
         for (i = 0; i < arr.obj_array.length; i++) {
             if (arr.obj_array[i].type == "webcam") {
-                document.getElementById("crosshair_vert" + arr.obj_array[i].name).setAttribute("style", "background:red;position:absolute;top:" + arr.obj_array[i].marker_y + "%;left:" + arr.obj_array[i].marker_x + "%;width:2px;height:30px;transform:translate(-50%, -50%)");
-                document.getElementById("crosshair_horiz" + arr.obj_array[i].name).setAttribute("style", "background:white;position:absolute;top:" + arr.obj_array[i].marker_y + "%;left:" + arr.obj_array[i].marker_x + "%;width:30px;height:2px;transform:translate(-50%, -50%)");
+                //document.getElementById("crosshair_vert" + arr.obj_array[i].name).setAttribute("style", "background:red;position:absolute;top:" + arr.obj_array[i].marker_y + "%;left:" + arr.obj_array[i].marker_x + "%;width:2px;height:30px;transform:translate(-50%, -50%)");
+                //document.getElementById("crosshair_horiz" + arr.obj_array[i].name).setAttribute("style", "background:white;position:absolute;top:" + arr.obj_array[i].marker_y + "%;left:" + arr.obj_array[i].marker_x + "%;width:30px;height:2px;transform:translate(-50%, -50%)");
             } else if (arr.obj_array[i].type == "autosel") {
                 autoSelSetCurrent(arr.obj_array[i].name, arr.obj_array[i].val);
             } else {
