@@ -25,6 +25,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
+import edu.wpi.first.wpilibj.Timer;
+import frc.lib.DataServer.Signal;
+
 /**
  * DESCRIPTION: <br>
  * Metric-gathering library to help track CPU load and memory load on-RIO, rather than just relying on the
@@ -62,6 +65,8 @@ public class CasseroleRIOLoadMonitor {
 	public double totalCPULoadPct = 0;
 	/** Memory used percentage */
 	public double totalMemUsedPct = 0;
+	/** JVM memory used percentage */
+	public double totalJVMMemUsedPct = 0;
 	
 	//To ensure we only calculate load between the last measurement and this one, we must store the
 	//previous values measured from the kernel, since the kernel reports aggregate time counts
@@ -78,6 +83,11 @@ public class CasseroleRIOLoadMonitor {
 	// These "files" contain the load info on a linux system
 	static final String CPU_LOAD_VIRT_FILE = "/proc/stat";
 	static final String MEM_LOAD_VIRT_FILE = "/proc/meminfo";
+
+	//Telemetry
+	Signal rioCPULoad;
+    Signal rioMemLoad;
+    Signal rioJVMMemLoad;
 	
 	/**
 	 * Constructor. Initalizes measurement system and starts a slow
@@ -94,7 +104,7 @@ public class CasseroleRIOLoadMonitor {
 	        @Override
 	        public void run() {
 	            try {
-	            	while(giveUp == false){
+	            	while(!Thread.currentThread().isInterrupted()){
 	            		periodicUpdate();
 	            		Thread.sleep(UPDATE_RATE_MS);
 	            	}
@@ -103,7 +113,11 @@ public class CasseroleRIOLoadMonitor {
 	            }
 
 	        }
-	    });
+		});
+		
+		rioCPULoad = new Signal("roboRIO CPU Load", "Pct");
+        rioMemLoad = new Signal("roboRIO Sys Memory Load", "Pct"); 
+        rioJVMMemLoad = new Signal("roboRIO JVM Memory Load", "Pct"); 
 	    
 	    //Set up thread properties and start it off
 	    monitorThread.setName("CasseroleRIOLoadMonitor");
@@ -122,6 +136,8 @@ public class CasseroleRIOLoadMonitor {
 
 		String CPUTotalLoadRawLine = new String();
 		File file;
+
+		double sample_time_ms = Timer.getFPGATimestamp()*1000;
 		
 		if(giveUp == false){
 			
@@ -246,6 +262,16 @@ public class CasseroleRIOLoadMonitor {
 			totalCPULoadPct = -1;
 			totalMemUsedPct = -1;
 		}
+
+		//Grab JVM memory (outside of give-up loop)
+		double jvmTotalMem = Runtime.getRuntime().totalMemory();
+		double jvmFreeMem = Runtime.getRuntime().freeMemory();
+		totalJVMMemUsedPct = (jvmTotalMem - jvmFreeMem)/(jvmTotalMem) * 100.0;
+
+		//Update Telemetry
+		rioCPULoad.addSample(sample_time_ms,this.getCPULoadPct());
+        rioMemLoad.addSample(sample_time_ms,this.getMemLoadPct());
+        rioJVMMemLoad.addSample(sample_time_ms,this.getJVMMemLoadPct());
 		
 		
 	}
@@ -265,6 +291,14 @@ public class CasseroleRIOLoadMonitor {
 	 */
 	public double getMemLoadPct(){
 		return totalMemUsedPct;
+	}
+
+	/**
+	 * Getter for the load percentage on memory in the Java Virtual Machine. 
+	 * @return percentage of available JVM RAM, or -1 if percentage unavailable.
+	 */
+	public double getJVMMemLoadPct(){
+		return totalJVMMemUsedPct;
 	}
     
 
