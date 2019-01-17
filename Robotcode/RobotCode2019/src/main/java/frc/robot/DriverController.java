@@ -92,13 +92,17 @@ public class DriverController {
         }
 
         if(xb.getTriggerAxis(Hand.kRight) > 0.5){
-            intakeSpdReq = IntakeSpd.Intake;
             //When pulling a ball in, override the intake to be extended.
             intakePosReq = IntakePos.Extend;
+            intakeSpdReq = IntakeSpd.Intake;
         } else if(xb.getTriggerAxis(Hand.kLeft) > 0.5){
+            //Same deal as pulling a ball in
+            intakePosReq = IntakePos.Extend;
             intakeSpdReq = IntakeSpd.Eject;
         } else {
             intakeSpdReq = IntakeSpd.Stop;
+            //If not pressing a trigger or right bumper, override the intake to be retracted
+            intakePosReq = IntakePos.Retract;
         }
 
         if(xb.getStartButton()){
@@ -148,6 +152,10 @@ public class DriverController {
 
     public IntakePos getIntakePosReq() {
         return this.intakePosReq;
+    }
+
+    public IntakeSpd getIntakeSpdReq() {
+        return this.intakeSpdReq;
     }
 
     public double getDriverFwdRevCmd() {
