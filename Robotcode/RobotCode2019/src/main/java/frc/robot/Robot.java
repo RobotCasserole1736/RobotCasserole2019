@@ -7,6 +7,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.BuiltInAccelerometer;
+
 /*
  *******************************************************************************************
  * Copyright (C) 2019 FRC Team 1736 Robot Casserole - www.robotcasserole.org
@@ -60,12 +62,17 @@ public class Robot extends TimedRobot {
     //Physical devices
     PowerDistributionPanel pdp;
 
+    BuiltInAccelerometer onboardAccel;
+
     //Top level telemetry signals
     Signal rioCPULoad;
     Signal rioMemLoad;
     Signal rioDS_SAMPLoad;
     Signal rioCurr_DrawLoad;
     Signal rioBat_VolLoad;
+    Signal onboardAccelX;
+    Signal onboardAccelY;
+    Signal onboardAccelZ;
 
     /**
      * @param rioCPULoad the rioCPULoad to set
@@ -85,6 +92,8 @@ public class Robot extends TimedRobot {
         wrangler = new CalWrangler();
 
         RobotPose = new RobotPose();
+
+        onboardAccel = new BuiltInAccelerometer();
 
         RobotPose.robotPose();
         /* Init Robot parts */
@@ -111,6 +120,9 @@ public class Robot extends TimedRobot {
         rioDS_SAMPLoad = new Signal("dataserver stored samples", "Pct"); 
         rioCurr_DrawLoad = new Signal("overall current draw", "A");
         rioBat_VolLoad = new Signal("battery voltage", "V");
+        onboardAccelX = new Signal("Onboard Accelerometer X Value", "g");
+        onboardAccelY = new Signal("Onboard Accelerometer Y Value", "g");
+        onboardAccelZ = new Signal("Onboard Accelerometer Z Value", "g");
         
         /* Website setup */
         initDriverView();
@@ -236,6 +248,9 @@ public class Robot extends TimedRobot {
         rioDS_SAMPLoad.addSample(sample_time_ms,CasseroleDataServer.getInstance().getTotalStoredSamples());
         rioCurr_DrawLoad.addSample(sample_time_ms,pdp.getTotalCurrent());
         rioBat_VolLoad.addSample(sample_time_ms,pdp.getVoltage());  
+        onboardAccelX.addSample(sample_time_ms, onboardAccel.getX());
+        onboardAccelY.addSample(sample_time_ms, onboardAccel.getY());
+        onboardAccelZ.addSample(sample_time_ms, onboardAccel.getZ());
     
         CasseroleDriverView.setDialValue("Main System Pressure", PneumaticsControl.getInstance().getPressure());
         CasseroleDriverView.setBoolean("Gyro Offline", !Drivetrain.getInstance().isGyroOnline());
