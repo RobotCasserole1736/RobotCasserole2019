@@ -36,6 +36,19 @@ public class Signal {
      * Adds a new sample to the signal queue. It is intended that the controls code
      * would call this once per loop to add a new datapoint to the real-time graph.
      * 
+     * The boolean version converts true to 1.0 and false to 0.0.
+     * 
+     * @param time_in
+     * @param value_in
+     */
+    public void addSample(double time_in_ms, boolean value_in) {
+        this.addSample(time_in_ms, value_in?1.0:0.0);
+    }
+
+    /**
+     * Adds a new sample to the signal queue. It is intended that the controls code
+     * would call this once per loop to add a new datapoint to the real-time graph.
+     * 
      * @param time_in
      * @param value_in
      */

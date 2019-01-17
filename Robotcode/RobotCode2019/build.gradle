@@ -1,9 +1,15 @@
+
 plugins {
     id "java"
     id "edu.wpi.first.GradleRIO" version "2019.1.1"
+    id "org.ajoberstar.grgit" version "3.0.0"
 }
 
+import org.ajoberstar.grgit.Grgit
+
 def ROBOT_MAIN_CLASS = "frc.robot.Main"
+
+def BUILD_INFO_FILE = "$projectDir/resources/buildinfo.html"
 
 // Define my targets (RoboRIO) and artifacts (deployable files)
 // This is added by GradleRIO's backing project EmbeddedTools.
@@ -35,7 +41,7 @@ deploy {
 }
 
 // Set this to true to enable desktop support.
-def includeDesktopSupport = false
+def includeDesktopSupport = true
 
 // Maven central needed for JUnit
 repositories {
@@ -50,6 +56,10 @@ dependencies {
     nativeZip wpi.deps.vendor.jni(wpi.platforms.roborio)
     nativeDesktopZip wpi.deps.vendor.jni(wpi.platforms.desktop)
     testCompile 'junit:junit:4.12'
+
+    //Simulation only
+    simulation "edu.wpi.first.halsim:halsim_lowfi:${wpi.wpilibVersion}:${wpi.platforms.desktop}@zip"
+
 
     //Casserole WebServer Deps
     compile 'com.googlecode.json-simple:json-simple:1.1.1'
@@ -74,3 +84,98 @@ jar {
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     manifest edu.wpi.first.gradlerio.GradleRIOPlugin.javaManifest(ROBOT_MAIN_CLASS)
 }
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// Build Meta-data file generation
+///////////////////////////////////////////////////////////////////////////////////////////////////
+task genMetaData(){
+    doLast{
+
+        String filecontents = ""
+        String build_uname = ""
+        String build_host = ""
+        String build_time = ""
+        String git_sha1 = ""
+        String git_branch = ""
+        String git_wd_clean = ""
+        String git_tag_list = ""
+
+        //Get the user's name. Shouldn't throw errors, just "null" if 
+        // it can't figure out who you are.
+        build_uname = System.getProperty("user.name")
+
+        //Get the closest thing to PC name we can find in Groovy, the
+        // local machine's Hostname. This could definietly throw exceptions
+        // if you've got a weird system or something.
+        try{
+            build_host = java.net.InetAddress.getLocalHost().getHostName()
+        } catch (all) {
+            build_host = "unknown"
+        }
+
+        //Build time in totally-not-ISO format
+        build_time = new java.text.SimpleDateFormat("MM-dd-yyyy hh:mm:ssa").format(new Date())
+
+        // Get currently checked-out SHA1
+        try{
+            git_sha1 = Grgit.open(currentDir: file('.')).head().id
+        } catch (all) {
+            git_sha1 = "unknown"
+        }
+
+        // Get currently checked-out branch friendly name
+        try{
+            git_branch = Grgit.open(currentDir: file('.')).branch.current().name
+        } catch (all) {
+            git_branch = "unknown"
+        }
+
+        // Get friendly names of the tags on this commit (if any)
+        try{
+            def repo = Grgit.open(currentDir: file('.'))
+            def head = repo.head()
+            def tag_list = repo.tag.list().findAll{it.commit == head}
+            if(tag_list.size() > 0){
+                for(tag_obj in tag_list){
+                    git_tag_list += tag_obj.getName()+","
+                }
+                
+            } else {
+                git_tag_list = "none"
+            }
+
+        } catch (Exception e) {
+            System.out.println(e)
+            git_tag_list = "unknown"
+        }
+
+        // Get clean/dirty status of working directory
+        try{
+            git_wd_clean = Grgit.open(currentDir: file('.')).status().isClean()
+        } catch (all) {
+            git_wd_clean = "unknown"
+        }
+
+        // Build file contents and write to disk
+        filecontents += "<html><body>\n"
+        filecontents += "<table>\n"
+        filecontents += "<head><link rel=\"stylesheet\" href=\"main.css\"></head>\n"
+        filecontents += "<tr><td>Build Username     </td><td> ${build_uname}  </td></tr>\n"
+        filecontents += "<tr><td>Build Host PC      </td><td> ${build_host}   </td></tr>\n"
+        filecontents += "<tr><td>Build Time         </td><td> ${build_time}   </td></tr>\n"
+        filecontents += "<tr><td>Git Tags           </td><td> ${git_tag_list} </td></tr>\n"
+        filecontents += "<tr><td>Git Branch         </td><td> ${git_branch}   </td></tr>\n"
+        filecontents += "<tr><td>Git SHA1           </td><td> ${git_sha1}     </td></tr>\n"
+        filecontents += "<tr><td>Working Dir Clean? </td><td> ${git_wd_clean} </td></tr>\n"
+        filecontents += "</table>\n" 
+        filecontents += "</body></html>\n"
+
+        new File(BUILD_INFO_FILE).text = filecontents
+    }
+}
+
+// Add the file generation task to the standard build
+build.dependsOn genMetaData
+simulateExternalJava.dependsOn genMetaData

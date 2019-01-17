@@ -7,22 +7,38 @@ var hostname = window.location.hostname + ":" + port;
 var ROBOT_W_FT = 2;
 var ROBOT_L_FT = 2.5;
 var FIELDPOLY_FT =
-    [[0, 0],
-    [11, 0],
-    [13.47, 3],
-    [13.47, 51],
-    [11, 54],
-    [-11, 54],
-    [-13.47, 51],
-    [-13.47, 3],
-    [-11, 0],
-    [0, 0]
-    ];
+    [[0, 0],[13, 0],[0, 54],[-27, 0],[0, -54],[14, 0],[0, 0]];
+    //RED ROCKET LEFT
+var FIELDELEMENTPOLY1_FT = 
+    [[13, 18],[0, 33],[-0.54, -1.64],[0, 1.54],[0.54, 1.64],[13, 18]];
+    //RED ROCKET RIGHT
+var FIELDELEMENTPOLY2_FT = 
+    [[-14, -18],[0, 33],[0.54, -1.64],[0, -1.54],[-0.54, -1.64],[-14, -18]];
+    //BLUE ROCKET LEFT
+var FIELDELEMENTPOLY3_FT = 
+    [[13, 33],[0, 33],[-0.54, -1.64],[0, 1.54],[0.54, 1.64],[13, 18]];
+    //BLUE ROCKET RIGHT
+var FIELDELEMENTPOLY4_FT = 
+    [[-14, -33],[0, 33],[0.54, -1.64],[0, -1.54],[-0.54, -1.64],[-14, -33]];
+    //RED CARGO SHIP
+var FIELDELEMENTPOLY5_FT = 
+    [[0, 18],[2.4, 0],[0, 8],[-4.8, 0],[0, -8],[2.4, 0]];
+    //BLUE CARGO SHIP
+var FIELDELEMENTPOLY6_FT = 
+    [[0, 35.5],[2.4, 0],[0, -8],[-4.8, 0],[0, 8],[2.4, 0]];  
+    //RED HAB
+var FIELDELEMENTPOLY7_FT = 
+    [[0, 0],[7.11, 0],[0, 3.9],[-0.16, 0],[3.11, 0],[0, -12.7],[-3.11, 0],[0.16, 0],[0, -3.9],[-7.11, 0],[0, 0]];
+    //BLUE HAB
+var FIELDELEMENTPOLY8_FT = 
+    [[0, 54],[-7.11, 0],[0, -3.9],[0.16, 0],[-3.11, 0],[0, 12.7],[3.11, 0],[-0.16, 0],[0, 3.9],[7.11, 0],[0, 54]];
 
-//Render Constants
+    //Render Constants
 var PX_PER_FOOT = 15;
 var FIELD_COLOR = '#fdd';
 var BOT_COLOR = '#d22';
+var RED_FIELD_ELEMENT_COLOR = '#FF2D00';
+var BLUE_FIELD_ELEMENT_COLOR = '#004CFF';
 var CANVAS_MARGIN_PX = 20;
 
 var ROBOT_W_PX = 0;
@@ -34,6 +50,13 @@ var numTransmissions = 0;
 var botPoseXSignalName = "botposex";
 var botPoseYSignalName = "botposey";
 var botPoseTSignalName = "botposet";
+
+var botDesPoseXSignalName = "botdesposex";
+var botDesPoseYSignalName = "botdesposey";
+var botDesPoseTSignalName = "botdesposet";
+var botActPoseXSignalName = "botactposex";
+var botActPoseYSignalName = "botactposey";
+var botActPoseTSignalName = "botactposet";
 
 dataSocket.onopen = function (event) {
     document.getElementById("id01").innerHTML = "Socket Open";
@@ -70,6 +93,30 @@ function procData(json_data) {
     this.canvas_robot = document.getElementById("robot_canvas");
     this.ctx_robot = this.canvas_robot.getContext("2d");
 
+    this.canvas_robot = document.getElementById("field_element_canvas_1");
+    this.ctx_robot = this.canvas_robot.getContext("2d");
+
+    this.canvas_robot = document.getElementById("field_element_canvas_2");
+    this.ctx_robot = this.canvas_robot.getContext("2d");
+
+    this.canvas_robot = document.getElementById("field_element_canvas_3");
+    this.ctx_robot = this.canvas_robot.getContext("2d");
+
+    this.canvas_robot = document.getElementById("field_element_canvas_4");
+    this.ctx_robot = this.canvas_robot.getContext("2d");
+
+    this.canvas_robot = document.getElementById("field_element_canvas_5");
+    this.ctx_robot = this.canvas_robot.getContext("2d");
+
+    this.canvas_robot = document.getElementById("field_element_canvas_6");
+    this.ctx_robot = this.canvas_robot.getContext("2d");
+
+    this.canvas_robot = document.getElementById("field_element_canvas_7");
+    this.ctx_robot = this.canvas_robot.getContext("2d");
+
+    this.canvas_robot = document.getElementById("field_element_canvas_8");
+    this.ctx_robot = this.canvas_robot.getContext("2d");
+    
     if (data.type == "sig_list") {
 
         var daq_request_cmd = {};
@@ -79,11 +126,11 @@ function procData(json_data) {
         var poseTFound = false;
 
         for (i = 0; i < data.signals.length; i++) {
-            if (data.signals[i].id == botPoseXSignalName) {
+            if (data.signals[i].id == botActPoseXSignalName) {
                 poseXFound = true;
-            } else if (data.signals[i].id == botPoseYSignalName) {
+            } else if (data.signals[i].id == botActPoseYSignalName) {
                 poseYFound = true;
-            } else if (data.signals[i].id == botPoseTSignalName) {
+            } else if (data.signals[i].id == botActPoseTSignalName) {
                 poseTFound = true;
             }
         }
@@ -124,7 +171,7 @@ function procData(json_data) {
             this.ctx.fillStyle = FIELD_COLOR;
 
 
-            //Draw polygon based on specified points 
+            //Draw field based on specified points 
             this.ctx.beginPath();
             for (i = 0; i < FIELDPOLY_FT.length; i++) {
                 x_px = FIELDPOLY_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
@@ -139,6 +186,140 @@ function procData(json_data) {
 
             this.ctx.closePath();
             this.ctx.fill();
+
+            this.ctx.fillStyle = RED_FIELD_ELEMENT_COLOR;
+
+            //draw RED ROCKET LEFT
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDELEMENTPOLY1_FT.length; i++) {
+                x_px = FIELDPOLY_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDPOLY_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+            //DRAW RED ROCKET RIGHT
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDELEMENTPOLY2_FT.length; i++) {
+                x_px = FIELDPOLY_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDPOLY_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+
+              //DRAW RED CARGO
+              this.ctx.beginPath();
+              for (i = 0; i < FIELDELEMENTPOLY1_FT.length; i++) {
+                  x_px = FIELDPOLY_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                  y_px = this.ctx.canvas.height - (FIELDPOLY_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+  
+                  if (i == 0) {
+                      this.ctx.moveTo(x_px, y_px);
+                  } else {
+                      this.ctx.lineTo(x_px, y_px);
+                  }
+              }
+
+              this.ctx.closePath();
+              this.ctx.fill();
+
+                //DRAW RED HAB
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDELEMENTPOLY1_FT.length; i++) {
+                x_px = FIELDPOLY_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDPOLY_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+            this.ctx.fillStyle = BLUE_FIELD_ELEMENT_COLOR;
+
+              //DRAW BLUE ROCKET LEFT
+              this.ctx.beginPath();
+              for (i = 0; i < FIELDELEMENTPOLY1_FT.length; i++) {
+                  x_px = FIELDPOLY_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                  y_px = this.ctx.canvas.height - (FIELDPOLY_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+  
+                  if (i == 0) {
+                      this.ctx.moveTo(x_px, y_px);
+                  } else {
+                      this.ctx.lineTo(x_px, y_px);
+                  }
+              }
+  
+              this.ctx.closePath();
+              this.ctx.fill();
+  
+
+                //DRAW BLUE ROCKET RIGHT
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDELEMENTPOLY1_FT.length; i++) {
+                x_px = FIELDPOLY_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDPOLY_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+            //DRAW BLUE CARGO
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDELEMENTPOLY1_FT.length; i++) {
+                x_px = FIELDPOLY_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDPOLY_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+              //DRAW BLUE HAB
+              this.ctx.beginPath();
+              for (i = 0; i < FIELDELEMENTPOLY1_FT.length; i++) {
+                  x_px = FIELDPOLY_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                  y_px = this.ctx.canvas.height - (FIELDPOLY_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+  
+                  if (i == 0) {
+                      this.ctx.moveTo(x_px, y_px);
+                  } else {
+                      this.ctx.lineTo(x_px, y_px);
+                  }
+              }
+  
+              this.ctx.closePath();
+              this.ctx.fill();
 
             //Save robot dimensions
             ROBOT_W_PX = ROBOT_W_FT * PX_PER_FOOT;

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+
+<html>
+
+<title>Casserole Driver Cameras</title>
+
+<head>
+  <link rel="stylesheet" href="main.css">
+</head>
+
+<body>
+
+
+<div id="statusContent">
+    <div align="center" id="id01">
+        COM Status: Socket Not Yet Opened...
+    </div>
+    <div align="center">
+        <br>
+        <button onclick="openFullscreen();">Open Video in Fullscreen Mode</button>
+        <p> Press the "Esc" key to exit full screen.</p>
+        <br>
+    </div>
+</div>
+
+<div align="center"><table><tr id="webcams">
+<!--Gets auto-populated by javascript -->
+</tr></table></div>
+<br>
+
+<script type="text/javascript" src="/driverViewCams.js" >
+</script>
+
+</body>
+</html>

@@ -1,8 +1,8 @@
-package frc.robot;
+package frc.lib.WebServer;
 
 /*
  *******************************************************************************************
- * Copyright (C) 2019 FRC Team 1736 Robot Casserole - www.robotcasserole.org
+ * Copyright (C) 2017 FRC Team 1736 Robot Casserole - www.robotcasserole.org
  *******************************************************************************************
  *
  * This software is released under the MIT Licence - see the license.txt
@@ -20,40 +20,17 @@ package frc.robot;
  *   if you would consider donating to our club to help further STEM education.
  */
 
-public class Utils {
+import javax.servlet.annotation.WebServlet;
+import org.eclipse.jetty.websocket.servlet.WebSocketServlet;
+import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 
-    public static double ctrlAxisScale(double input, double exp_scale, double deadzone){
-        boolean inputIsNegative = false;
-        double output = 0;
+@SuppressWarnings("serial")
+@WebServlet(name = "Casserole Robot Pose Servlet", urlPatterns = {"/poseview"})
+class CasseroleRobotPoseViewServlet extends WebSocketServlet {
 
-        // Track if the input was less than zero
-        if(input < 0){
-            inputIsNegative = true;
-            input *= -1;
-        }
-
-        if(input < deadzone){
-            //Input within deadzone range, set output to zero.
-            output = 0;
-        } else {
-            //Input is outside deadzon range, calcualte output
-
-            //Rescale input to 0-1 range
-            input -= (1-deadzone);
-            input *= 1/(1-deadzone);
-
-            //Raise input to desired power
-            input = Math.pow(input, exp_scale);
-        }
-
-        output = input;
-
-        // re-apply input sign
-        if(inputIsNegative){
-            output *= -1;
-        }
-
-        return output;
+    @Override
+    public void configure(WebSocketServletFactory factory) {
+        factory.getPolicy().setIdleTimeout(10000);
+        factory.register(CasseroleRobotPoseViewSocket.class);
     }
-
 }
