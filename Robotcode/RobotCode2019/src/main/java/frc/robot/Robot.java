@@ -72,6 +72,9 @@ public class Robot extends TimedRobot {
     Signal onboardAccelY;
     Signal onboardAccelZ;
 
+    //Vision Tracking Camera
+    JeVoisInterface jevois;
+
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
@@ -91,6 +94,7 @@ public class Robot extends TimedRobot {
         pdp = new PowerDistributionPanel(RobotConstants.POWER_DISTRIBUTION_PANEL_CANID);
         LEDController.getInstance();
         PneumaticsControl.getInstance();
+        jevois = new JeVoisInterface(false);
         //Arm.getInstance();
         Drivetrain.getInstance();
         Climber.getInstance();
@@ -241,6 +245,8 @@ public class Robot extends TimedRobot {
     
         CasseroleDriverView.setDialValue("Main System Pressure", PneumaticsControl.getInstance().getPressure());
         CasseroleDriverView.setBoolean("Gyro Offline", !Drivetrain.getInstance().isGyroOnline());
+        CasseroleDriverView.setBoolean("Vision Camera Offline", !jevois.isVisionOnline());
+        CasseroleDriverView.setBoolean("Vision Target Available", jevois.isTgtVisible());
     }
         
     /**
@@ -253,5 +259,7 @@ public class Robot extends TimedRobot {
         CasseroleDriverView.newWebcam("cam1", RobotConstants.CAM_1_STREAM_URL, 0, 0, 0);
         CasseroleDriverView.newWebcam("cam2", RobotConstants.CAM_2_STREAM_URL, 0, 0, 0);
         CasseroleDriverView.newBoolean("Gyro Offline", "red");
+        CasseroleDriverView.newBoolean("Vision Camera Offline", "red");
+        CasseroleDriverView.newBoolean("Vision Target Available", "green");
     }
 }
