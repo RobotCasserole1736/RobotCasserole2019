@@ -1,6 +1,8 @@
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.InvertType;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 
 /*
  *******************************************************************************************
@@ -74,6 +76,21 @@ public class DrivetrainReal implements DrivetrainInterface {
 
         leftTalon1.setInverted(true);
 
+        //Set coast mode always
+        rightTalon1.setNeutralMode(NeutralMode.Coast);
+        rightTalon2.setNeutralMode(NeutralMode.Coast);
+        leftTalon1.setNeutralMode(NeutralMode.Coast); 
+        leftTalon2.setNeutralMode(NeutralMode.Coast); 
+
+		//Motor 1 is presumed to be the one with a sensor hooked up to it.
+		rightTalon1.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, TIMEOUT_MS);
+		leftTalon1.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, TIMEOUT_MS);
+		
+		//We need a fairly high bandwidth on the velocity measurement, so keep
+		// the averaging of velocity samples low to minimize phase shift
+		rightTalon1.configVelocityMeasurementWindow(4, TIMEOUT_MS);
+		leftTalon1.configVelocityMeasurementWindow(4, TIMEOUT_MS);
+
         opMode = DrivetrainOpMode.OpenLoop;
 
         currentR1Sig = new Signal("Drivetrain R1 Motor Current", "A");
@@ -82,8 +99,8 @@ public class DrivetrainReal implements DrivetrainInterface {
         currentL2Sig = new Signal("Drivetrain L2 Motor Current", "A");
         opModeSig    = new Signal("Drivetrain Operation Mode", "Op Mode Enum");
         gyroscopeSig = new Signal("Drivetrain Pos Angle","Deg");
-        wheelSpeedRightSig = new Signal("Right Wheel Speed", "RPM");
-        wheelSpeedLeftSig = new Signal("Left Wheel Speed", "RPM");
+        wheelSpeedRightSig = new Signal("Drivetrain Right Wheel Speed", "RPM");
+        wheelSpeedLeftSig = new Signal("Drivetrain Left Wheel Speed", "RPM");
     }
 
     public void setOpenLoopCmd(double forwardReverseCmd_in, double rotaionCmd_in) {
@@ -133,15 +150,13 @@ public class DrivetrainReal implements DrivetrainInterface {
 		return motor_speed_rpm_Left;
     }
     
-    //public double getMotorSpeedRadpSec() {
-	//	return motor_speed_rpm*0.104719*GEARBOX_RATIO;
-	//}
-
 	private double CTRE_VEL_UNITS_TO_RPM(double ctre_units) {
 		return ctre_units * 600.0 / ENCODER_CYCLES_PER_REV / 4.0;
 	}
     
     public void update() {
+
+        sampleSensors();
 
         if (opMode == DrivetrainOpMode.OpenLoop) {
             /* Drivetrain running open-loop, assign outputs straight from input commands */
