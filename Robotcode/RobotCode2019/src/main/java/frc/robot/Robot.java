@@ -65,8 +65,6 @@ public class Robot extends TimedRobot {
     BuiltInAccelerometer onboardAccel;
 
     //Top level telemetry signals
-    Signal rioCPULoad;
-    Signal rioMemLoad;
     Signal rioDS_SAMPLoad;
     Signal rioCurr_DrawLoad;
     Signal rioBat_VolLoad;
@@ -74,13 +72,6 @@ public class Robot extends TimedRobot {
     Signal onboardAccelY;
     Signal onboardAccelZ;
 
-    /**
-     * @param rioCPULoad the rioCPULoad to set
-     */
-    public void setRioCPULoad(Signal rioCPULoad) {
-        this.rioCPULoad = rioCPULoad;
-    }
-    
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
@@ -115,9 +106,7 @@ public class Robot extends TimedRobot {
         LoopTiming.getInstance();
 
         /* Init local telemetry signals */
-        rioCPULoad = new Signal("roboRIO CPU Load", "Pct");
-        rioMemLoad = new Signal("roboRIO Memory Load", "Pct"); 
-        rioDS_SAMPLoad = new Signal("dataserver stored samples", "Pct"); 
+        rioDS_SAMPLoad = new Signal("dataserver stored samples", "count"); 
         rioCurr_DrawLoad = new Signal("overall current draw", "A");
         rioBat_VolLoad = new Signal("battery voltage", "V");
         onboardAccelX = new Signal("Onboard Accelerometer X Value", "g");
@@ -243,8 +232,6 @@ public class Robot extends TimedRobot {
         double sample_time_ms = LoopTiming.getInstance().getLoopStartTime_sec()*1000.0;
 
         /* Update main loop signals */
-        rioCPULoad.addSample(sample_time_ms,loadMon.getCPULoadPct());
-        rioMemLoad.addSample(sample_time_ms,loadMon.getMemLoadPct());
         rioDS_SAMPLoad.addSample(sample_time_ms,CasseroleDataServer.getInstance().getTotalStoredSamples());
         rioCurr_DrawLoad.addSample(sample_time_ms,pdp.getTotalCurrent());
         rioBat_VolLoad.addSample(sample_time_ms,pdp.getVoltage());  
