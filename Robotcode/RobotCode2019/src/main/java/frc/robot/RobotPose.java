@@ -28,9 +28,9 @@ public class RobotPose {
 		DesX = new Signal("botDesPoseX", "in");
 		DesY = new Signal("botDesPoseY", "in");
 		DesT = new Signal("botDesPoseT", "deg");
-		ActX = new Signal("botActPoseX", "in");
-		ActY = new Signal("botActPoseY", "in");
-		ActT = new Signal("botActPoseT", "deg");
+		ActX = new Signal("botposex", "in");
+		ActY = new Signal("botposey", "in");
+		ActT = new Signal("botposet", "deg");
 	}
 
 	public void setLeftMotorSpeed(double speed) {
@@ -73,13 +73,6 @@ public class RobotPose {
 		poseY += velosityY;
 		poseThadus += 0.02 * robotAngle_DPS;
 		//CasseroleRobotPoseView.setRobotPose(poseX, poseY, poseTheta - 90);
-	
-		System.out.println("x");
-		System.out.println(poseX);
-		System.out.println("y");
-		System.out.println(poseY);
-		System.out.println("Thadus");
-		System.out.println(poseThadus);
 
 		double sample_time_ms = LoopTiming.getInstance().getLoopStartTime_sec()*1000.0;
 
