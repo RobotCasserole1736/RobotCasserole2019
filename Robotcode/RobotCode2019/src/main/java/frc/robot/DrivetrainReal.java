@@ -32,6 +32,13 @@ public class DrivetrainReal implements DrivetrainInterface {
     public double forwardReverseCmd;
     public double rotationCmd;
 
+    private static final int TIMEOUT_MS = 0;
+    private static final double ENCODER_CYCLES_PER_REV = 2048;
+    private static final double GEARBOX_RATIO = 72.0/12.0;
+    private double motor_speed_rpm_Right = 0;
+    private double motor_speed_rpm_Left = 0;
+
+
     DrivetrainOpMode opMode;
     DrivetrainOpMode prevOpMode;
 
@@ -46,11 +53,13 @@ public class DrivetrainReal implements DrivetrainInterface {
     Signal currentL2Sig;
     Signal opModeSig;
     Signal gyroscopeSig;
+    Signal wheelSpeedRightSig;
+    Signal wheelSpeedLeftSig;
 
     public DrivetrainReal() {
-
         adxrs453 = new ADXRS453_Gyro();
-		angleOffset = 0;
+        angleOffset = 0;
+
 
         rightTalon1 = new WPI_TalonSRX(RobotConstants.DRIVETRAIN_RIGHT_1_CANID);
         rightTalon2 = new WPI_TalonSRX(RobotConstants.DRIVETRAIN_RIGHT_2_CANID);
@@ -72,6 +81,8 @@ public class DrivetrainReal implements DrivetrainInterface {
         currentL2Sig = new Signal("Drivetrain L2 Motor Current", "A");
         opModeSig    = new Signal("Drivetrain Operation Mode", "Op Mode Enum");
         gyroscopeSig = new Signal("Drivetrain Pos Angle","Deg");
+        wheelSpeedRightSig = new Signal("Right Wheel Speed", "RPM");
+        wheelSpeedLeftSig = new Signal("Left Wheel Speed", "RPM");
     }
 
     public void setOpenLoopCmd(double forwardReverseCmd_in, double rotaionCmd_in) {
@@ -107,6 +118,27 @@ public class DrivetrainReal implements DrivetrainInterface {
 		return adxrs453.isOnline();
 		//return true; // Temp, for bench debugging
     }
+
+    public void sampleSensors() {
+		motor_speed_rpm_Right = CTRE_VEL_UNITS_TO_RPM(rightTalon1.getSelectedSensorVelocity(0));
+		motor_speed_rpm_Left = CTRE_VEL_UNITS_TO_RPM(leftTalon1.getSelectedSensorVelocity(0));
+    }
+
+    public double getSpeedRightRPM() {
+		return motor_speed_rpm_Right;
+    }
+
+    public double getSpeedleftRPM() {
+		return motor_speed_rpm_Left;
+    }
+    
+    //public double getMotorSpeedRadpSec() {
+	//	return motor_speed_rpm*0.104719*GEARBOX_RATIO;
+	//}
+
+	private double CTRE_VEL_UNITS_TO_RPM(double ctre_units) {
+		return ctre_units * 600.0 / ENCODER_CYCLES_PER_REV / 4.0;
+	}
     
     public void update() {
 
@@ -134,6 +166,7 @@ public class DrivetrainReal implements DrivetrainInterface {
         currentL2Sig.addSample(sample_time_ms, leftTalon2.getOutputCurrent());
         opModeSig.addSample(sample_time_ms, opMode.toInt());
         gyroscopeSig.addSample(sample_time_ms, getAngle());
-
+        wheelSpeedRightSig.addSample(sample_time_ms, getSpeedRightRPM());
+        wheelSpeedLeftSig.addSample(sample_time_ms, getSpeedleftRPM());
     }
 }
