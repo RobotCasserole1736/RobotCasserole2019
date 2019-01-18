@@ -13,7 +13,7 @@ public class RobotPose {
 	public final double robotRadius_Ft  = 0.9;
 	public double poseX = 0;
 	public double poseY = 0;
-	public double poseThadus = 90;
+	public double poseThaddeus = 90;
 	public double velosityX = 0;
 	public double velosityY = 0;
 
@@ -47,8 +47,8 @@ public class RobotPose {
 		double robotAngle_DPS = ((rightVelosity_FPS-leftVelosity_FPS)/(2*robotRadius_Ft) * 180/3.14);
 		double X_dot = (rightVelosity_FPS+leftVelosity_FPS)/2; 
 		
-		velosityX = 0.02 * (X_dot*Math.cos(poseThadus*(3.14/180)));
-		velosityY = 0.02 * (X_dot*Math.sin(poseThadus*(3.14/180)));
+		velosityX = 0.02 * (X_dot*Math.cos(poseThaddeus*(3.14/180)));
+		velosityY = 0.02 * (X_dot*Math.sin(poseThaddeus*(3.14/180)));
 		
 		if(poseY < 0) { 
 			velosityY = 0;
@@ -71,15 +71,15 @@ public class RobotPose {
 		
 		poseX += velosityX;
 		poseY += velosityY;
-		poseThadus += 0.02 * robotAngle_DPS;
+		poseThaddeus += 0.02 * robotAngle_DPS;
 		//CasseroleRobotPoseView.setRobotPose(poseX, poseY, poseTheta - 90);
 	
 		System.out.println("x");
 		System.out.println(poseX);
 		System.out.println("y");
 		System.out.println(poseY);
-		System.out.println("Thadus");
-		System.out.println(poseThadus);
+		System.out.println("Thaddeus");
+		System.out.println(poseThaddeus);
 
 		double sample_time_ms = LoopTiming.getInstance().getLoopStartTime_sec()*1000.0;
 
@@ -88,13 +88,13 @@ public class RobotPose {
 		DesT.addSample(sample_time_ms,0);
 		ActX.addSample(sample_time_ms,poseX);
 		ActY.addSample(sample_time_ms,poseY);
-		ActT.addSample(sample_time_ms,poseThadus);
+		ActT.addSample(sample_time_ms,poseThaddeus);
 		}
 	
 	public void reset() {
 		poseX = 0;
 		poseY = 0;
-		poseThadus = 90;
+		poseThaddeus = 90;
 		leftVelosity_RPM = 0;
 		rightVelosity_RPM = 0;
 	}
