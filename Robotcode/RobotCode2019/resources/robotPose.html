@@ -10,29 +10,24 @@
 
 <body>
 
-<hr>
-<div/>
-<div id="id01">COM Status: Socket Not Yet Opened...</div>
+  <div id="id01">COM Status: Socket Not Yet Opened...</div>
 
-<br>
+  <br>
 
-<!-- This is the div which will be updated with the drawn field & Robot -->
-<div id="id02" >
-<canvas id="field_bg_canvas" style="position: absolute; z-index: 0"></canvas>
-<canvas id="robot_canvas"    style="position: absolute; z-index: 1"></canvas>
-<canvas id="field_element_canvas_1"    style="position: absolute; z-index: 1"></canvas>
-<canvas id="field_element_canvas_2"    style="position: absolute; z-index: 1"></canvas>
-<canvas id="field_element_canvas_3"    style="position: absolute; z-index: 1"></canvas>
-<canvas id="field_element_canvas_4"    style="position: absolute; z-index: 1"></canvas>
-<canvas id="field_element_canvas_5"    style="position: absolute; z-index: 1"></canvas>
-<canvas id="field_element_canvas_6"    style="position: absolute; z-index: 1"></canvas>
-<canvas id="field_element_canvas_7"    style="position: absolute; z-index: 1"></canvas>
-<canvas id="field_element_canvas_8"    style="position: absolute; z-index: 1"></canvas>
-</div>
+  <div>
+      <button id="path_clear_btn" type="button" onclick="handlePathClearBtnClick()" >Clear Path History</button> 
+  </div>
+
+  <div id="id02" style="position: fixed" >
+      <!-- This is the div which will be updated with the drawn field & Robot -->
+      <canvas id="field_bg_canvas" style="position: absolute; left:0px; top:0px; z-index: 0"></canvas>
+      <canvas id="robot_canvas"    style="position: absolute; left:0px; top:0px; z-index: 1"></canvas>
+      <canvas id="path_canvas"     style="position: absolute; left:0px; top:0px; z-index: 2"></canvas>
+  </div>
+  
 
 
-<script type="text/javascript" src="/robotPose.js" >
-</script>
+<script type="text/javascript" src="/robotPose.js" ></script>
 
 </body>
 </html>
