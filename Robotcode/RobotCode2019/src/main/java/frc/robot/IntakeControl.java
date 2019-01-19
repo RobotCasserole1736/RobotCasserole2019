@@ -23,12 +23,17 @@ package frc.robot;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Spark;
+import frc.lib.DataServer.Signal;
 
 public class IntakeControl {
 
     DigitalInput ballInIntake;
     Spark intakeMotor;
     Solenoid intakeArmBar;
+    Integer loopCounter = 10;
+    IntakePos currentPosition = IntakePos.Retract;
+
+    Signal solenoidArmState;
 
     // You will want to rename all instances of "EmptyClass" with your actual class name and "empty" with a variable name
     private static IntakeControl empty = null;
@@ -40,9 +45,11 @@ public class IntakeControl {
     }
     
     private IntakeControl(){
-        ballInIntake = new DigitalInput(1);
-        intakeMotor = new Spark(2);
-        intakeArmBar = new Solenoid(5);
+        ballInIntake = new DigitalInput(RobotConstants.BALL_INTAKE_PORT);
+        intakeMotor = new Spark(RobotConstants.INTAKE_MOTOR_PORT);
+        intakeArmBar = new Solenoid(RobotConstants.INTAKE_ARM_BAR_PORT);
+
+        solenoidArmState = new Signal("Intake State", "B");
     }
 
     //Intake positions that can be requested
@@ -121,6 +128,25 @@ public class IntakeControl {
         }else{ //If for some reason it is confused, don't run the intake
             intakeMotor.set(0);
         }
+        if(intakeArmBar.get() == true){
+            
+            if(loopCounter == 0){
+                currentPosition = IntakePos.Extend; 
+            }
+            else {
+                loopCounter = loopCounter - 1;
+            }
+        }
+
+        if(intakeArmBar.get() == false){
+            loopCounter = 10;
+            currentPosition = IntakePos.Retract;
+        }
+        
+
+        /* Update Telemetry */
+        double sample_time_ms = LoopTiming.getInstance().getLoopStartTime_sec() * 1000.0;
+        solenoidArmState.addSample(sample_time_ms, currentPosition.toInt());
     }
 
 
