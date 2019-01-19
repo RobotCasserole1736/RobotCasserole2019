@@ -39,12 +39,24 @@ var FIELDELEMENTPOLY7_FT =
 var FIELDELEMENTPOLY8_FT = 
     [[0, 54],[6.5, 54],[6.5, 50],[6.3, 50],[6.3, 47],[-6.3, 47],[-6.3, 50],[-6.5, 50],[-6.5, 54],[0, 54]];
 
+var FIELDTAPEPOLY1_FT = 
+    [[0.9, 16.5],[0.9, 35.25],[0.8, 35.25],[0.8, 16.5],[0.9, 16.5]];
+
+var FIELDTAPEPOLY2_FT = 
+    [[-0.9, 16.5],[-0.9, 35.25],[-0.8, 35.25],[-0.8, 16.5],[-0.9, 16.5]];
+
+var FIELDTAPEPOLY3_FT = 
+    [[3.85, 21.4],[3.85, 21.6],[-3.85, 21.6],[-3.85, 21.4],[3.85, 21.4]];
+
+var FIELDTAPEPOLY4_FT = 
+    [[3.85, 23.2],[3.85, 23.4],[-3.85, 23.4],[-3.85, 23.2],[3.85, 23.2]];
 //Render Constants
 var PX_PER_FOOT = 15;
-var FIELD_COLOR = '#F8D7C6';
+var FIELD_COLOR = '#534F4D';
 var BOT_COLOR = '#d22';
 var RED_FIELD_ELEMENT_COLOR = '#FF2D00';
 var BLUE_FIELD_ELEMENT_COLOR = '#004CFF';
+var TAPE_COLOR = '#FFFFFF';
 var CANVAS_MARGIN_PX = 20;
 
 var ROBOT_W_PX = 0;
@@ -203,6 +215,72 @@ function procData(json_data) {
 
             this.ctx.closePath();
             this.ctx.fill();
+
+            this.ctx.fillStyle = TAPE_COLOR;
+            //DRAW GAFFERS TAPE 1
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDTAPEPOLY1_FT.length; i++) {
+                x_px = FIELDTAPEPOLY1_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDTAPEPOLY1_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+            //DRAW GAFFERS TAPE 2
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDTAPEPOLY2_FT.length; i++) {
+                x_px = FIELDTAPEPOLY2_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDTAPEPOLY2_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+            //DRAW GAFFERS TAPE 3
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDTAPEPOLY3_FT.length; i++) {
+                x_px = FIELDTAPEPOLY3_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDTAPEPOLY3_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+            //DRAW GAFFERS TAPE 3
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDTAPEPOLY4_FT.length; i++) {
+                x_px = FIELDTAPEPOLY4_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDTAPEPOLY4_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
 
             this.ctx.fillStyle = RED_FIELD_ELEMENT_COLOR;
             //draw RED ROCKET LEFT
