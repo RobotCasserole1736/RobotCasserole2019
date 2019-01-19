@@ -73,6 +73,7 @@ public class RobotPose {
 		poseY += velosityY;
 		poseThaddeus += 0.02 * robotAngle_DPS;
 		//CasseroleRobotPoseView.setRobotPose(poseX, poseY, poseTheta - 90);
+<<<<<<< HEAD
 	
 		System.out.println("x");
 		System.out.println(poseX);
@@ -80,6 +81,8 @@ public class RobotPose {
 		System.out.println(poseY);
 		System.out.println("Thaddeus");
 		System.out.println(poseThaddeus);
+=======
+>>>>>>> origin/chrisg_debug_robot_pose_web
 
 		double sample_time_ms = LoopTiming.getInstance().getLoopStartTime_sec()*1000.0;
 

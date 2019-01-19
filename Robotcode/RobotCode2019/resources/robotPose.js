@@ -7,8 +7,18 @@ var hostname = window.location.hostname + ":" + port;
 var ROBOT_W_FT = 2;
 var ROBOT_L_FT = 2.5;
 var FIELDPOLY_FT =
-    [[0, 0],[13, 0],[0, 54],[-27, 0],[0, -54],[14, 0],[0, 0]];
-    //RED ROCKET LEFT
+    [[0, 0],
+    [11, 0],
+    [13.47, 3],
+    [13.47, 51],
+    [11, 54],
+    [-11, 54],
+    [-13.47, 51],
+    [-13.47, 3],
+    [-11, 0],
+    [0, 0]
+    ];
+
 var FIELDELEMENTPOLY1_FT = 
     [[13, 18],[0, 33],[-0.54, -1.64],[0, 1.54],[0.54, 1.64],[13, 18]];
     //RED ROCKET RIGHT
@@ -38,6 +48,8 @@ var FIELDELEMENTPOLY8_FT =
 var PX_PER_FOOT = 15;
 var FIELD_COLOR = '#fdd';
 var BOT_COLOR = '#d22';
+var RED_FIELD_ELEMENT_COLOR = '#FF2D00';
+var BLUE_FIELD_ELEMENT_COLOR = '#004CFF';
 var CANVAS_MARGIN_PX = 20;
 
 var ROBOT_W_PX = 0;
@@ -193,6 +205,142 @@ function procData(json_data) {
                     this.ctx.lineTo(x_px, y_px);
                 }
             }
+
+ 
+            this.ctx.fillStyle = RED_FIELD_ELEMENT_COLOR;
+
+            //draw RED ROCKET LEFT
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDELEMENTPOLY1_FT.length; i++) {
+                x_px = FIELDPOLY_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDPOLY_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+            //DRAW RED ROCKET RIGHT
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDELEMENTPOLY2_FT.length; i++) {
+                x_px = FIELDPOLY_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDPOLY_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+
+              //DRAW RED CARGO
+              this.ctx.beginPath();
+              for (i = 0; i < FIELDELEMENTPOLY1_FT.length; i++) {
+                  x_px = FIELDPOLY_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                  y_px = this.ctx.canvas.height - (FIELDPOLY_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+  
+                  if (i == 0) {
+                      this.ctx.moveTo(x_px, y_px);
+                  } else {
+                      this.ctx.lineTo(x_px, y_px);
+                  }
+              }
+
+              this.ctx.closePath();
+              this.ctx.fill();
+
+                //DRAW RED HAB
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDELEMENTPOLY1_FT.length; i++) {
+                x_px = FIELDPOLY_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDPOLY_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+            this.ctx.fillStyle = BLUE_FIELD_ELEMENT_COLOR;
+
+              //DRAW BLUE ROCKET LEFT
+              this.ctx.beginPath();
+              for (i = 0; i < FIELDELEMENTPOLY1_FT.length; i++) {
+                  x_px = FIELDPOLY_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                  y_px = this.ctx.canvas.height - (FIELDPOLY_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+  
+                  if (i == 0) {
+                      this.ctx.moveTo(x_px, y_px);
+                  } else {
+                      this.ctx.lineTo(x_px, y_px);
+                  }
+              }
+  
+              this.ctx.closePath();
+              this.ctx.fill();
+  
+
+                //DRAW BLUE ROCKET RIGHT
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDELEMENTPOLY1_FT.length; i++) {
+                x_px = FIELDPOLY_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDPOLY_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+            //DRAW BLUE CARGO
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDELEMENTPOLY1_FT.length; i++) {
+                x_px = FIELDPOLY_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDPOLY_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+              //DRAW BLUE HAB
+              this.ctx.beginPath();
+              for (i = 0; i < FIELDELEMENTPOLY1_FT.length; i++) {
+                  x_px = FIELDPOLY_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                  y_px = this.ctx.canvas.height - (FIELDPOLY_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+  
+                  if (i == 0) {
+                      this.ctx.moveTo(x_px, y_px);
+                  } else {
+                      this.ctx.lineTo(x_px, y_px);
+                  }
+              }
+  
+              this.ctx.closePath();
+              this.ctx.fill();
+
 
             this.ctx.closePath();
             this.ctx.fill();
