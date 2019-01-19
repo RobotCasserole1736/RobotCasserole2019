@@ -26,21 +26,25 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
+import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.PIDOutput;
+import edu.wpi.first.wpilibj.PIDSource;
+import edu.wpi.first.wpilibj.PIDSourceType;
+import frc.lib.Calibration.Calibration;
 import frc.lib.DataServer.Signal;
 
-public class DrivetrainReal implements DrivetrainInterface {
+public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput {
 
     private ADXRS453_Gyro gyro;
-	private int angleOffset;
+    private int angleOffset;
     public double forwardReverseCmd;
     public double rotationCmd;
 
     private static final int TIMEOUT_MS = 0;
     private static final double ENCODER_CYCLES_PER_REV = 2048;
-    private static final double GEARBOX_RATIO = 72.0/12.0;
+    private static final double GEARBOX_RATIO = 72.0 / 12.0;
     private double motor_speed_rpm_Right = 0;
     private double motor_speed_rpm_Left = 0;
-
 
     DrivetrainOpMode opMode;
     DrivetrainOpMode prevOpMode;
@@ -50,6 +54,15 @@ public class DrivetrainReal implements DrivetrainInterface {
     WPI_TalonSRX leftTalon1;
     WPI_TalonSRX leftTalon2;
 
+    PIDController gyroLockPID;
+
+    double gyroLockRotationCmd;
+    double desiredAngle;
+
+    Calibration gyroGain_P;
+    Calibration gyroGain_I;
+    Calibration gyroGain_D;
+
     Signal currentR1Sig;
     Signal currentR2Sig;
     Signal currentL1Sig;
@@ -58,6 +71,9 @@ public class DrivetrainReal implements DrivetrainInterface {
     Signal gyroscopeSig;
     Signal wheelSpeedRightSig;
     Signal wheelSpeedLeftSig;
+    Signal leftMotorCmdSig;
+    Signal rightMotorCmdSig;
+    Signal gyroLockRotationCmdSig;
 
     public DrivetrainReal() {
 
@@ -93,14 +109,23 @@ public class DrivetrainReal implements DrivetrainInterface {
 
         opMode = DrivetrainOpMode.OpenLoop;
 
+        gyroGain_P = new Calibration("Gyro Lock P Gain", 0.001);
+        gyroGain_I = new Calibration("Gyro Lock I Gain", 0.0);
+        gyroGain_D = new Calibration("Gyro Lock D Gain", 0.0);
+
+        gyroLockPID = new PIDController(gyroGain_P.get(), gyroGain_I.get(), gyroGain_D.get(), this, this);
+
         currentR1Sig = new Signal("Drivetrain R1 Motor Current", "A");
         currentR2Sig = new Signal("Drivetrain R2 Motor Current", "A");
         currentL1Sig = new Signal("Drivetrain L1 Motor Current", "A");
         currentL2Sig = new Signal("Drivetrain L2 Motor Current", "A");
-        opModeSig    = new Signal("Drivetrain Operation Mode", "Op Mode Enum");
-        gyroscopeSig = new Signal("Drivetrain Pos Angle","Deg");
-        wheelSpeedRightSig = new Signal("Drivetrain Right Wheel Speed", "RPM");
-        wheelSpeedLeftSig = new Signal("Drivetrain Left Wheel Speed", "RPM");
+        opModeSig = new Signal("Drivetrain Operation Mode", "Op Mode Enum");
+        gyroscopeSig = new Signal("Drivetrain Pos Angle", "Deg");
+        wheelSpeedRightSig = new Signal("Right Wheel Speed", "RPM");
+        wheelSpeedLeftSig = new Signal("Left Wheel Speed", "RPM");
+        leftMotorCmdSig = new Signal("Left Motor Command", "cmd");
+        rightMotorCmdSig = new Signal("Right Motor Command", "cmd");
+        gyroLockRotationCmdSig = new Signal("Gyro-Lock Rotation Command", "cmd");
     }
 
     public void setOpenLoopCmd(double forwardReverseCmd_in, double rotaionCmd_in) {
@@ -108,51 +133,74 @@ public class DrivetrainReal implements DrivetrainInterface {
         opMode = DrivetrainOpMode.OpenLoop;
         forwardReverseCmd = forwardReverseCmd_in;
         rotationCmd = rotaionCmd_in;
+        gyroLockPID.disable();
     }
 
     public void setGyroLockCmd(double forwardReverseCmd_in) {
         prevOpMode = opMode;
         opMode = DrivetrainOpMode.GyroLock;
+
+        if(prevOpMode == DrivetrainOpMode.OpenLoop && opMode == DrivetrainOpMode.GyroLock){
+            desiredAngle = getGyroAngle();
+            gyroLockPID.setSetpoint(desiredAngle);
+            gyroLockPID.enable();
+        }
         forwardReverseCmd = forwardReverseCmd_in;
-        rotationCmd = 0;
     }
 
     public double getGyroAngle() {
-		return angleOffset - gyro.getAngle();
-	}
+        return angleOffset - gyro.getAngle();
+    }
 
-	public void resetGyro() {
-		gyro.reset();
-	}
+    public void resetGyro() {
+        gyro.reset();
+    }
 
-	public void setGyroAngleOffset(int angle) {
-		angleOffset = angle;
-	}
+    public void setGyroAngleOffset(int angle) {
+        angleOffset = angle;
+    }
 
-	public int getGyroAngleOffset() {
-		return angleOffset;
-	}
+    public int getGyroAngleOffset() {
+        return angleOffset;
+    }
 
-	public boolean isGyroOnline() {
-		return gyro.isOnline();
+    public boolean isGyroOnline() {
+        return gyro.isOnline();
     }
 
     public void sampleSensors() {
-		motor_speed_rpm_Right = CTRE_VEL_UNITS_TO_RPM(rightTalon1.getSelectedSensorVelocity(0));
-		motor_speed_rpm_Left = CTRE_VEL_UNITS_TO_RPM(leftTalon1.getSelectedSensorVelocity(0));
+        motor_speed_rpm_Right = CTRE_VEL_UNITS_TO_RPM(rightTalon1.getSelectedSensorVelocity(0));
+        motor_speed_rpm_Left = CTRE_VEL_UNITS_TO_RPM(leftTalon1.getSelectedSensorVelocity(0));
     }
 
     public double getSpeedRightRPM() {
-		return motor_speed_rpm_Right;
+        return motor_speed_rpm_Right;
     }
 
     public double getSpeedleftRPM() {
-		return motor_speed_rpm_Left;
+        return motor_speed_rpm_Left;
+    }
+
+    public double getLeftMotorCmd() {
+        return leftTalon1.get();
+    }
+
+    public double getRightMotorCmd() {
+        return rightTalon1.get();
+    }
+
+    public double getGyroLockRotationCmd(){
+        return gyroLockRotationCmd;
+    }
+
+    // public double getMotorSpeedRadpSec() {
+    // return motor_speed_rpm*0.104719*GEARBOX_RATIO;
+    // }
+
+    private double CTRE_VEL_UNITS_TO_RPM(double ctre_units) {
+        return ctre_units * 600.0 / ENCODER_CYCLES_PER_REV / 4.0;
     }
     
-	private double CTRE_VEL_UNITS_TO_RPM(double ctre_units) {
-		return ctre_units * 600.0 / ENCODER_CYCLES_PER_REV / 4.0;
-	}
     
     public void update() {
 
@@ -168,7 +216,16 @@ public class DrivetrainReal implements DrivetrainInterface {
 
             rightTalon1.set(motorSpeedRightCMD);
             leftTalon1.set(motorSpeedLeftCMD);
-        } else {
+        } else if (opMode == DrivetrainOpMode.GyroLock){
+            double motorSpeedLeftCMD = 0;
+            double motorSpeedRightCMD = 0;
+
+            motorSpeedLeftCMD = forwardReverseCmd - gyroLockRotationCmd;
+            motorSpeedRightCMD = forwardReverseCmd + gyroLockRotationCmd;
+
+            leftTalon1.set(motorSpeedLeftCMD);
+            rightTalon1.set(motorSpeedRightCMD);
+        }else {
             /* Some other mode - stop everything */
             rightTalon1.set(0);
             leftTalon1.set(0);
@@ -184,5 +241,28 @@ public class DrivetrainReal implements DrivetrainInterface {
         gyroscopeSig.addSample(sample_time_ms, getGyroAngle());
         wheelSpeedRightSig.addSample(sample_time_ms, getSpeedRightRPM());
         wheelSpeedLeftSig.addSample(sample_time_ms, getSpeedleftRPM());
+        leftMotorCmdSig.addSample(sample_time_ms, getLeftMotorCmd());
+        rightMotorCmdSig.addSample(sample_time_ms, getRightMotorCmd());
+        gyroLockRotationCmdSig.addSample(sample_time_ms, getGyroLockRotationCmd());
+    }
+
+    @Override
+    public void pidWrite(double output) {
+        gyroLockRotationCmd = output;
+    }
+
+    @Override
+    public void setPIDSourceType(PIDSourceType pidSource) {
+        
+    }
+
+    @Override
+    public PIDSourceType getPIDSourceType() {
+        return PIDSourceType.kDisplacement;
+    }
+
+    @Override
+    public double pidGet() {
+        return getGyroAngle();
     }
 }

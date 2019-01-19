@@ -33,10 +33,10 @@ public class RobotConstants {
     /////////////////////////////////////////////////////////////////////////////////////
     // CAN Device ID's
     /////////////////////////////////////////////////////////////////////////////////////
-    public static final int DRIVETRAIN_LEFT_1_CANID = 14;
+    public static final int DRIVETRAIN_LEFT_1_CANID = 1;
     public static final int DRIVETRAIN_LEFT_2_CANID = 15;
-    public static final int DRIVETRAIN_RIGHT_1_CANID = 0;
-    public static final int DRIVETRAIN_RIGHT_2_CANID = 1;
+    public static final int DRIVETRAIN_RIGHT_1_CANID = 2;
+    public static final int DRIVETRAIN_RIGHT_2_CANID = 14;
     public static final int PNEUMATICS_CONTROL_MODULE_CANID = 0;
     public static final int POWER_DISTRIBUTION_PANEL_CANID = 0;
 
