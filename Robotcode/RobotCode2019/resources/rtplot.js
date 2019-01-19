@@ -243,6 +243,7 @@ function genSignalListTable(data){
         }
     }
     
+    outputLines = [];
     for(i = 0; i < data.signals.length; i++){
         //Record the signal info in local arrays for later use (when starting a new recording)
         signal_names.push(data.signals[i].id);
@@ -258,12 +259,18 @@ function genSignalListTable(data){
         }
         
         //Add some html to display a checkbox for this signal
-        out += "<td><input type=\"checkbox\" name=\""+data.signals[i].id+"\" " + checked_state + " />"+data.signals[i].display_name+" (" + data.signals[i].units + ") </td></tr><tr>";
+        outputLines[i] = "<td><input type=\"checkbox\" name=\""+data.signals[i].id+"\" " + checked_state + " />"+data.signals[i].display_name+" (" + data.signals[i].units + ") </td></tr><tr>";
         
+    }
+
+    outputLines.sort();
+
+    for(i = 0; i < outputLines.length; i++){
+        out += outputLines[i];
     }
     
     //Close out the HTML and push it to the document for display.
-    out +="</tr></tbody></table>";
+    out +="</tr></tbody></table><br><br><br><br><br><br>";
     document.getElementById("id02").innerHTML = out;
 
 }

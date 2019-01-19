@@ -7,6 +7,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.BuiltInAccelerometer;
+
 /*
  *******************************************************************************************
  * Copyright (C) 2019 FRC Team 1736 Robot Casserole - www.robotcasserole.org
@@ -35,6 +37,7 @@ import frc.lib.DataServer.Signal;
 import frc.lib.LoadMon.CasseroleRIOLoadMonitor;
 import frc.lib.WebServer.CasseroleDriverView;
 import frc.lib.WebServer.CasseroleWebServer;
+import frc.robot.LEDController.LEDPatterns;
 
 
 /**
@@ -60,10 +63,19 @@ public class Robot extends TimedRobot {
     //Physical devices
     PowerDistributionPanel pdp;
 
+    BuiltInAccelerometer onboardAccel;
+
     //Top level telemetry signals
-    Signal rioCPULoad;
-    Signal rioMemLoad;
-    
+    Signal rioDS_SAMPLoad;
+    Signal rioCurr_DrawLoad;
+    Signal rioBat_VolLoad;
+    Signal onboardAccelX;
+    Signal onboardAccelY;
+    Signal onboardAccelZ;
+
+    //Vision Tracking Camera
+    JeVoisInterface jevois;
+
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
@@ -76,15 +88,19 @@ public class Robot extends TimedRobot {
 
         RobotPose = new RobotPose();
 
+        onboardAccel = new BuiltInAccelerometer();
+
         RobotPose.robotPose();
         /* Init Robot parts */
         pdp = new PowerDistributionPanel(RobotConstants.POWER_DISTRIBUTION_PANEL_CANID);
         LEDController.getInstance();
         PneumaticsControl.getInstance();
-        Arm.getInstance();
+        jevois = new JeVoisInterface(false);
+        //Arm.getInstance();
         Drivetrain.getInstance();
         Climber.getInstance();
-
+        //Intake
+        IntakeControl.getInstance();
 
         /* Init input from humans */
         OperatorController.getInstance();
@@ -95,9 +111,13 @@ public class Robot extends TimedRobot {
         LoopTiming.getInstance();
 
         /* Init local telemetry signals */
-        rioCPULoad = new Signal("roboRIO CPU Load", "Pct");
-        rioMemLoad = new Signal("roboRIO Memory Load", "Pct"); 
-
+        rioDS_SAMPLoad = new Signal("dataserver stored samples", "count"); 
+        rioCurr_DrawLoad = new Signal("overall current draw", "A");
+        rioBat_VolLoad = new Signal("battery voltage", "V");
+        onboardAccelX = new Signal("Onboard Accelerometer X Value", "g");
+        onboardAccelY = new Signal("Onboard Accelerometer Y Value", "g");
+        onboardAccelZ = new Signal("Onboard Accelerometer Z Value", "g");
+        
         /* Website setup */
         initDriverView();
 
@@ -112,11 +132,13 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopInit() {
         CasseroleDataServer.getInstance().logger.startLoggingTeleop();
+        LEDController.getInstance().setPattern(LEDPatterns.Pattern1);
     }
 
     @Override
     public void autonomousInit() {
         CasseroleDataServer.getInstance().logger.startLoggingAuto();
+        LEDController.getInstance().setPattern(LEDPatterns.Pattern2);
     }
 
 
@@ -130,6 +152,10 @@ public class Robot extends TimedRobot {
         DriverController.getInstance().update();
         OperatorController.getInstance().update();
 
+        IntakeControl.getInstance().setPositionCmd(DriverController.getInstance().getIntakePosReq());
+        IntakeControl.getInstance().setSpeedCmd(DriverController.getInstance().getIntakeSpdReq());
+        IntakeControl.getInstance().update();
+
         /* Map subsystem IO */
         if(DriverController.getInstance().getGyroAngleLockReq()){
             //Map driver inputs to drivetrain in gyro-lock mode
@@ -139,14 +165,17 @@ public class Robot extends TimedRobot {
             Drivetrain.getInstance().setOpenLoopCmd(DriverController.getInstance().getDriverFwdRevCmd(), DriverController.getInstance().getDriverRotateCmd());
         }
 
+        IntakeControl.getInstance().setPositionCmd(OperatorController.getInstance().getIntakePosReq());
+
         /* Update subsytems */
         LEDController.getInstance().update();
         Drivetrain.getInstance().update();
         PneumaticsControl.getInstance().update();
-        Arm.getInstance().update();
+        //Arm.getInstance().update();
         Climber.getInstance().update();
         telemetryUpdate();
         RobotPose.update();
+        IntakeControl.getInstance().update();
         
         LoopTiming.getInstance().markLoopEnd();
 
@@ -178,6 +207,7 @@ public class Robot extends TimedRobot {
     @Override
     public void disabledInit() {
         CasseroleDataServer.getInstance().logger.stopLogging();
+        LEDController.getInstance().setPattern(LEDPatterns.Pattern4);
     }
 
     /**
@@ -186,6 +216,7 @@ public class Robot extends TimedRobot {
     @Override
     public void disabledPeriodic() {
         LoopTiming.getInstance().markLoopStart();
+        
 
         /* Read from humans to keep telemetry up to date */
         DriverController.getInstance().update();
@@ -198,7 +229,7 @@ public class Robot extends TimedRobot {
         LEDController.getInstance().update();
         Drivetrain.getInstance().update();
         PneumaticsControl.getInstance().update();
-        Arm.getInstance().update();
+        //Arm.getInstance().update();
         Climber.getInstance().update();
         RobotPose.update();
 
@@ -213,11 +244,17 @@ public class Robot extends TimedRobot {
         double sample_time_ms = LoopTiming.getInstance().getLoopStartTime_sec()*1000.0;
 
         /* Update main loop signals */
-        rioCPULoad.addSample(sample_time_ms,loadMon.getCPULoadPct());
-        rioMemLoad.addSample(sample_time_ms,loadMon.getMemLoadPct());
-
-        /* Update driver view */
+        rioDS_SAMPLoad.addSample(sample_time_ms,CasseroleDataServer.getInstance().getTotalStoredSamples());
+        rioCurr_DrawLoad.addSample(sample_time_ms,pdp.getTotalCurrent());
+        rioBat_VolLoad.addSample(sample_time_ms,pdp.getVoltage());  
+        onboardAccelX.addSample(sample_time_ms, onboardAccel.getX());
+        onboardAccelY.addSample(sample_time_ms, onboardAccel.getY());
+        onboardAccelZ.addSample(sample_time_ms, onboardAccel.getZ());
+    
         CasseroleDriverView.setDialValue("Main System Pressure", PneumaticsControl.getInstance().getPressure());
+        CasseroleDriverView.setBoolean("Gyro Offline", !Drivetrain.getInstance().isGyroOnline());
+        CasseroleDriverView.setBoolean("Vision Camera Offline", !jevois.isVisionOnline());
+        CasseroleDriverView.setBoolean("Vision Target Available", jevois.isTgtVisible());
     }
         
     /**
@@ -230,5 +267,8 @@ public class Robot extends TimedRobot {
         CasseroleDriverView.newWebcam("cam1", RobotConstants.CAM_1_STREAM_URL, 0, 0, 0);
         CasseroleDriverView.newWebcam("cam2", RobotConstants.CAM_2_STREAM_URL, 0, 0, 0);
         CasseroleDriverView.newDial("velocity", 0, 20, 1, 15);
+        CasseroleDriverView.newBoolean("Gyro Offline", "red");
+        CasseroleDriverView.newBoolean("Vision Camera Offline", "red");
+        CasseroleDriverView.newBoolean("Vision Target Available", "green");
     }
 }

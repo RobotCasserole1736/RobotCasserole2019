@@ -71,7 +71,7 @@ public class CasseroleDriverView {
      * @param min_acceptable_in Lower limit of green display area on drawn dial.
      * @param i
      */
-    public static void newDial(String name_in, double min_in, double max_in, double step_in, double min_acceptable_in, int i) {
+    public static void newDial(String name_in, double min_in, double max_in, double step_in, double min_acceptable_in, double max_acceptable_in) {
 
         DriverViewDial newDial = new DriverViewDial(name_in, min_in, max_in, step_in, min_acceptable_in,
                 max_acceptable_in);

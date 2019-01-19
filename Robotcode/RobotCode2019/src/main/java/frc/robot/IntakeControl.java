@@ -23,12 +23,23 @@ package frc.robot;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Spark;
+import frc.lib.Calibration.Calibration;
+import frc.lib.DataServer.Signal;
 
 public class IntakeControl {
 
     DigitalInput ballInIntake;
+
     Spark intakeMotor;
+
     Solenoid intakeArmBar;
+    Integer loopCounter = 10;
+    IntakePos currentPosition = IntakePos.Retract;
+
+    Signal solenoidArmState;
+
+    Calibration intakeSpeed;
+    Calibration ejectSpeed;
 
     // You will want to rename all instances of "EmptyClass" with your actual class name and "empty" with a variable name
     private static IntakeControl empty = null;
@@ -40,9 +51,14 @@ public class IntakeControl {
     }
     
     private IntakeControl(){
-        ballInIntake = new DigitalInput(1);
-        intakeMotor = new Spark(2);
-        intakeArmBar = new Solenoid(5);
+
+        intakeSpeed = new Calibration("Intake Speed", 0.25, 0, 1);
+        ejectSpeed = new Calibration("Eject Speed", 0.25, 0, 1);
+        ballInIntake = new DigitalInput(RobotConstants.BALL_INTAKE_PORT);
+        intakeMotor = new Spark(RobotConstants.INTAKE_MOTOR_PORT);
+        intakeArmBar = new Solenoid(RobotConstants.INTAKE_ARM_BAR_PORT);
+
+        solenoidArmState = new Signal("Intake State", "B");
     }
 
     //Intake positions that can be requested
@@ -113,14 +129,33 @@ public class IntakeControl {
         if((ballInIntake.get() == true) && (intakeSpdCmd == IntakeSpd.Intake)){ //If we got a ball, don't Intake
             intakeMotor.set(0);
         }else if((ballInIntake.get() == false) && (intakeSpdCmd == IntakeSpd.Intake)){ //If we don't, Intake
-            intakeMotor.set(1);
+            intakeMotor.set(intakeSpeed.get());
         }else if(intakeSpdCmd == IntakeSpd.Stop){ //Whether we have a ball or not, we can Stop and Eject
             intakeMotor.set(0);
         }else if(intakeSpdCmd == IntakeSpd.Eject){
-            intakeMotor.set(-1);
+            intakeMotor.set(-1 * (ejectSpeed.get()));
         }else{ //If for some reason it is confused, don't run the intake
             intakeMotor.set(0);
         }
+        if(intakeArmBar.get() == true){
+            
+            if(loopCounter == 0){
+                currentPosition = IntakePos.Extend; 
+            }
+            else {
+                loopCounter = loopCounter - 1;
+            }
+        }
+
+        if(intakeArmBar.get() == false){
+            loopCounter = 10;
+            currentPosition = IntakePos.Retract;
+        }
+        
+
+        /* Update Telemetry */
+        double sample_time_ms = LoopTiming.getInstance().getLoopStartTime_sec() * 1000.0;
+        solenoidArmState.addSample(sample_time_ms, currentPosition.toInt());
     }
 
 
