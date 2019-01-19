@@ -1,5 +1,7 @@
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DigitalOutput;
+
 /*
  *******************************************************************************************
  * Copyright (C) 2019 FRC Team 1736 Robot Casserole - www.robotcasserole.org
@@ -23,6 +25,11 @@ package frc.robot;
 public class LEDController {
 
     private static LEDController ledCtrl = null;
+
+    private DigitalOutput out0;
+    private DigitalOutput out1;
+
+    private LEDPatterns patternCmd;
 
     public static synchronized LEDController getInstance() {
         if(ledCtrl == null)
@@ -52,15 +59,34 @@ public class LEDController {
 
     // This is the private constructor that will be called once by getInstance() and it should instantiate anything that will be required by the class
     private LEDController() {
-        //TODO
+        out0 = new DigitalOutput(RobotConstants.LED_PATTERN_OUTPUT_0);
+        out1 = new DigitalOutput(RobotConstants.LED_PATTERN_OUTPUT_1);
+        patternCmd = LEDPatterns.Pattern1;
     }
 
     public void update(){
-        //TODO
+        switch(patternCmd){
+            case Pattern1:
+                out0.set(false);
+                out1.set(false);
+            break;
+            case Pattern2:
+                out0.set(true);
+                out1.set(false);
+            break;
+            case Pattern3:
+                out0.set(false);
+                out1.set(true);
+            break;
+            case Pattern4:
+                out0.set(true);
+                out1.set(true);
+            break;
+        }
     }
 
     public void setPattern(LEDPatterns pattern_in){
-        //TODO
+        patternCmd = pattern_in;
     }
 
 }

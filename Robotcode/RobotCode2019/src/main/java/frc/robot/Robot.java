@@ -37,6 +37,7 @@ import frc.lib.DataServer.Signal;
 import frc.lib.LoadMon.CasseroleRIOLoadMonitor;
 import frc.lib.WebServer.CasseroleDriverView;
 import frc.lib.WebServer.CasseroleWebServer;
+import frc.robot.LEDController.LEDPatterns;
 
 
 /**
@@ -131,11 +132,13 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopInit() {
         CasseroleDataServer.getInstance().logger.startLoggingTeleop();
+        LEDController.getInstance().setPattern(LEDPatterns.Pattern1);
     }
 
     @Override
     public void autonomousInit() {
         CasseroleDataServer.getInstance().logger.startLoggingAuto();
+        LEDController.getInstance().setPattern(LEDPatterns.Pattern2);
     }
 
 
@@ -201,6 +204,7 @@ public class Robot extends TimedRobot {
     @Override
     public void disabledInit() {
         CasseroleDataServer.getInstance().logger.stopLogging();
+        LEDController.getInstance().setPattern(LEDPatterns.Pattern4);
     }
 
     /**
@@ -209,6 +213,7 @@ public class Robot extends TimedRobot {
     @Override
     public void disabledPeriodic() {
         LoopTiming.getInstance().markLoopStart();
+        
 
         /* Read from humans to keep telemetry up to date */
         DriverController.getInstance().update();
