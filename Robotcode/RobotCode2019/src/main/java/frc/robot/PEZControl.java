@@ -26,8 +26,8 @@ public class PEZControl {
 	// You will want to rename all instances of "EmptyClass" with your actual class name and "empty" with a variable name
 	private static PEZControl empty = null;
 
-    DoubleSolenoid longS;
-    DoubleSolenoid ShortS;
+    DoubleSolenoid longS; 
+    DoubleSolenoid shortS;
 
 	public static synchronized PEZControl getInstance() {
 		if(empty == null)
@@ -45,10 +45,54 @@ public class PEZControl {
         }
     }
 
+
+    public enum GamePiece {
+        Nothing(0), Cargo(1), Hatch(2);
+        public final int value;
+
+        private GamePiece(int value) {
+            this.value = value;
+    
+        }
+    }
 	// This is the private constructor that will be called once by getInstance() and it should instantiate anything that will be required by the class
 	private  PEZControl() {
 
-	}
+        longS = new DoubleSolenoid(RobotConstants.LONG_SOLENOID_FORWARD_CHANNEL, RobotConstants.LONG_SOLENOID_REVERSE_CHANNEL);
+        shortS = new DoubleSolenoid(RobotConstants.SHORT_SOLENOID_FORWARD_CHANNEL, RobotConstants. SHORT_SOLENOID_REVERSE_CHANNEL);
 
-	public void setPositionCmd(PEZPos cmd_in)
+	}
+    public void update() {
+
+        if(OperatorController.getInstance().getBallPickupReq() == true){
+
+           longS.set(DoubleSolenoid.Value.kReverse);
+           shortS.set(DoubleSolenoid.Value.kReverse);
+        }
+        if(OperatorController.getInstance().getHatchPickupReq() == true){
+
+            longS.set(DoubleSolenoid.Value.kForward);
+            shortS.set(DoubleSolenoid.Value.kForward);
+        }
+        if(OperatorController.getInstance().getReleaseReq() == true){
+
+            longS.set(DoubleSolenoid.Value.kOff);
+            shortS.set(DoubleSolenoid.Value.kOff);
+        }
+
+    }
+
+	public void setPositionCmd(PEZPos cmd_in){
+
+
+    }
+
+    public GamePiece getHeldGamePiece(){
+        if(longS.get() == DoubleSolenoid.Value.kReverse)
+            return GamePiece.Cargo; 
+        else if (longS.get() == DoubleSolenoid.Value.kReverse)
+            return GamePiece.Hatch;
+        else 
+            return GamePiece.Nothing;    }
+
 }
