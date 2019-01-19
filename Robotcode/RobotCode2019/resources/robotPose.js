@@ -8,38 +8,37 @@ var ROBOT_W_FT = 2;
 var ROBOT_L_FT = 2.5;
 var FIELDPOLY_FT =
     [[0, 0],
-    [14, 0],
-    [14, 54],
-    [-13, 54],
-    [-13, 0],
+    [13.5, 0],
+    [13.5, 54],
+    [-13.5, 54],
+    [-13.5, 0],
     [0, 0]
     ];
     //RED ROCKET LEFT
 var FIELDELEMENTPOLY1_FT = 
-    [[-14, 18],[-14, 20.75],[-11.46, 20.15],[-11.46, 18.65],[-14, 18]];
+    [[-13.5, 17],[-13.5, 19.75],[-12.46, 19.15],[-12.46, 17.65],[-13.5, 17]];
     //RED ROCKET RIGHT
 var FIELDELEMENTPOLY2_FT = 
-    [[14, 18],[14, 20.75],[12.46, 20.15],[12.46, 18.65],[14, 18]];
+    [[13.5, 17],[13.5, 19.75],[12.46, 19.15],[12.46, 17.65],[13.5, 17]];
     //BLUE ROCKET LEFT
-/*var FIELDELEMENTPOLY3_FT = 
-    [[13, 33],[0, 33],[-0.54, -1.64],[0, 1.54],[0.54, 1.64],[13, 18]];
+var FIELDELEMENTPOLY3_FT = 
+    [[-13.5, 33],[-13.5, 35.75],[-12.46, 35.15],[-12.46, 33.65],[-13.5, 33]];
     //BLUE ROCKET RIGHT
 var FIELDELEMENTPOLY4_FT = 
-    [[-14, -33],[0, 33],[0.54, -1.64],[0, -1.54],[-0.54, -1.64],[-14, -33]];
+    [[13.5, 33],[13.5, 35.75],[12.46, 35.15],[12.46, 33.65],[13.5, 33]];
     //RED CARGO SHIP
 var FIELDELEMENTPOLY5_FT = 
-    [[0, 18],[2.4, 0],[0, 8],[-4.8, 0],[0, -8],[2.4, 0]];
+    [[0, 18],[2.3, 18],[2.3, 25],[-2.3, 25],[-2.3, 18],[0, 18]];
     //BLUE CARGO SHIP
 var FIELDELEMENTPOLY6_FT = 
-    [[0, 35.5],[2.4, 0],[0, -8],[-4.8, 0],[0, 8],[2.4, 0]];  
+    [[0, 33.75],[2.3, 33.75],[2.3, 26.75],[-2.3, 26.75],[-2.3, 33.75],[0, 33.75]];  
     //RED HAB
 var FIELDELEMENTPOLY7_FT = 
-    [[0, 0],[7.11, 0],[0, 3.9],[-0.16, 0],[3.11, 0],[0, -12.7],[-3.11, 0],[0.16, 0],[0, -3.9],[-7.11, 0],[0, 0]];
+    [[0, 0],[6.5, 0],[6.5, 4],[6.3, 4],[6.3, 7.11],[-6.3, 7.11],[-6.3, 4],[-6.5, 4],[-6.5, 0],[0, 0]];
     //BLUE HAB
 var FIELDELEMENTPOLY8_FT = 
-    [[0, 54],[-7.11, 0],[0, -3.9],[0.16, 0],[-3.11, 0],[0, 12.7],[3.11, 0],[-0.16, 0],[0, 3.9],[7.11, 0],[0, 54]];
+    [[0, 54],[6.5, 54],[6.5, 50],[6.3, 50],[6.3, 47],[-6.3, 47],[-6.3, 50],[-6.5, 50],[-6.5, 54],[0, 54]];
 
-*/
 //Render Constants
 var PX_PER_FOOT = 15;
 var FIELD_COLOR = '#F8D7C6';
@@ -239,11 +238,11 @@ function procData(json_data) {
             this.ctx.fill();
 
 
-           /*   //DRAW RED CARGO
+              //DRAW RED CARGO
               this.ctx.beginPath();
-              for (i = 0; i < FIELDELEMENTPOLY1_FT.length; i++) {
-                  x_px = FIELDPOLY_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
-                  y_px = this.ctx.canvas.height - (FIELDPOLY_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+              for (i = 0; i < FIELDELEMENTPOLY5_FT.length; i++) {
+                  x_px = FIELDELEMENTPOLY5_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                  y_px = this.ctx.canvas.height - (FIELDELEMENTPOLY5_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
   
                   if (i == 0) {
                       this.ctx.moveTo(x_px, y_px);
@@ -255,11 +254,11 @@ function procData(json_data) {
               this.ctx.closePath();
               this.ctx.fill();
 
-                //DRAW RED HAB
+              //DRAW RED HAB
             this.ctx.beginPath();
-            for (i = 0; i < FIELDELEMENTPOLY1_FT.length; i++) {
-                x_px = FIELDPOLY_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
-                y_px = this.ctx.canvas.height - (FIELDPOLY_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+            for (i = 0; i < FIELDELEMENTPOLY7_FT.length; i++) {
+                x_px = FIELDELEMENTPOLY7_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDELEMENTPOLY7_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
 
                 if (i == 0) {
                     this.ctx.moveTo(x_px, y_px);
@@ -275,9 +274,9 @@ function procData(json_data) {
 
               //DRAW BLUE ROCKET LEFT
               this.ctx.beginPath();
-              for (i = 0; i < FIELDELEMENTPOLY1_FT.length; i++) {
-                  x_px = FIELDPOLY_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
-                  y_px = this.ctx.canvas.height - (FIELDPOLY_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+              for (i = 0; i < FIELDELEMENTPOLY3_FT.length; i++) {
+                  x_px = FIELDELEMENTPOLY3_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                  y_px = this.ctx.canvas.height - (FIELDELEMENTPOLY3_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
   
                   if (i == 0) {
                       this.ctx.moveTo(x_px, y_px);
@@ -290,11 +289,11 @@ function procData(json_data) {
               this.ctx.fill();
   
 
-                //DRAW BLUE ROCKET RIGHT
+               //DRAW BLUE ROCKET RIGHT
             this.ctx.beginPath();
-            for (i = 0; i < FIELDELEMENTPOLY1_FT.length; i++) {
-                x_px = FIELDPOLY_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
-                y_px = this.ctx.canvas.height - (FIELDPOLY_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+            for (i = 0; i < FIELDELEMENTPOLY4_FT.length; i++) {
+                x_px = FIELDELEMENTPOLY4_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDELEMENTPOLY4_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
 
                 if (i == 0) {
                     this.ctx.moveTo(x_px, y_px);
@@ -308,9 +307,9 @@ function procData(json_data) {
 
             //DRAW BLUE CARGO
             this.ctx.beginPath();
-            for (i = 0; i < FIELDELEMENTPOLY1_FT.length; i++) {
-                x_px = FIELDPOLY_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
-                y_px = this.ctx.canvas.height - (FIELDPOLY_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+            for (i = 0; i < FIELDELEMENTPOLY6_FT.length; i++) {
+                x_px = FIELDELEMENTPOLY6_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDELEMENTPOLY6_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
 
                 if (i == 0) {
                     this.ctx.moveTo(x_px, y_px);
@@ -324,9 +323,9 @@ function procData(json_data) {
 
               //DRAW BLUE HAB
               this.ctx.beginPath();
-              for (i = 0; i < FIELDELEMENTPOLY1_FT.length; i++) {
-                  x_px = FIELDPOLY_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
-                  y_px = this.ctx.canvas.height - (FIELDPOLY_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+              for (i = 0; i < FIELDELEMENTPOLY8_FT.length; i++) {
+                  x_px = FIELDELEMENTPOLY8_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                  y_px = this.ctx.canvas.height - (FIELDELEMENTPOLY8_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
   
                   if (i == 0) {
                       this.ctx.moveTo(x_px, y_px);
@@ -339,7 +338,7 @@ function procData(json_data) {
               this.ctx.fill();
 
 
-            */
+            
 
             //Save robot dimensions
             ROBOT_W_PX = ROBOT_W_FT * PX_PER_FOOT;
