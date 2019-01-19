@@ -76,6 +76,8 @@ public class Robot extends TimedRobot {
     //Vision Tracking Camera
     JeVoisInterface jevois;
 
+    Ultrasonic testSensor;
+
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
@@ -101,6 +103,8 @@ public class Robot extends TimedRobot {
         Climber.getInstance();
         //Intake
         IntakeControl.getInstance();
+
+        testSensor = new Ultrasonic(3, "Test");
 
         /* Init input from humans */
         OperatorController.getInstance();
@@ -217,6 +221,7 @@ public class Robot extends TimedRobot {
     public void disabledPeriodic() {
         LoopTiming.getInstance().markLoopStart();
         
+        testSensor.update();
 
         /* Read from humans to keep telemetry up to date */
         DriverController.getInstance().update();

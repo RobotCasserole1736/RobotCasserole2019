@@ -46,9 +46,9 @@ public class DrivetrainReal implements DrivetrainInterface {
     DrivetrainOpMode prevOpMode;
 
     WPI_TalonSRX rightTalon1;
-    WPI_TalonSRX rightTalon2;
+   // WPI_TalonSRX rightTalon2;
     WPI_TalonSRX leftTalon1;
-    WPI_TalonSRX leftTalon2;
+    //WPI_TalonSRX leftTalon2;
 
     Signal currentR1Sig;
     Signal currentR2Sig;
@@ -65,22 +65,22 @@ public class DrivetrainReal implements DrivetrainInterface {
         angleOffset = 0;
 
         rightTalon1 = new WPI_TalonSRX(RobotConstants.DRIVETRAIN_RIGHT_1_CANID);
-        rightTalon2 = new WPI_TalonSRX(RobotConstants.DRIVETRAIN_RIGHT_2_CANID);
+        //rightTalon2 = new WPI_TalonSRX(RobotConstants.DRIVETRAIN_RIGHT_2_CANID);
         leftTalon1 = new WPI_TalonSRX(RobotConstants.DRIVETRAIN_LEFT_1_CANID);
-        leftTalon2 = new WPI_TalonSRX(RobotConstants.DRIVETRAIN_LEFT_2_CANID);
+        //leftTalon2 = new WPI_TalonSRX(RobotConstants.DRIVETRAIN_LEFT_2_CANID);
 
-        rightTalon2.follow(rightTalon1);
-        leftTalon2.follow(leftTalon1);
-        rightTalon2.setInverted(InvertType.FollowMaster);
-        leftTalon2.setInverted(InvertType.FollowMaster);
+        //rightTalon2.follow(rightTalon1);
+        //leftTalon2.follow(leftTalon1);
+        //rightTalon2.setInverted(InvertType.FollowMaster);
+        //leftTalon2.setInverted(InvertType.FollowMaster);
 
         leftTalon1.setInverted(true);
 
         //Set coast mode always
         rightTalon1.setNeutralMode(NeutralMode.Coast);
-        rightTalon2.setNeutralMode(NeutralMode.Coast);
+        //rightTalon2.setNeutralMode(NeutralMode.Coast);
         leftTalon1.setNeutralMode(NeutralMode.Coast); 
-        leftTalon2.setNeutralMode(NeutralMode.Coast); 
+        //leftTalon2.setNeutralMode(NeutralMode.Coast); 
 
 		//Motor 1 is presumed to be the one with a sensor hooked up to it.
 		rightTalon1.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, TIMEOUT_MS);
@@ -177,9 +177,9 @@ public class DrivetrainReal implements DrivetrainInterface {
         /* Update Telemetry */
         double sample_time_ms = LoopTiming.getInstance().getLoopStartTime_sec() * 1000.0;
         currentR1Sig.addSample(sample_time_ms, rightTalon1.getOutputCurrent());
-        currentR2Sig.addSample(sample_time_ms, rightTalon2.getOutputCurrent());
+        //currentR2Sig.addSample(sample_time_ms, rightTalon2.getOutputCurrent());
         currentL1Sig.addSample(sample_time_ms, leftTalon1.getOutputCurrent());
-        currentL2Sig.addSample(sample_time_ms, leftTalon2.getOutputCurrent());
+        //currentL2Sig.addSample(sample_time_ms, leftTalon2.getOutputCurrent());
         opModeSig.addSample(sample_time_ms, opMode.toInt());
         gyroscopeSig.addSample(sample_time_ms, getGyroAngle());
         wheelSpeedRightSig.addSample(sample_time_ms, getSpeedRightRPM());
