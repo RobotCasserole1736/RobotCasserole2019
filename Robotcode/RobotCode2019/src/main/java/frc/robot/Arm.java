@@ -79,6 +79,8 @@ public class Arm {
     Calibration midRocketCal;
     Calibration lowRocketCal;
     Calibration intakeHeightCal;
+    Calibration armUpCal;
+    Calibration armDownCal;
     
 
     ///////////Pot State\\\\\\\\\\\\
