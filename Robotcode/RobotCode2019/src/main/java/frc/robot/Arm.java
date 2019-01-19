@@ -27,8 +27,6 @@ import frc.lib.Calibration.*;
 
 import edu.wpi.first.wpilibj.Spark;
 
-import org.junit.Test.None;
-
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -139,7 +137,9 @@ public class Arm {
         }
     }
 
-    
+    double convertVoltsToDeg(double voltage_in) {
+        return (voltage_in - LowerLimitVoltage) * (UpperLimitDegrees - LowerLimitDegrees) / (UpperLimitVoltage - LowerLimitVoltage) + LowerLimitDegrees;
+    }
 
     public void sampleSensors() {
        topOfMotion = upperLimSwitch.get();
@@ -150,9 +150,35 @@ public class Arm {
     
     /////Use Sensor Data in Calculations\\\\\
     public void update() {
-        double convertVoltsToDeg(double voltage_in) {
-            return (voltage_in - LowerLimitVoltage) * (UpperLimitDegrees - LowerLimitDegrees) / (UpperLimitVoltage - LowerLimitVoltage) + LowerLimitDegrees;
-        } 
+        if(!isZeroed) {
+            
+        } else {
+            if(pos_in == ArmPosReq.None && manMoveCmd == 0) {
+                armBreak.set(true); 
+            } 
+           
+            else if (pos_in == ArmPosReq.None) {
+                if(curHeight < desHeight) {
+                    armMotor.set(1);
+                }
+                else if (curHeight > desHeight) {
+                    armMotor.set(-1);
+                }
+                else {
+                    armMotor.set(0);
+                }
+            }
+            else if(topOfMotion && manMoveCmd <= 0) {
+                armMotor.set(uncompensatedMotorCmd + gravityCompensation);
+                }
+            else if(bottomOfMotion && manMoveCmd >= 0) {
+                armMotor.set(uncompensatedMotorCmd + gravityCompensation);
+            }
+            else
+                    
+            }
+        }  
+        
     }
    
     ArmPosReq pos_in;
@@ -205,8 +231,8 @@ public class Arm {
         }
         else {
             manMoveCmd = 0;
+            
         }
-
     }
     public void setSolBrake(boolean brake_in) {
         if(brake_in) {
@@ -217,10 +243,9 @@ public class Arm {
         }
     }
         
+
+
             
-  
-
-
 
     public double getActualArmHeight() {
         return curHeight;
