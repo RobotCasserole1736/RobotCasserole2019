@@ -38,7 +38,7 @@ public class Arm {
 
     /////////Moving Things\\\\\\\\\
     Solenoid armBreak;
-    Spark armMotor;
+    Spark sadey;
 
     /////////Sensors\\\\\\\\\
     AnalogPotentiometer armPot;
@@ -61,7 +61,8 @@ public class Arm {
     public double   potUpVolt;
     public double   potLowVolt;
     public boolean  brakeActivated;
-    public double   manMoveCmd = 0;
+    public double   pastManMoveCmd = 0;
+    public double   curManMoveCmd = 0;
     public double   uncompensatedMotorCmd = 0;
     public boolean  brake_in = false;
     public double   gravityCompensation = 0;
@@ -72,7 +73,6 @@ public class Arm {
     public double midRocket;
     public double lowRocket;
     public double intakeHeight;
-    
     
     
     Calibration topRocketCal;
@@ -111,7 +111,7 @@ public class Arm {
         armPot = new AnalogPotentiometer(RobotConstants.ARM_POS_SENSOR_PORT, voltageToDegreeMult, zeroOffset);
     /////Movers\\\\\
         armBreak = new Solenoid(0);
-        armMotor = new Spark(RobotConstants.ARM_MOTOR_PORT);
+        sadey = new Spark(RobotConstants.ARM_MOTOR_PORT);
     /////Digital Inputs\\\\\\\
         upperLimSwitch = new DigitalInput(RobotConstants.ARM_UPPER_LIMIT_SWITCH_PORT);
         lowLimSwitch = new DigitalInput(RobotConstants.ARM_LOWER_LIMIT_SWITCH_PORT);
@@ -155,35 +155,54 @@ public class Arm {
         if(!isZeroed) {
             
         } else {
-            if(pos_in == ArmPosReq.None && manMoveCmd == 0) {
-                armBreak.set(true); 
-            } 
-           
-            else if (pos_in == ArmPosReq.None) {
-                if(curHeight < desHeight) {
-                    armMotor.set(1);
-                }
-                else if (curHeight > desHeight) {
-                    armMotor.set(-1);
-                }
-                else {
-                    armMotor.set(0);
-                }
+            //Preset Heights Logic
+
+            //If arm == 0 ??needed??
+            desHeight = desiredArmAngle;
+
+            if(curHeight - desHeight <= -2) {
+                uncompensatedMotorCmd = 1;
             }
-            else if(topOfMotion)
-             if(manMoveCmd <= 0) {
-                armMotor.set(uncompensatedMotorCmd + gravityCompensation);
-                }
-            else if(bottomOfMotion) 
-                if(manMoveCmd >= 0) {
-                armMotor.set(uncompensatedMotorCmd + gravityCompensation);
-                }
+            else if (curHeight - desHeight >= 2) {
+                uncompensatedMotorCmd = -1;
+            }
             else {
-                armMotor.set(uncompensatedMotorCmd + gravityCompensation);
+                uncompensatedMotorCmd = 0;
             }
-                    
+            
+            if(curManMoveCmd != pastManMoveCmd) {
+
             }
-        }  
+            //Joystick Operation by Drivers
+            
+            if(curManMoveCmd != pastManMoveCmd) {
+                uncompensatedMotorCmd = curManMoveCmd;
+            }
+            
+            
+            
+            
+            
+            if(topOfMotion && uncompensatedMotorCmd < 0) {
+                sadey.set(uncompensatedMotorCmd);
+            } 
+            else if(bottomOfMotion && uncompensatedMotorCmd > 0) {
+                sadey.set(uncompensatedMotorCmd);
+            }
+
+            else {
+                sadey.set(uncompensatedMotorCmd);
+            } 
+            
+            if(uncompensatedMotorCmd == 0) {
+                armBreak.set(true);
+            } 
+            else {
+                armBreak.set(false);
+            }
+            } 
+        }
+ 
         
     
    
@@ -225,18 +244,18 @@ public class Arm {
     public void setManualMovementCmd(double mov_cmd_in) {
         
         if(mov_cmd_in>0.5 || mov_cmd_in<-0.5) {    
-            manMoveCmd = mov_cmd_in;
+            curManMoveCmd = mov_cmd_in;
             brake_in = false;
         
         }
         else if(mov_cmd_in < 0.5 && mov_cmd_in > -0.5 /*&& !brakeActivated*/) {
         
-            manMoveCmd = 0;
+            curManMoveCmd = 0;
             brake_in = true;
 
         }
         else {
-            manMoveCmd = 0;
+            curManMoveCmd = 0;
             
         }
     }
@@ -250,10 +269,16 @@ public class Arm {
     }
         
 
-
+    public boolean getTopOfMotion() {
+        return topOfMotion;
+    }
+    public boolean getBottomOfMotion() {
+        return bottomOfMotion;
+    }
             
 
     public double getActualArmHeight() {
+        curHeight = armPot.get();
         return curHeight;
     }
 
