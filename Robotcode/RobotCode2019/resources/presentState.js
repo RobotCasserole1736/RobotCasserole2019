@@ -45,7 +45,7 @@ dataSocket.onmessage = function (event) {
     var sendVal = JSON.stringify(daq_request_cmd);
     dataSocket.send(sendVal);
 
-    genInitTable(serverMsg.signals);
+    genInitTable(serverMsg.signals.sort());
 
     var sendVal = JSON.stringify({cmd: "start"});
     dataSocket.send(sendVal);
