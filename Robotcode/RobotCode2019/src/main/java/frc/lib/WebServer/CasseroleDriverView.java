@@ -69,10 +69,9 @@ public class CasseroleDriverView {
      * @param max_in            Maximum value displayed on the dial.
      * @param step_in           Step value between dial tick marks.
      * @param min_acceptable_in Lower limit of green display area on drawn dial.
-     * @param max_acceptable_in Upper limit of green display area on drawn dial.
+     * @param i
      */
-    public static void newDial(String name_in, double min_in, double max_in, double step_in, double min_acceptable_in,
-            double max_acceptable_in) {
+    public static void newDial(String name_in, double min_in, double max_in, double step_in, double min_acceptable_in, double max_acceptable_in) {
 
         DriverViewDial newDial = new DriverViewDial(name_in, min_in, max_in, step_in, min_acceptable_in,
                 max_acceptable_in);
@@ -248,5 +247,8 @@ public class CasseroleDriverView {
 
         return tmp_list;
     }
+
+	public static void newDial(String string, int i, int j, int k, int l) {
+	}
 
 }

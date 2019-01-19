@@ -1,25 +1,5 @@
 package frc.robot;
 
-/*
- *******************************************************************************************
- * Copyright (C) 2019 FRC Team 1736 Robot Casserole - www.robotcasserole.org
- *******************************************************************************************
- *
- * This software is released under the MIT Licence - see the license.txt
- *  file in the root of this repo.
- *
- * Non-legally-binding statement from Team 1736:
- *  Thank you for taking the time to read through our software! We hope you
- *   find it educational and informative! 
- *  Please feel free to snag our software for your own use in whatever project
- *   you have going on right now! We'd love to be able to help out! Shoot us 
- *   any questions you may have, all our contact info should be on our website
- *   (listed above).
- *  If you happen to end up using our software to make money, that is wonderful!
- *   Robot Casserole is always looking for more sponsors, so we'd be very appreciative
- *   if you would consider donating to our club to help further STEM education.
- */
-
 public class RobotConstants {
 
     
@@ -42,12 +22,10 @@ public class RobotConstants {
 
 
     /////////////////////////////////////////////////////////////////////////////////////
-    // RoboRIO Input Ports
+	// RoboRIO Input Ports
     /////////////////////////////////////////////////////////////////////////////////////
-    //Analog
     public static final int ANALOG_PRESSURE_SENSOR_PORT = 0;
     public static final int ARM_POS_SENSOR_PORT = 1;
-    public static final int WRIST_POS_SENSOR_PORT = 2;
 
     //Digital
     public static final int LED_PATTERN_OUTPUT_0 = 0;
@@ -62,7 +40,7 @@ public class RobotConstants {
     public static final int BALL_INTAKE_PORT = 9;
 
     /////////////////////////////////////////////////////////////////////////////////////
-    // PDP Ports
+	// PDP Ports
     /////////////////////////////////////////////////////////////////////////////////////
 
     /////////////////////////////////////////////////////////////////////////////////////
@@ -81,7 +59,7 @@ public class RobotConstants {
 
     public static final int DRIVER_CONTROLLER_USB_IDX = 0;
     public static final int OPERATOR_CONTROLLER_USB_IDX = 1;
-    public static final String CAM_1_STREAM_URL = "http://10.17.36.10:1181/stream.mjpg";
-    public static final String CAM_2_STREAM_URL = "http://10.17.36.10:1182/stream.mjpg";
+	public static final String CAM_1_STREAM_URL = null;
+	public static final String CAM_2_STREAM_URL = null;
     
 }
