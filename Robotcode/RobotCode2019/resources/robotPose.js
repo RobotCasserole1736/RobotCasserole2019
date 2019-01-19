@@ -16,12 +16,12 @@ var FIELDPOLY_FT =
     ];
     //RED ROCKET LEFT
 var FIELDELEMENTPOLY1_FT = 
-    [[-13, 18],[-13, 20.75],[-12.46, 20.15],[-12.46, 18.65],[-13, 18]];
+    [[-14, 18],[-14, 20.75],[-11.46, 20.15],[-11.46, 18.65],[-14, 18]];
     //RED ROCKET RIGHT
-/*var FIELDELEMENTPOLY2_FT = 
-    [[-14, -18],[0, 33],[0.54, -1.64],[0, -1.54],[-0.54, -1.64],[-14, -18]];
+var FIELDELEMENTPOLY2_FT = 
+    [[14, 18],[14, 20.75],[12.46, 20.15],[12.46, 18.65],[14, 18]];
     //BLUE ROCKET LEFT
-var FIELDELEMENTPOLY3_FT = 
+/*var FIELDELEMENTPOLY3_FT = 
     [[13, 33],[0, 33],[-0.54, -1.64],[0, 1.54],[0.54, 1.64],[13, 18]];
     //BLUE ROCKET RIGHT
 var FIELDELEMENTPOLY4_FT = 
@@ -222,11 +222,11 @@ function procData(json_data) {
             this.ctx.closePath();
             this.ctx.fill();
 
-           /* //DRAW RED ROCKET RIGHT
+            //DRAW RED ROCKET RIGHT
             this.ctx.beginPath();
             for (i = 0; i < FIELDELEMENTPOLY2_FT.length; i++) {
-                x_px = FIELDPOLY_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
-                y_px = this.ctx.canvas.height - (FIELDPOLY_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+                x_px = FIELDELEMENTPOLY2_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDELEMENTPOLY2_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
 
                 if (i == 0) {
                     this.ctx.moveTo(x_px, y_px);
@@ -239,7 +239,7 @@ function procData(json_data) {
             this.ctx.fill();
 
 
-              //DRAW RED CARGO
+           /*   //DRAW RED CARGO
               this.ctx.beginPath();
               for (i = 0; i < FIELDELEMENTPOLY1_FT.length; i++) {
                   x_px = FIELDPOLY_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
