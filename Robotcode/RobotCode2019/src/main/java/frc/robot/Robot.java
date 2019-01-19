@@ -229,5 +229,6 @@ public class Robot extends TimedRobot {
         CasseroleDriverView.newDial("Main System Pressure", 0, 140, 10, 80, 125);
         CasseroleDriverView.newWebcam("cam1", RobotConstants.CAM_1_STREAM_URL, 0, 0, 0);
         CasseroleDriverView.newWebcam("cam2", RobotConstants.CAM_2_STREAM_URL, 0, 0, 0);
+        CasseroleDriverView.newDial("velocity", 0, 20, 1, 15);
     }
 }
