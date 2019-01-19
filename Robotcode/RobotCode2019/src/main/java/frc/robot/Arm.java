@@ -168,18 +168,22 @@ public class Arm {
                     armMotor.set(0);
                 }
             }
-            else if(topOfMotion && manMoveCmd <= 0) {
+            else if(topOfMotion)
+             if(manMoveCmd <= 0) {
                 armMotor.set(uncompensatedMotorCmd + gravityCompensation);
                 }
-            else if(bottomOfMotion && manMoveCmd >= 0) {
+            else if(bottomOfMotion) 
+                if(manMoveCmd >= 0) {
+                armMotor.set(uncompensatedMotorCmd + gravityCompensation);
+                }
+            else {
                 armMotor.set(uncompensatedMotorCmd + gravityCompensation);
             }
-            else
                     
             }
         }  
         
-    }
+    
    
     ArmPosReq pos_in;
     public void setPositionCmd(ArmPosReq pos_in) {
