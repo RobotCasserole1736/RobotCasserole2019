@@ -248,7 +248,4 @@ public class CasseroleDriverView {
         return tmp_list;
     }
 
-	public static void newDial(String string, int i, int j, int k, int l) {
-	}
-
 }
