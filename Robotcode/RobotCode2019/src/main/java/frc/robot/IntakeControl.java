@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Spark;
 import frc.lib.Calibration.Calibration;
+import frc.lib.DataServer.Signal;
 
 public class IntakeControl {
 
@@ -32,6 +33,10 @@ public class IntakeControl {
     Spark intakeMotor;
 
     Solenoid intakeArmBar;
+    Integer loopCounter = 10;
+    IntakePos currentPosition = IntakePos.Retract;
+
+    Signal solenoidArmState;
 
     Calibration intakeSpeed;
     Calibration ejectSpeed;
@@ -46,14 +51,14 @@ public class IntakeControl {
     }
     
     private IntakeControl(){
-        ballInIntake = new DigitalInput(1);
-
-        intakeMotor = new Spark(2);
-
-        intakeArmBar = new Solenoid(5);
 
         intakeSpeed = new Calibration("Intake Speed", 0.25, 0, 1);
         ejectSpeed = new Calibration("Eject Speed", 0.25, 0, 1);
+        ballInIntake = new DigitalInput(RobotConstants.BALL_INTAKE_PORT);
+        intakeMotor = new Spark(RobotConstants.INTAKE_MOTOR_PORT);
+        intakeArmBar = new Solenoid(RobotConstants.INTAKE_ARM_BAR_PORT);
+
+        solenoidArmState = new Signal("Intake State", "B");
     }
 
     //Intake positions that can be requested
@@ -132,6 +137,25 @@ public class IntakeControl {
         }else{ //If for some reason it is confused, don't run the intake
             intakeMotor.set(0);
         }
+        if(intakeArmBar.get() == true){
+            
+            if(loopCounter == 0){
+                currentPosition = IntakePos.Extend; 
+            }
+            else {
+                loopCounter = loopCounter - 1;
+            }
+        }
+
+        if(intakeArmBar.get() == false){
+            loopCounter = 10;
+            currentPosition = IntakePos.Retract;
+        }
+        
+
+        /* Update Telemetry */
+        double sample_time_ms = LoopTiming.getInstance().getLoopStartTime_sec() * 1000.0;
+        solenoidArmState.addSample(sample_time_ms, currentPosition.toInt());
     }
 
 

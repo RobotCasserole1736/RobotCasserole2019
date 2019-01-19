@@ -165,6 +165,8 @@ public class Robot extends TimedRobot {
             Drivetrain.getInstance().setOpenLoopCmd(DriverController.getInstance().getDriverFwdRevCmd(), DriverController.getInstance().getDriverRotateCmd());
         }
 
+        IntakeControl.getInstance().setPositionCmd(OperatorController.getInstance().getIntakePosReq());
+
         /* Update subsytems */
         LEDController.getInstance().update();
         Drivetrain.getInstance().update();
@@ -173,6 +175,7 @@ public class Robot extends TimedRobot {
         Climber.getInstance().update();
         telemetryUpdate();
         RobotPose.update();
+        IntakeControl.getInstance().update();
         
         LoopTiming.getInstance().markLoopEnd();
 
