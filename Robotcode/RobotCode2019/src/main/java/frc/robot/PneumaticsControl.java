@@ -1,8 +1,5 @@
 package frc.robot;
 
-import edu.wpi.first.wpilibj.Compressor;
-import edu.wpi.first.wpilibj.AnalogInput;
-
 /*
  *******************************************************************************************
  * Copyright (C) 2019 FRC Team 1736 Robot Casserole - www.robotcasserole.org
@@ -23,38 +20,59 @@ import edu.wpi.first.wpilibj.AnalogInput;
  *   if you would consider donating to our club to help further STEM education.
  */
 
+import edu.wpi.first.wpilibj.Compressor;
+import frc.lib.DataServer.Signal;
+import edu.wpi.first.wpilibj.AnalogInput;
+
 public class PneumaticsControl {
-	
-	Compressor compressor;
-	AnalogInput pressureSensor;
-
-	private static PneumaticsControl pneumatics = null;
     
-	public static synchronized PneumaticsControl getInstance() {
-		if(pneumatics == null)
-		 pneumatics = new PneumaticsControl();
-		return pneumatics;
-	}
+    Compressor compressor;
+    AnalogInput pressureSensor;
 
-	private PneumaticsControl() {
-		compressor = new Compressor();
-		pressureSensor = new AnalogInput(RobotConstants.ANALOG_PRESSURE_SENSOR_PORT);
-	}
-	
-	// start method for the compressor
-	public void Start(){
-		compressor.start();
-	}
+    Signal pressSig;
+    Signal pressSwVallSig;
+    Signal compCurrent;
 
-	// stop method for the compressor
-	public void Stop(){
-		compressor.stop();
-	}
-	
-	public double GetPressure(){
-		double voltage = pressureSensor.getVoltage();
-		double pressure = ((voltage/5.0)-0.1)*(150/0.8);
-		return pressure;
-	}
+    double curPressure_psi;
+
+    /* Singelton Stuff */
+    private static PneumaticsControl pneumatics = null;
+    public static synchronized PneumaticsControl getInstance() {
+        if(pneumatics == null) pneumatics = new PneumaticsControl();
+        return pneumatics;
+    }
+
+    private PneumaticsControl() {
+        compressor = new Compressor(RobotConstants.PNEUMATICS_CONTROL_MODULE_CANID);
+        pressureSensor = new AnalogInput(RobotConstants.ANALOG_PRESSURE_SENSOR_PORT);
+        pressSig = new Signal("Pneumatics Main System Pressure", "psi");
+        pressSwVallSig = new Signal("Pneumatics Cutoff Switch State", "bool");
+        compCurrent = new Signal("Pneumatics Compressor Current", "A");
+    }
+
+    public void update(){
+
+        double voltage = pressureSensor.getVoltage();
+        curPressure_psi = ((voltage/5.0)-0.1)*(150/0.8); /*Equation derived from datasheet */
+
+        double sample_time_ms = LoopTiming.getInstance().getLoopStartTime_sec()*1000.0;
+        pressSig.addSample(sample_time_ms,curPressure_psi);
+        pressSwVallSig.addSample(sample_time_ms,compressor.getPressureSwitchValue());
+        compCurrent.addSample(sample_time_ms,compressor.getCompressorCurrent());
+    }
+    
+    // start method for the compressor
+    public void start(){
+        compressor.start();
+    }
+
+    // stop method for the compressor
+    public void stop(){
+        compressor.stop();
+    }
+    
+    public double getPressure(){
+        return curPressure_psi;
+    }
 
 }
