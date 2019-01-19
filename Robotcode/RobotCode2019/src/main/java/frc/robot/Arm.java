@@ -26,6 +26,9 @@ package frc.robot;
 import frc.lib.Calibration.*;
 
 import edu.wpi.first.wpilibj.Spark;
+
+import org.junit.Test.None;
+
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -55,12 +58,16 @@ public class Arm {
 
     /////////State Varibles\\\\\\\\\\\\
     public double   desiredArmAngle = 0;
-    public double   curentHeight = 0;
+    public double   curHeight = 0;
+    public double   desHeight = 0;
     public double   potUpVolt;
     public double   potLowVolt;
     public boolean  brakeActivated;
+    public double   manMoveCmd = 0;
     public double   uncompensatedMotorCmd = 0;
     public boolean  brake_in = false;
+    public double   gravityCompensation = 0;
+    public boolean  isZeroed = false;
     //Arm State Heights\\
     
     public double topRocket;
@@ -74,6 +81,7 @@ public class Arm {
     Calibration midRocketCal;
     Calibration lowRocketCal;
     Calibration intakeHeightCal;
+    
 
     ///////////Pot State\\\\\\\\\\\\
     public double UpperLimitDegrees = 270;
@@ -131,9 +139,7 @@ public class Arm {
         }
     }
 
-    double convertVoltsToDeg(double voltage_in) {
-        return (voltage_in - LowerLimitVoltage) * (UpperLimitDegrees - LowerLimitDegrees) / (UpperLimitVoltage - LowerLimitVoltage) + LowerLimitDegrees;
-    }
+    
 
     public void sampleSensors() {
        topOfMotion = upperLimSwitch.get();
@@ -144,8 +150,9 @@ public class Arm {
     
     /////Use Sensor Data in Calculations\\\\\
     public void update() {
-        
-        
+        double convertVoltsToDeg(double voltage_in) {
+            return (voltage_in - LowerLimitVoltage) * (UpperLimitDegrees - LowerLimitDegrees) / (UpperLimitVoltage - LowerLimitVoltage) + LowerLimitDegrees;
+        } 
     }
    
     ArmPosReq pos_in;
@@ -157,19 +164,23 @@ public class Arm {
     public void defArmPos() {
         switch(pos_in) {
             case Top:
-            desiredArmAngle = topRocket; 
+            desiredArmAngle = topRocket;
+             
             break;
 
             case Middle:
             desiredArmAngle = midRocket;
+
             break;
 
             case Lower:
             desiredArmAngle = lowRocket;
+
             break;
 
             case Intake:
             desiredArmAngle = intakeHeight;
+
             break;
 
             case None:
@@ -179,35 +190,59 @@ public class Arm {
         }
     }
 
-    public void setSolBrake(boolean brake_in) {
-        if(brake_in) {
-         armBreak.set(true); 
-        }
-        else {
-         armBreak.set(true);
-        }
-    }
-
     public void setManualMovementCmd(double mov_cmd_in) {
         
         if(mov_cmd_in>0.5 || mov_cmd_in<-0.5) {    
-            uncompensatedMotorCmd = mov_cmd_in;
+            manMoveCmd = mov_cmd_in;
             brake_in = false;
+        
         }
         else if(mov_cmd_in < 0.5 && mov_cmd_in > -0.5 /*&& !brakeActivated*/) {
         
-            uncompensatedMotorCmd = 0;
+            manMoveCmd = 0;
             brake_in = true;
 
         }
         else {
-            uncompensatedMotorCmd = 0;
-            
+            manMoveCmd = 0;
         }
-        
-    }
 
     }
+    public void setSolBrake(boolean brake_in) {
+        if(brake_in) {
+            armBreak.set(true); 
+        }
+        else {
+            armBreak.set(true);
+        }
+    }
+        
+            
+  
+
+
+
+    public double getActualArmHeight() {
+        return curHeight;
+    }
+
+    public double getDesiredArmHeight() {
+        return desHeight;
+    }
+
+    public double getuncompensatedMotorCmd() {
+        return uncompensatedMotorCmd;
+    
+    }
+    public boolean atDesiredHeight() {
+        return(desHeight == curHeight);
+    }
+    
+
+
+
+
+}
 
 
 
