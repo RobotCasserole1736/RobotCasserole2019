@@ -38,9 +38,9 @@ public interface DrivetrainInterface {
         }
     }
 
-    public void setOpenLoopCmd(double forwardReverseCmd_in, double rotaionCmd_in);
+    public void setOpenLoopCmd(double forwardReverseCmd, double rotaionCmd);
 
-    public void setGyroLockCmd(double forwardReverseCmd_in);
+    public void setGyroLockCmd(double forwardReverseCmd);
 
     public void update();
 
@@ -49,4 +49,6 @@ public interface DrivetrainInterface {
     public double getLeftWheelSpeedRPM();
 
     public double getRightWheelSpeedRPM();
+
+    public void updateGains(boolean force);
 }

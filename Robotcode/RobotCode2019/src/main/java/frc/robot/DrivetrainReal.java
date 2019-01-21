@@ -44,8 +44,8 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
     private static final int TIMEOUT_MS = 0;
     private static final double ENCODER_CYCLES_PER_REV = 2048;
     private static final double GEARBOX_RATIO = 72.0 / 12.0;
-    private double motor_speed_rpm_Right = 0;
-    private double motor_speed_rpm_Left = 0;
+    private double motorSpeedRPMRight = 0;
+    private double motorSpeedRPMLeft = 0;
 
     DrivetrainOpMode opMode; /* The present operational mode */
     DrivetrainOpMode opModeCmd; /* The most recently commanded operational mode */
@@ -178,28 +178,28 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
         updateGains(true);
     }
 
-    public void setOpenLoopCmd(double forwardReverseCmd_in, double rotaionCmd_in) {
+    public void setOpenLoopCmd(double forwardReverseCmd, double rotaionCmd) {
         opModeCmd = DrivetrainOpMode.OpenLoop;
-        forwardReverseCmd = forwardReverseCmd_in;
-        rotationCmd = rotaionCmd_in;
+        this.forwardReverseCmd = forwardReverseCmd;
+        this.rotationCmd = rotaionCmd;
     }
 
-    public void setGyroLockCmd(double forwardReverseCmd_in) {
+    public void setGyroLockCmd(double forwardReverseCmd) {
         opModeCmd = DrivetrainOpMode.GyroLock;
-        forwardReverseCmd = forwardReverseCmd_in;
+        this.forwardReverseCmd = forwardReverseCmd;
     }
 
-    public void setClosedLoopSpeedCmd(double leftCmdRPM_in, double rightCmdRPM_in) {
+    public void setClosedLoopSpeedCmd(double leftCmdRPM, double rightCmdRPM) {
         opModeCmd = DrivetrainOpMode.ClosedLoop;
-        leftSpeedCmd_RPM  = leftCmdRPM_in;
-        rightSpeedCmd_RPM = rightCmdRPM_in;
+        leftSpeedCmd_RPM  = leftCmdRPM;
+        rightSpeedCmd_RPM = rightCmdRPM;
     }
 
-    public void setClosedLoopSpeedCmd(double leftCmdRPM_in, double rightCmdRPM_in, double headingCmdDeg_in) {
+    public void setClosedLoopSpeedCmd(double leftCmdRPM, double rightCmdRPM, double headingCmdDeg) {
         opModeCmd = DrivetrainOpMode.ClosedLoopWithGyro;
-        leftSpeedCmd_RPM  = leftCmdRPM_in;
-        rightSpeedCmd_RPM = rightCmdRPM_in;
-        headingCmd_deg = headingCmdDeg_in;
+        leftSpeedCmd_RPM  = leftCmdRPM;
+        rightSpeedCmd_RPM = rightCmdRPM;
+        headingCmd_deg = headingCmdDeg;
     }
 
     public double getGyroAngle() {
@@ -223,16 +223,16 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
     }
 
     public void sampleSensors() {
-        motor_speed_rpm_Right = CTRE_VEL_UNITS_TO_RPM(rightTalon1.getSelectedSensorVelocity(0));
-        motor_speed_rpm_Left = CTRE_VEL_UNITS_TO_RPM(leftTalon1.getSelectedSensorVelocity(0));
+        motorSpeedRPMRight = CTRE_VelUnitsToRPM(rightTalon1.getSelectedSensorVelocity(0));
+        motorSpeedRPMLeft = CTRE_VelUnitsToRPM(leftTalon1.getSelectedSensorVelocity(0));
     }
 
     public double getRightWheelSpeedRPM() {
-        return motor_speed_rpm_Right;
+        return motorSpeedRPMRight;
     }
 
     public double getLeftWheelSpeedRPM() {
-        return motor_speed_rpm_Left;
+        return motorSpeedRPMLeft;
     }
 
     public double getLeftMotorCmd() {
@@ -251,8 +251,8 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
     // return motor_speed_rpm*0.104719*GEARBOX_RATIO;
     // }
 
-    private double CTRE_VEL_UNITS_TO_RPM(double ctre_units) {
-        return ctre_units * 600.0 / ENCODER_CYCLES_PER_REV / 4.0;
+    private double CTRE_VelUnitsToRPM(double ctreUnits) {
+        return ctreUnits * 600.0 / ENCODER_CYCLES_PER_REV / 4.0;
     }
     
     public void updateGains(boolean force){
@@ -364,18 +364,18 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
         }
 
         /* Update Telemetry */
-        double sample_time_ms = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
-        currentR1Sig.addSample(sample_time_ms, rightTalon1.getOutputCurrent());
-        currentR2Sig.addSample(sample_time_ms, rightTalon2.getOutputCurrent());
-        currentL1Sig.addSample(sample_time_ms, leftTalon1.getOutputCurrent());
-        currentL2Sig.addSample(sample_time_ms, leftTalon2.getOutputCurrent());
-        opModeSig.addSample(sample_time_ms, opMode.toInt());
-        gyroscopeSig.addSample(sample_time_ms, getGyroAngle());
-        wheelSpeedRightSig.addSample(sample_time_ms, getRightWheelSpeedRPM());
-        wheelSpeedLeftSig.addSample(sample_time_ms, getLeftWheelSpeedRPM());
-        leftMotorCmdSig.addSample(sample_time_ms, getLeftMotorCmd());
-        rightMotorCmdSig.addSample(sample_time_ms, getRightMotorCmd());
-        gyroLockRotationCmdSig.addSample(sample_time_ms, getGyroLockRotationCmd());
+        double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
+        currentR1Sig.addSample(sampleTimeMS, rightTalon1.getOutputCurrent());
+        currentR2Sig.addSample(sampleTimeMS, rightTalon2.getOutputCurrent());
+        currentL1Sig.addSample(sampleTimeMS, leftTalon1.getOutputCurrent());
+        currentL2Sig.addSample(sampleTimeMS, leftTalon2.getOutputCurrent());
+        opModeSig.addSample(sampleTimeMS, opMode.toInt());
+        gyroscopeSig.addSample(sampleTimeMS, getGyroAngle());
+        wheelSpeedRightSig.addSample(sampleTimeMS, getRightWheelSpeedRPM());
+        wheelSpeedLeftSig.addSample(sampleTimeMS, getLeftWheelSpeedRPM());
+        leftMotorCmdSig.addSample(sampleTimeMS, getLeftMotorCmd());
+        rightMotorCmdSig.addSample(sampleTimeMS, getRightMotorCmd());
+        gyroLockRotationCmdSig.addSample(sampleTimeMS, getGyroLockRotationCmd());
     }
 
     @Override

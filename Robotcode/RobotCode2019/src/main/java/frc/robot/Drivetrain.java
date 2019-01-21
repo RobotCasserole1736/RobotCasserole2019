@@ -31,8 +31,6 @@ package frc.robot;
   */
 public class Drivetrain implements DrivetrainInterface {
 
-    private static DrivetrainReal dTrainR = null;
-    private static DrivetrainSim  dTrainS = null;
     private static DrivetrainInterface dTrainIF = null;
     private static Drivetrain dTrain = null;
 
@@ -52,12 +50,12 @@ public class Drivetrain implements DrivetrainInterface {
         }
     }
 
-    public void setOpenLoopCmd(double forwardReverseCmd_in, double rotaionCmd_in){
-        dTrainIF.setOpenLoopCmd(forwardReverseCmd_in, rotaionCmd_in);
+    public void setOpenLoopCmd(double forwardReverseCmd, double rotaionCmd){
+        dTrainIF.setOpenLoopCmd(forwardReverseCmd, rotaionCmd);
     }
 
-    public void setGyroLockCmd(double forwardReverseCmd_in){
-        dTrainIF.setGyroLockCmd(forwardReverseCmd_in);
+    public void setGyroLockCmd(double forwardReverseCmd){
+        dTrainIF.setGyroLockCmd(forwardReverseCmd);
     }
 
     public boolean isGyroOnline(){
@@ -69,11 +67,7 @@ public class Drivetrain implements DrivetrainInterface {
     }
 
     public void updateGains(boolean force){
-        if(dTrainR != null){
-            dTrainR.updateGains(force);
-        } else {
-            dTrainS.updateGains();
-        }
+        dTrainIF.updateGains(force);
     }
 
     public double getLeftWheelSpeedRPM(){
