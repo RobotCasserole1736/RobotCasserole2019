@@ -20,23 +20,8 @@ package frc.robot;
  *   if you would consider donating to our club to help further STEM education.
  */
 
-public class Climber {
-
-    /* Singleton stuff */
-    private static Climber climbCtrl = null;
-    
-    public static synchronized Climber getInstance() {
-        if(climbCtrl == null) climbCtrl = new Climber();
-        return climbCtrl;
-    }
-
-    private Climber(){
-        //TODO
-    }
-
-    public void update(){
-        //TODO
-
-    }
-
+public enum LineFollowerSensorStates {
+RIGHT_SENSOR_OFF_LINE, RIGHT_SENSOR_HALF_ON_LINE, RIGHT_SENSOR_ON_LINE, 
+MID_SENSOR_OFF_LINE, MID_SENSOR_HALF_ON_LINE, MID_SENSOR_ON_LINE, 
+LEFT_SENSOR_OFF_LINE, LEFT_SENSOR_HALF_ON_LINE, LEFT_SENSOR_ON_LINE;
 }

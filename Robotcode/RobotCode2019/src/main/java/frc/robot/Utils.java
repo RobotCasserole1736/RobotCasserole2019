@@ -35,7 +35,7 @@ public class Utils {
         if(input < deadzone){
             //Input within deadzone range, set output to zero.
             output = 0;
-        } else {
+        } else{
             //Input is outside deadzon range, calcualte output
 
             //Rescale input to 0-1 range
@@ -55,5 +55,4 @@ public class Utils {
 
         return output;
     }
-
 }

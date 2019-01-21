@@ -76,7 +76,6 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
     Signal gyroLockRotationCmdSig;
 
     public DrivetrainReal() {
-
         gyro = new ADXRS453_Gyro();
         angleOffset = 0;
 
@@ -173,11 +172,11 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
         motor_speed_rpm_Left = CTRE_VEL_UNITS_TO_RPM(leftTalon1.getSelectedSensorVelocity(0));
     }
 
-    public double getSpeedRightRPM() {
+    public double getRightWheelSpeedRPM() {
         return motor_speed_rpm_Right;
     }
 
-    public double getSpeedLeftRPM() {
+    public double getLeftWheelSpeedRPM() {
         return motor_speed_rpm_Left;
     }
 
@@ -225,22 +224,22 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
 
             leftTalon1.set(motorSpeedLeftCMD);
             rightTalon1.set(motorSpeedRightCMD);
-        }else {
+        } else {
             /* Some other mode - stop everything */
             rightTalon1.set(0);
             leftTalon1.set(0);
         }
 
         /* Update Telemetry */
-        double sample_time_ms = LoopTiming.getInstance().getLoopStartTime_sec() * 1000.0;
+        double sample_time_ms = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
         currentR1Sig.addSample(sample_time_ms, rightTalon1.getOutputCurrent());
         currentR2Sig.addSample(sample_time_ms, rightTalon2.getOutputCurrent());
         currentL1Sig.addSample(sample_time_ms, leftTalon1.getOutputCurrent());
         currentL2Sig.addSample(sample_time_ms, leftTalon2.getOutputCurrent());
         opModeSig.addSample(sample_time_ms, opMode.toInt());
         gyroscopeSig.addSample(sample_time_ms, getGyroAngle());
-        wheelSpeedRightSig.addSample(sample_time_ms, getSpeedRightRPM());
-        wheelSpeedLeftSig.addSample(sample_time_ms, getSpeedLeftRPM());
+        wheelSpeedRightSig.addSample(sample_time_ms, getRightWheelSpeedRPM());
+        wheelSpeedLeftSig.addSample(sample_time_ms, getLeftWheelSpeedRPM());
         leftMotorCmdSig.addSample(sample_time_ms, getLeftMotorCmd());
         rightMotorCmdSig.addSample(sample_time_ms, getRightMotorCmd());
         gyroLockRotationCmdSig.addSample(sample_time_ms, getGyroLockRotationCmd());

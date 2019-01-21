@@ -33,73 +33,46 @@ public class Drivetrain implements DrivetrainInterface {
 
     private static DrivetrainReal dTrainR = null;
     private static DrivetrainSim  dTrainS = null;
+    private static DrivetrainInterface dTrainIF = null;
     private static Drivetrain dTrain = null;
 
     
     public static synchronized Drivetrain getInstance() {
         if (dTrain == null){
-                dTrain = new Drivetrain();
-            }
+            dTrain = new Drivetrain();
+        }
         return dTrain;
     }
 
     private Drivetrain(){
         if(System.getProperty("os.name").contains("Windows")){
-            dTrainS = new DrivetrainSim(); //TODO make this work on linux laptops
+            dTrainIF = new DrivetrainSim(); //TODO make this work on linux laptops
         } else {
-            dTrainR = new DrivetrainReal();
+            dTrainIF = new DrivetrainReal();
         }
     }
 
     public void setOpenLoopCmd(double forwardReverseCmd_in, double rotaionCmd_in){
-        if(dTrainR != null){
-            dTrainR.setOpenLoopCmd(forwardReverseCmd_in, rotaionCmd_in);
-        } else {
-            dTrainS.setOpenLoopCmd(forwardReverseCmd_in, rotaionCmd_in);
-        }
-
+        dTrainIF.setOpenLoopCmd(forwardReverseCmd_in, rotaionCmd_in);
     }
 
     public void setGyroLockCmd(double forwardReverseCmd_in){
-        if(dTrainR != null){
-            dTrainR.setGyroLockCmd(forwardReverseCmd_in);
-        } else {
-            dTrainS.setGyroLockCmd(forwardReverseCmd_in);
-        }
+        dTrainIF.setGyroLockCmd(forwardReverseCmd_in);
     }
 
     public boolean isGyroOnline(){
-        if(dTrainR != null){
-            return dTrainR.isGyroOnline();
-        } else {
-            return dTrainS.isGyroOnline();
-        }
+        return dTrainIF.isGyroOnline();
     }
 
     public void update(){
-        if(dTrainR != null){
-            dTrainR.update();
-        } else {
-            dTrainS.update();
-        }
+        dTrainIF.update();
     }
 
     public double getLeftWheelSpeedRPM(){
-        if(dTrainR != null){
-            return dTrainR.getSpeedLeftRPM();
-        } else {
-            return dTrainS.getSpeedLeftRPM();
-        }
+        return dTrainIF.getLeftWheelSpeedRPM();
     }
 
     public double getRightWheelSpeedRPM(){
-        if(dTrainR != null){
-            return dTrainR.getSpeedRightRPM();
-        } else {
-            return dTrainS.getSpeedRightRPM();
-        }
+        return dTrainIF.getRightWheelSpeedRPM();
     }
-
-
-
 }

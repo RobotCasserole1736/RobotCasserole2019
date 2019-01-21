@@ -41,4 +41,10 @@ public interface DrivetrainInterface {
     public void setGyroLockCmd(double forwardReverseCmd_in);
 
     public void update();
+
+    public boolean isGyroOnline();
+
+    public double getLeftWheelSpeedRPM();
+
+    public double getRightWheelSpeedRPM();
 }

@@ -37,22 +37,19 @@ import edu.wpi.first.wpilibj.DigitalInput;
 public class Arm {
 
     /////////Moving Things\\\\\\\\\
-    Solenoid armBreak;
+    Solenoid armBrake;
     Spark sadey;
 
     /////////Sensors\\\\\\\\\
     AnalogPotentiometer armPot;
-        int potChannel;
-        double voltageToDegreeMult;
-        double zeroOffset;
+    int potChannel;
+    double voltageToDegreeMult;
+    double zeroOffset;
     DigitalInput upperLimSwitch;
     DigitalInput lowLimSwitch;
 
-        
-        
-
     /////////Input Commands\\\\\\\\\\\
-    
+    ArmPosReq posIn;
 
     /////////State Varibles\\\\\\\\\\\\
     public double   desiredArmAngle = 0;
@@ -64,9 +61,10 @@ public class Arm {
     public double   pastManMoveCmd = 0;
     public double   curManMoveCmd = 0;
     public double   uncompensatedMotorCmd = 0;
-    public boolean  brake_in = false;
+    public boolean  brakeIn = false;
     public double   gravityCompensation = 0;
     public boolean  isZeroed = false;
+
     //Arm State Heights\\
     
     public double topRocket;
@@ -92,8 +90,8 @@ public class Arm {
 
 
     /////////Limit Switches\\\\\\\\\\
-    public boolean topOfMotion ;
-    public boolean bottomOfMotion ; 
+    public boolean topOfMotion;
+    public boolean bottomOfMotion; 
 
 
     
@@ -107,16 +105,16 @@ public class Arm {
     }
 
     private Arm() {
-    /////Analog Inputs\\\\\\\\
+        /////Analog Inputs\\\\\\\\
         armPot = new AnalogPotentiometer(RobotConstants.ARM_POS_SENSOR_PORT, voltageToDegreeMult, zeroOffset);
-    /////Movers\\\\\
-        armBreak = new Solenoid(RobotConstants.ARM_MECH_BRAKE_SOL_PORT);
+        /////Movers\\\\\
+        armBrake = new Solenoid(RobotConstants.ARM_MECH_BRAKE_SOL_PORT);
         sadey = new Spark(RobotConstants.ARM_MOTOR_PORT);
-    /////Digital Inputs\\\\\\\
+        /////Digital Inputs\\\\\\\
         upperLimSwitch = new DigitalInput(RobotConstants.ARM_UPPER_LIMIT_SWITCH_PORT);
         lowLimSwitch = new DigitalInput(RobotConstants.ARM_LOWER_LIMIT_SWITCH_PORT);
         
-    /////Calibration Things\\\\\
+        /////Calibration Things\\\\\
         topRocketCal = new Calibration("Top Level Rocket Placement Placement", 0);
         midRocketCal = new Calibration("Mid level Rocket Placement Placement", 0);
         lowRocketCal = new Calibration("Bottom Level Placement Postition", 0);
@@ -140,13 +138,14 @@ public class Arm {
     }
 
     double convertVoltsToDeg(double voltage_in) {
-        return (voltage_in - LowerLimitVoltage) * (UpperLimitDegrees - LowerLimitDegrees) / (UpperLimitVoltage - LowerLimitVoltage) + LowerLimitDegrees;
+        return (voltage_in - LowerLimitVoltage) * 
+                (UpperLimitDegrees - LowerLimitDegrees) / 
+                (UpperLimitVoltage - LowerLimitVoltage) + LowerLimitDegrees;
     }
 
     public void sampleSensors() {
        topOfMotion = upperLimSwitch.get();
        topOfMotion = lowLimSwitch.get();
-
     }
 
     
@@ -154,7 +153,8 @@ public class Arm {
     public void update() {
         if(!isZeroed) {
             
-        } else {
+        } 
+        else {
             //Preset Heights Logic
 
             //If arm == 0 ??needed??
@@ -178,11 +178,7 @@ public class Arm {
             if(curManMoveCmd != pastManMoveCmd) {
                 uncompensatedMotorCmd = curManMoveCmd;
             }
-            
-            
-            
-            
-            
+
             if(topOfMotion && uncompensatedMotorCmd < 0) {
                 sadey.set(uncompensatedMotorCmd);
             } 
@@ -195,25 +191,21 @@ public class Arm {
             } 
             
             if(uncompensatedMotorCmd == 0) {
-                armBreak.set(true);
+                armBrake.set(true);
             } 
             else {
-                armBreak.set(false);
+                armBrake.set(false);
             }
-            } 
-        }
- 
-        
-    
-   
-    ArmPosReq pos_in;
-    public void setPositionCmd(ArmPosReq pos_in) {
-        this.pos_in = pos_in;
+        } 
+    }
+
+    public void setPositionCmd(ArmPosReq posIn) {
+        this.posIn = posIn;
     }
     
     /////Movement Settings\\\\\
     public void defArmPos() {
-        switch(pos_in) {
+        switch(posIn) {
             case Top:
             desiredArmAngle = topRocket;
              
@@ -245,13 +237,13 @@ public class Arm {
         
         if(mov_cmd_in>0.5 || mov_cmd_in<-0.5) {    
             curManMoveCmd = mov_cmd_in;
-            brake_in = false;
+            brakeIn = false;
         
         }
         else if(mov_cmd_in < 0.5 && mov_cmd_in > -0.5 /*&& !brakeActivated*/) {
         
             curManMoveCmd = 0;
-            brake_in = true;
+            brakeIn = true;
 
         }
         else {
@@ -259,12 +251,13 @@ public class Arm {
             
         }
     }
-    public void setSolBrake(boolean brake_in) {
-        if(brake_in) {
-            armBreak.set(true); 
+
+    public void setSolBrake(boolean brakeIn) {
+        if(brakeIn) {
+            armBrake.set(true); 
         }
         else {
-            armBreak.set(true);
+            armBrake.set(true);
         }
     }
         
@@ -272,6 +265,7 @@ public class Arm {
     public boolean getTopOfMotion() {
         return topOfMotion;
     }
+
     public boolean getBottomOfMotion() {
         return bottomOfMotion;
     }
@@ -311,13 +305,4 @@ public class Arm {
         //TODO
         return false;
     }
-    
-
-
-
-
 }
-
-
-
-    

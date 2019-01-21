@@ -45,11 +45,11 @@ public class DrivetrainSim implements DrivetrainInterface {
         //TODO
     }
 
-	public double getSpeedLeftRPM() {
+	public double getLeftWheelSpeedRPM() {
 		return 0; //TODO
 	}
 
-	public double getSpeedRightRPM() {
+	public double getRightWheelSpeedRPM() {
 		return 0; //TODO
 	}
 }

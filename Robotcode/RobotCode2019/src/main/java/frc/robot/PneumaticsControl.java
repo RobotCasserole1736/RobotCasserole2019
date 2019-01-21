@@ -33,12 +33,13 @@ public class PneumaticsControl {
     Signal pressSwVallSig;
     Signal compCurrent;
 
-    double curPressure_psi;
+    double curPressurePSI;
 
     /* Singelton Stuff */
     private static PneumaticsControl pneumatics = null;
     public static synchronized PneumaticsControl getInstance() {
-        if(pneumatics == null) pneumatics = new PneumaticsControl();
+        if(pneumatics == null)
+            pneumatics = new PneumaticsControl();
         return pneumatics;
     }
 
@@ -51,12 +52,11 @@ public class PneumaticsControl {
     }
 
     public void update(){
-
         double voltage = pressureSensor.getVoltage();
-        curPressure_psi = ((voltage/5.0)-0.1)*(150/0.8); /*Equation derived from datasheet */
+        curPressurePSI = ((voltage/5.0)-0.1)*(150/0.8); /*Equation derived from datasheet */
 
-        double sample_time_ms = LoopTiming.getInstance().getLoopStartTime_sec()*1000.0;
-        pressSig.addSample(sample_time_ms,curPressure_psi);
+        double sample_time_ms = LoopTiming.getInstance().getLoopStartTimeSec()*1000.0;
+        pressSig.addSample(sample_time_ms,curPressurePSI);
         pressSwVallSig.addSample(sample_time_ms,compressor.getPressureSwitchValue());
         compCurrent.addSample(sample_time_ms,compressor.getCompressorCurrent());
     }
@@ -72,7 +72,6 @@ public class PneumaticsControl {
     }
     
     public double getPressure(){
-        return curPressure_psi;
+        return curPressurePSI;
     }
-
 }
