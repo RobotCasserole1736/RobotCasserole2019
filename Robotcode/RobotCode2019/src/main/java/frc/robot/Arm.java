@@ -115,11 +115,10 @@ public class Arm {
         lowLimSwitch = new DigitalInput(RobotConstants.ARM_LOWER_LIMIT_SWITCH_PORT);
         
         /////Calibration Things\\\\\
-        topRocketCal = new Calibration("Top Level Rocket Placement Placement", 0);
-        midRocketCal = new Calibration("Mid level Rocket Placement Placement", 0);
-        lowRocketCal = new Calibration("Bottom Level Placement Postition", 0);
-        intakeHeightCal = new Calibration("Cube from Intake", 0);
-        //armPotPosCal = new Calibration("Actual Values", 1)
+        topRocketCal = new Calibration("Arm Top Level Pos (Deg)", 0);
+        midRocketCal = new Calibration("Arm Mid Level Pos (Deg)", 0);
+        lowRocketCal = new Calibration("Arm Bottom Level Pos (Deg)", 0);
+        intakeHeightCal = new Calibration("Arm Intake Level Pos (Deg)", 0);
 
     } 
 
