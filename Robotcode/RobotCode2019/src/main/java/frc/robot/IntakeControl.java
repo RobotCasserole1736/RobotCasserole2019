@@ -36,7 +36,8 @@ public class IntakeControl {
     Integer loopCounter = 10;
     IntakePos currentPosition = IntakePos.Retract;
 
-    Signal retractStateSig;
+    Signal retractStateEstSig;
+    Signal retractStateCmdSig;
     Signal motorSpeedCmdSig;
     Signal ballInIntakeSig;
 
@@ -60,7 +61,8 @@ public class IntakeControl {
         intakeMotor = new Spark(RobotConstants.INTAKE_MOTOR_PORT);
         intakeArmBar = new Solenoid(RobotConstants.INTAKE_ARM_BAR_PORT);
 
-        retractStateSig = new Signal("Intake Extension State", "Extension");
+        retractStateEstSig = new Signal("Intake Estimated Position", "Intake Pos Enum");
+        retractStateCmdSig = new Signal("Intake Commanded Position", "Intake Pos Enum");
         motorSpeedCmdSig = new Signal("Intake Motor Command", "cmd");
         ballInIntakeSig = new Signal("Intake Ball Present", "bool");
     }
@@ -132,7 +134,7 @@ public class IntakeControl {
             intakeArmBar.set(false);
         }
 
-        ballDetected = ballInIntake.get();
+        ballDetected = !ballInIntake.get(); //Sensor outputs high for no ball, low for ball 
 
         //Intake motor control
         if((ballDetected == true) && (intakeSpdCmd == IntakeSpd.Intake)){ //If we got a ball, don't Intake
@@ -150,7 +152,7 @@ public class IntakeControl {
         intakeMotor.set(intakeMotorCmd);
 
         // Calcualte an estimate of current position
-        if(intakeArmBar.get() == true){
+        if(intakePosCmd == IntakePos.Extend){
             
             if(loopCounter == 0){
                 currentPosition = IntakePos.Extend; 
@@ -160,7 +162,7 @@ public class IntakeControl {
             }
         }
 
-        if(intakeArmBar.get() == false){
+        if(intakePosCmd == IntakePos.Retract){
             loopCounter = 10;
             currentPosition = IntakePos.Retract;
         }
@@ -168,7 +170,8 @@ public class IntakeControl {
 
         /* Update Telemetry */
         double sample_time_ms = LoopTiming.getInstance().getLoopStartTime_sec() * 1000.0;
-        retractStateSig.addSample(sample_time_ms, currentPosition.toInt());
+        retractStateEstSig.addSample(sample_time_ms, currentPosition.toInt());
+        retractStateCmdSig.addSample(sample_time_ms, intakePosCmd.toInt());
         motorSpeedCmdSig.addSample(sample_time_ms, intakeMotorCmd);
         ballInIntakeSig.addSample(sample_time_ms, ballDetected);
     }
