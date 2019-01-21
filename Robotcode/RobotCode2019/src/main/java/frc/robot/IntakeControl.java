@@ -33,7 +33,7 @@ public class IntakeControl {
     Spark intakeMotor;
 
     Solenoid intakeArmBar;
-    Integer loopCounter = 10;
+    Integer loopCounter;
     IntakePos currentPosition = IntakePos.Retract;
 
     Signal retractStateEstSig;
@@ -43,6 +43,7 @@ public class IntakeControl {
 
     Calibration intakeSpeed;
     Calibration ejectSpeed;
+    Calibration extendTime;
 
     // You will want to rename all instances of "EmptyClass" with your actual class name and "empty" with a variable name
     private static IntakeControl empty = null;
@@ -55,8 +56,9 @@ public class IntakeControl {
     
     private IntakeControl(){
 
-        intakeSpeed = new Calibration("Intake Speed", 0.25, 0, 1);
-        ejectSpeed = new Calibration("Eject Speed", 0.25, 0, 1);
+        intakeSpeed = new Calibration("Intake Intake Speed (motor cmd)", 0.25, 0, 1);
+        ejectSpeed = new Calibration("Intake Eject Speed (motor cmd)", 0.25, 0, 1);
+        extendTime = new Calibration("Intake Est Extend Time (sec)", 0.500, 0, 5);
         ballInIntake = new DigitalInput(RobotConstants.BALL_INTAKE_PORT);
         intakeMotor = new Spark(RobotConstants.INTAKE_MOTOR_PORT);
         intakeArmBar = new Solenoid(RobotConstants.INTAKE_ARM_BAR_PORT);
@@ -158,12 +160,12 @@ public class IntakeControl {
                 currentPosition = IntakePos.Extend; 
             }
             else {
-                loopCounter = loopCounter - 1;
+                loopCounter--;
             }
         }
 
         if(intakePosCmd == IntakePos.Retract){
-            loopCounter = 10;
+            loopCounter = (int)Math.floor(extendTime.get()/0.02);
             currentPosition = IntakePos.Retract;
         }
         
