@@ -30,8 +30,13 @@ public class AutoEventSequencer {
 		return empty;
 	}
 
-	// This is the private constructor that will be called once by getInstance() and it should instantiate anything that will be required by the class
-	private AutoEventSequencer() {
+    // This is the private constructor that will be called once by getInstance() and it should instantiate anything that will be required by the class
+    // Name for AutoEventSequencer enum is Robert
+    public enum Robert{
+        
+    }
+    
+    private AutoEventSequencer() {
 
     }
 
