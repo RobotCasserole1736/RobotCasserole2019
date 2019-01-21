@@ -278,7 +278,6 @@ public class Robot extends TimedRobot {
         DriverController.getInstance().update();
         OperatorController.getInstance().update();
 
-
         /* Map subsystem IO */
 
         //Initial Match State - Arm in Lower Position
@@ -308,6 +307,7 @@ public class Robot extends TimedRobot {
         //Keep drivetrain stopped.
         Drivetrain.getInstance().setOpenLoopCmd(0,0);
         Drivetrain.getInstance().update();
+        Drivetrain.getInstance().updateGains();
 
         poseCalc.setLeftMotorSpeed(Drivetrain.getInstance().getLeftWheelSpeedRPM());
         poseCalc.setRightMotorSpeed(Drivetrain.getInstance().getRightWheelSpeedRPM());

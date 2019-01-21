@@ -52,4 +52,7 @@ public class DrivetrainSim implements DrivetrainInterface {
 	public double getSpeedRightRPM() {
 		return 0; //TODO
 	}
+
+	public void updateGains() {
+	}
 }
