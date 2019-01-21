@@ -7,13 +7,7 @@ var hostname = window.location.hostname + ":" + port;
 var ROBOT_W_FT = 2;
 var ROBOT_L_FT = 2.5;
 var FIELDPOLY_FT =
-    [[0, 0],
-    [13.5, 0],
-    [13.5, 54],
-    [-13.5, 54],
-    [-13.5, 0],
-    [0, 0]
-    ];
+    [[0, 0],[13.5, 0],[13.5, 54],[-13.5, 54],[-13.5, 0],[0, 0]];
     //RED ROCKET LEFT
 var FIELDELEMENTPOLY1_FT = 
     [[-13.5, 17],[-13.5, 19.75],[-12.46, 19.15],[-12.46, 17.65],[-13.5, 17]];
@@ -22,16 +16,16 @@ var FIELDELEMENTPOLY2_FT =
     [[13.5, 17],[13.5, 19.75],[12.46, 19.15],[12.46, 17.65],[13.5, 17]];
     //BLUE ROCKET LEFT
 var FIELDELEMENTPOLY3_FT = 
-    [[-13.5, 33],[-13.5, 35.75],[-12.46, 35.15],[-12.46, 33.65],[-13.5, 33]];
+    [[-13.5, 37],[-13.5, 34.25],[-12.46, 34.85],[-12.46, 36.35],[-13.5, 37]];
     //BLUE ROCKET RIGHT
 var FIELDELEMENTPOLY4_FT = 
-    [[13.5, 33],[13.5, 35.75],[12.46, 35.15],[12.46, 33.65],[13.5, 33]];
+    [[13.5, 37],[13.5, 34.25],[12.46, 34.85],[12.46, 36.35],[13.5, 37]];
     //RED CARGO SHIP
 var FIELDELEMENTPOLY5_FT = 
-    [[0, 18],[2.3, 18],[2.3, 25],[-2.3, 25],[-2.3, 18],[0, 18]];
+    [[0, 26.25],[2.3, 26.25],[2.3, 19.14],[-2.3, 19.11],[-2.3, 26.25],[0, 26.25]];
     //BLUE CARGO SHIP
 var FIELDELEMENTPOLY6_FT = 
-    [[0, 33.75],[2.3, 33.75],[2.3, 26.75],[-2.3, 26.75],[-2.3, 33.75],[0, 33.75]];  
+    [[0, 27.75],[2.3, 27.75],[2.3, 34.86],[-2.3, 34.86],[-2.3, 27.75],[0, 27.75]];  
     //RED HAB
 var FIELDELEMENTPOLY7_FT = 
     [[0, 0],[6.5, 0],[6.5, 4],[6.3, 4],[6.3, 7.11],[-6.3, 7.11],[-6.3, 4],[-6.5, 4],[-6.5, 0],[0, 0]];
@@ -40,16 +34,29 @@ var FIELDELEMENTPOLY8_FT =
     [[0, 54],[6.5, 54],[6.5, 50],[6.3, 50],[6.3, 47],[-6.3, 47],[-6.3, 50],[-6.5, 50],[-6.5, 54],[0, 54]];
 
 var FIELDTAPEPOLY1_FT = 
-    [[0.9, 16.5],[0.9, 35.25],[0.8, 35.25],[0.8, 16.5],[0.9, 16.5]];
+    [[0.9, 17.64],[0.9, 36.36],[0.7, 36.36],[0.7, 17.64],[0.9, 17.64]];
 
 var FIELDTAPEPOLY2_FT = 
-    [[-0.9, 16.5],[-0.9, 35.25],[-0.8, 35.25],[-0.8, 16.5],[-0.9, 16.5]];
+    [[-0.9, 17.64],[-0.9, 36.36],[-0.7, 36.36],[-0.7, 17.64],[-0.7, 17.64]];
 
 var FIELDTAPEPOLY3_FT = 
     [[3.85, 21.4],[3.85, 21.6],[-3.85, 21.6],[-3.85, 21.4],[3.85, 21.4]];
 
 var FIELDTAPEPOLY4_FT = 
     [[3.85, 23.2],[3.85, 23.4],[-3.85, 23.4],[-3.85, 23.2],[3.85, 23.2]];
+
+var FIELDTAPEPOLY5_FT = 
+    [[3.85, 25],[3.85, 25.2],[-3.85, 25.2],[-3.85, 25],[3.85, 25]];
+
+var FIELDTAPEPOLY6_FT = 
+    [[3.85, 28.5],[3.85, 28.7],[-3.85, 28.7],[-3.85, 28.5],[3.85, 28.5]];
+
+var FIELDTAPEPOLY7_FT = 
+    [[3.85, 30.3],[3.85, 30.5],[-3.85, 30.5],[-3.85, 30.3],[3.85, 30.3]];    
+
+var FIELDTAPEPOLY8_FT = 
+    [[3.85, 32.1],[3.85, 32.3],[-3.85, 32.3],[-3.85, 32.1],[3.85, 32.1]];    
+
 //Render Constants
 var PX_PER_FOOT = 15;
 var FIELD_COLOR = '#534F4D';
@@ -265,7 +272,7 @@ function procData(json_data) {
             this.ctx.closePath();
             this.ctx.fill();
 
-            //DRAW GAFFERS TAPE 3
+            //DRAW GAFFERS TAPE 4
             this.ctx.beginPath();
             for (i = 0; i < FIELDTAPEPOLY4_FT.length; i++) {
                 x_px = FIELDTAPEPOLY4_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
@@ -281,6 +288,69 @@ function procData(json_data) {
             this.ctx.closePath();
             this.ctx.fill();
 
+            //DRAW GAFFERS TAPE 5
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDTAPEPOLY5_FT.length; i++) {
+                x_px = FIELDTAPEPOLY5_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDTAPEPOLY5_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+                                
+            //DRAW GAFFERS TAPE 6
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDTAPEPOLY6_FT.length; i++) {
+                x_px = FIELDTAPEPOLY6_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDTAPEPOLY6_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+            //DRAW GAFFERS TAPE 7
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDTAPEPOLY7_FT.length; i++) {
+                x_px = FIELDTAPEPOLY7_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDTAPEPOLY7_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+            //DRAW GAFFERS TAPE 8
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDTAPEPOLY8_FT.length; i++) {
+                x_px = FIELDTAPEPOLY8_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDTAPEPOLY8_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
 
             this.ctx.fillStyle = RED_FIELD_ELEMENT_COLOR;
             //draw RED ROCKET LEFT

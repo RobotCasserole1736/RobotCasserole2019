@@ -1,8 +1,8 @@
 /*----------------------------------------------------------------------------*/
-/* Copyright (c) 2017-2018 FIRST. All Rights Reserved.                                                */
-/* Open Source Software - may be modified and shared by FRC teams. The code     */
+/* Copyright (c) 2017-2018 FIRST. All Rights Reserved.                        */
+/* Open Source Software - may be modified and shared by FRC teams. The code   */
 /* must be accompanied by the FIRST BSD license file in the root directory of */
-/* the project.                                                                                                                             */
+/* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
 package frc.robot;
@@ -148,14 +148,14 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopInit() {
         dataServer.logger.startLoggingTeleop();
-        ledController.setPattern(LEDPatterns.Pattern1);
+        ledController.setPattern(LEDPatterns.Pattern3);
         matchState.SetPeriod(MatchState.Period.OperatorControl);
     }
 
     @Override
     public void autonomousInit() {
         dataServer.logger.startLoggingAuto();
-        ledController.setPattern(LEDPatterns.Pattern2);
+        ledController.setPattern(LEDPatterns.Pattern4);
         matchState.SetPeriod(MatchState.Period.Autonomous);
     }
 
@@ -234,7 +234,7 @@ public class Robot extends TimedRobot {
     @Override
     public void disabledInit() {
         dataServer.logger.stopLogging();
-        ledController.setPattern(LEDPatterns.Pattern4);
+        ledController.setPattern(LEDPatterns.Pattern1);
         matchState.SetPeriod(MatchState.Period.Disabled);
     }
 
@@ -248,7 +248,6 @@ public class Robot extends TimedRobot {
         /* Sample inputs from humans to keep telemetry updated, but we won't actually use it. */
         driverController.update();
         operatorController.update();
-
 
         /* Map subsystem IO */
 
@@ -266,6 +265,7 @@ public class Robot extends TimedRobot {
         //Keep drivetrain stopped.
         drivetrain.setOpenLoopCmd(0,0);
         drivetrain.update();
+        drivetrain.updateGains(false);
 
         poseCalc.setLeftMotorSpeed(drivetrain.getLeftWheelSpeedRPM());
         poseCalc.setRightMotorSpeed(drivetrain.getRightWheelSpeedRPM());

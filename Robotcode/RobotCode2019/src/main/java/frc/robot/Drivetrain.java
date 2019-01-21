@@ -68,6 +68,14 @@ public class Drivetrain implements DrivetrainInterface {
         dTrainIF.update();
     }
 
+    public void updateGains(boolean force){
+        if(dTrainR != null){
+            dTrainR.updateGains(force);
+        } else {
+            dTrainS.updateGains();
+        }
+    }
+
     public double getLeftWheelSpeedRPM(){
         return dTrainIF.getLeftWheelSpeedRPM();
     }

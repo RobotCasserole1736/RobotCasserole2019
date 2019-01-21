@@ -28,6 +28,9 @@ public class RobotPose {
 	public double rightVelosity_RPM;
 	public final double wheelRadius_Ft = 0.24;
 	public final double robotRadius_Ft  = 0.9;
+	public final double Math_PI = 3.14;
+	public final double FIELD_LENGTH_FT = 54;
+	public final double FIELD_HALF_WIDTH_FT = 13.47;
 	public double poseX = 0;
 	public double poseY = 0;
 	public double poseThaddeus = 90;
@@ -63,29 +66,33 @@ public class RobotPose {
 	}
 	
 	public void update() {
-		double leftVelosity_FPS = leftVelosity_RPM * (2*3.14*wheelRadius_Ft / 60);
-		double rightVelosity_FPS = rightVelosity_RPM * (2*3.14*wheelRadius_Ft / 60);
-		double robotAngle_DPS = ((rightVelosity_FPS-leftVelosity_FPS)/(2*robotRadius_Ft) * 180/3.14);
+		double leftVelosity_FPS = leftVelosity_RPM * (2*Math_PI*wheelRadius_Ft / 60);
+		double rightVelosity_FPS = rightVelosity_RPM * (2*Math_PI*wheelRadius_Ft / 60);
+		double robotAngle_DPS = ((rightVelosity_FPS-leftVelosity_FPS)/(2*robotRadius_Ft));
 		double X_dot = (rightVelosity_FPS+leftVelosity_FPS)/2; 
 		
-		velosityX = 0.02 * (X_dot*Math.cos(poseThaddeus*(3.14/180)));
-		velosityY = 0.02 * (X_dot*Math.sin(poseThaddeus*(3.14/180)));
+		Math.toRadians(poseThaddeus);
+
+		Math.toDegrees((rightVelosity_FPS-leftVelosity_FPS)/(2*robotRadius_Ft));
+
+		velosityX = 0.02 * (X_dot*Math.cos(poseThaddeus));
+		velosityY = 0.02 * (X_dot*Math.sin(poseThaddeus));
 		
 		if(poseY < 0) { 
 			velosityY = 0;
 			velosityX = 0;
 			
 		}
-		if(poseY > 54){
+		if(poseY > FIELD_LENGTH_FT){
 			velosityY = 0;
 			velosityX = 0;
 			
 		}
-		if(poseX < -13.47){
+		if(poseX < -FIELD_HALF_WIDTH_FT){
 			velosityX = 0;
 			velosityY = 0;
 		}
-		if(poseX > 13.47){
+		if(poseX > FIELD_HALF_WIDTH_FT){
 			velosityX = 0;
 			velosityY = 0;
 		}
@@ -102,6 +109,7 @@ public class RobotPose {
 		ActX.addSample(sample_time_ms,poseX);
 		ActY.addSample(sample_time_ms,poseY);
 		ActT.addSample(sample_time_ms,poseThaddeus);
+
 		}
 	
 	public void reset() {
