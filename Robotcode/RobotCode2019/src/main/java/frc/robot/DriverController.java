@@ -34,6 +34,7 @@ public class DriverController {
     /* Driver input command state */
     double    driverFwdRevCmd;
     double    driverRotateCmd;
+    double    invertFactor = 1;
     boolean   slowMoveReq;
     boolean   gyroAngleLockReq;
     boolean   compressorDisableReq;
@@ -135,6 +136,14 @@ public class DriverController {
         } else {
             gyroAngleLockReq = false;
         }
+
+        if(xb.getBumper(Hand.kLeft)){
+            invertFactor = -1;
+        } else {
+            invertFactor = 1;
+        } 
+
+        driverFwdRevCmd *= invertFactor;
 
         /*Update Telemetry */
         double sample_time_ms = LoopTiming.getInstance().getLoopStartTime_sec()*1000.0;
