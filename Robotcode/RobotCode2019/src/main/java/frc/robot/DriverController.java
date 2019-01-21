@@ -143,7 +143,9 @@ public class DriverController {
             invertFactor = 1;
         } 
 
+        //If we want to drive backward, invert the command.
         driverFwdRevCmd *= invertFactor;
+        driverRotateCmd *= invertFactor;
 
         /*Update Telemetry */
         double sample_time_ms = LoopTiming.getInstance().getLoopStartTime_sec()*1000.0;

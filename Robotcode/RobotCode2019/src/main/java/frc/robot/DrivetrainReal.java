@@ -113,10 +113,15 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
         rightTalon2.follow(rightTalon1);
         leftTalon2.follow(leftTalon1);
 
-        //Invert the left side of the drivetrain.
-        leftTalon1.setInverted(true);
+        //Invert the motor direction on one side of the drivetrain.
+        rightTalon1.setInverted(true);
+        leftTalon1.setInverted(false);
         rightTalon2.setInverted(InvertType.FollowMaster);
         leftTalon2.setInverted(InvertType.FollowMaster);
+
+        //Set up Phase so that the sensors report positive measurment for forward motion
+        rightTalon1.setSensorPhase(true);
+        leftTalon1.setSensorPhase(true);
 
         //Set coast mode always
         rightTalon1.setNeutralMode(NeutralMode.Coast);
@@ -133,10 +138,14 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
 		rightTalon1.configVelocityMeasurementWindow(4, TIMEOUT_MS);
 		leftTalon1.configVelocityMeasurementWindow(4, TIMEOUT_MS);
 
+
+
+        // Start in OpenLoop
         opMode     = DrivetrainOpMode.OpenLoop;
         opModeCmd  = DrivetrainOpMode.OpenLoop;
         prevOpMode = DrivetrainOpMode.OpenLoop;
 
+        // Configure closed-loop gain calibrations
         gyroGain_P = new Calibration("Drivetrain Gyro Lock P Gain", 0.001);
         gyroGain_I = new Calibration("Drivetrain Gyro Lock I Gain", 0.0);
         gyroGain_D = new Calibration("Drivetrain Gyro Lock D Gain", 0.0);
@@ -152,8 +161,7 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
 
         gyroCompGain_P = new Calibration("Drivetrain Gyro Compensation P Gain", 0.001);
 
-        gyroLockPID = new PIDController(gyroGain_P.get(), gyroGain_I.get(), gyroGain_D.get(), this, this);
-
+        //Telemetry
         currentR1Sig = new Signal("Drivetrain R1 Motor Current", "A");
         currentR2Sig = new Signal("Drivetrain R2 Motor Current", "A");
         currentL1Sig = new Signal("Drivetrain L1 Motor Current", "A");
@@ -165,6 +173,10 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
         leftMotorCmdSig = new Signal("Left Motor Command", "cmd");
         rightMotorCmdSig = new Signal("Right Motor Command", "cmd");
         gyroLockRotationCmdSig = new Signal("Gyro-Lock Rotation Command", "cmd");
+
+        gyroLockPID = new PIDController(gyroGain_P.get(), gyroGain_I.get(), gyroGain_D.get(), this, this);
+
+        updateGains(true);
     }
 
     public void setOpenLoopCmd(double forwardReverseCmd_in, double rotaionCmd_in) {
@@ -225,11 +237,11 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
     }
 
     public double getLeftMotorCmd() {
-        return leftTalon1.get();
+        return leftTalon1.getMotorOutputPercent();
     }
 
     public double getRightMotorCmd() {
-        return rightTalon1.get();
+        return rightTalon1.getMotorOutputPercent();
     }
 
     public double getGyroLockRotationCmd(){
@@ -244,44 +256,44 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
         return ctre_units * 600.0 / ENCODER_CYCLES_PER_REV / 4.0;
     }
     
-    public void updateGains(){
-        if(gyroGain_P.isChanged() || gyroGain_I.isChanged() || gyroGain_D.isChanged()){
+    public void updateGains(boolean force){
+        if(force || gyroGain_P.isChanged() || gyroGain_I.isChanged() || gyroGain_D.isChanged()){
             gyroLockPID.setPID(gyroGain_P.get(), gyroGain_I.get(), gyroGain_D.get());
             gyroGain_P.acknowledgeValUpdate();
             gyroGain_I.acknowledgeValUpdate();
             gyroGain_D.acknowledgeValUpdate();
         }
 
-        if(rightDtGain_P.isChanged()){
+        if(force || rightDtGain_P.isChanged()){
             rightTalon1.config_kP(0, rightDtGain_P.get());
             rightDtGain_P.acknowledgeValUpdate();
         }
-        if(rightDtGain_I.isChanged()){
+        if(force || rightDtGain_I.isChanged()){
             rightTalon1.config_kI(0, rightDtGain_I.get());
             rightDtGain_I.acknowledgeValUpdate();
         }
-        if(rightDtGain_D.isChanged()){
+        if(force || rightDtGain_D.isChanged()){
             rightTalon1.config_kD(0, rightDtGain_D.get());
             rightDtGain_D.acknowledgeValUpdate();
         }
-        if(rightDtGain_F.isChanged()){
+        if(force || rightDtGain_F.isChanged()){
             rightTalon1.config_kF(0, rightDtGain_F.get());
             rightDtGain_F.acknowledgeValUpdate();
         }
         
-        if(leftDtGain_P.isChanged()){
+        if(force || leftDtGain_P.isChanged()){
             leftTalon1.config_kP(0, leftDtGain_P.get());
             leftDtGain_P.acknowledgeValUpdate();
         }
-        if(leftDtGain_I.isChanged()){
+        if(force || leftDtGain_I.isChanged()){
             leftTalon1.config_kI(0, leftDtGain_I.get());
             leftDtGain_I.acknowledgeValUpdate();
         }
-        if(leftDtGain_D.isChanged()){
+        if(force || leftDtGain_D.isChanged()){
             leftTalon1.config_kD(0, leftDtGain_D.get());
             leftDtGain_D.acknowledgeValUpdate();
         }
-        if(leftDtGain_F.isChanged()){
+        if(force || leftDtGain_F.isChanged()){
             leftTalon1.config_kF(0, leftDtGain_F.get());
             leftDtGain_F.acknowledgeValUpdate();
         }

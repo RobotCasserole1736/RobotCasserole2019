@@ -138,13 +138,13 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopInit() {
         CasseroleDataServer.getInstance().logger.startLoggingTeleop();
-        LEDController.getInstance().setPattern(LEDPatterns.Pattern1);
+        LEDController.getInstance().setPattern(LEDPatterns.Pattern3);
     }
 
     @Override
     public void autonomousInit() {
         CasseroleDataServer.getInstance().logger.startLoggingAuto();
-        LEDController.getInstance().setPattern(LEDPatterns.Pattern2);
+        LEDController.getInstance().setPattern(LEDPatterns.Pattern4);
     }
 
 
@@ -264,7 +264,7 @@ public class Robot extends TimedRobot {
     @Override
     public void disabledInit() {
         CasseroleDataServer.getInstance().logger.stopLogging();
-        LEDController.getInstance().setPattern(LEDPatterns.Pattern4);
+        LEDController.getInstance().setPattern(LEDPatterns.Pattern1);
     }
 
     /**
@@ -307,7 +307,7 @@ public class Robot extends TimedRobot {
         //Keep drivetrain stopped.
         Drivetrain.getInstance().setOpenLoopCmd(0,0);
         Drivetrain.getInstance().update();
-        Drivetrain.getInstance().updateGains();
+        Drivetrain.getInstance().updateGains(false);
 
         poseCalc.setLeftMotorSpeed(Drivetrain.getInstance().getLeftWheelSpeedRPM());
         poseCalc.setRightMotorSpeed(Drivetrain.getInstance().getRightWheelSpeedRPM());

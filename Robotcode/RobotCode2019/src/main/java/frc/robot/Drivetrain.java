@@ -84,9 +84,9 @@ public class Drivetrain implements DrivetrainInterface {
         }
     }
 
-    public void updateGains(){
+    public void updateGains(boolean force){
         if(dTrainR != null){
-            dTrainR.updateGains();
+            dTrainR.updateGains(force);
         } else {
             dTrainS.updateGains();
         }
