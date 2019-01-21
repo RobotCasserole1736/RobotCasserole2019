@@ -83,4 +83,23 @@ public class Drivetrain implements DrivetrainInterface {
             dTrainS.update();
         }
     }
+
+    public double getLeftWheelSpeedRPM(){
+        if(dTrainR != null){
+            return dTrainR.getSpeedLeftRPM();
+        } else {
+            return dTrainS.getSpeedLeftRPM();
+        }
+    }
+
+    public double getRightWheelSpeedRPM(){
+        if(dTrainR != null){
+            return dTrainR.getSpeedRightRPM();
+        } else {
+            return dTrainS.getSpeedRightRPM();
+        }
+    }
+
+
+
 }

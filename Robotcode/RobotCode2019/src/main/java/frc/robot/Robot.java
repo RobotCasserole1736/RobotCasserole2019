@@ -37,7 +37,12 @@ import frc.lib.DataServer.Signal;
 import frc.lib.LoadMon.CasseroleRIOLoadMonitor;
 import frc.lib.WebServer.CasseroleDriverView;
 import frc.lib.WebServer.CasseroleWebServer;
+import frc.robot.Arm.ArmPosReq;
+import frc.robot.IntakeControl.IntakePos;
+import frc.robot.IntakeControl.IntakeSpd;
 import frc.robot.LEDController.LEDPatterns;
+import frc.robot.PEZControl.GamePiece;
+import frc.robot.PEZControl.PEZPos;
 
 
 /**
@@ -88,21 +93,17 @@ public class Robot extends TimedRobot {
         webserver = new CasseroleWebServer();
         wrangler = new CalWrangler();
 
-        poseCalc = new RobotPose();
-
-        onboardAccel = new BuiltInAccelerometer();
-
-        poseCalc.robotPose();
         /* Init Robot parts */
         pdp = new PowerDistributionPanel(RobotConstants.POWER_DISTRIBUTION_PANEL_CANID);
         LEDController.getInstance();
         PneumaticsControl.getInstance();
         jevois = new JeVoisInterface(false);
-        //Arm.getInstance();
+        Arm.getInstance();
         Drivetrain.getInstance();
         Climber.getInstance();
-        //Intake
         IntakeControl.getInstance();
+        PEZControl.getInstance();
+        onboardAccel = new BuiltInAccelerometer();
 
         testSensor = new Ultrasonic(3, "Test");
 
@@ -113,6 +114,7 @@ public class Robot extends TimedRobot {
         /* Init software utilities */
         loadMon= new CasseroleRIOLoadMonitor();
         LoopTiming.getInstance();
+        poseCalc = new RobotPose();
 
         /* Init local telemetry signals */
         rioDS_SAMPLoad = new Signal("dataserver stored samples", "count"); 
@@ -156,11 +158,60 @@ public class Robot extends TimedRobot {
         DriverController.getInstance().update();
         OperatorController.getInstance().update();
 
-        IntakeControl.getInstance().setPositionCmd(DriverController.getInstance().getIntakePosReq());
-        IntakeControl.getInstance().setSpeedCmd(DriverController.getInstance().getIntakeSpdReq());
-        IntakeControl.getInstance().update();
 
         /* Map subsystem IO */
+
+        //Operator Controller provides commands to Arm
+        Arm.getInstance().setIntakeActualState(IntakeControl.getInstance().getEstimatedPosition());
+        Arm.getInstance().setManualMovementCmd(OperatorController.getInstance().getArmManualPosCmd());
+        Arm.getInstance().setPositionCmd(OperatorController.getInstance().getArmPosReq());
+        Arm.getInstance().update();
+
+        //Update Gripper Control
+        if(OperatorController.getInstance().getBallPickupReq()){
+            //Cargo Pickup is requested
+            PEZControl.getInstance().setPositionCmd(PEZPos.CargoGrab);
+        } else if(OperatorController.getInstance().getHatchPickupReq()){
+            //Hatch Pickup Requested
+            PEZControl.getInstance().setPositionCmd(PEZPos.HatchGrab);
+        } else if(OperatorController.getInstance().getReleaseReq()) {
+            //Release whatever we currently have in our gripper
+            if(PEZControl.getInstance().getHeldGamePiece() == GamePiece.Cargo){
+                PEZControl.getInstance().setPositionCmd(PEZPos.CargoRelease);
+            } else if(PEZControl.getInstance().getHeldGamePiece() == GamePiece.Hatch){
+                PEZControl.getInstance().setPositionCmd(PEZPos.HatchRelease);
+            } else {
+                PEZControl.getInstance().setPositionCmd(PEZPos.None);
+            }
+        } else {
+            PEZControl.getInstance().setPositionCmd(PEZPos.None);
+        }
+        PEZControl.getInstance().update();
+
+
+        //Arbitrate Intake commands from driver and operator and arm
+        if(DriverController.getInstance().getIntakePosReq() == IntakePos.Extend || 
+           OperatorController.getInstance().getIntakePosReq() == IntakePos.Extend || 
+           Arm.getInstance().intakeExtendOverride() == true) {
+            IntakeControl.getInstance().setPositionCmd(IntakePos.Extend);
+        } else {
+            IntakeControl.getInstance().setPositionCmd(IntakePos.Retract);
+        }
+
+        if(DriverController.getInstance().getIntakeSpdReq() == IntakeSpd.Eject ||
+           OperatorController.getInstance().getIntakeSpdReq() == IntakeSpd.Eject ){
+            IntakeControl.getInstance().setSpeedCmd(IntakeSpd.Eject);
+        } else if(DriverController.getInstance().getIntakeSpdReq() == IntakeSpd.Intake ||
+                  OperatorController.getInstance().getIntakeSpdReq() == IntakeSpd.Intake ){
+            IntakeControl.getInstance().setSpeedCmd(IntakeSpd.Intake);
+        } else {
+            IntakeControl.getInstance().setSpeedCmd(IntakeSpd.Stop);
+        }
+
+        IntakeControl.getInstance().update();
+
+
+        //Arbitrate driver & auto sequencer inputs to drivetrain
         if(DriverController.getInstance().getGyroAngleLockReq()){
             //Map driver inputs to drivetrain in gyro-lock mode
             Drivetrain.getInstance().setGyroLockCmd(DriverController.getInstance().getDriverFwdRevCmd());
@@ -169,20 +220,22 @@ public class Robot extends TimedRobot {
             Drivetrain.getInstance().setOpenLoopCmd(DriverController.getInstance().getDriverFwdRevCmd(), DriverController.getInstance().getDriverRotateCmd());
         }
 
-        IntakeControl.getInstance().setPositionCmd(OperatorController.getInstance().getIntakePosReq());
-
-        /* Update subsytems */
-        LEDController.getInstance().update();
         Drivetrain.getInstance().update();
+
+        poseCalc.setLeftMotorSpeed(Drivetrain.getInstance().getLeftWheelSpeedRPM());
+        poseCalc.setRightMotorSpeed(Drivetrain.getInstance().getRightWheelSpeedRPM());
+        poseCalc.update();
+
+
+        /* Update Other subsytems */
+        LEDController.getInstance().update();
         PneumaticsControl.getInstance().update();
-        Arm.getInstance().update();
         Climber.getInstance().update();
         telemetryUpdate();
-        poseCalc.update();
-        IntakeControl.getInstance().update();
+
+
         
         LoopTiming.getInstance().markLoopEnd();
-
     }
 
     /**
@@ -220,25 +273,55 @@ public class Robot extends TimedRobot {
     @Override
     public void disabledPeriodic() {
         LoopTiming.getInstance().markLoopStart();
-        
-        testSensor.update();
 
-        /* Read from humans to keep telemetry up to date */
+        /* Sample inputs from humans to keep telemetry updated, but we won't actually use it. */
         DriverController.getInstance().update();
         OperatorController.getInstance().update();
-        
-        /*Set commands to safe stopped state */
-        Drivetrain.getInstance().setOpenLoopCmd(0,0);
 
-        /* Update subsystems */
-        LEDController.getInstance().update();
-        Drivetrain.getInstance().update();
-        PneumaticsControl.getInstance().update();
+
+        /* Map subsystem IO */
+
+        //Initial Match State - Arm in Lower Position
+        Arm.getInstance().setIntakeActualState(IntakeControl.getInstance().getEstimatedPosition());
+        Arm.getInstance().setManualMovementCmd(0);
+        Arm.getInstance().setPositionCmd(ArmPosReq.Lower);
         Arm.getInstance().update();
-        Climber.getInstance().update();
+
+        //Update Gripper Control - pull position command from driver view interface.
+        String gp_start = CasseroleDriverView.getAutoSelectorVal("Starting Gamepiece");
+        if(gp_start.compareTo(GamePiece.Cargo.toString())==0){
+            PEZControl.getInstance().setPositionCmd(PEZPos.CargoGrab);
+        } else if(gp_start.compareTo(GamePiece.Hatch.toString())==0){
+            PEZControl.getInstance().setPositionCmd(PEZPos.HatchGrab);
+        } else {
+            PEZControl.getInstance().setPositionCmd(PEZPos.HatchRelease);
+        }
+        PEZControl.getInstance().update();
+
+
+        //Start intake within frame perimiter and in safe state
+        IntakeControl.getInstance().setPositionCmd(IntakePos.Retract);
+        IntakeControl.getInstance().setSpeedCmd(IntakeSpd.Stop);
+        IntakeControl.getInstance().update();
+
+
+        //Keep drivetrain stopped.
+        Drivetrain.getInstance().setOpenLoopCmd(0,0);
+        Drivetrain.getInstance().update();
+
+        poseCalc.setLeftMotorSpeed(Drivetrain.getInstance().getLeftWheelSpeedRPM());
+        poseCalc.setRightMotorSpeed(Drivetrain.getInstance().getRightWheelSpeedRPM());
         poseCalc.update();
 
+
+        /* Update Other subsytems */
+        LEDController.getInstance().update();
+        PneumaticsControl.getInstance().update();
+        Climber.getInstance().update();
         telemetryUpdate();
+
+
+        
         LoopTiming.getInstance().markLoopEnd();
     }
     
@@ -268,7 +351,7 @@ public class Robot extends TimedRobot {
      * This function sets up the driver view website
      */
     private void initDriverView(){
-        String[] gpOptions =    {"Cargo (ball)", "Hatch Panel", "Nothing"};
+        String[] gpOptions =    {GamePiece.Cargo.toString(), GamePiece.Hatch.toString(), GamePiece.Nothing.toString()};
         CasseroleDriverView.newAutoSelector("Starting Gamepiece", gpOptions);
         CasseroleDriverView.newDial("Main System Pressure", 0, 140, 10, 80, 125);
         CasseroleDriverView.newWebcam("cam1", RobotConstants.CAM_1_STREAM_URL, 0, 0, 0);

@@ -24,7 +24,7 @@ public class RobotPose {
 	Signal ActY;
 	Signal ActT;
 
-	public void robotPose() {
+	public RobotPose() {
 		DesX = new Signal("botDesPoseX", "in");
 		DesY = new Signal("botDesPoseY", "in");
 		DesT = new Signal("botDesPoseT", "deg");

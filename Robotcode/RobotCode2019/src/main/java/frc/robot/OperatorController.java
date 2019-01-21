@@ -163,7 +163,7 @@ public class OperatorController {
         return this.releaseReq;
     }
 
-    public ArmPosReq getArmTopPosReq() {
+    public ArmPosReq getArmPosReq() {
         return this.armPosReq;
     }
 
@@ -183,7 +183,7 @@ public class OperatorController {
         return this.autoAlignLowReq;
     }
 
-    public IntakeSpd getIntakeIntakeReq() {
+    public IntakeSpd getIntakeSpdReq() {
         return this.intakeSpdReq;
     }
 

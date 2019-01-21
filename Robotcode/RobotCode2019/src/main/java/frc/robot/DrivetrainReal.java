@@ -177,7 +177,7 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
         return motor_speed_rpm_Right;
     }
 
-    public double getSpeedleftRPM() {
+    public double getSpeedLeftRPM() {
         return motor_speed_rpm_Left;
     }
 
@@ -240,7 +240,7 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
         opModeSig.addSample(sample_time_ms, opMode.toInt());
         gyroscopeSig.addSample(sample_time_ms, getGyroAngle());
         wheelSpeedRightSig.addSample(sample_time_ms, getSpeedRightRPM());
-        wheelSpeedLeftSig.addSample(sample_time_ms, getSpeedleftRPM());
+        wheelSpeedLeftSig.addSample(sample_time_ms, getSpeedLeftRPM());
         leftMotorCmdSig.addSample(sample_time_ms, getLeftMotorCmd());
         rightMotorCmdSig.addSample(sample_time_ms, getRightMotorCmd());
         gyroLockRotationCmdSig.addSample(sample_time_ms, getGyroLockRotationCmd());

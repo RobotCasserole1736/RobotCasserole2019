@@ -24,7 +24,7 @@ package frc.robot;
 //import org.usfirst.frc.team1736.lib.Util.CrashTracker;
 
 import frc.lib.Calibration.*;
-
+import frc.robot.IntakeControl.IntakePos;
 import edu.wpi.first.wpilibj.Spark;
 
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
@@ -110,7 +110,7 @@ public class Arm {
     /////Analog Inputs\\\\\\\\
         armPot = new AnalogPotentiometer(RobotConstants.ARM_POS_SENSOR_PORT, voltageToDegreeMult, zeroOffset);
     /////Movers\\\\\
-        armBreak = new Solenoid(0);
+        armBreak = new Solenoid(RobotConstants.ARM_MECH_BRAKE_SOL_PORT);
         sadey = new Spark(RobotConstants.ARM_MOTOR_PORT);
     /////Digital Inputs\\\\\\\
         upperLimSwitch = new DigitalInput(RobotConstants.ARM_UPPER_LIMIT_SWITCH_PORT);
@@ -292,6 +292,24 @@ public class Arm {
     }
     public boolean atDesiredHeight() {
         return(desHeight == curHeight);
+    }
+
+    /**
+     * Set the current state of the intake. If Retracted, and the arm is 
+     * inside the Danger Zone, motion should be stopped.
+     * 
+     */
+    public void setIntakeActualState(IntakePos state_in){
+        //Todo
+    }
+
+    /**
+     * 
+     * @return True if the arm is forcing the intake to extend, false otherwise.
+     */
+    public boolean intakeExtendOverride(){
+        //TODO
+        return false;
     }
     
 

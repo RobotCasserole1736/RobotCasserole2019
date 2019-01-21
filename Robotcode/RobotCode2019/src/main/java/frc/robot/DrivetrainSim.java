@@ -30,7 +30,7 @@ public class DrivetrainSim implements DrivetrainInterface {
     }
 
     public void setOpenLoopCmd(double forwardReverseCmd_in, double rotaionCmd_in) {
-
+        //TODO
     }
 
     public boolean isGyroOnline(){
@@ -38,10 +38,18 @@ public class DrivetrainSim implements DrivetrainInterface {
     }
 
     public void setGyroLockCmd(double forwardReverseCmd_in) {
-
+        //TODO
     }
 
     public void update() {
-
+        //TODO
     }
+
+	public double getSpeedLeftRPM() {
+		return 0; //TODO
+	}
+
+	public double getSpeedRightRPM() {
+		return 0; //TODO
+	}
 }

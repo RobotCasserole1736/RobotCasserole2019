@@ -24,19 +24,25 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 
 public class PEZControl {
     
-	private static PEZControl empty = null;
+	private static PEZControl pezCtrl = null;
 
     DoubleSolenoid longS; 
     DoubleSolenoid shortS;
 
+    GamePiece curGamePiece;
+
+    PEZPos posReq;
+
+
 	public static synchronized PEZControl getInstance() {
-		if(empty == null)
-			empty = new  PEZControl();
-		return empty;
+		if(pezCtrl == null)
+			pezCtrl = new  PEZControl();
+		return pezCtrl;
     }
     
+
     public enum PEZPos {
-        CargoGrab(0), CargoRelease(1), HatchGrab(2), HatchRelease(3);
+        CargoGrab(0), CargoRelease(1), HatchGrab(2), HatchRelease(3), None(4);
         public final int value;
 
         private PEZPos(int value) {
@@ -44,7 +50,6 @@ public class PEZControl {
     
         }
     }
-
 
     public enum GamePiece {
         Nothing(0), Cargo(1), Hatch(2);
@@ -55,43 +60,46 @@ public class PEZControl {
     
         }
     }
+
 	// This is the private constructor that will be called once by getInstance() and it should instantiate anything that will be required by the class
 	private  PEZControl() {
 
         longS = new DoubleSolenoid(RobotConstants.LONG_SOLENOID_FORWARD_CHANNEL, RobotConstants.LONG_SOLENOID_REVERSE_CHANNEL);
-        shortS = new DoubleSolenoid(RobotConstants.SHORT_SOLENOID_FORWARD_CHANNEL, RobotConstants. SHORT_SOLENOID_REVERSE_CHANNEL);
+        shortS = new DoubleSolenoid(RobotConstants.SHORT_SOLENOID_FORWARD_CHANNEL, RobotConstants.SHORT_SOLENOID_REVERSE_CHANNEL);
+    }
+    
 
-	}
     public void update() {
 
-        if(OperatorController.getInstance().getBallPickupReq() == true){
-
+        if(posReq == PEZPos.CargoGrab){
            longS.set(DoubleSolenoid.Value.kReverse);
            shortS.set(DoubleSolenoid.Value.kReverse);
-        }
-        if(OperatorController.getInstance().getHatchPickupReq() == true){
-
+        } else if(posReq == PEZPos.HatchGrab){
             longS.set(DoubleSolenoid.Value.kForward);
             shortS.set(DoubleSolenoid.Value.kForward);
-        }
-        if(OperatorController.getInstance().getReleaseReq() == true){
-
+        }else if(posReq == PEZPos.HatchRelease || posReq == PEZPos.CargoRelease){
             longS.set(DoubleSolenoid.Value.kOff);
             shortS.set(DoubleSolenoid.Value.kOff);
+        }
+
+        if(posReq == PEZPos.HatchGrab){
+            curGamePiece = GamePiece.Hatch;
+        } else if(posReq == PEZPos.HatchRelease){
+            curGamePiece = GamePiece.Nothing;
+        } else if(posReq == PEZPos.CargoGrab) {
+            curGamePiece = GamePiece.Hatch;
+        } else if(posReq == PEZPos.CargoRelease) {
+            curGamePiece = GamePiece.Nothing;
         }
 
     }
 
 	public void setPositionCmd(PEZPos cmd_in){
-
-
+        posReq = cmd_in;
     }
 
     public GamePiece getHeldGamePiece(){
-        if(longS.get() == DoubleSolenoid.Value.kReverse)
-            return GamePiece.Cargo; 
-        else if (longS.get() == DoubleSolenoid.Value.kReverse)
-            return GamePiece.Hatch;
-        else 
-            return GamePiece.Nothing;    }
+        return curGamePiece;           
+    }
+
 }

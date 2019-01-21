@@ -137,6 +137,8 @@ public class IntakeControl {
         }else{ //If for some reason it is confused, don't run the intake
             intakeMotor.set(0);
         }
+
+        // Calcualte an estimate of current position
         if(intakeArmBar.get() == true){
             
             if(loopCounter == 0){
@@ -158,20 +160,7 @@ public class IntakeControl {
         solenoidArmState.addSample(sample_time_ms, currentPosition.toInt());
     }
 
-
-
-
-    // This is the private constructor that will be called once by getInstance() and it should instantiate anything that will be required by the class
-
-
-    //This is a dummy variable that you will probably want to delete
-    private boolean testIsEverythingOK = false;
-
-    // This is a dummy method that you will probably want to delete
-    public void TestCommand() {
-        if(testIsEverythingOK)
-            System.out.println("OK");
-        else
-            System.out.println("NOT OK");
+    public IntakePos getEstimatedPosition() {
+        return currentPosition;
     }
 }
