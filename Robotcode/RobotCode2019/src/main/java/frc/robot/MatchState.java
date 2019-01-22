@@ -20,7 +20,35 @@ package frc.robot;
  *   if you would consider donating to our club to help further STEM education.
  */
 
-public enum lineFolowerSensorStates {
-RIGHTSENSOROFFLINE, RIGHTSENSORHALFONLINE, RIGHTSENSORONLINE, MIDSENSOROFFLINE, MIDSENSORHALFONLINE, 
-MIDSENSORONLINE, LEFTSENSOROFFLINE, LEFTSENSORHALFONLINE, LEFTSENSORONLINE;
+public class MatchState {
+
+    public enum Period {
+        Disabled(0), Autonomous(1), OperatorControl(2), Test(3), Simulation(4);
+        public final int value;
+
+        private Period(int value) {
+            this.value = value;
+        }
+    }
+
+    private Period period;
+
+	private static MatchState matchState = null;
+	public static synchronized MatchState getInstance() {
+		if(matchState == null)
+			matchState = new MatchState();
+		return matchState;
+	}
+
+	private MatchState() {
+        period = Period.Disabled;
+	}
+
+	public void SetPeriod(Period currentPeriod) {
+        period = currentPeriod;
+    }
+    
+    public Period GetPeriod() {
+        return period;
+    }
 }

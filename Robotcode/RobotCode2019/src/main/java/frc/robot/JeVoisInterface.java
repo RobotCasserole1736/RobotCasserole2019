@@ -389,7 +389,7 @@ public class JeVoisInterface {
         bytes = visionPort.writeString(cmd + "\n");
         System.out.println("wrote " +  bytes + "/" + (cmd.length()+1) + " bytes, cmd: " + cmd);
         return bytes;
-    };
+    }
     
     /**
      * Sends a command over serial to the JeVois, waits for a response, and checks that response
@@ -407,7 +407,7 @@ public class JeVoisInterface {
             System.out.println(cmd + " timed out");
         }
         return retval;
-    };
+    }
 
     //Persistent but "local" variables for getBytesPeriodic()
     private String getBytesWork = "";
@@ -640,8 +640,6 @@ public class JeVoisInterface {
         jevoisFramerateSig.addSample(sample_time_ms, jeVoisFramerateFPS);
 
         return 0;
-
-        
     }
     
     

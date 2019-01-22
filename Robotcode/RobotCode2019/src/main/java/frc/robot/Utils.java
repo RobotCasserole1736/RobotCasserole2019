@@ -35,7 +35,7 @@ public class Utils {
         if(input < deadzone){
             //Input within deadzone range, set output to zero.
             output = 0;
-        } else {
+        } else{
             //Input is outside deadzon range, calcualte output
 
             //Raise input to desired power
@@ -53,5 +53,4 @@ public class Utils {
 
         return output;
     }
-
 }
