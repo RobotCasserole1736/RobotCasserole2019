@@ -26,21 +26,21 @@ public class LineFollower {
 
     public double forwardReverseCmd;
     public double rotationCmd;
-    public boolean sensor1;
-    public boolean sensor2;
-    public boolean sensor3;
-    public boolean sensor4;
-    public boolean sensor5;
+    public boolean sensor1State;
+    public boolean sensor2State;
+    public boolean sensor3State;
+    public boolean sensor4State;
+    public boolean sensor5State;
     public boolean sensor1Prev;
     public boolean sensor2Prev;
     public boolean sensor3Prev;
     public boolean sensor4Prev;
     public boolean sensor5Prev;
-    public double sensor1PosIn = 4;
-    public double sensor2PosIn = 2;
-    public double sensor3PosIn = 0;
-    public double sensor4PosIn = -2;
-    public double sensor5PosIn = -4;
+    public double sensor1Pos = 4;
+    public double sensor2Pos = 2;
+    public double sensor3Pos = 0;
+    public double sensor4Pos = -2;
+    public double sensor5Pos = -4;
     
     DigitalInput digitalInput1;
     DigitalInput digitalInput2;
@@ -65,56 +65,56 @@ public class LineFollower {
     }
 
     public void update() {
-        sensor1 = digitalInput1.get();
-        sensor2 = digitalInput2.get();
-        sensor3 = digitalInput3.get();
-        sensor4 = digitalInput4.get();
-        sensor5 = digitalInput5.get();
-        if(sensor1 == true && sensor1Prev == false){
+        sensor1State = digitalInput1.get();
+        sensor2State = digitalInput2.get();
+        sensor3State = digitalInput3.get();
+        sensor4State = digitalInput4.get();
+        sensor5State = digitalInput5.get();
+        if(sensor1State == true && sensor1Prev == false){
             forwardReverseCmd = 0;
             rotationCmd = 1;
-        } else if(sensor1 == false && sensor1Prev == false){
+        } else if(sensor1State == false && sensor1Prev == false){
             forwardReverseCmd = 0;
             rotationCmd = 0;
         }
 
-        if(sensor2 == true && sensor2Prev == false) {
+        if(sensor2State == true && sensor2Prev == false) {
             forwardReverseCmd = 0;
             rotationCmd = 50;
-        } else if(sensor2 == false && sensor2Prev == false){
+        } else if(sensor2State == false && sensor2Prev == false){
             forwardReverseCmd = 0;
             rotationCmd = 0;
         }
 
-        if(sensor3 == true && sensor3Prev == false){
+        if(sensor3State == true && sensor3Prev == false){
             forwardReverseCmd = 1;
             rotationCmd = 0;
-        } else if(sensor3 == false && sensor3Prev == false){
+        } else if(sensor3State == false && sensor3Prev == false){
             forwardReverseCmd = 0;
             rotationCmd = 0;
         }
 
-        if(sensor4 == true && sensor4Prev == false){
+        if(sensor4State == true && sensor4Prev == false){
             forwardReverseCmd = 0;
             rotationCmd = -50;
-        } else if(sensor4 == false && sensor5Prev == false){
+        } else if(sensor4State == false && sensor5Prev == false){
             forwardReverseCmd = 0;
             rotationCmd = 0;
         }
 
-        if(sensor5 == true && sensor5Prev == false){
+        if(sensor5State == true && sensor5Prev == false){
             forwardReverseCmd = 0;
             rotationCmd = -1;
-        } else if(sensor5 == false && sensor5Prev == false){
+        } else if(sensor5State == false && sensor5Prev == false){
             forwardReverseCmd = 0;
             rotationCmd = 0;
         }
         
-        sensor1Prev = sensor1;
-        sensor2Prev = sensor2;
-        sensor3Prev = sensor3;
-        sensor4Prev = sensor4;
-        sensor5Prev = sensor5;
+        sensor1Prev = sensor1State;
+        sensor2Prev = sensor2State;
+        sensor3Prev = sensor3State;
+        sensor4Prev = sensor4State;
+        sensor5Prev = sensor5State;
     }
     
 }

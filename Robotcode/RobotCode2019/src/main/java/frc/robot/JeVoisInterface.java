@@ -274,11 +274,11 @@ public class JeVoisInterface {
      * Returns the roboRIO measured serial packet recieve rate in packets per second
      */
     public int getPacketRxRate_PPS(){
-    	if(visionOnline){
-    		return (int)Math.round(packetRxRatePPS);
-    	} else {
-    		return 0;
-    	}
+        if(visionOnline){
+            return (int)Math.round(packetRxRatePPS);
+        } else {
+            return 0;
+        }
     }
 
     /**
@@ -457,7 +457,7 @@ public class JeVoisInterface {
                         retval = 0;
                         break;
                     }else if(testStr.contains("ERR")){
-                    	DriverStation.reportError("JeVois reported error:\n" + testStr, false);
+                        DriverStation.reportError("JeVois reported error:\n" + testStr, false);
                         retval = -1;
                         break;
                     }
@@ -489,16 +489,16 @@ public class JeVoisInterface {
         if (visionPort != null){
             while(Timer.getFPGATimestamp() - startTime < timeout_s){
                 // Keep trying to get bytes from the serial port until the timeout expires.
-            	
+                
                 
                 if (visionPort.getBytesReceived() > 0) {
                     // If there are any bytes available, read them in and 
                     //  append them to the buffer.
-                	packetBuffer = packetBuffer.append(visionPort.readString());
+                    packetBuffer = packetBuffer.append(visionPort.readString());
 
                     // Attempt to detect if the buffer currently contains a complete packet
                     if(packetBuffer.indexOf(PACKET_START_CHAR) != -1){
-                    	endIdx = packetBuffer.lastIndexOf(PACKET_END_CHAR);
+                        endIdx = packetBuffer.lastIndexOf(PACKET_END_CHAR);
                         if(endIdx != -1){
                             // Buffer also contains at least one start & end character.
                             // But we don't know if they're in the right order yet.
@@ -582,7 +582,7 @@ public class JeVoisInterface {
      */
     public int parsePacket(String pkt, double rx_Time){
         //Parsing constants. These must be aligned with JeVois code.
-		final int FRAME_CTR_TOKEN_IDX = 0; //currently unused
+        final int FRAME_CTR_TOKEN_IDX = 0; //currently unused
         final int TGT_VISIBLE_TOKEN_IDX = 1;
         final int TGT_X_TOKEN_IDX = 2;
         final int TGT_DIST_TOKEN_IDX = 3;
@@ -591,7 +591,7 @@ public class JeVoisInterface {
         final int JV_CPULOAD_TOKEN_IDX = 6;
         final int JV_CPUTEMP_TOKEN_IDX = 7;
         final int JV_PIPLINE_DELAY_TOKEN_IDX = 8;
-		final int NUM_EXPECTED_TOKENS = 9;
+        final int NUM_EXPECTED_TOKENS = 9;
 
         //Split string into many substrings, presuming those strings are separated by commas
         String[] tokens = pkt.split(",");
@@ -605,7 +605,7 @@ public class JeVoisInterface {
         //Convert each string into the proper internal value
         try {
             
-        	//Boolean values should only have T or F characters
+            //Boolean values should only have T or F characters
             if(tokens[TGT_VISIBLE_TOKEN_IDX].equals("F")){
                 tgtVisible = false;
             } else if (tokens[TGT_VISIBLE_TOKEN_IDX].equals("T")) {
@@ -648,9 +648,9 @@ public class JeVoisInterface {
      */
     Thread packetListenerThread = new Thread(new Runnable(){
         public void run(){
-        	while(!Thread.interrupted()){
-        		backgroundUpdate();   
-        	}
+            while(!Thread.interrupted()){
+                backgroundUpdate();   
+            }
         }
     });
     

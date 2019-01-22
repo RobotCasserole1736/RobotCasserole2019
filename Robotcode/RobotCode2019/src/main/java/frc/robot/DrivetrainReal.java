@@ -128,14 +128,14 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
         leftTalon1.setNeutralMode(NeutralMode.Coast); 
         leftTalon2.setNeutralMode(NeutralMode.Coast); 
 
-		//Motor Controller 1 is presumed to be the one with a sensor hooked up to it.
-		rightTalon1.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, TIMEOUT_MS);
-		leftTalon1.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, TIMEOUT_MS);
-		
-		//We need a fairly high bandwidth on the velocity measurement, so keep
-		// the averaging of velocity samples low to minimize phase shift
-		rightTalon1.configVelocityMeasurementWindow(4, TIMEOUT_MS);
-		leftTalon1.configVelocityMeasurementWindow(4, TIMEOUT_MS);
+        //Motor Controller 1 is presumed to be the one with a sensor hooked up to it.
+        rightTalon1.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, TIMEOUT_MS);
+        leftTalon1.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, TIMEOUT_MS);
+        
+        //We need a fairly high bandwidth on the velocity measurement, so keep
+        // the averaging of velocity samples low to minimize phase shift
+        rightTalon1.configVelocityMeasurementWindow(4, TIMEOUT_MS);
+        leftTalon1.configVelocityMeasurementWindow(4, TIMEOUT_MS);
 
 
 

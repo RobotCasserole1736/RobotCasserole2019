@@ -33,18 +33,18 @@ public class MatchState {
 
     private Period period;
 
-	private static MatchState matchState = null;
-	public static synchronized MatchState getInstance() {
-		if(matchState == null)
-			matchState = new MatchState();
-		return matchState;
-	}
+    private static MatchState matchState = null;
+    public static synchronized MatchState getInstance() {
+        if(matchState == null)
+            matchState = new MatchState();
+        return matchState;
+    }
 
-	private MatchState() {
+    private MatchState() {
         period = Period.Disabled;
-	}
+    }
 
-	public void SetPeriod(Period currentPeriod) {
+    public void SetPeriod(Period currentPeriod) {
         period = currentPeriod;
     }
     
