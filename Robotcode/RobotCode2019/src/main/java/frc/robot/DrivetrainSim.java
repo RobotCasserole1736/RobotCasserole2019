@@ -1,6 +1,5 @@
 package frc.robot;
 
-import com.ctre.phoenix.motorcontrol.InvertType;
 
 /*
  *******************************************************************************************
@@ -25,12 +24,21 @@ import com.ctre.phoenix.motorcontrol.InvertType;
 
 public class DrivetrainSim implements DrivetrainInterface {
 
-    public DrivetrainSim() {
+    DrivetrainOpMode opModeCmd;
+    DrivetrainOpMode opMode;
+    DrivetrainOpMode prevOpMode;
 
+    public double DesRightRPM;
+    public double DesLeftRPM;
+    public double ActRightRPM;
+    public double ActLeftRPM;
+
+    public DrivetrainSim() {
+        
     }
 
     public void setOpenLoopCmd(double forwardReverseCmd, double rotaionCmd) {
-        //TODO
+        opModeCmd = DrivetrainOpMode.OpenLoop;
     }
 
     public boolean isGyroOnline(){
@@ -38,21 +46,36 @@ public class DrivetrainSim implements DrivetrainInterface {
     }
 
     public void setGyroLockCmd(double forwardReverseCmd) {
-        //TODO
+        opModeCmd = DrivetrainOpMode.GyroLock;
     }
 
     public void update() {
-        //TODO
+
+        if(ActLeftRPM < DesLeftRPM){
+            ActLeftRPM++;
+        } else if (ActLeftRPM > DesLeftRPM){
+            ActLeftRPM--;
+        }
+        
+        if(ActRightRPM < DesRightRPM){
+            ActRightRPM++;
+        } else if (ActRightRPM > DesRightRPM){
+            ActRightRPM--;
+        }
+
+        prevOpMode = opMode;
+        opMode = opModeCmd;
     }
 
     public double getLeftWheelSpeedRPM() {
-        return 0; //TODO
+        return ActLeftRPM;
     }
 
     public double getRightWheelSpeedRPM() {
-        return 0; //TODO
+        return ActRightRPM;
     }
 
     public void updateGains(boolean force) {
+
     }
 }
