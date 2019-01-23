@@ -32,7 +32,7 @@ var FIELDELEMENTPOLY7_FT =
     //BLUE HAB
 var FIELDELEMENTPOLY8_FT = 
     [[0, 54],[6.5, 54],[6.5, 50],[6.3, 50],[6.3, 47],[-6.3, 47],[-6.3, 50],[-6.5, 50],[-6.5, 54],[0, 54]];
-
+    //cargo ship lines
 var FIELDTAPEPOLY1_FT = 
     [[0.9, 17.64],[0.9, 36.36],[0.7, 36.36],[0.7, 17.64],[0.9, 17.64]];
 
@@ -56,8 +56,55 @@ var FIELDTAPEPOLY7_FT =
 
 var FIELDTAPEPOLY8_FT = 
     [[3.85, 32.1],[3.85, 32.3],[-3.85, 32.3],[-3.85, 32.1],[3.85, 32.1]];    
+    //rocket ship lines
+var FIELDTAPEPOLY9_FT =
+    [[13.1, 17.8],[13.2, 17.8],[12.75, 16.5],[12.65, 16.5],[13.1, 17.8]]; 
+    
+var FIELDTAPEPOLY10_FT =
+    [[-13.1, 17.8],[-13.2, 17.8],[-12.75, 16.5],[-12.65, 16.5],[-13.1, 17.8]];
 
-//Render Constants
+var FIELDTAPEPOLY11_FT =
+    [[13, 19.3],[13.1, 19.3],[12.65, 20.3],[12.55, 20.3],[13, 19.3]]; 
+    
+var FIELDTAPEPOLY12_FT =
+    [[-13, 19.3],[-13.1, 19.3],[-12.65, 20.3],[-12.55, 20.3],[-13, 19.3]];
+    
+var FIELDTAPEPOLY13_FT =
+    [[13.1, 36.2],[13.2, 36.2],[12.75, 37.5],[12.65, 37.5],[13.1, 36.2]];
+    
+var FIELDTAPEPOLY14_FT =
+    [[-13.1, 36.2],[-13.2, 36.2],[-12.75, 37.5],[-12.65, 37.5],[-13.1, 36.2]];
+
+var FIELDTAPEPOLY15_FT =
+    [[13, 34.7],[13.1, 34.7],[12.65, 33.7],[12.55, 33.7],[13, 34.7]];
+
+var FIELDTAPEPOLY16_FT =
+    [[-13, 34.7],[-13.1, 34.7],[-12.65, 33.7],[-12.55, 33.7],[-13, 34.7]];
+
+var FIELDTAPEPOLY17_FT =
+    [[12.46, 18.3],[10.96, 18.3],[10.96, 18.5],[12.46, 18.5],[12.46, 18.3]];    
+
+var FIELDTAPEPOLY18_FT =
+    [[-12.46, 18.3],[-10.96, 18.3],[-10.96, 18.5],[-12.46, 18.5],[-12.46, 18.3]];
+
+var FIELDTAPEPOLY19_FT =
+    [[12.46, 35.7],[10.96, 35.7],[10.96, 35.5],[12.46, 35.5],[12.46, 35.7]];
+
+var FIELDTAPEPOLY20_FT =
+    [[-12.46, 35.7],[-10.96, 35.7],[-10.96, 35.5],[-12.46, 35.5],[-12.46, 35.7]];
+
+var FIELDTAPEPOLY21_FT =
+    [[-10.6, 0],[-10.6, 1.5],[-10.8, 1.5],[-10.8, 0],[-10.6, 0]];
+
+var FIELDTAPEPOLY22_FT =
+    [[10.6, 0],[10.6, 1.5],[10.8, 1.5],[10.8, 0],[10.6, 0]];
+
+var FIELDTAPEPOLY23_FT =
+    [[-10.6, 54],[-10.6, 52.5],[-10.8, 52.5],[-10.8, 54],[-10.6, 54]];    
+    
+var FIELDTAPEPOLY24_FT =
+    [[10.6, 54],[10.6, 52.5],[10.8, 52.5],[10.8, 54],[10.6, 54]];    
+    //Render Constants
 var PX_PER_FOOT = 15;
 var FIELD_COLOR = '#534F4D';
 var BOT_COLOR = '#d22';
@@ -352,6 +399,264 @@ function procData(json_data) {
             this.ctx.closePath();
             this.ctx.fill();
 
+           
+            //DRAW GAFFERS TAPE 9
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDTAPEPOLY9_FT.length; i++) {
+                x_px = FIELDTAPEPOLY9_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDTAPEPOLY9_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+            //DRAW GAFFERS TAPE 10
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDTAPEPOLY10_FT.length; i++) {
+                x_px = FIELDTAPEPOLY10_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDTAPEPOLY10_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+            //DRAW GAFFERS TAPE 11
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDTAPEPOLY11_FT.length; i++) {
+                x_px = FIELDTAPEPOLY11_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDTAPEPOLY11_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+            //DRAW GAFFERS TAPE 12
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDTAPEPOLY12_FT.length; i++) {
+                x_px = FIELDTAPEPOLY12_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDTAPEPOLY12_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+            //DRAW GAFFERS TAPE 13
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDTAPEPOLY13_FT.length; i++) {
+                x_px = FIELDTAPEPOLY13_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDTAPEPOLY13_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+            //DRAW GAFFERS TAPE 14
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDTAPEPOLY14_FT.length; i++) {
+                x_px = FIELDTAPEPOLY14_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDTAPEPOLY14_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+            
+            //DRAW GAFFERS TAPE 15
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDTAPEPOLY15_FT.length; i++) {
+                x_px = FIELDTAPEPOLY15_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDTAPEPOLY15_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+            //DRAW GAFFERS TAPE 16
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDTAPEPOLY16_FT.length; i++) {
+                x_px = FIELDTAPEPOLY16_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDTAPEPOLY16_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+            //DRAW GAFFERS TAPE 17
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDTAPEPOLY17_FT.length; i++) {
+                x_px = FIELDTAPEPOLY17_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDTAPEPOLY17_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+            //DRAW GAFFERS TAPE 18
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDTAPEPOLY18_FT.length; i++) {
+                x_px = FIELDTAPEPOLY18_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDTAPEPOLY18_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+            //DRAW GAFFERS TAPE 19
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDTAPEPOLY19_FT.length; i++) {
+                x_px = FIELDTAPEPOLY19_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDTAPEPOLY19_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+            //DRAW GAFFERS TAPE 20
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDTAPEPOLY20_FT.length; i++) {
+                x_px = FIELDTAPEPOLY20_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDTAPEPOLY20_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+            //DRAW GAFFERS TAPE 21
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDTAPEPOLY21_FT.length; i++) {
+                x_px = FIELDTAPEPOLY21_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDTAPEPOLY21_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+            //DRAW GAFFERS TAPE 22
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDTAPEPOLY22_FT.length; i++) {
+                x_px = FIELDTAPEPOLY22_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDTAPEPOLY22_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+            //DRAW GAFFERS TAPE 23
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDTAPEPOLY23_FT.length; i++) {
+                x_px = FIELDTAPEPOLY23_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDTAPEPOLY23_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+            //DRAW GAFFERS TAPE 24
+            this.ctx.beginPath();
+            for (i = 0; i < FIELDTAPEPOLY24_FT.length; i++) {
+                x_px = FIELDTAPEPOLY24_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDTAPEPOLY24_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+
             this.ctx.fillStyle = RED_FIELD_ELEMENT_COLOR;
             //draw RED ROCKET LEFT
             this.ctx.beginPath();
@@ -485,7 +790,8 @@ function procData(json_data) {
               this.ctx.closePath();
               this.ctx.fill();
 
-
+              
+            
             
 
             //Save robot dimensions
