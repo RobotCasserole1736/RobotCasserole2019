@@ -24,7 +24,15 @@ import frc.robot.PEZControl.PEZPos;
  */
 
 public class AutoEventSequencer {
-    // You will want to rename all instances of "EmptyClass" with your actual class
+    //State Variables
+    public Robert curState;
+    private Robert nextState;
+
+    private double visionAngle = 0;
+
+
+    private static final Robert initState = Robert.Idle;
+
     // name and "empty" with a variable name
     private static AutoEventSequencer empty = null;
 
@@ -39,11 +47,17 @@ public class AutoEventSequencer {
 
     // Name for AutoEventSequencer enum is Robert. Welcome to change if need be.
     public enum Robert {
+        Idle(0), Path_Plan_Approach_Vector(1), Move_Along_Approach_Vector(2), Place_Gamepiece(3), Release_Gamepiece_and_Backup(4);
+        public final int value;
 
+        private Robert(int value){
+            this.value = value;
+        }
     }
 
+    //needs something inside of the parentheses, probably
     private AutoEventSequencer() {
-
+        curState = initState;
     }
 
     public void setVisionAngleToTgt(double angle_in) {
@@ -104,7 +118,11 @@ public class AutoEventSequencer {
         return false;
     }
 
+    //Commands called from other parts of the code need to be inputed into the parentheses, I think
     public void update(){
-
+        nextState = curState;
+        if(){
+            nextState = 
+        }
     }
 }

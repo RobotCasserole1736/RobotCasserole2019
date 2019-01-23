@@ -135,6 +135,10 @@ public class OperatorController {
             intakeSpdReq = IntakeSpd.Stop;
         }
 
+        if(xb.getPOV() = 0 && xb.getXButton()){
+
+        }
+
         /* Update Telemetry */
         double sample_time_ms = LoopTiming.getInstance().getLoopStartTime_sec()*1000.0;
         ballPickupReqSig.addSample(sample_time_ms,ballPickupReq);
