@@ -34,14 +34,14 @@ public class OperatorController {
     XboxController xb;
 
     /* Operator commands state*/
-    boolean   ballPickupReq;
-    boolean   hatchPickupReq;
-    boolean   releaseReq;
+    boolean ballPickupReq;
+    boolean hatchPickupReq;
+    boolean releaseReq;
     ArmPosReq armPosReq;
-    double    armManualPosCmd;
-    boolean   autoAlignHighReq;
-    boolean   autoAlignMidReq;
-    boolean   autoAlignLowReq;
+    double  armManualPosCmd;
+    boolean autoAlignHighReq;
+    boolean autoAlignMidReq;
+    boolean autoAlignLowReq;
     IntakeSpd intakeSpdReq;
     IntakePos intakePosReq;
 
@@ -65,15 +65,16 @@ public class OperatorController {
     /* Singleton stuff */
     private static OperatorController opCtrl = null;
     public static synchronized OperatorController getInstance() {
-        if(opCtrl == null) opCtrl = new OperatorController();
+        if(opCtrl == null)
+            opCtrl = new OperatorController();
         return opCtrl;
     }
 
     private OperatorController(){
         xb = new XboxController(RobotConstants.OPERATOR_CONTROLLER_USB_IDX);
 
-        joystickExpScaleFactor    = new Calibration("Operator Joystick Exponential Scale Factor", 3.0 , 1, 10);
-        joystickDeadzone          = new Calibration("Operator Joystick Deadzone ", 0.15, 0, 1);
+        joystickExpScaleFactor = new Calibration("Operator Joystick Exponential Scale Factor", 3.0 , 1, 10);
+        joystickDeadzone = new Calibration("Operator Joystick Deadzone ", 0.15, 0, 1);
 
         ballPickupReqSig = new Signal("Operator Ball Pickup Command", "bool");
         hatchPickupReqSig = new Signal("Operator Hatch Pickup Command", "bool");
@@ -85,14 +86,13 @@ public class OperatorController {
         autoAlignLowReqSig = new Signal("Operator Auto Align Low Command", "bool");
         intakeSpdReqSig = new Signal("Operator Intake Speed Command", "speed enum");
         intakePosReqSig = new Signal("Operator Intake Position Command", "pos enum");
-        
     }
 
 
     public void update(){
-        ballPickupReq  = xb.getAButton();
+        ballPickupReq = xb.getAButton();
         hatchPickupReq = xb.getYButton();
-        releaseReq     = xb.getBButton();
+        releaseReq = xb.getBButton();
 
         armPosReq = ArmPosReq.None;
         autoAlignHighReq = false;
@@ -136,7 +136,7 @@ public class OperatorController {
         }
 
         /* Update Telemetry */
-        double sample_time_ms = LoopTiming.getInstance().getLoopStartTime_sec()*1000.0;
+        double sample_time_ms = LoopTiming.getInstance().getLoopStartTimeSec()*1000.0;
         ballPickupReqSig.addSample(sample_time_ms,ballPickupReq);
         hatchPickupReqSig.addSample(sample_time_ms,hatchPickupReq);
         releaseReqSig.addSample(sample_time_ms,releaseReq);
@@ -190,5 +190,4 @@ public class OperatorController {
     public IntakePos getIntakePosReq() {
         return this.intakePosReq;
     }
-    
 }

@@ -35,18 +35,16 @@ public class Utils {
         if(input < deadzone){
             //Input within deadzone range, set output to zero.
             output = 0;
-        } else {
+        } else{
             //Input is outside deadzon range, calcualte output
-
-            //Rescale input to 0-1 range
-            input -= (1-deadzone);
-            input *= 1/(1-deadzone);
 
             //Raise input to desired power
             input = Math.pow(input, exp_scale);
+            
+            output = input;
         }
 
-        output = input;
+        
 
         // re-apply input sign
         if(inputIsNegative){
@@ -55,5 +53,4 @@ public class Utils {
 
         return output;
     }
-
 }

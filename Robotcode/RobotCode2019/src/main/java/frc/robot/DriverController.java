@@ -32,12 +32,13 @@ public class DriverController {
     XboxController xb;
 
     /* Driver input command state */
-    double    driverFwdRevCmd;
-    double    driverRotateCmd;
-    boolean   slowMoveReq;
-    boolean   gyroAngleLockReq;
-    boolean   compressorDisableReq;
-    boolean   compressorEnableReq;
+    double driverFwdRevCmd;
+    double driverRotateCmd;
+    double invertFactor = 1;
+    boolean slowMoveReq;
+    boolean gyroAngleLockReq;
+    boolean compressorDisableReq;
+    boolean compressorEnableReq;
     IntakeSpd intakeSpdReq;
     IntakePos intakePosReq;
 
@@ -69,8 +70,8 @@ public class DriverController {
         xb = new XboxController(RobotConstants.DRIVER_CONTROLLER_USB_IDX);
         slowMoveFwdRevScaleFactor = new Calibration("Driver Fwd-Rev Slow Move Scale Factor",  0.25, 0, 1);
         slowMoveRotateScaleFactor = new Calibration("Driver Rotation Slow Move Scale Factor", 0.25, 0, 1);
-        joystickExpScaleFactor    = new Calibration("Driver Joystick Exponential Scale Factor", 3.0 , 1, 10);
-        joystickDeadzone          = new Calibration("Driver Joystick Deadzone ", 0.15, 0, 1);
+        joystickExpScaleFactor = new Calibration("Driver Joystick Exponential Scale Factor", 3.0 , 1, 10);
+        joystickDeadzone = new Calibration("Driver Joystick Deadzone ", 0.15, 0, 1);
 
         driverFwdRevCmdSig = new Signal("Driver Fwd-Rev Command", "cmd");
         driverRotateCmdSig = new Signal("Driver Rotate Command", "cmd");
@@ -136,8 +137,18 @@ public class DriverController {
             gyroAngleLockReq = false;
         }
 
+        if(xb.getBumper(Hand.kLeft)){
+            invertFactor = -1;
+        } else {
+            invertFactor = 1;
+        } 
+
+        //If we want to drive backward, invert the command.
+        driverFwdRevCmd *= invertFactor;
+        driverRotateCmd *= invertFactor;
+
         /*Update Telemetry */
-        double sample_time_ms = LoopTiming.getInstance().getLoopStartTime_sec()*1000.0;
+        double sample_time_ms = LoopTiming.getInstance().getLoopStartTimeSec()*1000.0;
         driverFwdRevCmdSig.addSample(sample_time_ms, driverFwdRevCmd);
         driverRotateCmdSig.addSample(sample_time_ms, driverRotateCmd);
         slowMoveReqSig.addSample(sample_time_ms, slowMoveReq);
