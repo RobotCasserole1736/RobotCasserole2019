@@ -1,5 +1,8 @@
 package frc.robot;
 
+import frc.robot.Arm.ArmPosReq;
+import frc.robot.PEZControl.PEZPos;
+
 /*
  *******************************************************************************************
  * Copyright (C) 2019 FRC Team 1736 Robot Casserole - www.robotcasserole.org
@@ -21,79 +24,84 @@ package frc.robot;
  */
 
 public class AutoEventSequencer {
-	// You will want to rename all instances of "EmptyClass" with your actual class name and "empty" with a variable name
-	private static AutoEventSequencer empty = null;
+    // You will want to rename all instances of "EmptyClass" with your actual class
+    // name and "empty" with a variable name
+    private static AutoEventSequencer empty = null;
 
-	public static synchronized AutoEventSequencer getInstance() {
-		if(empty == null)
-			empty = new AutoEventSequencer();
-		return empty;
-	}
-
-    // This is the private constructor that will be called once by getInstance() and it should instantiate anything that will be required by the class
-    // Name for AutoEventSequencer enum is Robert
-    public enum Robert{
-        
+    public static synchronized AutoEventSequencer getInstance() {
+        if (empty == null)
+            empty = new AutoEventSequencer();
+        return empty;
     }
-    
+
+    // This is the private constructor that will be called once by getInstance() and
+    // it should instantiate anything that will be required by the class
+
+    // Name for AutoEventSequencer enum is Robert. Welcome to change if need be.
+    public enum Robert {
+
+    }
+
     private AutoEventSequencer() {
 
     }
 
-    public void setVisionAngleToTgt(double angle_in){
-
-    }
-       
-    public void setVisionTargetTranslation(double x_in, double y_in){
+    public void setVisionAngleToTgt(double angle_in) {
 
     }
 
-    public void setVisionTargetSkewAngle(double angle_deg_in){
+    public void setVisionTargetTranslation(double x_in, double y_in) {
 
     }
 
-    public void setAutoAlignCommand(TYPE_TBD cmd_in){
+    public void setVisionTargetSkewAngle(double angle_deg_in) {
 
     }
 
-    public void setFrontDistanceMeas(double distance_ft, boolean dist_avail){
+    //The type double was placed to remove the error. Replacement may be neccessary.
+    public void setAutoAlignCommand(double cmd_in) {
 
     }
 
-    public void setRearDistanceMeas(double distance_ft, boolean dist_avail){
+    public void setFrontDistanceMeas(double distance_ft, boolean dist_avail) {
 
     }
 
-    public void setDrivetrainMeasDist(double right_distance_ft, double left_distance_ft){
+    public void setRearDistanceMeas(double distance_ft, boolean dist_avail) {
 
     }
 
-    public ArmPosCmd getArmPosCmd(){
+    public void setDrivetrainMeasDist(double right_distance_ft, double left_distance_ft) {
 
     }
 
-    public PEZPosCmd getGripperPosCmd(){
-
+    public ArmPosReq getArmPosCmd() {
+        return ArmPosReq.None;
     }
 
+    public PEZPos getGripperPosCmd(){
+        return PEZPos.None;
+    }
+
+    //The return false statements are just to get rid of errors. Replacement neccessary.
     public boolean getIntakeExtendLockout(){
-
+        return false;
     }
 
     public boolean getAutoSequencerActive(){
-
+        return false;
     }
 
     public boolean getLeftMotorSpeedCmd_RPM(){
-
+        return false;
     }
 
     public boolean getRightMotorSpeedCmd_RPM(){
-
+        return false;
     }
 
     public boolean getHeadingCmd_deg(){
-
+        return false;
     }
 
     public void update(){
