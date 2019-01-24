@@ -47,7 +47,10 @@ public class AutoEventSequencer {
 
     // Name for AutoEventSequencer enum is Robert. Welcome to change if need be.
     public enum Robert {
-        Idle(0), Path_Plan_Approach_Vector(1), Move_Along_Approach_Vector(2), Place_Gamepiece(3), Release_Gamepiece_and_Backup(4);
+        Idle(0), Path_Plan_Approach_Vector(1), Move_Along_Approach_Vector(2), Place_Gamepiece_Low_Level(3), 
+        Place_Gamepiece_Mid_Level(4), Place_Gamepiece_Top_Level(5), Release_Gamepiece_Low_Level_and_Backup(6),
+        Release_Gamepiece_Mid_Level_and_Backup(7), Release_Gamepiece_High_Level_and_Backup(8);
+
         public final int value;
 
         private Robert(int value){
@@ -120,9 +123,48 @@ public class AutoEventSequencer {
 
     //Commands called from other parts of the code need to be inputed into the parentheses, I think
     public void update(){
+        //if no state transition is specified, 
+        //	we should stay in the same state.
+        //this assignment will be overwritten if any
+        // 	of the transition conditions are true.
         nextState = curState;
-        if(){
-            nextState = 
+        if(OperatorController.getInstance().getAutoMove()){
+            nextState = Robert.Path_Plan_Approach_Vector;
         }
+
+        else if(nextState == Robert.Path_Plan_Approach_Vector){
+            nextState = Robert.Move_Along_Approach_Vector;
+        }
+
+        else {
+            nextState = initState;
+        }
+
+        if(OperatorController.getInstance().getLowLevelPlace() && nextState == Robert.Move_Along_Approach_Vector){
+            nextState = Robert.Place_Gamepiece_Low_Level;
+        }
+
+        else if(nextState == Robert.Place_Gamepiece_Low_Level){
+            nextState = Robert.Release_Gamepiece_Low_Level_and_Backup;
+        }
+
+        if(OperatorController.getInstance().getMidLevelPlace() && nextState == Robert.Move_Along_Approach_Vector){
+            nextState = Robert.Place_Gamepiece_Mid_Level;
+        }
+
+        else if(nextState == Robert.Place_Gamepiece_Mid_Level){
+            nextState = Robert.Release_Gamepiece_Mid_Level_and_Backup;
+        }
+
+        if(OperatorController.getInstance().getTopLevelPlace() && nextState == Robert.Move_Along_Approach_Vector){
+            nextState = Robert.Place_Gamepiece_Top_Level;
+        }
+
+        else if(nextState == Robert.Place_Gamepiece_Top_Level){
+            nextState = Robert.Release_Gamepiece_High_Level_and_Backup;
+        }
+        
+        //make the next-state the current state
+		curState = nextState;
     }
 }
