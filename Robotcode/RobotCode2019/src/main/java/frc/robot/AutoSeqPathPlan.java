@@ -81,7 +81,8 @@ public class AutoSeqPathPlan {
             cmdSpeed = path.smoothLeftVelocity[timestep][1];
         } 
 
-        return cmdSpeed;
+        //TODO Convert ft/sec to RPM
+        return 0;
     }
 
 
@@ -96,7 +97,8 @@ public class AutoSeqPathPlan {
             cmdSpeed = path.smoothRightVelocity[timestep][1];
         } 
 
-        return cmdSpeed;
+        //TODO Convert ft/sec to RPM
+        return 0;
     }
 
 
