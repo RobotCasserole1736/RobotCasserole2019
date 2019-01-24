@@ -27,7 +27,7 @@ public class JeVoisInterface {
     private boolean broadcastUSBCam = false;
     
     // When not streaming, use this mapping
-    private static final int NO_STREAM_MAPPING = 2;
+    private static final int NO_STREAM_MAPPING = 0;
     
     // When streaming, use this set of configuration
     private static final int STREAM_WIDTH_PX = 352;
@@ -54,7 +54,8 @@ public class JeVoisInterface {
     // Most recently seen target information
     private boolean tgtVisible = false;   //True if a target is seen, false otherwise
     private double  tgtAngle_deg = 0;     //Angle from center that the target appears in the camera. Shows if the robot is pointed at the target, or off to the side.
-    private double  tgtDist_ft = 0;       //Distance to the target in ft
+    private double  tgtXPos_ft = 0;       //Position of the target relative to the robot in Ft
+    private double  tgtYPos_ft = 0;       //Position of the target relative to the robot in Ft
     private double  tgtRotation_deg = 0;  //Skew of the target - if it's pointed at the robot, or away from the robot. AKA normal vector away from the wall.
     private double  tgtTime = 0;          //Estimated to time of image capture (on the scale of Timer.getFPGATimestamp())
     
@@ -65,12 +66,14 @@ public class JeVoisInterface {
 
     private Signal tgtVisibleSig;
     private Signal tgtAngleSig;
-    private Signal tgtDistSig;
+    private Signal tgtXPosSig;
+    private Signal tgtYPosSig;
     private Signal tgtRotationSig;
     private Signal tgtCaptureTimeSig;
     private Signal jevoisCpuTempSig;
     private Signal jevoisCpuLoadSig;
     private Signal jevoisFramerateSig;
+    private Signal jevoisPacketsPerSecSig;
 
 
     
@@ -98,12 +101,14 @@ public class JeVoisInterface {
         // Configure telemetry signals
         tgtVisibleSig = new Signal("Jevois Target Visible", "bool");
         tgtAngleSig = new Signal("Jevois Target Angle", "deg");
-        tgtDistSig = new Signal("Jevois Target Distance", "ft");
+        tgtXPosSig = new Signal("Jevois Target X Position", "ft");
+        tgtYPosSig = new Signal("Jevois Target Y Position", "ft");
         tgtRotationSig = new Signal("Jevois Target Rotation Angle", "deg");
         tgtCaptureTimeSig = new Signal("Jevois Image Capture Time", "sec");
         jevoisCpuTempSig = new Signal("Jevois CPU Temp", "C");
         jevoisCpuLoadSig = new Signal("Jevois CPU Load", "pct");
         jevoisFramerateSig = new Signal("Jevois Framerate", "fps");
+        jevoisPacketsPerSecSig = new Signal("Jevois Packets Per Sec", "pps");
         
         //Retry strategy to get this serial port open.
         //I have yet to see a single retry used assuming the camera is plugged in
@@ -138,6 +143,7 @@ public class JeVoisInterface {
         stopDataOnlyStream();
 
         setCameraStreamActive(useUSBStream);
+
         start();
 
         //Start listening for packets
@@ -171,8 +177,7 @@ public class JeVoisInterface {
      */
     public void setCamVisionProcMode() {
         if (visionPort != null){
-            sendCmdAndCheck("setcam autoexp 1"); //Disable auto exposure
-            sendCmdAndCheck("setcam absexp 75"); //Force exposure to a low value for vision processing
+            //all should be done on jevois
         }
     }
     
@@ -181,7 +186,7 @@ public class JeVoisInterface {
      */
     public void setCamHumanDriverMode() {
         if (visionPort != null){
-            sendCmdAndCheck("setcam autoexp 0"); //Enable AutoExposure
+            //all on jevois
         }
     }
 
@@ -214,8 +219,15 @@ public class JeVoisInterface {
     /**
      * Returns the estimated disatance to the target in ft.
      */
-    public double getTgtDistance() {
-        return tgtDist_ft;
+    public double getTgtPositionX() {
+        return tgtXPos_ft;
+    }
+
+    /**
+     * Returns the estimated disatance to the target in ft.
+     */
+    public double getTgtPositionY() {
+        return tgtYPos_ft;
     }
 
     /**
@@ -285,7 +297,7 @@ public class JeVoisInterface {
      * Indicates to the Camera that it should lock on to whatever vision target it sees in the middle of the screen right now
      */
     public void latchTarget(){
-        sendCmd("latch");
+        sendCmd("latch\n");
     }
 
     //=======================================================
@@ -453,6 +465,7 @@ public class JeVoisInterface {
             while(Timer.getFPGATimestamp() - startTime < timeout_s){
                 if (visionPort.getBytesReceived() > 0) {
                     testStr += visionPort.readString();
+                    System.out.println(testStr); //debug only 
                     if(testStr.contains("OK")){
                         retval = 0;
                         break;
@@ -582,10 +595,10 @@ public class JeVoisInterface {
      */
     public int parsePacket(String pkt, double rx_Time){
         //Parsing constants. These must be aligned with JeVois code.
-        final int FRAME_CTR_TOKEN_IDX = 0; //currently unused
-        final int TGT_VISIBLE_TOKEN_IDX = 1;
-        final int TGT_X_TOKEN_IDX = 2;
-        final int TGT_DIST_TOKEN_IDX = 3;
+        final int TGT_VISIBLE_TOKEN_IDX = 0;
+        final int ANGLE_TO_TGT_TOKEN_IDX = 1;
+        final int TGT_X_LOCATION_TOKEN_IDX  = 2;
+        final int TGT_Y_LOCATION_TOKEN_IDX  = 3;
         final int TGT_ROTATION_TOKEN_IDX = 4;
         final int JV_FRMRT_TOKEN_IDX = 5;
         final int JV_CPULOAD_TOKEN_IDX = 6;
@@ -598,7 +611,7 @@ public class JeVoisInterface {
 
         //Check there were enough substrings found
         if(tokens.length < NUM_EXPECTED_TOKENS){
-            DriverStation.reportError("Got malformed vision packet. Expected 8 tokens, but only found " + Integer.toString(tokens.length) + ". Packet Contents: " + pkt, false);
+            DriverStation.reportError("Got malformed vision packet. Expected " + NUM_EXPECTED_TOKENS + " tokens, but only found " + Integer.toString(tokens.length) + ". Packet Contents: " + pkt, false);
             return -1;
         }
 
@@ -616,8 +629,9 @@ public class JeVoisInterface {
             }
 
             //Use Java built-in double to string conversion on most of the rest
-            tgtAngle_deg    = Double.parseDouble(tokens[TGT_X_TOKEN_IDX]);
-            tgtDist_ft    = Double.parseDouble(tokens[TGT_DIST_TOKEN_IDX]);
+            tgtAngle_deg    = Double.parseDouble(tokens[ANGLE_TO_TGT_TOKEN_IDX]);
+            tgtXPos_ft    = Double.parseDouble(tokens[TGT_X_LOCATION_TOKEN_IDX]);
+            tgtYPos_ft    = Double.parseDouble(tokens[TGT_Y_LOCATION_TOKEN_IDX]);
             tgtRotation_deg = Double.parseDouble(tokens[TGT_ROTATION_TOKEN_IDX]);
             jeVoisFramerateFPS = Double.parseDouble(tokens[JV_FRMRT_TOKEN_IDX]);
             tgtTime  = rx_Time - Double.parseDouble(tokens[JV_PIPLINE_DELAY_TOKEN_IDX])/1000000.0;
@@ -632,12 +646,14 @@ public class JeVoisInterface {
         double sample_time_ms = Timer.getFPGATimestamp()*1000;
         tgtVisibleSig.addSample(sample_time_ms, tgtVisible);
         tgtAngleSig.addSample(sample_time_ms, tgtAngle_deg);
-        tgtDistSig.addSample(sample_time_ms, tgtDist_ft);
+        tgtXPosSig.addSample(sample_time_ms, tgtXPos_ft);
+        tgtYPosSig.addSample(sample_time_ms, tgtYPos_ft);
         tgtRotationSig.addSample(sample_time_ms, tgtRotation_deg);
         tgtCaptureTimeSig.addSample(sample_time_ms, tgtTime);
         jevoisCpuTempSig.addSample(sample_time_ms, jeVoisCpuTempC);
         jevoisCpuLoadSig.addSample(sample_time_ms, jeVoisCpuLoadPct);
         jevoisFramerateSig.addSample(sample_time_ms, jeVoisFramerateFPS);
+        jevoisPacketsPerSecSig.addSample(sample_time_ms, packetRxRatePPS);
 
         return 0;
     }
