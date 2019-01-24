@@ -1,5 +1,6 @@
 package frc.robot;
 
+import frc.lib.DataServer.Signal;
 
 /*
  *******************************************************************************************
@@ -33,8 +34,13 @@ public class DrivetrainSim implements DrivetrainInterface {
     public double ActRightRPM;
     public double ActLeftRPM;
 
+    Signal ActualRightSimRPM;
+    Signal ActualLeftSimRPM;
+
+
     public DrivetrainSim() {
-        
+        ActualRightSimRPM = new Signal("actual sim drivetrain right RPM", "RPM");
+        ActualLeftSimRPM = new Signal("actual sim drivetrain left RPM", "RPM");
     }
 
     public void setOpenLoopCmd(double forwardReverseCmd, double rotaionCmd) {
@@ -65,6 +71,11 @@ public class DrivetrainSim implements DrivetrainInterface {
 
         prevOpMode = opMode;
         opMode = opModeCmd;
+        
+        double sampleTimeMs = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
+
+        ActualLeftSimRPM.addSample(sampleTimeMs, getLeftWheelSpeedRPM());
+        ActualLeftSimRPM.addSample(sampleTimeMs, getRightWheelSpeedRPM());
     }
 
     public double getLeftWheelSpeedRPM() {
@@ -73,7 +84,7 @@ public class DrivetrainSim implements DrivetrainInterface {
 
     public double getRightWheelSpeedRPM() {
         return ActRightRPM;
-    }
+    } 
 
     public void updateGains(boolean force) {
 
