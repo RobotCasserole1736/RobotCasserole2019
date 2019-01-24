@@ -27,7 +27,7 @@ public class JeVoisInterface {
     private boolean broadcastUSBCam = false;
     
     // When not streaming, use this mapping
-    private static final int NO_STREAM_MAPPING = 2;
+    private static final int NO_STREAM_MAPPING = 0;
     
     // When streaming, use this set of configuration
     private static final int STREAM_WIDTH_PX = 352;
@@ -73,6 +73,7 @@ public class JeVoisInterface {
     private Signal jevoisCpuTempSig;
     private Signal jevoisCpuLoadSig;
     private Signal jevoisFramerateSig;
+    private Signal jevoisPacketsPerSecSig;
 
 
     
@@ -107,6 +108,7 @@ public class JeVoisInterface {
         jevoisCpuTempSig = new Signal("Jevois CPU Temp", "C");
         jevoisCpuLoadSig = new Signal("Jevois CPU Load", "pct");
         jevoisFramerateSig = new Signal("Jevois Framerate", "fps");
+        jevoisPacketsPerSecSig = new Signal("Jevois Packets Per Sec", "pps");
         
         //Retry strategy to get this serial port open.
         //I have yet to see a single retry used assuming the camera is plugged in
@@ -141,6 +143,7 @@ public class JeVoisInterface {
         stopDataOnlyStream();
 
         setCameraStreamActive(useUSBStream);
+
         start();
 
         //Start listening for packets
@@ -174,8 +177,7 @@ public class JeVoisInterface {
      */
     public void setCamVisionProcMode() {
         if (visionPort != null){
-            sendCmdAndCheck("setcam autoexp 1"); //Disable auto exposure
-            sendCmdAndCheck("setcam absexp 75"); //Force exposure to a low value for vision processing
+            //all should be done on jevois
         }
     }
     
@@ -184,7 +186,7 @@ public class JeVoisInterface {
      */
     public void setCamHumanDriverMode() {
         if (visionPort != null){
-            sendCmdAndCheck("setcam autoexp 0"); //Enable AutoExposure
+            //all on jevois
         }
     }
 
@@ -463,6 +465,7 @@ public class JeVoisInterface {
             while(Timer.getFPGATimestamp() - startTime < timeout_s){
                 if (visionPort.getBytesReceived() > 0) {
                     testStr += visionPort.readString();
+                    System.out.println(testStr); //debug only 
                     if(testStr.contains("OK")){
                         retval = 0;
                         break;
@@ -592,24 +595,23 @@ public class JeVoisInterface {
      */
     public int parsePacket(String pkt, double rx_Time){
         //Parsing constants. These must be aligned with JeVois code.
-        final int FRAME_CTR_TOKEN_IDX = 0; //currently unused
-        final int TGT_VISIBLE_TOKEN_IDX = 1;
-        final int ANGLE_TO_TGT_TOKEN_IDX = 2;
-        final int TGT_X_LOCATION_TOKEN_IDX  = 3;
-        final int TGT_Y_LOCATION_TOKEN_IDX  = 4;
-        final int TGT_ROTATION_TOKEN_IDX = 5;
-        final int JV_FRMRT_TOKEN_IDX = 6;
-        final int JV_CPULOAD_TOKEN_IDX = 7;
-        final int JV_CPUTEMP_TOKEN_IDX = 8;
-        final int JV_PIPLINE_DELAY_TOKEN_IDX = 9;
-        final int NUM_EXPECTED_TOKENS = 10;
+        final int TGT_VISIBLE_TOKEN_IDX = 0;
+        final int ANGLE_TO_TGT_TOKEN_IDX = 1;
+        final int TGT_X_LOCATION_TOKEN_IDX  = 2;
+        final int TGT_Y_LOCATION_TOKEN_IDX  = 3;
+        final int TGT_ROTATION_TOKEN_IDX = 4;
+        final int JV_FRMRT_TOKEN_IDX = 5;
+        final int JV_CPULOAD_TOKEN_IDX = 6;
+        final int JV_CPUTEMP_TOKEN_IDX = 7;
+        final int JV_PIPLINE_DELAY_TOKEN_IDX = 8;
+        final int NUM_EXPECTED_TOKENS = 9;
 
         //Split string into many substrings, presuming those strings are separated by commas
         String[] tokens = pkt.split(",");
 
         //Check there were enough substrings found
         if(tokens.length < NUM_EXPECTED_TOKENS){
-            DriverStation.reportError("Got malformed vision packet. Expected 8 tokens, but only found " + Integer.toString(tokens.length) + ". Packet Contents: " + pkt, false);
+            DriverStation.reportError("Got malformed vision packet. Expected " + NUM_EXPECTED_TOKENS + " tokens, but only found " + Integer.toString(tokens.length) + ". Packet Contents: " + pkt, false);
             return -1;
         }
 
@@ -651,6 +653,7 @@ public class JeVoisInterface {
         jevoisCpuTempSig.addSample(sample_time_ms, jeVoisCpuTempC);
         jevoisCpuLoadSig.addSample(sample_time_ms, jeVoisCpuLoadPct);
         jevoisFramerateSig.addSample(sample_time_ms, jeVoisFramerateFPS);
+        jevoisPacketsPerSecSig.addSample(sample_time_ms, packetRxRatePPS);
 
         return 0;
     }

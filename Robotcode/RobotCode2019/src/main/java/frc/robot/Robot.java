@@ -234,7 +234,7 @@ public class Robot extends TimedRobot {
     @Override
     public void disabledInit() {
         dataServer.logger.stopLogging();
-        ledController.setPattern(LEDPatterns.Pattern1);
+        ledController.setPattern(LEDPatterns.Pattern2);
         matchState.SetPeriod(MatchState.Period.Disabled);
     }
 
