@@ -80,6 +80,8 @@ public class Robot extends TimedRobot {
     IntakeControl intakeControl;
     PEZControl pezControl;
 
+    FrontUltrasonic frontUltrasonic;
+
     //Top level telemetry signals
     Signal rioDSSampLoad;
     Signal rioCurrDrawLoad;
@@ -112,6 +114,8 @@ public class Robot extends TimedRobot {
         intakeControl = IntakeControl.getInstance();
         pezControl = PEZControl.getInstance();
         onboardAccel = new BuiltInAccelerometer();
+
+        frontUltrasonic = FrontUltrasonic.getInstance();
 
         testSensor = new Ultrasonic(3, "Test");
 
@@ -182,6 +186,8 @@ public class Robot extends TimedRobot {
         pezControl.update();
 
         intakeControl.update();
+
+        frontUltrasonic.update();
 
 
         //Arbitrate driver & auto sequencer inputs to drivetrain
@@ -260,6 +266,8 @@ public class Robot extends TimedRobot {
         pezControl.update();
 
         intakeControl.update();
+
+        frontUltrasonic.update();
 
 
         //Keep drivetrain stopped.
