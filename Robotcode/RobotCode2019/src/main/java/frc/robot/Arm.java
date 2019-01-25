@@ -25,7 +25,7 @@ package frc.robot;
 
 import frc.lib.Calibration.*;
 import frc.robot.IntakeControl.IntakePos;
-import edu.wpi.first.wpilibj.Spark;
+//import edu.wpi.first.wpilibj.Spark;
 
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.Solenoid;
@@ -34,6 +34,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANEncoder;
+import com.revrobotics.CANPIDController;
 
 
 public class Arm {
@@ -41,8 +42,14 @@ public class Arm {
     /////////Moving Things\\\\\\\\\
     Solenoid armBrake;
     CANSparkMax sadey;
-    public double armEncoder;
+    
+    CANPIDController armPID;
 
+
+    /////Know Where The Arm Is(From SparkMax)\\\\\
+    public double armEncoder;
+    public double curArmAngle;
+    
     /////////Sensors\\\\\\\\\
     AnalogPotentiometer armPot;
     int potChannel;
@@ -55,9 +62,7 @@ public class Arm {
     ArmPosReq posIn;
 
     /////////State Varibles\\\\\\\\\\\\
-    public double   desiredArmAngle = 0;
-    public double   curHeight = 0;
-    public double   desHeight = 0;
+    public double   desArmAngle = 0;
     public double   potUpVolt;
     public double   potLowVolt;
     public boolean  brakeActivated;
@@ -115,6 +120,9 @@ public class Arm {
         armBrake = new Solenoid(RobotConstants.ARM_MECH_BRAKE_SOL_PORT);
         sadey = new CANSparkMax(RobotConstants.ARM_MOTOR_PORT, MotorType.kBrushless);
         armEncoder = sadey.get();
+        armPID = sadey.getPIDController();
+        
+        
         /////Digital Inputs\\\\\\\
         upperLimSwitch = new DigitalInput(RobotConstants.ARM_UPPER_LIMIT_SWITCH_PORT);
         lowLimSwitch = new DigitalInput(RobotConstants.ARM_LOWER_LIMIT_SWITCH_PORT);
@@ -146,6 +154,9 @@ public class Arm {
                 (UpperLimitDegrees - LowerLimitDegrees) / 
                 (UpperLimitVoltage - LowerLimitVoltage) + LowerLimitDegrees;
     }
+    double convertRotationsToDeg(double rotations_in) {
+        return ();
+    }
 
     public void sampleSensors() {
        topOfMotion = upperLimSwitch.get();
@@ -162,20 +173,16 @@ public class Arm {
             //Preset Heights Logic
 
             //If arm == 0 ??needed??
-            desHeight = desiredArmAngle;
+            desArmAngle = desiredArmAngle;
 
-            if(curHeight - desHeight <= -2) {
+            if(curArmAngle - desArmAngle <= -2) {
                 uncompensatedMotorCmd = 1;
             }
-            else if (curHeight - desHeight >= 2) {
+            else if (curArmAngle - desArmAngle >= 2) {
                 uncompensatedMotorCmd = -1;
             }
             else {
                 uncompensatedMotorCmd = 0;
-            }
-            
-            if(curManMoveCmd != pastManMoveCmd) {
-
             }
             //Joystick Operation by Drivers
             
@@ -276,12 +283,12 @@ public class Arm {
             
 
     public double getActualArmHeight() {
-        curHeight = armPot.get();
-        return curHeight;
+    
+        return curArmAngle;
     }
 
     public double getDesiredArmHeight() {
-        return desHeight;
+        return desArmAngle;
     }
 
     public double getuncompensatedMotorCmd() {
@@ -289,7 +296,7 @@ public class Arm {
     
     }
     public boolean atDesiredHeight() {
-        return(desHeight == curHeight);
+        return(desArmAngle == curArmAngle);
     }
 
     /**
@@ -307,6 +314,9 @@ public class Arm {
      */
     public boolean intakeExtendOverride(){
         //TODO
+            if(curIntakePos == IntakePos.Retract && curArmAngle < 50) {
+                
+            }
         return false;
     }
 }
