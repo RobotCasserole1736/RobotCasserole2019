@@ -80,7 +80,7 @@ public class ADXRS453_Gyro extends GyroBase implements Gyro, PIDSource {
      * @return True if the gyro system is running, false if not.
      */
     public boolean isOnline(){
-    	return !(m_spi == null);
+        return !(m_spi == null);
     }
 
     /**
@@ -163,9 +163,9 @@ public class ADXRS453_Gyro extends GyroBase implements Gyro, PIDSource {
      */
     @Override
     public synchronized void reset() {
-    	if(m_spi == null){
-    		return;
-    	}
+        if(m_spi == null){
+            return;
+        }
         if (m_is_calibrating) {
             cancelCalibrate();
         }

@@ -33,32 +33,45 @@ public class IntakeControl {
     Spark intakeMotor;
 
     Solenoid intakeArmBar;
-    Integer loopCounter = 10;
+    Integer loopCounter;
     IntakePos currentPosition = IntakePos.Retract;
 
-    Signal solenoidArmState;
+    Signal retractStateEstSig;
+    Signal retractStateCmdSig;
+    Signal motorSpeedCmdSig;
+    Signal ballInIntakeSig;
 
     Calibration intakeSpeed;
     Calibration ejectSpeed;
+    Calibration extendTime;
 
-    // You will want to rename all instances of "EmptyClass" with your actual class name and "empty" with a variable name
-    private static IntakeControl empty = null;
+    DriverController dController;
+    OperatorController opController;
+    Arm arm;
+
+    private static IntakeControl iControl = null;
 
     public static synchronized IntakeControl getInstance() {
-        if(empty == null)
-            empty = new IntakeControl();
-        return empty;
+        if(iControl == null)
+            iControl = new IntakeControl();
+        return iControl;
     }
     
     private IntakeControl(){
-
-        intakeSpeed = new Calibration("Intake Speed", 0.25, 0, 1);
-        ejectSpeed = new Calibration("Eject Speed", 0.25, 0, 1);
+        intakeSpeed = new Calibration("Intake Intake Speed (motor cmd)", 0.25, 0, 1);
+        ejectSpeed = new Calibration("Intake Eject Speed (motor cmd)", 0.25, 0, 1);
+        extendTime = new Calibration("Intake Est Extend Time (sec)", 0.500, 0, 5);
         ballInIntake = new DigitalInput(RobotConstants.BALL_INTAKE_PORT);
         intakeMotor = new Spark(RobotConstants.INTAKE_MOTOR_PORT);
         intakeArmBar = new Solenoid(RobotConstants.INTAKE_ARM_BAR_PORT);
 
-        solenoidArmState = new Signal("Intake State", "B");
+        dController = DriverController.getInstance();
+        opController = OperatorController.getInstance();
+        arm = Arm.getInstance();
+        retractStateEstSig = new Signal("Intake Estimated Position", "Intake Pos Enum");
+        retractStateCmdSig = new Signal("Intake Commanded Position", "Intake Pos Enum");
+        motorSpeedCmdSig = new Signal("Intake Motor Command", "cmd");
+        ballInIntakeSig = new Signal("Intake Ball Present", "bool");
     }
 
     //Intake positions that can be requested
@@ -96,26 +109,57 @@ public class IntakeControl {
     private IntakePos intakePosCmd = IntakePos.Retract;
     private IntakeSpd intakeSpdCmd = IntakeSpd.Stop;
 
-    public void setPositionCmd(IntakePos pos_in){
-        if(pos_in == IntakePos.Retract){
+    public void setPositionCmd(IntakePos posIn){
+        if(posIn == IntakePos.Retract){
             intakePosCmd = IntakePos.Retract;
-        }else if(pos_in == IntakePos.Extend){
+        }else if(posIn == IntakePos.Extend){
             intakePosCmd = IntakePos.Extend;
         }
     }
 
-    public void setSpeedCmd(IntakeSpd spd_in){
-        if(spd_in == IntakeSpd.Stop){
+    public void setSpeedCmd(IntakeSpd speedIn){
+        if(speedIn == IntakeSpd.Stop){
             intakeSpdCmd = IntakeSpd.Stop;
-        }else if(spd_in == IntakeSpd.Intake){
+        }else if(speedIn == IntakeSpd.Intake){
             intakeSpdCmd = IntakeSpd.Intake;
-        }else if(spd_in == IntakeSpd.Eject){
+        }else if(speedIn == IntakeSpd.Eject){
             intakeSpdCmd = IntakeSpd.Eject;
         }
 
     }
 
     public void update(){
+        double intakeMotorCmd = 0;
+        boolean ballDetected = false;
+
+        if(MatchState.getInstance().GetPeriod() == MatchState.Period.OperatorControl ||
+           MatchState.getInstance().GetPeriod() == MatchState.Period.Autonomous) {
+            //Arbitrate Intake commands from driver and operator and arm
+            if(dController.getIntakePosReq() == IntakePos.Extend || 
+            opController.getIntakePosReq() == IntakePos.Extend || 
+            arm.intakeExtendOverride() == true) {
+                setPositionCmd(IntakePos.Extend);
+            } else {
+                setPositionCmd(IntakePos.Retract);
+            }
+
+            if(dController.getIntakeSpdReq() == IntakeSpd.Eject ||
+            opController.getIntakeSpdReq() == IntakeSpd.Eject ){
+                setSpeedCmd(IntakeSpd.Eject);
+            } else if(dController.getIntakeSpdReq() == IntakeSpd.Intake ||
+                    opController.getIntakeSpdReq() == IntakeSpd.Intake ){
+                setSpeedCmd(IntakeSpd.Intake);
+            } else {
+                setSpeedCmd(IntakeSpd.Stop);
+            }
+        }
+        else
+        {
+            //Start intake within frame perimiter and in safe state
+            setPositionCmd(IntakePos.Retract);
+            setSpeedCmd(IntakeSpd.Stop);
+        }
+
         //Pneumatic arm bar thingy control
         if(intakePosCmd == IntakePos.Retract){
             intakeArmBar.set(false);
@@ -125,39 +169,45 @@ public class IntakeControl {
             intakeArmBar.set(false);
         }
 
+        ballDetected = !ballInIntake.get(); //Sensor outputs high for no ball, low for ball 
+
         //Intake motor control
-        if((ballInIntake.get() == true) && (intakeSpdCmd == IntakeSpd.Intake)){ //If we got a ball, don't Intake
-            intakeMotor.set(0);
-        }else if((ballInIntake.get() == false) && (intakeSpdCmd == IntakeSpd.Intake)){ //If we don't, Intake
-            intakeMotor.set(intakeSpeed.get());
+        if((ballDetected) && (intakeSpdCmd == IntakeSpd.Intake)){ //If we got a ball, don't Intake
+            intakeMotorCmd = 0;
+        }else if((!ballDetected) && (intakeSpdCmd == IntakeSpd.Intake)){ //If we don't, Intake
+            intakeMotorCmd = intakeSpeed.get();
         }else if(intakeSpdCmd == IntakeSpd.Stop){ //Whether we have a ball or not, we can Stop and Eject
-            intakeMotor.set(0);
+            intakeMotorCmd = 0;
         }else if(intakeSpdCmd == IntakeSpd.Eject){
-            intakeMotor.set(-1 * (ejectSpeed.get()));
+            intakeMotorCmd = -1 * ejectSpeed.get();
         }else{ //If for some reason it is confused, don't run the intake
-            intakeMotor.set(0);
+            intakeMotorCmd = 0;
         }
 
+        intakeMotor.set(intakeMotorCmd);
+
         // Calcualte an estimate of current position
-        if(intakeArmBar.get() == true){
+        if(intakePosCmd == IntakePos.Extend){
             
             if(loopCounter == 0){
                 currentPosition = IntakePos.Extend; 
             }
             else {
-                loopCounter = loopCounter - 1;
+                loopCounter--;
             }
         }
 
-        if(intakeArmBar.get() == false){
-            loopCounter = 10;
+        if(intakePosCmd == IntakePos.Retract){
+            loopCounter = (int)Math.floor(extendTime.get()/0.02);
             currentPosition = IntakePos.Retract;
         }
         
-
         /* Update Telemetry */
-        double sample_time_ms = LoopTiming.getInstance().getLoopStartTime_sec() * 1000.0;
-        solenoidArmState.addSample(sample_time_ms, currentPosition.toInt());
+        double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
+        retractStateEstSig.addSample(sampleTimeMS, currentPosition.toInt());
+        retractStateCmdSig.addSample(sampleTimeMS, intakePosCmd.toInt());
+        motorSpeedCmdSig.addSample(sampleTimeMS, intakeMotorCmd);
+        ballInIntakeSig.addSample(sampleTimeMS, ballDetected);
     }
 
     public IntakePos getEstimatedPosition() {

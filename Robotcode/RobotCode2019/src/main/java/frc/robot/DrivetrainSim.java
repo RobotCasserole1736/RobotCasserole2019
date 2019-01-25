@@ -29,7 +29,7 @@ public class DrivetrainSim implements DrivetrainInterface {
 
     }
 
-    public void setOpenLoopCmd(double forwardReverseCmd_in, double rotaionCmd_in) {
+    public void setOpenLoopCmd(double forwardReverseCmd, double rotaionCmd) {
         //TODO
     }
 
@@ -37,7 +37,7 @@ public class DrivetrainSim implements DrivetrainInterface {
         return true;
     }
 
-    public void setGyroLockCmd(double forwardReverseCmd_in) {
+    public void setGyroLockCmd(double forwardReverseCmd) {
         //TODO
     }
 
@@ -45,11 +45,14 @@ public class DrivetrainSim implements DrivetrainInterface {
         //TODO
     }
 
-	public double getSpeedLeftRPM() {
-		return 0; //TODO
-	}
+    public double getLeftWheelSpeedRPM() {
+        return 0; //TODO
+    }
 
-	public double getSpeedRightRPM() {
-		return 0; //TODO
-	}
+    public double getRightWheelSpeedRPM() {
+        return 0; //TODO
+    }
+
+    public void updateGains(boolean force) {
+    }
 }

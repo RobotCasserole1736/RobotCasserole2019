@@ -20,23 +20,35 @@ package frc.robot;
  *   if you would consider donating to our club to help further STEM education.
  */
 
-public class Climber {
+public class MatchState {
 
-    /* Singleton stuff */
-    private static Climber climbCtrl = null;
+    public enum Period {
+        Disabled(0), Autonomous(1), OperatorControl(2), Test(3), Simulation(4);
+        public final int value;
+
+        private Period(int value) {
+            this.value = value;
+        }
+    }
+
+    private Period period;
+
+    private static MatchState matchState = null;
+    public static synchronized MatchState getInstance() {
+        if(matchState == null)
+            matchState = new MatchState();
+        return matchState;
+    }
+
+    private MatchState() {
+        period = Period.Disabled;
+    }
+
+    public void SetPeriod(Period currentPeriod) {
+        period = currentPeriod;
+    }
     
-    public static synchronized Climber getInstance() {
-        if(climbCtrl == null) climbCtrl = new Climber();
-        return climbCtrl;
+    public Period GetPeriod() {
+        return period;
     }
-
-    private Climber(){
-        //TODO
-    }
-
-    public void update(){
-        //TODO
-
-    }
-
 }

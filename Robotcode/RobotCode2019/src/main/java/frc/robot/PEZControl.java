@@ -1,6 +1,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import frc.lib.WebServer.CasseroleDriverView;
 
 /*
  *******************************************************************************************
@@ -24,22 +25,23 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 
 public class PEZControl {
     
-	private static PEZControl pezCtrl = null;
+    private static PEZControl pezCtrl = null;
 
     DoubleSolenoid longS; 
     DoubleSolenoid shortS;
+
+    DriverController dController;
+    OperatorController opController;
 
     GamePiece curGamePiece;
 
     PEZPos posReq;
 
-
-	public static synchronized PEZControl getInstance() {
-		if(pezCtrl == null)
-			pezCtrl = new  PEZControl();
-		return pezCtrl;
+    public static synchronized PEZControl getInstance() {
+        if(pezCtrl == null)
+            pezCtrl = new PEZControl();
+        return pezCtrl;
     }
-    
 
     public enum PEZPos {
         CargoGrab(0), CargoRelease(1), HatchGrab(2), HatchRelease(3), None(4);
@@ -47,7 +49,6 @@ public class PEZControl {
 
         private PEZPos(int value) {
             this.value = value;
-    
         }
     }
 
@@ -57,19 +58,52 @@ public class PEZControl {
 
         private GamePiece(int value) {
             this.value = value;
-    
         }
     }
 
-	// This is the private constructor that will be called once by getInstance() and it should instantiate anything that will be required by the class
-	private  PEZControl() {
-
+    // This is the private constructor that will be called once by getInstance() and it should instantiate anything that will be required by the class
+    private  PEZControl() {
         longS = new DoubleSolenoid(RobotConstants.LONG_SOLENOID_FORWARD_CHANNEL, RobotConstants.LONG_SOLENOID_REVERSE_CHANNEL);
         shortS = new DoubleSolenoid(RobotConstants.SHORT_SOLENOID_FORWARD_CHANNEL, RobotConstants.SHORT_SOLENOID_REVERSE_CHANNEL);
+        dController = DriverController.getInstance();
+        opController = OperatorController.getInstance();
     }
     
 
     public void update() {
+        if(MatchState.getInstance().GetPeriod() == MatchState.Period.OperatorControl ||
+           MatchState.getInstance().GetPeriod() == MatchState.Period.Autonomous){
+            //Update Gripper Control
+            if(opController.getBallPickupReq()){
+                //Cargo Pickup is requested
+                setPositionCmd(PEZPos.CargoGrab);
+            } else if(opController.getHatchPickupReq()){
+                //Hatch Pickup Requested
+                setPositionCmd(PEZPos.HatchGrab);
+            } else if(opController.getReleaseReq()) {
+                //Release whatever we currently have in our gripper
+                if(getHeldGamePiece() == GamePiece.Cargo){
+                    setPositionCmd(PEZPos.CargoRelease);
+                } else if(getHeldGamePiece() == GamePiece.Hatch){
+                    setPositionCmd(PEZPos.HatchRelease);
+                } else {
+                    setPositionCmd(PEZPos.None);
+                }
+            } else {
+                setPositionCmd(PEZPos.None);
+            }
+        }
+        else{
+            //Update Gripper Control - pull position command from driver view interface.
+            String gripStart = CasseroleDriverView.getAutoSelectorVal("Starting Gamepiece");
+            if(gripStart.compareTo(GamePiece.Cargo.toString())==0){
+                setPositionCmd(PEZPos.CargoGrab);
+            } else if(gripStart.compareTo(GamePiece.Hatch.toString())==0){
+                setPositionCmd(PEZPos.HatchGrab);
+            } else {
+                setPositionCmd(PEZPos.HatchRelease);
+            }
+        }
 
         if(posReq == PEZPos.CargoGrab){
            longS.set(DoubleSolenoid.Value.kReverse);
@@ -91,15 +125,13 @@ public class PEZControl {
         } else if(posReq == PEZPos.CargoRelease) {
             curGamePiece = GamePiece.Nothing;
         }
-
     }
 
-	public void setPositionCmd(PEZPos cmd_in){
+    public void setPositionCmd(PEZPos cmd_in){
         posReq = cmd_in;
     }
 
     public GamePiece getHeldGamePiece(){
         return curGamePiece;           
     }
-
 }

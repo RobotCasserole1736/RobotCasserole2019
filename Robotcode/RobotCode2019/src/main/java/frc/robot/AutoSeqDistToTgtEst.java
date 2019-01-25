@@ -1,5 +1,4 @@
 package frc.robot;
-
 /*
  *******************************************************************************************
  * Copyright (C) 2019 FRC Team 1736 Robot Casserole - www.robotcasserole.org
@@ -20,37 +19,43 @@ package frc.robot;
  *   if you would consider donating to our club to help further STEM education.
  */
 
-public class Utils {
+public class AutoSeqDistToTgtEst {
 
-    public static double ctrlAxisScale(double input, double exp_scale, double deadzone){
-        boolean inputIsNegative = false;
-        double output = 0;
+    double distanceEst_ft = 0;
 
-        // Track if the input was less than zero
-        if(input < 0){
-            inputIsNegative = true;
-            input *= -1;
-        }
-
-        if(input < deadzone){
-            //Input within deadzone range, set output to zero.
-            output = 0;
-        } else{
-            //Input is outside deadzon range, calcualte output
-
-            //Raise input to desired power
-            input = Math.pow(input, exp_scale);
-            
-            output = input;
-        }
-
-        
-
-        // re-apply input sign
-        if(inputIsNegative){
-            output *= -1;
-        }
-
-        return output;
+    public AutoSeqDistToTgtEst(){
+        //TODO, if any init is needed.
     }
+
+    /**
+     * Set the current robot linear velocity toward or away from the target
+     */
+    public void setRobotLinearVelocity(double linearVel_ftpsec){
+        //TODO
+    }
+
+    /**
+     * Call this when the current distance is known for sure (ie, line sensor first detects the line). It will force the current estimate to this number.
+     */
+    public void setDistance(double distance_ft){
+        //Todo
+    }
+
+    public void setVisionDistanceEstimate(double distance_ft){
+        //Todo
+    }
+
+    public void setUltrasonicDistanceEstimate(double distance_ft){
+        //todo
+    }
+
+    public double getEstDistanceFt(){
+        return distanceEst_ft; 
+    }
+
+    public void update(){
+        //TODO 
+
+    }
+
 }
