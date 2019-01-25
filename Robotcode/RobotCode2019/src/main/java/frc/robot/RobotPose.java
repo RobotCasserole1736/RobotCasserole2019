@@ -26,7 +26,6 @@ public class RobotPose {
 
     public double leftVelosity_RPM;
     public double rightVelosity_RPM;
-    public final double wheelRadius_Ft = 0.24;
     public final double robotRadius_Ft  = 0.9;
     public final double Math_PI = 3.14;
     public final double FIELD_LENGTH_FT = 54;
@@ -64,7 +63,7 @@ public class RobotPose {
     public double getRobotVelocity_ftpersec(){
         return velosityX;
     }
-    
+
     public void update() {
         double leftVelosity_FPS = leftVelosity_RPM * (2*Math_PI*wheelRadius_Ft / 60);
         double rightVelosity_FPS = rightVelosity_RPM * (2*Math_PI*wheelRadius_Ft / 60);

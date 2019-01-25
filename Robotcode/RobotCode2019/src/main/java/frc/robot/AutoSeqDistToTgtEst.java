@@ -52,7 +52,7 @@ public class AutoSeqDistToTgtEst {
      * Call this when the current distance is known for sure (ie, line sensor first detects the line). It will force the current estimate to this number.
      */
     public void setDistance(double distance_ft){
-        //TODO
+        distanceEst_ft = distance_ft;
     }
 
     public void setVisionDistanceEstimate(double distance_ft, boolean visionAvailable_in){
@@ -69,8 +69,21 @@ public class AutoSeqDistToTgtEst {
     }
 
     public void update(){
-        //TODO 
+        
+        if(testSensor.getInstance().getDistanceAvailable){
+            this.setDistance(getDistanceFt());
+        }
+        else if(jevois.isTgtVisible()) {
+            this.setDistance(jevois.getTgtPositionY());
+        }
+        else
+        {
+            double rev_per_update = ((Drivetrain.getInstance().getLeftWheelSpeedRPM() 
+            + Drivetrain.getInstance().getRightWheelSpeedRPM())/2)/3000;
 
+            this.setDistance(rev_per_update*2*RobotConstants.WHEELRADIUS_FT*3.14);
+        }
+       
     }
 
 }

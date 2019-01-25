@@ -61,5 +61,6 @@ public class RobotConstants {
     public static final int OPERATOR_CONTROLLER_USB_IDX = 1;
     public static final String CAM_1_STREAM_URL = "http://10.17.36.10:1181/stream.mjpg";
     public static final String CAM_2_STREAM_URL = "http://10.17.36.10:1182/stream.mjpg";
-    
+    public static final double WHEELRADIUS_FT = 0.24;
+
 }
