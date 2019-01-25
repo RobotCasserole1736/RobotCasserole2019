@@ -1,4 +1,7 @@
-package frc.robot;
+package frc.robot.auto;
+
+import frc.lib.AutoSequencer.AutoEvent;
+
 /*
  *******************************************************************************************
  * Copyright (C) 2019 FRC Team 1736 Robot Casserole - www.robotcasserole.org
@@ -19,43 +22,34 @@ package frc.robot;
  *   if you would consider donating to our club to help further STEM education.
  */
 
-public class AutoSeqDistToTgtEst {
-
-    double distanceEst_ft = 0;
-
-    public AutoSeqDistToTgtEst(){
-        //TODO, if any init is needed.
-    }
-
-    /**
-     * Set the current robot linear velocity toward or away from the target
-     */
-    public void setRobotLinearVelocity(double linearVel_ftpsec){
-        //TODO
-    }
-
-    /**
-     * Call this when the current distance is known for sure (ie, line sensor first detects the line). It will force the current estimate to this number.
-     */
-    public void setDistance(double distance_ft){
-        //Todo
-    }
-
-    public void setVisionDistanceEstimate(double distance_ft){
-        //Todo
-    }
-
-    public void setUltrasonicDistanceEstimate(double distance_ft){
-        //todo
-    }
-
-    public double getEstDistanceFt(){
-        return distanceEst_ft; 
-    }
-
-    public void update(){
-        //TODO 
+public class MoveArmMidPos extends AutoEvent {
+	
+	MoveArmMidPos() {
 
     }
 
+    @Override
+    public void userStart() {
+
+    }
+
+    @Override
+    public void userUpdate() {
+
+    }
+
+    @Override
+    public void userForceStop() {
+
+    }
+
+    @Override
+    public boolean isTriggered() {
+        return false;
+    }
+
+    @Override
+    public boolean isDone() {
+        return false;
+    }
 }
