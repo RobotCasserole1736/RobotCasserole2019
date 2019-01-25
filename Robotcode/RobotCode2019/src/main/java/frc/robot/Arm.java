@@ -40,7 +40,8 @@ public class Arm {
 
     /////////Moving Things\\\\\\\\\
     Solenoid armBrake;
-    Spark sadey;
+    CANSparkMax sadey;
+    public double armEncoder;
 
     /////////Sensors\\\\\\\\\
     AnalogPotentiometer armPot;
@@ -66,6 +67,7 @@ public class Arm {
     public boolean  brakeIn = false;
     public double   gravityCompensation = 0;
     public boolean  isZeroed = false;
+    public IntakePos curIntakePos;
 
     //Arm State Heights\\
     
@@ -112,6 +114,7 @@ public class Arm {
         /////Movers\\\\\
         armBrake = new Solenoid(RobotConstants.ARM_MECH_BRAKE_SOL_PORT);
         sadey = new CANSparkMax(RobotConstants.ARM_MOTOR_PORT, MotorType.kBrushless);
+        armEncoder = sadey.get();
         /////Digital Inputs\\\\\\\
         upperLimSwitch = new DigitalInput(RobotConstants.ARM_UPPER_LIMIT_SWITCH_PORT);
         lowLimSwitch = new DigitalInput(RobotConstants.ARM_LOWER_LIMIT_SWITCH_PORT);
@@ -295,7 +298,7 @@ public class Arm {
      * 
      */
     public void setIntakeActualState(IntakePos state_in){
-        //Todo
+        curIntakePos = IntakeControl.getInstance().getEstimatedPosition();   
     }
 
     /**
