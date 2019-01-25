@@ -62,7 +62,8 @@ public class Arm {
     ArmPosReq posIn;
 
     /////////State Varibles\\\\\\\\\\\\
-    public double   desArmAngle = 0;
+    public double   desHeight;
+    public double   desArmAngle;
     public double   potUpVolt;
     public double   potLowVolt;
     public boolean  brakeActivated;
@@ -155,7 +156,7 @@ public class Arm {
                 (UpperLimitVoltage - LowerLimitVoltage) + LowerLimitDegrees;
     }
     double convertRotationsToDeg(double rotations_in) {
-        return ();
+        return (5);
     }
 
     public void sampleSensors() {
@@ -173,8 +174,7 @@ public class Arm {
             //Preset Heights Logic
 
             //If arm == 0 ??needed??
-            desArmAngle = desiredArmAngle;
-
+                desArmAngle = desHeight;
             if(curArmAngle - desArmAngle <= -2) {
                 uncompensatedMotorCmd = 1;
             }
@@ -218,22 +218,22 @@ public class Arm {
     public void defArmPos() {
         switch(posIn) {
             case Top:
-            desiredArmAngle = topRocket;
+            desHeight = topRocket;
              
             break;
 
             case Middle:
-            desiredArmAngle = midRocket;
+            desHeight = midRocket;
 
             break;
 
             case Lower:
-            desiredArmAngle = lowRocket;
+            desHeight = lowRocket;
 
             break;
 
             case Intake:
-            desiredArmAngle = intakeHeight;
+            desHeight = intakeHeight;
 
             break;
 
