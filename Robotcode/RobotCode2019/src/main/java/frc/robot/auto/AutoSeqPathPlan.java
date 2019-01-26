@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import frc.lib.AutoSequencer.AutoEvent;
 import frc.lib.PathPlanner.FalconPathPlanner;
+import frc.robot.RobotConstants;
 
 /*
  *******************************************************************************************
