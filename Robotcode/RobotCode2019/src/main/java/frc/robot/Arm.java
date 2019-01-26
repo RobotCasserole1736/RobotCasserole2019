@@ -74,6 +74,7 @@ public class Arm {
     public double   gravityCompensation = 0;
     public boolean  isZeroed = false;
     public IntakePos curIntakePos;
+    public boolean  intakeExtend = false;
 
     //Arm State Heights\\
     
@@ -122,7 +123,11 @@ public class Arm {
         sadey = new CANSparkMax(RobotConstants.ARM_MOTOR_PORT, MotorType.kBrushless);
         armEncoder = sadey.get();
         armPID = sadey.getPIDController();
-        
+        /////PID Values\\\\\
+        armPID.setP(0);
+        armPID.setI(0);
+        armPID.setD(0);
+        armPID.setFF(0);    
         
         /////Digital Inputs\\\\\\\
         upperLimSwitch = new DigitalInput(RobotConstants.ARM_UPPER_LIMIT_SWITCH_PORT);
@@ -133,6 +138,8 @@ public class Arm {
         midRocketCal = new Calibration("Arm Mid Level Pos (Deg)", 0);
         lowRocketCal = new Calibration("Arm Bottom Level Pos (Deg)", 0);
         intakeHeightCal = new Calibration("Arm Intake Level Pos (Deg)", 0);
+        
+        
 
     } 
 
@@ -188,6 +195,9 @@ public class Arm {
             
             if(curManMoveCmd != pastManMoveCmd) {
                 uncompensatedMotorCmd = curManMoveCmd;
+            }
+            else {
+               curArmAngle = desArmAngle; 
             }
 
             if(topOfMotion && uncompensatedMotorCmd < 0) {
@@ -304,7 +314,7 @@ public class Arm {
      * inside the Danger Zone, motion should be stopped.
      * 
      */
-    public void setIntakeActualState(IntakePos state_in){
+    public void setIntakeActualState(IntakePos state_in) {
         curIntakePos = IntakeControl.getInstance().getEstimatedPosition();   
     }
 
@@ -312,11 +322,11 @@ public class Arm {
      * 
      * @return True if the arm is forcing the intake to extend, false otherwise.
      */
-    public boolean intakeExtendOverride(){
+    public boolean intakeExtendOverride() {
         //TODO
             if(curIntakePos == IntakePos.Retract && curArmAngle < 50) {
-                
+               intakeExtend = true;
             }
-        return false;
+        return intakeExtend;
     }
 }
