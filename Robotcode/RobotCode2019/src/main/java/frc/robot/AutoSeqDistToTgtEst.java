@@ -60,8 +60,9 @@ public class AutoSeqDistToTgtEst {
         visionAvailable = visionAvailable_in;
     }
 
-    public void setUltrasonicDistanceEstimate(double distance_ft){
-        //TODO
+    public void setUltrasonicDistanceEstimate(double distance_ft,  boolean ultraSonicAvailable_in){
+        ultrasonicDistance_ft = distance_ft;
+        ultrasonicAvailable = ultraSonicAvailable_in;
     }
 
     public double getEstDistanceFt(){
@@ -70,18 +71,19 @@ public class AutoSeqDistToTgtEst {
 
     public void update(){
         
-        if(testSensor.getInstance().getDistanceAvailable){
-            this.setDistance(getDistanceFt());
+        if(ultrasonicAvailable){
+            this.setDistance(ultrasonicDistance_ft);
         }
-        else if(jevois.isTgtVisible()) {
-            this.setDistance(jevois.getTgtPositionY());
+        else if(visionAvailable) {
+            this.setDistance(visionDistance_ft);
         }
         else
         {
-            double rev_per_update = ((Drivetrain.getInstance().getLeftWheelSpeedRPM() 
-            + Drivetrain.getInstance().getRightWheelSpeedRPM())/2)/3000;
+            //double rev_per_update = ((Drivetrain.getInstance().getLeftWheelSpeedRPM() 
+            //+ Drivetrain.getInstance().getRightWheelSpeedRPM())/2)/3000;
 
-            this.setDistance(rev_per_update*2*RobotConstants.WHEELRADIUS_FT*3.14);
+           // this.setDistance(rev_per_update*2*RobotConstants.WHEELRADIUS_FT*3.14);
+           distanceEst_ft += robotLinearVelocity_ftpersec * 0.02;
         }
        
     }
