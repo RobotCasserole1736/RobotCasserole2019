@@ -48,11 +48,21 @@ public class RobotPose {
 		return velosityX;
 	}
 	
+	public void	setMeasuredPoseAngle(double poseAngle_in, boolean angleAvailable_in) {
+
+
+		
+	}
 	public void update() {
 		double leftVelosity_FPS = leftVelosity_RPM * (2*Math_PI*wheelRadius_Ft / 60);
 		double rightVelosity_FPS = rightVelosity_RPM * (2*Math_PI*wheelRadius_Ft / 60);
 		double robotAngle_DPS = ((rightVelosity_FPS-leftVelosity_FPS)/(2*robotRadius_Ft));
 		double X_dot = (rightVelosity_FPS+leftVelosity_FPS)/2; 
+	
+
+		}
+
+
 		
 		Math.toRadians(poseThaddeus);
 
