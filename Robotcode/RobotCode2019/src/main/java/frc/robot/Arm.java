@@ -329,4 +329,8 @@ public class Arm {
             }
         return intakeExtend;
     }
+
+    public void forceArmStop(){
+        //TODO
+    }
 }

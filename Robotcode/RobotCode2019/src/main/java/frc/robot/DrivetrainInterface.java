@@ -53,4 +53,8 @@ public interface DrivetrainInterface {
     public double getRightWheelSpeedRPM();
 
     public void updateGains(boolean force);
+
+    public void setClosedLoopSpeedCmd(double leftCmdRPM, double rightCmdRPM);
+
+    public void setClosedLoopSpeedCmd(double leftCmdRPM, double rightCmdRPM, double headingCmdDeg);
 }
