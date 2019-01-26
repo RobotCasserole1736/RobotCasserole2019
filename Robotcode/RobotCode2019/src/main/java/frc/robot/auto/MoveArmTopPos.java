@@ -31,7 +31,7 @@ public class MoveArmTopPos extends AutoEvent {
 
     @Override
     public void userStart() {
-
+        Arm.getInstance().setPositionCmd(Arm.ArmPosReq.Top);
     }
 
     @Override

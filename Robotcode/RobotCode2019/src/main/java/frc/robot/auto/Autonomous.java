@@ -131,7 +131,7 @@ public class Autonomous {
 
             AutoEvent parent = new AutoSeqPathPlan(xTargetOffset, yTargetOffset, targetPositionAngle);
             AutoSequencer.addEvent(parent);
-            parent = new AutoSeqDistToTgtEst();
+            parent = new AutoSeqFinalAlign();
 
             if(OperatorController.getInstance().getLowLevelPlace()){
                 parent.addChildEvent(new MoveArmLowPos());
@@ -150,6 +150,8 @@ public class Autonomous {
             }
 
             AutoSequencer.addEvent(parent);
+
+            AutoSequencer.addEvent(new Backup());
         }
 
         if(!currentAutoMoveState && previousAutoMoveState){

@@ -31,12 +31,12 @@ public class MoveArmLowPos extends AutoEvent {
 
     @Override
     public void userStart() {
-
+        Arm.getInstance().setPositionCmd(Arm.ArmPosReq.Lower);
     }
 
     @Override
     public void userUpdate() {
-
+        
     }
 
     @Override

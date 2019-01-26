@@ -1,7 +1,9 @@
 package frc.robot.auto;
 
+import frc.lib.PathPlanner.FalconPathPlanner;
+import frc.lib.PathPlanner.PathPlannerAutoEvent;
+
 import frc.lib.AutoSequencer.AutoEvent;
-import frc.robot.Arm;
 
 /*
  *******************************************************************************************
@@ -23,34 +25,48 @@ import frc.robot.Arm;
  *   if you would consider donating to our club to help further STEM education.
  */
 
-public class MoveArmMidPos extends AutoEvent {
+public class Backup extends AutoEvent {
 	
-	MoveArmMidPos() {
-
+	Backup() {
+        driveBackward = new PathPlannerAutoEvent(waypoints, time, true, 0.2, 0.5, 0.001, 0.9);
     }
 
-    @Override
-    public void userStart() {
-        Arm.getInstance().setPositionCmd(Arm.ArmPosReq.Middle);
-    }
+    PathPlannerAutoEvent driveBackward;
 
-    @Override
-    public void userUpdate() {
+	private final double[][] waypoints = new double[][] {
+		{0,0},
+		{0,-50}
+	};
+	
+	private final double time = 1.5;
 
-    }
+	@Override
+	public void userUpdate() {
+		driveBackward.userUpdate();
+		// shotCTRL.setDesiredShooterState(ShooterStates.PREP_TO_SHOOT);
+	}
 
-    @Override
-    public void userForceStop() {
-        Arm.getInstance().forceArmStop();
-    }
+	@Override
+	public void userForceStop() {
+		driveBackward.userForceStop();
+	}
 
-    @Override
-    public boolean isTriggered() {
-        return !Arm.getInstance().atDesiredHeight();
-    }
+	@Override
+	public boolean isTriggered() {
+		return driveBackward.isTriggered();
+	}
 
-    @Override
-    public boolean isDone() {
-        return Arm.getInstance().atDesiredHeight();
-    }
+	@Override
+	public boolean isDone() {
+		return driveBackward.isDone();
+	}
+
+	@Override
+	public void userStart() {
+		driveBackward.userStart();
+	}
+    public static void main(String[] args) {
+    	Backup autoEvent = new Backup();
+		FalconPathPlanner.plotPath(autoEvent.driveBackward.path);
+	}
 }

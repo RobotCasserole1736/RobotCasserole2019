@@ -55,4 +55,14 @@ public class DrivetrainSim implements DrivetrainInterface {
 
     public void updateGains(boolean force) {
     }
+
+    @Override
+    public void setClosedLoopSpeedCmd(double leftCmdRPM, double rightCmdRPM) {
+
+    }
+
+    @Override
+    public void setClosedLoopSpeedCmd(double leftCmdRPM, double rightCmdRPM, double headingCmdDeg) {
+
+    }
 }

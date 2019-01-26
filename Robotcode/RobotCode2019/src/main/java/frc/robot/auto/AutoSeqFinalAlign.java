@@ -1,8 +1,4 @@
 package frc.robot.auto;
-
-import frc.lib.AutoSequencer.AutoEvent;
-import frc.robot.Arm;
-
 /*
  *******************************************************************************************
  * Copyright (C) 2019 FRC Team 1736 Robot Casserole - www.robotcasserole.org
@@ -23,15 +19,17 @@ import frc.robot.Arm;
  *   if you would consider donating to our club to help further STEM education.
  */
 
-public class MoveArmMidPos extends AutoEvent {
-	
-	MoveArmMidPos() {
+import frc.lib.AutoSequencer.AutoEvent;
 
+public class AutoSeqFinalAlign extends AutoEvent {
+
+    public AutoSeqFinalAlign(){
+        //TODO, if any init is needed.
     }
 
     @Override
     public void userStart() {
-        Arm.getInstance().setPositionCmd(Arm.ArmPosReq.Middle);
+
     }
 
     @Override
@@ -41,16 +39,17 @@ public class MoveArmMidPos extends AutoEvent {
 
     @Override
     public void userForceStop() {
-        Arm.getInstance().forceArmStop();
+
     }
 
     @Override
     public boolean isTriggered() {
-        return !Arm.getInstance().atDesiredHeight();
+        return false;
     }
 
     @Override
     public boolean isDone() {
-        return Arm.getInstance().atDesiredHeight();
+        return false;
     }
+
 }
