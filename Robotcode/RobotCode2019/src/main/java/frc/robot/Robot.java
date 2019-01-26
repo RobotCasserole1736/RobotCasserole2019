@@ -40,6 +40,7 @@ import frc.lib.WebServer.CasseroleWebServer;
 import frc.robot.Arm.ArmPosReq;
 import frc.robot.LEDController.LEDPatterns;
 import frc.robot.PEZControl.GamePiece;
+import frc.robot.auto.AutoSeqDistToTgtEst;
 
 
 /**
@@ -187,6 +188,18 @@ public class Robot extends TimedRobot {
         frontUltrasonic.update();
         backUltrasonic.update();
 
+        if(arm.getActualArmHeight() < 90) {
+            AutoSeqDistToTgtEst.getInstance().setVisionDistanceEstimate(jevois.getTgtPositionY(), jevois.isTgtVisible());
+            AutoSeqDistToTgtEst.getInstance().setUltrasonicDistanceEstimate(frontUltrasonic.getdistance_ft(), true);
+            AutoSeqDistToTgtEst.getInstance().setRobotLinearVelocity(poseCalc.getRobotVelocity_ftpersec());
+        } else{
+            AutoSeqDistToTgtEst.getInstance().setVisionDistanceEstimate(0, false);
+            AutoSeqDistToTgtEst.getInstance().setUltrasonicDistanceEstimate(backUltrasonic.getdistance_ft(), true);
+            AutoSeqDistToTgtEst.getInstance().setRobotLinearVelocity(-1 * poseCalc.getRobotVelocity_ftpersec());
+
+        }
+
+        AutoSeqDistToTgtEst.getInstance().update();
 
         //Arbitrate driver & auto sequencer inputs to drivetrain
         if(driverController.getGyroAngleLockReq()){

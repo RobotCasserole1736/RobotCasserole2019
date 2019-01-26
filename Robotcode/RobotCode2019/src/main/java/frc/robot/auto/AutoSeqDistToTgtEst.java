@@ -19,7 +19,8 @@ package frc.robot.auto;
  *   if you would consider donating to our club to help further STEM education.
  */
 
-
+import frc.lib.DataServer.Signal;
+import frc.robot.LoopTiming;
 
 public class AutoSeqDistToTgtEst {
 
@@ -38,16 +39,19 @@ public class AutoSeqDistToTgtEst {
 
     //The robot's present speed
     double robotLinearVelocity_ftpersec = 0;
+    Signal estdist;
 
     public static synchronized AutoSeqDistToTgtEst getInstance() {
         if(autoSeqInstance == null)
             autoSeqInstance = new AutoSeqDistToTgtEst();
         return autoSeqInstance;
+        
     }
 
     //Constructor
     private AutoSeqDistToTgtEst(){
         //TODO - put init here
+        estdist = new Signal ("estimated distance to target", "ft");
     }
 
     /**
@@ -87,13 +91,17 @@ public class AutoSeqDistToTgtEst {
             this.setDistance(visionDistance_ft);
         }
         else
+
         {
             //double rev_per_update = ((Drivetrain.getInstance().getLeftWheelSpeedRPM() 
             //+ Drivetrain.getInstance().getRightWheelSpeedRPM())/2)/3000;
 
            // this.setDistance(rev_per_update*2*RobotConstants.WHEELRADIUS_FT*3.14);
            distanceEst_ft += robotLinearVelocity_ftpersec * 0.02;
-        }
+        
+        } 
+        double sample_time_ms = LoopTiming.getInstance().getLoopStartTimeSec()*1000.0;
+        estdist.addSample(sample_time_ms, distanceEst_ft);
        
     }
 

@@ -131,7 +131,7 @@ public class Autonomous {
 
             AutoEvent parent = new AutoSeqPathPlan(xTargetOffset, yTargetOffset, targetPositionAngle);
             AutoSequencer.addEvent(parent);
-            parent = new AutoSeqDistToTgtEst();
+            //parent = new AutoSeqDistToTgtEst();
 
             if(OperatorController.getInstance().getLowLevelPlace()){
                 parent.addChildEvent(new MoveArmLowPos());

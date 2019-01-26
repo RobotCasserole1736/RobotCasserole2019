@@ -65,8 +65,8 @@ public class RobotPose {
     }
 
     public void update() {
-        double leftVelosity_FPS = leftVelosity_RPM * (2*Math_PI*wheelRadius_Ft / 60);
-        double rightVelosity_FPS = rightVelosity_RPM * (2*Math_PI*wheelRadius_Ft / 60);
+        double leftVelosity_FPS = leftVelosity_RPM * (2*Math_PI*RobotConstants.WHEELRADIUS_FT / 60);
+        double rightVelosity_FPS = rightVelosity_RPM * (2*Math_PI*RobotConstants.WHEELRADIUS_FT / 60);
         double robotAngle_DPS = ((rightVelosity_FPS-leftVelosity_FPS)/(2*robotRadius_Ft));
         double X_dot = (rightVelosity_FPS+leftVelosity_FPS)/2; 
         
