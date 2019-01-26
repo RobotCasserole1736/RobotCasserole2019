@@ -45,6 +45,12 @@ public class OperatorController {
     IntakeSpd intakeSpdReq;
     IntakePos intakePosReq;
 
+    /* State Machine Related Variables */
+    boolean   topLevelPlace;
+    boolean   midLevelPlace;
+    boolean   lowLevelPlace;
+    boolean   autoMove;
+
     /* Behavior/feel calibrations */
     Calibration joystickExpScaleFactor;
     Calibration joystickDeadzone;
@@ -135,6 +141,37 @@ public class OperatorController {
             intakeSpdReq = IntakeSpd.Stop;
         }
 
+        //code for Third level placement. 0 references the top button of the Dpad on the Xbox controller
+        if(xb.getPOV() == 0 && xb.getXButton()){
+            topLevelPlace = true;
+            autoMove = true;
+        }
+        else {
+            topLevelPlace = false;
+            autoMove = false;
+        }
+
+        //code for Second level placement. 90 and 270 are referencing the sides of the Dpad on the Xbox controller
+        //90 is the right while 270 is the left
+        if((xb.getPOV() == 90 || xb.getPOV() == 270) && xb.getXButton()){
+            midLevelPlace = true;
+            autoMove = true;
+        }
+        else {
+            midLevelPlace = false;
+            autoMove = false;
+        }
+
+        //code for first level placement. 180 references the bottom button of the Dpad on the Xbox controller
+        if(xb.getPOV() == 180 && xb.getXButton()){
+            lowLevelPlace = true;
+            autoMove = true;
+        }
+        else {
+            lowLevelPlace = false;
+            autoMove = false;
+        }
+
         /* Update Telemetry */
         double sample_time_ms = LoopTiming.getInstance().getLoopStartTimeSec()*1000.0;
         ballPickupReqSig.addSample(sample_time_ms,ballPickupReq);
@@ -189,5 +226,21 @@ public class OperatorController {
 
     public IntakePos getIntakePosReq() {
         return this.intakePosReq;
+    }
+
+    public boolean getAutoMove() {
+        return this.autoMove;
+    }
+
+    public boolean getLowLevelPlace() {
+        return this.lowLevelPlace;
+    }
+
+    public boolean getMidLevelPlace() {
+        return this.midLevelPlace;
+    }
+
+    public boolean getTopLevelPlace() {
+        return this.topLevelPlace;
     }
 }
