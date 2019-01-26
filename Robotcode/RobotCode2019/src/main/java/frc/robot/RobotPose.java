@@ -62,7 +62,7 @@ public class RobotPose {
     public double getRobotVelocity_ftpersec(){
         return velosityX;
     }
-    
+
     public void update() {
         double leftVelosity_FPS = leftVelosity_RPM * (2*Math_PI*RobotConstants.WHEEL_RADIUS_FT / 60);
         double rightVelosity_FPS = rightVelosity_RPM * (2*Math_PI*RobotConstants.WHEEL_RADIUS_FT / 60);

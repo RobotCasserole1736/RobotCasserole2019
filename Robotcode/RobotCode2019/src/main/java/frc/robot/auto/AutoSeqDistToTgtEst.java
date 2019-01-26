@@ -19,36 +19,63 @@ package frc.robot.auto;
  *   if you would consider donating to our club to help further STEM education.
  */
 
-import frc.lib.AutoSequencer.AutoEvent;
+import frc.lib.DataServer.Signal;
+import frc.robot.LoopTiming;
 
-public class AutoSeqDistToTgtEst extends AutoEvent {
+public class AutoSeqDistToTgtEst {
 
+    private static AutoSeqDistToTgtEst autoSeqInstance = null;
+
+    //The current estimate of distance to target
     double distanceEst_ft = 0;
 
-    public AutoSeqDistToTgtEst(){
-        //TODO, if any init is needed.
+    //The vision system's estimate of the distance to the target
+    double visionDistance_ft = 0;
+    boolean visionAvailable = false;
+
+    //The Ultrasonic Sensor's estimate of distance to the target
+    double ultrasonicDistance_ft = 0;
+    boolean ultrasonicAvailable = false;
+
+    //The robot's present speed
+    double robotLinearVelocity_ftpersec = 0;
+    Signal estdist;
+
+    public static synchronized AutoSeqDistToTgtEst getInstance() {
+        if(autoSeqInstance == null)
+            autoSeqInstance = new AutoSeqDistToTgtEst();
+        return autoSeqInstance;
+        
+    }
+
+    //Constructor
+    private AutoSeqDistToTgtEst(){
+        //TODO - put init here
+        estdist = new Signal ("estimated distance to target", "ft");
     }
 
     /**
      * Set the current robot linear velocity toward or away from the target
      */
     public void setRobotLinearVelocity(double linearVel_ftpsec){
-        //TODO
+        robotLinearVelocity_ftpersec = linearVel_ftpsec;
     }
 
     /**
      * Call this when the current distance is known for sure (ie, line sensor first detects the line). It will force the current estimate to this number.
      */
     public void setDistance(double distance_ft){
-        //Todo
+        distanceEst_ft = distance_ft;
     }
 
-    public void setVisionDistanceEstimate(double distance_ft){
-        //Todo
+    public void setVisionDistanceEstimate(double distance_ft, boolean visionAvailable_in){
+        visionDistance_ft = distance_ft;
+        visionAvailable = visionAvailable_in;
     }
 
-    public void setUltrasonicDistanceEstimate(double distance_ft){
-        //todo
+    public void setUltrasonicDistanceEstimate(double distance_ft,  boolean ultraSonicAvailable_in){
+        ultrasonicDistance_ft = distance_ft;
+        ultrasonicAvailable = ultraSonicAvailable_in;
     }
 
     public double getEstDistanceFt(){
@@ -56,33 +83,28 @@ public class AutoSeqDistToTgtEst extends AutoEvent {
     }
 
     public void update(){
-        //TODO 
+        
+        if(ultrasonicAvailable){
+            this.setDistance(ultrasonicDistance_ft);
+        }
+        else if(visionAvailable) {
+            this.setDistance(visionDistance_ft);
+        }
+        else
 
+        {
+            //double rev_per_update = ((Drivetrain.getInstance().getLeftWheelSpeedRPM() 
+            //+ Drivetrain.getInstance().getRightWheelSpeedRPM())/2)/3000;
+
+           // this.setDistance(rev_per_update*2*RobotConstants.WHEELRADIUS_FT*3.14);
+           distanceEst_ft += robotLinearVelocity_ftpersec * 0.02;
+        
+        } 
+        double sample_time_ms = LoopTiming.getInstance().getLoopStartTimeSec()*1000.0;
+        estdist.addSample(sample_time_ms, distanceEst_ft);
+       
     }
 
-    @Override
-    public void userStart() {
-
-    }
-
-    @Override
-    public void userUpdate() {
-
-    }
-
-    @Override
-    public void userForceStop() {
-
-    }
-
-    @Override
-    public boolean isTriggered() {
-        return false;
-    }
-
-    @Override
-    public boolean isDone() {
-        return false;
-    }
+   
 
 }

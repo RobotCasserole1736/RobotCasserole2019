@@ -23,7 +23,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.Timer;
 import frc.lib.DataServer.Signal;
 
-class LoopTiming{
+public class LoopTiming{
 
     //All times in seconds
     double loopStartTime;

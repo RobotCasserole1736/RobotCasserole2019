@@ -63,5 +63,5 @@ public class RobotConstants {
     public static final String CAM_2_STREAM_URL = "http://10.17.36.10:1182/stream.mjpg";
     public static final double WHEEL_RADIUS_FT = 0.24;
     public static final double ROBOT_RADIUS_FT  = 0.9;
-    
+
 }
