@@ -25,7 +25,7 @@ import frc.lib.SignalMath.AveragingFilter;
  *   if you would consider donating to our club to help further STEM education.
  */
 
-public class FrontUltrasonic {
+public class BackUltrasonic {
     AnalogInput analogIn;
 
     AveragingFilter filt;
@@ -40,27 +40,27 @@ public class FrontUltrasonic {
     Signal voltageSig;
     Signal distanceAvailableSig;
 
-	// You will want to rename all instances of "FrontUltrasonic" with your actual class name and "empty" with a variable name
-	private static FrontUltrasonic empty = null;
+	// You will want to rename all instances of "BackUltrasonic" with your actual class name and "empty" with a variable name
+	private static BackUltrasonic empty = null;
 
-	public static synchronized FrontUltrasonic getInstance() {
+	public static synchronized BackUltrasonic getInstance() {
 		if(empty == null)
-			empty = new FrontUltrasonic();
+			empty = new BackUltrasonic();
 		return empty;
 	}
 
 	// This is the private constructor that will be called once by getInstance() and it should instantiate anything that will be required by the class
-	FrontUltrasonic() {
+	BackUltrasonic() {
         analogIn = new AnalogInput(2); 
 
         filt = new AveragingFilter(3,0);
 
-        maxVoltage = new Calibration("Front Ultrasonic Voltage Max (mV)", 180);
-        minVoltage = new Calibration("Front Ultrasonic Voltage Min (mV)", 70);
+        maxVoltage = new Calibration("Back Ultrasonic Voltage Max (mV)", 180);
+        minVoltage = new Calibration("Back Ultrasonic Voltage Min (mV)", 70);
 
-        distanceFeetSig = new Signal("Distance in Feet (Front)", "ft");
-        voltageSig = new Signal("Front Ultrasonic Sensor Voltage", "mV");
-        distanceAvailableSig = new Signal("Front Distance Available", "true/false");
+        distanceFeetSig = new Signal("Distance in Feet (Back)", "ft");
+        voltageSig = new Signal("Back Ultrasonic Sensor Voltage", "mV");
+        distanceAvailableSig = new Signal("Back Distance Available", "true/false");
     }
 
     public void update() {
