@@ -1,6 +1,6 @@
 package frc.robot;
 
-import com.ctre.phoenix.motorcontrol.InvertType;
+import frc.lib.DataServer.Signal;
 
 /*
  *******************************************************************************************
@@ -25,12 +25,26 @@ import com.ctre.phoenix.motorcontrol.InvertType;
 
 public class DrivetrainSim implements DrivetrainInterface {
 
-    public DrivetrainSim() {
+    DrivetrainOpMode opModeCmd;
+    DrivetrainOpMode opMode;
+    DrivetrainOpMode prevOpMode;
 
+    public double DesRightRPM;
+    public double DesLeftRPM;
+    public double ActRightRPM;
+    public double ActLeftRPM;
+
+    Signal ActualRightSimRPM;
+    Signal ActualLeftSimRPM;
+
+
+    public DrivetrainSim() {
+        ActualRightSimRPM = new Signal("actual sim drivetrain right RPM", "RPM");
+        ActualLeftSimRPM = new Signal("actual sim drivetrain left RPM", "RPM");
     }
 
     public void setOpenLoopCmd(double forwardReverseCmd, double rotaionCmd) {
-        //TODO
+        opModeCmd = DrivetrainOpMode.OpenLoop;
     }
 
     public boolean isGyroOnline(){
@@ -38,20 +52,39 @@ public class DrivetrainSim implements DrivetrainInterface {
     }
 
     public void setGyroLockCmd(double forwardReverseCmd) {
-        //TODO
+        opModeCmd = DrivetrainOpMode.GyroLock;
     }
 
     public void update() {
-        //TODO
+
+        if(ActLeftRPM < DesLeftRPM){
+            ActLeftRPM++;
+        } else if (ActLeftRPM > DesLeftRPM){
+            ActLeftRPM--;
+        }
+        
+        if(ActRightRPM < DesRightRPM){
+            ActRightRPM++;
+        } else if (ActRightRPM > DesRightRPM){
+            ActRightRPM--;
+        }
+
+        prevOpMode = opMode;
+        opMode = opModeCmd;
+        
+        double sampleTimeMs = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
+
+        ActualLeftSimRPM.addSample(sampleTimeMs, getLeftWheelSpeedRPM());
+        ActualLeftSimRPM.addSample(sampleTimeMs, getRightWheelSpeedRPM());
     }
 
     public double getLeftWheelSpeedRPM() {
-        return 0; //TODO
+        return ActLeftRPM;
     }
 
     public double getRightWheelSpeedRPM() {
-        return 0; //TODO
-    }
+        return ActRightRPM;
+    } 
 
     public void updateGains(boolean force) {
         //TODO
@@ -66,8 +99,4 @@ public class DrivetrainSim implements DrivetrainInterface {
 
     }
 
-    @Override
-    public void setClosedLoopSpeedCmd(double leftCmdRPM, double rightCmdRPM, double headingCmdDeg) {
-
-    }
 }

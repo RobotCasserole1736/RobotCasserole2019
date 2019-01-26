@@ -66,12 +66,12 @@ public class RobotPose {
     public void update() {
         double leftVelosity_FPS = leftVelosity_RPM * (2*Math_PI*RobotConstants.WHEEL_RADIUS_FT / 60);
         double rightVelosity_FPS = rightVelosity_RPM * (2*Math_PI*RobotConstants.WHEEL_RADIUS_FT / 60);
-        double robotAngle_DPS = ((rightVelosity_FPS-leftVelosity_FPS)/(2*RobotConstants.ROBOT_RADIUS_FT));
+        double robotAngle_DPS = ((rightVelosity_FPS-leftVelosity_FPS)/(2*RobotConstants.ROBOT_TRACK_WIDTH_FT));
         double X_dot = (rightVelosity_FPS+leftVelosity_FPS)/2; 
         
         Math.toRadians(poseThaddeus);
 
-        Math.toDegrees((rightVelosity_FPS-leftVelosity_FPS)/(2*RobotConstants.ROBOT_RADIUS_FT));
+        Math.toDegrees((rightVelosity_FPS-leftVelosity_FPS)/(2*RobotConstants.ROBOT_TRACK_WIDTH_FT));
 
         velosityX = 0.02 * (X_dot*Math.cos(poseThaddeus));
         velosityY = 0.02 * (X_dot*Math.sin(poseThaddeus));
