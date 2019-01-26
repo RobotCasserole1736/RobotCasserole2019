@@ -193,6 +193,8 @@ public class Robot extends TimedRobot {
             drivetrain.setOpenLoopCmd(driverController.getDriverFwdRevCmd(), driverController.getDriverRotateCmd());
         }
 
+        DrivetrainClosedLoopTestVectors.getInstance().update();
+        
         drivetrain.update();
 
         poseCalc.setLeftMotorSpeed(drivetrain.getLeftWheelSpeedRPM());

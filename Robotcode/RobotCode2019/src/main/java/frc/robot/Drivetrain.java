@@ -77,4 +77,8 @@ public class Drivetrain implements DrivetrainInterface {
     public double getRightWheelSpeedRPM(){
         return dTrainIF.getRightWheelSpeedRPM();
     }
+
+    public void setClosedLoopSpeedCmd(double leftCmdRPM, double rightCmdRPM, double headingCmdDeg){
+        dTrainIF.setClosedLoopSpeedCmd(leftCmdRPM, rightCmdRPM, headingCmdDeg);
+    }
 }

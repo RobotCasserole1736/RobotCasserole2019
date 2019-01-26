@@ -26,9 +26,6 @@ import frc.lib.PathPlanner.FalconPathPlanner;
 
 public class AutoSeqPathPlan {
 
-    final double PLANNER_SAMPLE_RATE_S = 0.02; // 20ms update rate
-    final double ROBOT_TRACK_WIDTH_FT = 3.5; // 3.5 ft effective track width
-
     public ArrayList<double[]> waypoints;
 
     double pathDurationSec = 0;
@@ -51,7 +48,7 @@ public class AutoSeqPathPlan {
         //TODO add more waypoints based on the final location rquested
 
         path = new FalconPathPlanner((double[][])waypoints.toArray());
-        path.calculate(pathDurationSec, PLANNER_SAMPLE_RATE_S, ROBOT_TRACK_WIDTH_FT);
+        path.calculate(pathDurationSec, RobotConstants.MAIN_LOOP_SAMPLE_RATE_S, RobotConstants.ROBOT_TRACK_WIDTH_FT);
 
     }
 
@@ -74,7 +71,7 @@ public class AutoSeqPathPlan {
      * Return the left motor speed command at the specified time (in sec)
      */
     public double getLeftSpeedCmdRPM(double time_sec){
-        int timestep = (int)Math.floor(time_sec/PLANNER_SAMPLE_RATE_S);
+        int timestep = (int)Math.floor(time_sec/RobotConstants.MAIN_LOOP_SAMPLE_RATE_S);
         double cmdSpeed = 0;
 
         if(timestep < path.smoothLeftVelocity.length){
@@ -90,7 +87,7 @@ public class AutoSeqPathPlan {
      * Return the right motor speed command at the specified time (in sec)
      */
     public double getRightSpeedCmdRPM(double time_sec){
-        int timestep = (int)Math.floor(time_sec/PLANNER_SAMPLE_RATE_S);
+        int timestep = (int)Math.floor(time_sec/RobotConstants.MAIN_LOOP_SAMPLE_RATE_S);
         double cmdSpeed = 0;
 
         if(timestep < path.smoothRightVelocity.length){
@@ -106,7 +103,7 @@ public class AutoSeqPathPlan {
      * Return the heading command, relative to how the gyro returns angles, at the specified time (in sec)
      */
     public double getHeadingCmdRPM(double time_sec){
-        int timestep = (int)Math.floor(time_sec/PLANNER_SAMPLE_RATE_S);
+        int timestep = (int)Math.floor(time_sec/RobotConstants.MAIN_LOOP_SAMPLE_RATE_S);
         double cmdHeading = 0;
 
         if(timestep < path.heading.length){
