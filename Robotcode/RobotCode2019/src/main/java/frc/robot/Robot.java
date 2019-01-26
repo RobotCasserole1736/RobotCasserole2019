@@ -70,7 +70,6 @@ public class Robot extends TimedRobot {
 
     //Physical devices
     PowerDistributionPanel pdp;
-    Ultrasonic testSensor;
     BuiltInAccelerometer onboardAccel;
     LEDController ledController;
     PneumaticsControl pneumaticsControl;
@@ -79,6 +78,8 @@ public class Robot extends TimedRobot {
     Climber climber;
     IntakeControl intakeControl;
     PEZControl pezControl;
+    FrontUltrasonic frontUltrasonic;
+    BackUltrasonic backUltrasonic;
 
     //Top level telemetry signals
     Signal rioDSSampLoad;
@@ -112,8 +113,8 @@ public class Robot extends TimedRobot {
         intakeControl = IntakeControl.getInstance();
         pezControl = PEZControl.getInstance();
         onboardAccel = new BuiltInAccelerometer();
-
-        testSensor = new Ultrasonic(3, "Test");
+        frontUltrasonic = FrontUltrasonic.getInstance();
+        backUltrasonic = BackUltrasonic.getInstance();
 
         /* Init input from humans */
         operatorController = OperatorController.getInstance();
@@ -182,6 +183,9 @@ public class Robot extends TimedRobot {
         pezControl.update();
 
         intakeControl.update();
+
+        frontUltrasonic.update();
+        backUltrasonic.update();
 
 
         //Arbitrate driver & auto sequencer inputs to drivetrain
@@ -260,6 +264,9 @@ public class Robot extends TimedRobot {
         pezControl.update();
 
         intakeControl.update();
+
+        frontUltrasonic.update();
+        backUltrasonic.update();
 
 
         //Keep drivetrain stopped.
