@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.robot.auto;
 /*
  *******************************************************************************************
  * Copyright (C) 2019 FRC Team 1736 Robot Casserole - www.robotcasserole.org
@@ -19,7 +19,9 @@ package frc.robot;
  *   if you would consider donating to our club to help further STEM education.
  */
 
-public class AutoSeqDistToTgtEst {
+import frc.lib.AutoSequencer.AutoEvent;
+
+public class AutoSeqDistToTgtEst extends AutoEvent {
 
     //The current estimate of distance to target
     double distanceEst_ft = 0;
@@ -86,6 +88,31 @@ public class AutoSeqDistToTgtEst {
            distanceEst_ft += robotLinearVelocity_ftpersec * 0.02;
         }
        
+    }
+
+    @Override
+    public void userStart() {
+
+    }
+
+    @Override
+    public void userUpdate() {
+
+    }
+
+    @Override
+    public void userForceStop() {
+
+    }
+
+    @Override
+    public boolean isTriggered() {
+        return false;
+    }
+
+    @Override
+    public boolean isDone() {
+        return false;
     }
 
 }

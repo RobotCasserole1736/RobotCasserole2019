@@ -304,4 +304,8 @@ public class Arm {
         //TODO
         return false;
     }
+
+    public void forceArmStop(){
+        //TODO
+    }
 }

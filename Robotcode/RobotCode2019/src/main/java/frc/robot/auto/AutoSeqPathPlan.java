@@ -1,7 +1,8 @@
-package frc.robot;
+package frc.robot.auto;
 
 import java.util.ArrayList;
 
+import frc.lib.AutoSequencer.AutoEvent;
 import frc.lib.PathPlanner.FalconPathPlanner;
 
 /*
@@ -24,7 +25,7 @@ import frc.lib.PathPlanner.FalconPathPlanner;
  *   if you would consider donating to our club to help further STEM education.
  */
 
-public class AutoSeqPathPlan {
+public class AutoSeqPathPlan extends AutoEvent {
 
     final double PLANNER_SAMPLE_RATE_S = 0.02; // 20ms update rate
     final double ROBOT_TRACK_WIDTH_FT = 3.5; // 3.5 ft effective track width
@@ -116,6 +117,31 @@ public class AutoSeqPathPlan {
         }
 
         return cmdHeading - 90;
+    }
+
+    @Override
+    public void userStart() {
+
+    }
+
+    @Override
+    public void userUpdate() {
+
+    }
+
+    @Override
+    public void userForceStop() {
+
+    }
+
+    @Override
+    public boolean isTriggered() {
+        return false;
+    }
+
+    @Override
+    public boolean isDone() {
+        return false;
     }
 
 }
