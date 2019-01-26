@@ -51,7 +51,7 @@ public class BackUltrasonic {
 
 	// This is the private constructor that will be called once by getInstance() and it should instantiate anything that will be required by the class
 	BackUltrasonic() {
-        analogIn = new AnalogInput(2); 
+        analogIn = new AnalogInput(3); 
 
         filt = new AveragingFilter(3,0);
 
