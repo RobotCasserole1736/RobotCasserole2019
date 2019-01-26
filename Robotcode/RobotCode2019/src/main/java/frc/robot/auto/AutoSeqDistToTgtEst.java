@@ -19,9 +19,11 @@ package frc.robot.auto;
  *   if you would consider donating to our club to help further STEM education.
  */
 
-import frc.lib.AutoSequencer.AutoEvent;
 
-public class AutoSeqDistToTgtEst extends AutoEvent {
+
+public class AutoSeqDistToTgtEst {
+
+    private static AutoSeqDistToTgtEst autoSeqInstance = null;
 
     //The current estimate of distance to target
     double distanceEst_ft = 0;
@@ -37,9 +39,14 @@ public class AutoSeqDistToTgtEst extends AutoEvent {
     //The robot's present speed
     double robotLinearVelocity_ftpersec = 0;
 
+    public static synchronized AutoSeqDistToTgtEst getInstance() {
+        if(autoSeqInstance == null)
+            autoSeqInstance = new AutoSeqDistToTgtEst();
+        return autoSeqInstance;
+    }
 
     //Constructor
-    public AutoSeqDistToTgtEst(){
+    private AutoSeqDistToTgtEst(){
         //TODO - put init here
     }
 
@@ -90,29 +97,6 @@ public class AutoSeqDistToTgtEst extends AutoEvent {
        
     }
 
-    @Override
-    public void userStart() {
-
-    }
-
-    @Override
-    public void userUpdate() {
-
-    }
-
-    @Override
-    public void userForceStop() {
-
-    }
-
-    @Override
-    public boolean isTriggered() {
-        return false;
-    }
-
-    @Override
-    public boolean isDone() {
-        return false;
-    }
+   
 
 }
