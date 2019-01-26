@@ -19,7 +19,9 @@ package frc.robot;
  *   if you would consider donating to our club to help further STEM education.
  */
 
+import edu.wpi.first.wpilibj.Timer;
 import frc.lib.Calibration.Calibration;
+import frc.lib.PathPlanner.FalconPathPlanner;
 
 public class DrivetrainClosedLoopTestVectors {
 
@@ -27,6 +29,26 @@ public class DrivetrainClosedLoopTestVectors {
 
     Calibration testPeriodSec;
     Calibration testAmpRPM;
+
+    double leftSpeedCmd = 0;
+    double rightSpeedCmd = 0;
+    double headingCmd = 0;
+
+    double speedCmd = 0;
+    boolean triangleWaveUp = true;
+
+    double[][] testWaypoints = {
+                                {0,0},
+                                {0,5},
+                                {2,7},
+                                {4,9},
+                                {4,12}
+                               };
+    FalconPathPlanner path;
+    int pathPlannerIdx = 0;
+    
+    double testSeq = 0;
+    double prevTestSeq = 0;
 
 
     boolean testActive;
@@ -43,6 +65,7 @@ public class DrivetrainClosedLoopTestVectors {
         testPeriodSec = new Calibration("Test Vector Drivetrain Amplititude RPM", 50, 0, 1000); 
         testAmpRPM    = new Calibration("Test Vector Drivetrain Period Sec", 0, 0, 15); 
         testActive = false;
+        speedCmd = 0;
     }
 
     public boolean isTestActive(){
@@ -50,23 +73,65 @@ public class DrivetrainClosedLoopTestVectors {
     }
 
     public void update(){
-        double leftSpeedCmd = 0;
-        double rightSpeedCmd = 0;
 
-        if(testSequence.get() > 0){
+        prevTestSeq = testSeq;
+        testSeq = testSequence.get();
+
+        if(prevTestSeq != testSeq){
+            //Reset
+            speedCmd = 0;
+            triangleWaveUp = true;
+            pathPlannerIdx = 0;
+            path = new FalconPathPlanner(testWaypoints);
+            path.calculate(testPeriodSec.get(), RobotConstants.MAIN_LOOP_SAMPLE_RATE_S, RobotConstants.ROBOT_TRACK_WIDTH_FT);
+        }
+
+        if(testSeq > 0){
             testActive = true;
         } else {
             testActive = false;
         }
 
         if(testActive){
-            if(testSequence.get() == 1.0){
-                //Sine-wave input
-            } else if(testSequence.get() == 2.0){
-                // Trapezoid speed profile
-            } else if(testSequence.get() == 3.0){
-                //PathPlan Curve
+            if(testSeq == 1.0){
+                //Sine wave
+                speedCmd = testAmpRPM.get() * Math.sin(2*Math.PI*Timer.getFPGATimestamp()/testPeriodSec.get());
+                leftSpeedCmd = speedCmd;
+                rightSpeedCmd = speedCmd;
+                headingCmd = 0;
+            } else if(testSeq == 2.0){
+                // Triangle speed profile
+                if(speedCmd > testAmpRPM.get()){
+                    triangleWaveUp = true;
+                } else if(speedCmd < -1.0*testAmpRPM.get()) {
+                    triangleWaveUp = false;
+                }
+
+                if(triangleWaveUp){
+                    speedCmd += testAmpRPM.get() * (0.02/testPeriodSec.get());
+                } else {
+                    speedCmd -= testAmpRPM.get() * (0.02/testPeriodSec.get());
+                }
+
+                leftSpeedCmd = speedCmd;
+                rightSpeedCmd = speedCmd;
+                headingCmd = 0;
+
+            } else if(testSeq == 3.0){
+
+                if(pathPlannerIdx < path.smoothLeftVelocity.length){
+                    leftSpeedCmd  = path.smoothLeftVelocity[pathPlannerIdx][1];
+                    rightSpeedCmd = path.smoothRightVelocity[pathPlannerIdx][1];
+                    headingCmd = path.heading[pathPlannerIdx][1];
+                } else {
+                    leftSpeedCmd  = 0;
+                    rightSpeedCmd = 0;
+                    headingCmd = path.heading[path.heading.length-1][1];
+                }
+                pathPlannerIdx++;
             }
+
+            Drivetrain.getInstance().setClosedLoopSpeedCmd(leftSpeedCmd, rightSpeedCmd, headingCmd);
         }
 
     }
