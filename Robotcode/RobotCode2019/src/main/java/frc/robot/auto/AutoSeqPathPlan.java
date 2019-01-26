@@ -49,6 +49,12 @@ public class AutoSeqPathPlan extends AutoEvent {
         double[] wp2 = {0,0.5};
         waypoints.add(wp2);
 
+        double[] wp3 = {,};
+        waypoints.add(wp3);
+
+        double [] wp4 = {,};
+        waypoints.add(wp4);
+
         //TODO add more waypoints based on the final location rquested
 
         path = new FalconPathPlanner((double[][])waypoints.toArray());

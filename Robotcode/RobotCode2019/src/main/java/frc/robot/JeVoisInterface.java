@@ -9,6 +9,14 @@ import edu.wpi.first.wpilibj.Timer;
 import frc.lib.DataServer.Signal;
 
 public class JeVoisInterface {
+
+    private static JeVoisInterface instance = null;
+
+    public static synchronized JeVoisInterface getInstance() {
+		if(instance == null)
+			instance = new JeVoisInterface();
+        return instance;
+    }
     
     // Serial Port Constants 
     private static final int BAUD_RATE = 115200;
