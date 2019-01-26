@@ -1,6 +1,7 @@
 package frc.robot.auto;
 
 import frc.lib.AutoSequencer.AutoEvent;
+import frc.robot.Arm;
 
 /*
  *******************************************************************************************
@@ -40,16 +41,16 @@ public class MoveArmTopPos extends AutoEvent {
 
     @Override
     public void userForceStop() {
-
+        Arm.getInstance().forceArmStop();
     }
 
     @Override
     public boolean isTriggered() {
-        return false;
+        return !Arm.getInstance().atDesiredHeight();
     }
 
     @Override
     public boolean isDone() {
-        return false;
+        return Arm.getInstance().atDesiredHeight();    
     }
 }
