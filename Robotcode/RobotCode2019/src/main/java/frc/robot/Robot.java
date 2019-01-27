@@ -126,6 +126,7 @@ public class Robot extends TimedRobot {
         loopTiming = LoopTiming.getInstance();
         poseCalc = new RobotPose();
         matchState = MatchState.getInstance();
+        DrivetrainClosedLoopTestVectors.getInstance();
 
         /* Init local telemetry signals */
         rioDSSampLoad = new Signal("dataserver stored samples", "count"); 
@@ -168,14 +169,17 @@ public class Robot extends TimedRobot {
     private void matchPeriodicCommon(){
         loopTiming.markLoopStart();
 
+        /* Sample Sensors */
+        frontUltrasonic.update();
+        backUltrasonic.update();
+
         /* Sample inputs from humans */
         driverController.update();
         operatorController.update();
 
 
-        /* Map subsystem IO */
-
         //Operator Controller provides commands to Arm
+        //TODO: AutoSequencer will want to provide more inputs here.
         arm.setIntakeActualState(intakeControl.getEstimatedPosition());
         arm.setManualMovementCmd(operatorController.getArmManualPosCmd());
         arm.setPositionCmd(operatorController.getArmPosReq());
@@ -185,9 +189,6 @@ public class Robot extends TimedRobot {
 
         intakeControl.update();
 
-        frontUltrasonic.update();
-        backUltrasonic.update();
-
         if(arm.getActualArmHeight() < 90) {
             AutoSeqDistToTgtEst.getInstance().setVisionDistanceEstimate(jevois.getTgtPositionY(), jevois.isTgtVisible());
             AutoSeqDistToTgtEst.getInstance().setUltrasonicDistanceEstimate(frontUltrasonic.getdistance_ft(), true);
@@ -196,9 +197,7 @@ public class Robot extends TimedRobot {
             AutoSeqDistToTgtEst.getInstance().setVisionDistanceEstimate(0, false);
             AutoSeqDistToTgtEst.getInstance().setUltrasonicDistanceEstimate(backUltrasonic.getdistance_ft(), true);
             AutoSeqDistToTgtEst.getInstance().setRobotLinearVelocity(-1 * poseCalc.getRobotVelocity_ftpersec());
-
         }
-
         AutoSeqDistToTgtEst.getInstance().update();
 
         //Arbitrate driver & auto sequencer inputs to drivetrain
@@ -264,6 +263,10 @@ public class Robot extends TimedRobot {
     public void disabledPeriodic() {
         loopTiming.markLoopStart();
 
+        /* Sample Sensors */
+        frontUltrasonic.update();
+        backUltrasonic.update();
+
         /* Sample inputs from humans to keep telemetry updated, but we won't actually use it. */
         driverController.update();
         operatorController.update();
@@ -280,12 +283,12 @@ public class Robot extends TimedRobot {
 
         intakeControl.update();
 
-        frontUltrasonic.update();
-        backUltrasonic.update();
-
-
         //Keep drivetrain stopped.
         drivetrain.setOpenLoopCmd(0,0);
+
+        //temp test only
+        DrivetrainClosedLoopTestVectors.getInstance().update();
+
         drivetrain.update();
         drivetrain.updateGains(false);
 

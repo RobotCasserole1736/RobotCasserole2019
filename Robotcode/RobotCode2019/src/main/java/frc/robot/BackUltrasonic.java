@@ -58,7 +58,7 @@ public class BackUltrasonic {
         maxVoltage = new Calibration("Back Ultrasonic Voltage Max (mV)", 180);
         minVoltage = new Calibration("Back Ultrasonic Voltage Min (mV)", 70);
 
-        distanceFeetSig = new Signal("Distance in Feet (Back)", "ft");
+        distanceFeetSig = new Signal("Back Ultrasonic Distance", "ft");
         voltageSig = new Signal("Back Ultrasonic Sensor Voltage", "mV");
         distanceAvailableSig = new Signal("Back Distance Available", "true/false");
     }
@@ -91,15 +91,4 @@ public class BackUltrasonic {
     public boolean isDistanceAvailable() {
         return distanceAvailable;
     }
-
-	//This is a dummy variable that you will probably want to delete
-	private boolean testIsEverythingOK = false;
-
-	// This is a dummy method that you will probably want to delete
-	public void TestCommand() {
-		if(testIsEverythingOK)
-			System.out.println("OK");
-		else
-			System.out.println("NOT OK");
-	}
 }

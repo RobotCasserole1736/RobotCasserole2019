@@ -44,9 +44,9 @@ public class Drivetrain implements DrivetrainInterface {
 
     private Drivetrain(){
         if(System.getProperty("os.name").contains("Windows")){
-            dTrainIF = new DrivetrainReal(); //TODO make this work on linux laptops
+            dTrainIF = new DrivetrainSim(); //TODO make this work on linux laptops
         } else {
-            dTrainIF = new DrivetrainSim();
+            dTrainIF = new DrivetrainReal();
         }
     }
 

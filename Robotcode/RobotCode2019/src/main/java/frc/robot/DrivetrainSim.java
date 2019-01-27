@@ -39,8 +39,8 @@ public class DrivetrainSim implements DrivetrainInterface {
 
 
     public DrivetrainSim() {
-        ActualRightSimRPM = new Signal("actual sim drivetrain right RPM", "RPM");
-        ActualLeftSimRPM = new Signal("actual sim drivetrain left RPM", "RPM");
+        ActualRightSimRPM = new Signal("Drivetrain Sim Right Speed", "RPM");
+        ActualLeftSimRPM = new Signal("Drivetrain Sim Left Speed", "RPM");
     }
 
     public void setOpenLoopCmd(double forwardReverseCmd, double rotaionCmd) {
@@ -48,7 +48,7 @@ public class DrivetrainSim implements DrivetrainInterface {
     }
 
     public boolean isGyroOnline(){
-        return true;
+        return false;
     }
 
     public void setGyroLockCmd(double forwardReverseCmd) {
@@ -57,25 +57,31 @@ public class DrivetrainSim implements DrivetrainInterface {
 
     public void update() {
 
-        if(ActLeftRPM < DesLeftRPM){
-            ActLeftRPM++;
-        } else if (ActLeftRPM > DesLeftRPM){
-            ActLeftRPM--;
-        }
-        
-        if(ActRightRPM < DesRightRPM){
-            ActRightRPM++;
-        } else if (ActRightRPM > DesRightRPM){
-            ActRightRPM--;
-        }
-
         prevOpMode = opMode;
         opMode = opModeCmd;
-        
+
+        if(opModeCmd == DrivetrainOpMode.ClosedLoop || opModeCmd == DrivetrainOpMode.ClosedLoopWithGyro){
+            //Asssume perfect drivetrain closed loop.
+            ActLeftRPM = DesLeftRPM;
+            ActRightRPM = DesRightRPM;
+        } else if (opModeCmd == DrivetrainOpMode.OpenLoop){
+            if(ActLeftRPM < DesLeftRPM){
+                ActLeftRPM++;
+            } else if (ActLeftRPM > DesLeftRPM){
+                ActLeftRPM--;
+            }
+            
+            if(ActRightRPM < DesRightRPM){
+                ActRightRPM++;
+            } else if (ActRightRPM > DesRightRPM){
+                ActRightRPM--;
+            }
+        }
+
         double sampleTimeMs = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
 
         ActualLeftSimRPM.addSample(sampleTimeMs, getLeftWheelSpeedRPM());
-        ActualLeftSimRPM.addSample(sampleTimeMs, getRightWheelSpeedRPM());
+        ActualRightSimRPM.addSample(sampleTimeMs, getRightWheelSpeedRPM());
     }
 
     public double getLeftWheelSpeedRPM() {
@@ -91,12 +97,16 @@ public class DrivetrainSim implements DrivetrainInterface {
     }
 
     public void setClosedLoopSpeedCmd(double leftCmdRPM, double rightCmdRPM, double headingCmdDeg) {
-        //TODO
+        opModeCmd = DrivetrainOpMode.ClosedLoopWithGyro;
+        DesRightRPM = rightCmdRPM;
+        DesLeftRPM = leftCmdRPM;
     }
 
     @Override
     public void setClosedLoopSpeedCmd(double leftCmdRPM, double rightCmdRPM) {
-
+        opModeCmd = DrivetrainOpMode.ClosedLoop;
+        DesRightRPM = rightCmdRPM;
+        DesLeftRPM = leftCmdRPM;
     }
 
 }

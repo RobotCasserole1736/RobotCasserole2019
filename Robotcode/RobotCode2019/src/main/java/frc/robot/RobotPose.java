@@ -22,18 +22,70 @@ import frc.lib.DataServer.Signal;
  *    if you would consider donating to our club to help further STEM education.
  */
 
+
+ /**
+ * 
+ * The following coordinate system is used:
+ * 
+ *   Field Centerline
+ *   |
+ *   V 
+ * 
+ * 
+ *   ^ Field Y+
+ *   |                    _____________________________                             
+ *   |                    |      Bumper Length        |                             
+ *   |                    V                           V                             
+ *   |                                                                              
+ *   |                    =============================                       <-|
+ *   |                    |    O                 O    |       <-|               |           
+ *   |                    |                           |         |               |   
+ *   |                Rear|      Robot +----> Y+      |Front    |Wheel Base     | Bumper Width
+ *   |                    |            |              |         |               |      
+ *   |                    |    O       V X+      O    |       <-|               |                  
+ *   |                    =============================                       <-|     
+ *   |                                                                              
+ *   |                                                                              
+ *   |                                                                              
+ *   |                                                                              
+ *<--+------------------------------------------------------------------> Field X+    <- Your alliance wall
+ *   |
+ *   V
+ * Positive field Theta (T)   is defined as rotation from X+ to Y+. 0 Theta points along positive X axis. 
+ * Field->Robot theta defined as angle from Field X axis to Robot X axis.
+ * Robot drawn at T = 270deg.
+ * 
+
+ */
+
 public class RobotPose {
 
-    public double leftVelosity_RPM;
-    public double rightVelosity_RPM;
-    public final double Math_PI = 3.14;
-    public final double FIELD_LENGTH_FT = 54;
-    public final double FIELD_HALF_WIDTH_FT = 13.47;
-    public double poseX = 0;
-    public double poseY = 0;
-    public double poseThaddeus = 90;
-    public double velosityX = 0;
-    public double velosityY = 0;
+    //Robot Physical Constants
+    final double wheelRadius_In = RobotConstants.WHEEL_RADIUS_FT*12.0;
+    final double BUMPER_WIDTH_FT = 2.0;
+    final double SIDE_LINEAR_DISTANCE_PER_ROBOT_ROTATION_FT = RobotConstants.ROBOT_TRACK_WIDTH_FT*Math.PI; //account for wheel scrub on rotation here.
+    final double BUMPER_LENGTH_FT = 2.5;
+
+    //Field physical Constants  - model as a rectangle for now
+    final double FIELD_UPPER_BOUNDARY_FT = 54.0;
+    final double FIELD_LOWER_BOUNDARY_FT = 0.0;
+    final double FIELD_LEFT_BOUNDARY_FT  = -13.47;
+    final double FIELD_RIGHT_BOUNDARY_FT = 13.47;
+
+    //Robot State
+    double leftWheelSpeed_RPM;
+    double rightWheelSpeed_RPM;
+    double poseX;
+    double poseY;
+    double poseT;
+    double delta_y_robot_ft;
+    double delta_x_robot_ft;
+    double delta_t_robot_deg;
+
+    //Simulation Timing
+    double prevLoopTime = 0;
+    double delta_t_sec = 0.02;
+
 
     Signal DesX;
     Signal DesY;
@@ -52,53 +104,20 @@ public class RobotPose {
     }
 
     public void setLeftMotorSpeed(double speed) {
-        leftVelosity_RPM = speed;
+        leftWheelSpeed_RPM = speed;
     }
 
     public void setRightMotorSpeed(double speed){
-        rightVelosity_RPM = speed;
+        rightWheelSpeed_RPM = speed;
     }
     
     public double getRobotVelocity_ftpersec(){
-        return velosityX;
+        return delta_y_robot_ft/delta_t_sec;
     }
 
     public void update() {
-        double leftVelosity_FPS = leftVelosity_RPM * (2*Math_PI*RobotConstants.WHEEL_RADIUS_FT / 60);
-        double rightVelosity_FPS = rightVelosity_RPM * (2*Math_PI*RobotConstants.WHEEL_RADIUS_FT / 60);
-        double robotAngle_DPS = ((rightVelosity_FPS-leftVelosity_FPS)/(2*RobotConstants.ROBOT_TRACK_WIDTH_FT));
-        double X_dot = (rightVelosity_FPS+leftVelosity_FPS)/2; 
-        
-        Math.toRadians(poseThaddeus);
-
-        Math.toDegrees((rightVelosity_FPS-leftVelosity_FPS)/(2*RobotConstants.ROBOT_TRACK_WIDTH_FT));
-
-        velosityX = 0.02 * (X_dot*Math.cos(poseThaddeus));
-        velosityY = 0.02 * (X_dot*Math.sin(poseThaddeus));
-        
-        if(poseY < 0) { 
-            velosityY = 0;
-            velosityX = 0;
-            
-        }
-        if(poseY > FIELD_LENGTH_FT){
-            velosityY = 0;
-            velosityX = 0;
-            
-        }
-        if(poseX < -FIELD_HALF_WIDTH_FT){
-            velosityX = 0;
-            velosityY = 0;
-        }
-        if(poseX > FIELD_HALF_WIDTH_FT){
-            velosityX = 0;
-            velosityY = 0;
-        }
-        
-        poseX += velosityX;
-        poseY += velosityY;
-        poseThaddeus += 0.02 * robotAngle_DPS;
-        //CasseroleRobotPoseView.setRobotPose(poseX, poseY, poseTheta - 90);
+        updatePoseFromWheelSpeeds();
+        handleFieldColission();
 
         double sample_time_ms = LoopTiming.getInstance().getLoopStartTimeSec()*1000.0;
         DesX.addSample(sample_time_ms,0);
@@ -106,16 +125,99 @@ public class RobotPose {
         DesT.addSample(sample_time_ms,0);
         ActX.addSample(sample_time_ms,poseX);
         ActY.addSample(sample_time_ms,poseY);
-        ActT.addSample(sample_time_ms,poseThaddeus);
+        ActT.addSample(sample_time_ms,poseT);
 
-        }
+    }
     
     public void reset() {
         poseX = 0;
         poseY = 0;
-        poseThaddeus = 90;
-        leftVelosity_RPM = 0;
-        rightVelosity_RPM = 0;
+        poseT = 90;
+        leftWheelSpeed_RPM = 0;
+        rightWheelSpeed_RPM = 0;
     }
-    
+
+    private void updatePoseFromWheelSpeeds(){
+        //Robot frome velocity
+        double leftVelocity_FPS = Utils.RPM_TO_FT_PER_SEC(leftWheelSpeed_RPM);
+        double rightVelocity_FPS = Utils.RPM_TO_FT_PER_SEC(rightWheelSpeed_RPM);
+        
+        //Tank-drive robot frame displacement
+        delta_y_robot_ft  = (leftVelocity_FPS + rightVelocity_FPS)/2 *delta_t_sec;
+        delta_x_robot_ft  = 0;
+        delta_t_robot_deg = ((-1.0 * leftVelocity_FPS) + rightVelocity_FPS) * delta_t_sec * (1/SIDE_LINEAR_DISTANCE_PER_ROBOT_ROTATION_FT) * 360.0;
+        
+        //Transform to field coordinates
+        poseX += cos(poseT)*delta_x_robot_ft + -1.0*sin(poseT)*delta_y_robot_ft;
+        poseY += sin(poseT)*delta_x_robot_ft +      cos(poseT)*delta_y_robot_ft;
+        poseT += delta_t_robot_deg;
+    }
+
+    private void handleFieldColission(){
+
+        //Helper calculations for distance from robot center out to sides
+        final double dx = BUMPER_WIDTH_FT/2.0;
+        final double dy = BUMPER_LENGTH_FT/2.0;
+        final double ndx = -1.0*dx;
+        final double ndy = -1.0*dy;
+
+        //Calculate verticie locations using 2d rotation formulae https://academo.org/demos/rotation-about-point/
+        double FL_Corner_X = poseX + ( ndx*cos(poseT) -  dy*sin(poseT) );
+        double FL_Corner_Y = poseY + (  dy*cos(poseT) + ndx*sin(poseT) );
+        double FR_Corner_X = poseX + (  dx*cos(poseT) -  dy*sin(poseT) );
+        double FR_Corner_Y = poseY + (  dy*cos(poseT) +  dx*sin(poseT) );
+        double RL_Corner_X = poseX + ( ndx*cos(poseT) - ndy*sin(poseT) );
+        double RL_Corner_Y = poseY + ( ndy*cos(poseT) + ndx*sin(poseT) );
+        double RR_Corner_X = poseX + (  dx*cos(poseT) - ndy*sin(poseT) );
+        double RR_Corner_Y = poseY + ( ndy*cos(poseT) +  dx*sin(poseT) );
+ 
+        //The extrema of the verticiecs forms the bounding box of the robot
+        double robotFrontBounds = max4(FL_Corner_Y, FR_Corner_Y, RL_Corner_Y, RR_Corner_Y);
+        double robotRearBounds  = min4(FL_Corner_Y, FR_Corner_Y, RL_Corner_Y, RR_Corner_Y);
+        double robotRightBounds = max4(FL_Corner_X, FR_Corner_X, RL_Corner_X, RR_Corner_X);
+        double robotLeftBounds  = min4(FL_Corner_X, FR_Corner_X, RL_Corner_X, RR_Corner_X);
+
+        //If the corresponding side of the boundary box exceeds the field boundary, the robot is in colission with a wall.
+
+        if(robotFrontBounds > FIELD_UPPER_BOUNDARY_FT){
+            //Robot colliding with opposing alliance wall
+            poseY -= (robotFrontBounds - FIELD_UPPER_BOUNDARY_FT); //Reset bot within field
+            //System.out.println("Colission with upper field boundary");
+        }
+
+        if(robotRearBounds < FIELD_LOWER_BOUNDARY_FT){
+            //Robot colliding with your alliance wall
+            poseY += (FIELD_LOWER_BOUNDARY_FT - robotRearBounds); //Reset bot within field
+            //System.out.println("Colission with Lower field boundary");
+        }
+
+        if(robotRightBounds > FIELD_RIGHT_BOUNDARY_FT){
+            //Robot colliding with opposing alliance wall
+            poseX -= (robotRightBounds - FIELD_RIGHT_BOUNDARY_FT); //Reset bot within field
+            //System.out.println("Colission with Right field boundary");
+        }
+
+        if(robotLeftBounds < FIELD_LEFT_BOUNDARY_FT){
+            //Robot colliding with opposing alliance wall
+            poseX += (FIELD_LEFT_BOUNDARY_FT - robotLeftBounds); //Reset bot within field
+            //System.out.println("Colission with Left field boundary");
+        }
+    }
+
+    //Utility Math helper functions
+    private double cos(double in_deg){
+        return Math.cos(in_deg*Math.PI/180.0);
+    }
+
+    private double sin(double in_deg){
+        return Math.sin(in_deg*Math.PI/180.0);
+    }
+
+    private double max4(double in1, double in2, double in3, double in4){
+        return Math.max(in1, Math.max(in2, Math.max(in3, in4)));
+    }
+
+    private double min4(double in1, double in2, double in3, double in4){
+        return Math.min(in1, Math.min(in2, Math.min(in3, in4)));
+    }
 }

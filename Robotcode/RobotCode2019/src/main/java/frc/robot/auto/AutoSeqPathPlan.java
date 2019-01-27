@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import frc.lib.AutoSequencer.AutoEvent;
 import frc.lib.PathPlanner.FalconPathPlanner;
 import frc.robot.RobotConstants;
+import frc.robot.Utils;
 
 /*
  *******************************************************************************************
@@ -50,6 +51,10 @@ public class AutoSeqPathPlan extends AutoEvent {
         //TODO add more waypoints based on the final location rquested
 
         path = new FalconPathPlanner((double[][])waypoints.toArray());
+        path.setPathBeta(0.2);
+        path.setPathAlpha(0.5);
+        path.setVelocityAlpha(0.001);
+        path.setVelocityBeta(0.9);
         path.calculate(pathDurationSec, RobotConstants.MAIN_LOOP_SAMPLE_RATE_S, RobotConstants.ROBOT_TRACK_WIDTH_FT);
 
     }
@@ -77,11 +82,10 @@ public class AutoSeqPathPlan extends AutoEvent {
         double cmdSpeed = 0;
 
         if(timestep < path.smoothLeftVelocity.length){
-            cmdSpeed = path.smoothLeftVelocity[timestep][1];
+            cmdSpeed = Utils.FT_PER_SEC_TO_RPM(path.smoothLeftVelocity[timestep][1]);
         } 
 
-        //TODO Convert ft/sec to RPM
-        return 0;
+        return cmdSpeed;
     }
 
 
@@ -93,11 +97,10 @@ public class AutoSeqPathPlan extends AutoEvent {
         double cmdSpeed = 0;
 
         if(timestep < path.smoothRightVelocity.length){
-            cmdSpeed = path.smoothRightVelocity[timestep][1];
+            cmdSpeed = Utils.FT_PER_SEC_TO_RPM(path.smoothRightVelocity[timestep][1]);
         } 
 
-        //TODO Convert ft/sec to RPM
-        return 0;
+        return cmdSpeed;
     }
 
 

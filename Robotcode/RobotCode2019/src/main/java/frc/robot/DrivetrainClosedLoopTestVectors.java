@@ -37,6 +37,7 @@ public class DrivetrainClosedLoopTestVectors {
     double speedCmd = 0;
     boolean triangleWaveUp = true;
 
+    //In units of feet
     double[][] testWaypoints = {
                                 {0,0},
                                 {0,5},
@@ -61,9 +62,9 @@ public class DrivetrainClosedLoopTestVectors {
     }
 
     private DrivetrainClosedLoopTestVectors(){
-        testSequence  = new Calibration("Test Vector Drivetrain Test Type", 0, 0, 2); 
-        testPeriodSec = new Calibration("Test Vector Drivetrain Amplititude RPM", 50, 0, 1000); 
-        testAmpRPM    = new Calibration("Test Vector Drivetrain Period Sec", 0, 0, 15); 
+        testSequence  = new Calibration("Test Vector Drivetrain Test Type", 0, 0, 3); 
+        testAmpRPM = new Calibration("Test Vector Drivetrain Amplititude RPM", 50, 0, 1000); 
+        testPeriodSec = new Calibration("Test Vector Drivetrain Period Sec", 1.0, 0.01, 15); 
         testActive = false;
         speedCmd = 0;
     }
@@ -83,6 +84,10 @@ public class DrivetrainClosedLoopTestVectors {
             triangleWaveUp = true;
             pathPlannerIdx = 0;
             path = new FalconPathPlanner(testWaypoints);
+            path.setPathBeta(0.2);
+            path.setPathAlpha(0.5);
+            path.setVelocityAlpha(0.001);
+            path.setVelocityBeta(0.9);
             path.calculate(testPeriodSec.get(), RobotConstants.MAIN_LOOP_SAMPLE_RATE_S, RobotConstants.ROBOT_TRACK_WIDTH_FT);
         }
 
@@ -102,15 +107,15 @@ public class DrivetrainClosedLoopTestVectors {
             } else if(testSeq == 2.0){
                 // Triangle speed profile
                 if(speedCmd > testAmpRPM.get()){
-                    triangleWaveUp = true;
-                } else if(speedCmd < -1.0*testAmpRPM.get()) {
                     triangleWaveUp = false;
+                } else if(speedCmd < -1.0*testAmpRPM.get()) {
+                    triangleWaveUp = true;
                 }
 
                 if(triangleWaveUp){
-                    speedCmd += testAmpRPM.get() * (0.02/testPeriodSec.get());
+                    speedCmd += testAmpRPM.get() * (0.02/testPeriodSec.get()*4);
                 } else {
-                    speedCmd -= testAmpRPM.get() * (0.02/testPeriodSec.get());
+                    speedCmd -= testAmpRPM.get() * (0.02/testPeriodSec.get()*4);
                 }
 
                 leftSpeedCmd = speedCmd;
@@ -131,7 +136,7 @@ public class DrivetrainClosedLoopTestVectors {
                 pathPlannerIdx++;
             }
 
-            Drivetrain.getInstance().setClosedLoopSpeedCmd(leftSpeedCmd, rightSpeedCmd, headingCmd);
+            Drivetrain.getInstance().setClosedLoopSpeedCmd(Utils.FT_PER_SEC_TO_RPM(leftSpeedCmd), Utils.FT_PER_SEC_TO_RPM(rightSpeedCmd), headingCmd);
         }
 
     }
