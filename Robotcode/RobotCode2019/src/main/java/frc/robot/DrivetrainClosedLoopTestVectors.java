@@ -64,7 +64,7 @@ public class DrivetrainClosedLoopTestVectors {
     private DrivetrainClosedLoopTestVectors(){
         testSequence  = new Calibration("Test Vector Drivetrain Test Type", 0, 0, 3); 
         testAmpRPM = new Calibration("Test Vector Drivetrain Amplititude RPM", 50, 0, 1000); 
-        testPeriodSec = new Calibration("Test Vector Drivetrain Period Sec", 1.0, 0.01, 15); 
+        testPeriodSec = new Calibration("Test Vector Drivetrain Period Sec", 5.0, 0.5, 15); 
         testActive = false;
         speedCmd = 0;
     }
