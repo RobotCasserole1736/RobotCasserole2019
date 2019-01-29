@@ -46,10 +46,8 @@ public class RobotConstants {
     /////////////////////////////////////////////////////////////////////////////////////
     // Solenoid Ports
     /////////////////////////////////////////////////////////////////////////////////////
-    public static final int LONG_SOLENOID_FORWARD_CHANNEL = 0;
-    public static final int LONG_SOLENOID_REVERSE_CHANNEL = 1;
-    public static final int SHORT_SOLENOID_FORWARD_CHANNEL = 2;
-    public static final int SHORT_SOLENOID_REVERSE_CHANNEL = 3;
+    public static final int PEZ_SOLENOID_FORWARD_CHANNEL = 0;
+    public static final int PEZ_SOLENOID_REVERSE_CHANNEL = 1;
     public static final int INTAKE_ARM_BAR_PORT = 4;
     public static final int ARM_MECH_BRAKE_SOL_PORT = 5;
 

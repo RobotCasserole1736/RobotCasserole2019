@@ -1,12 +1,16 @@
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.Timer;
 import frc.lib.WebServer.CasseroleDriverView;
 
 /*
  *******************************************************************************************
  * Copyright (C) 2019 FRC Team 1736 Robot Casserole - www.robotcasserole.org
- *******************************************************************************************
+ ***
+ ****************************************************************************************
  *
  * This software is released under the MIT Licence - see the license.txt
  *  file in the root of this repo.
@@ -27,8 +31,10 @@ public class PEZControl {
     
     private static PEZControl pezCtrl = null;
 
-    DoubleSolenoid longS; 
-    DoubleSolenoid shortS;
+    Solenoid pezSolenoid; 
+    Solenoid electricSolenoid;
+
+    Timer solenoidTimer;
 
     DriverController dController;
     OperatorController opController;
@@ -36,6 +42,12 @@ public class PEZControl {
     GamePiece curGamePiece;
 
     PEZPos posReq;
+    PEZPos prevPosReq; 
+
+    double retractTimeStart; 
+
+    DigitalInput limitSwitch;
+
 
     public static synchronized PEZControl getInstance() {
         if(pezCtrl == null)
@@ -44,7 +56,7 @@ public class PEZControl {
     }
 
     public enum PEZPos {
-        CargoGrab(0), CargoRelease(1), HatchGrab(2), HatchRelease(3), None(4);
+        CargoGrab(0), Release(1), HatchGrab(2), None(3);
         public final int value;
 
         private PEZPos(int value) {
@@ -63,12 +75,28 @@ public class PEZControl {
 
     // This is the private constructor that will be called once by getInstance() and it should instantiate anything that will be required by the class
     private  PEZControl() {
-        longS = new DoubleSolenoid(RobotConstants.LONG_SOLENOID_FORWARD_CHANNEL, RobotConstants.LONG_SOLENOID_REVERSE_CHANNEL);
-        shortS = new DoubleSolenoid(RobotConstants.SHORT_SOLENOID_FORWARD_CHANNEL, RobotConstants.SHORT_SOLENOID_REVERSE_CHANNEL);
+        pezSolenoid = new Solenoid (RobotConstants.PEZ_SOLENOID_CHANNEL);
+        electricSolenoid = new Solenoid(RobotConstants.ELECTRIC_SOLENOID_CHANNEL);
         dController = DriverController.getInstance();
         opController = OperatorController.getInstance();
+        solenoidTimer = new Timer();
+        limitSwitch = new DigitalInput(2); // we'll find out real port later ;) //
+
+        solenoidTimer.start();
     }
+    private boolean getPezSolenoidState(){ 
+        boolean  extended = true;
+        if (limitSwitch.get() == true){
+            extended = false;
+        }   else if ((limitSwitch.get() == false) && (solenoidTimer.getFPGATimestamp() - retractTimeStart < 250)) {
+            extended = true;
+        }   else if ((limitSwitch.get() == false) && (solenoidTimer.getFPGATimestamp() - retractTimeStart >= 250)) {
+            extended = false; 
+        
+        }
     
+
+    }
 
     public void update() {
         if(MatchState.getInstance().GetPeriod() == MatchState.Period.OperatorControl ||
@@ -82,10 +110,9 @@ public class PEZControl {
                 setPositionCmd(PEZPos.HatchGrab);
             } else if(opController.getReleaseReq()) {
                 //Release whatever we currently have in our gripper
-                if(getHeldGamePiece() == GamePiece.Cargo){
-                    setPositionCmd(PEZPos.CargoRelease);
-                } else if(getHeldGamePiece() == GamePiece.Hatch){
-                    setPositionCmd(PEZPos.HatchRelease);
+                if(getHeldGamePiece() == GamePiece.Cargo || getHeldGamePiece() == GamePiece.Hatch){
+                    setPositionCmd(PEZPos.Release);
+    
                 } else {
                     setPositionCmd(PEZPos.None);
                 }
@@ -101,28 +128,37 @@ public class PEZControl {
             } else if(gripStart.compareTo(GamePiece.Hatch.toString())==0){
                 setPositionCmd(PEZPos.HatchGrab);
             } else {
-                setPositionCmd(PEZPos.HatchRelease);
+                setPositionCmd(PEZPos.Release);
             }
         }
 
         if(posReq == PEZPos.CargoGrab){
-           longS.set(DoubleSolenoid.Value.kReverse);
-           shortS.set(DoubleSolenoid.Value.kReverse);
+            pezSolenoid.set(false);
+            electricSolenoid.set(false);
+            prevPosReq = PEZPos.CargoGrab;
         } else if(posReq == PEZPos.HatchGrab){
-            longS.set(DoubleSolenoid.Value.kForward);
-            shortS.set(DoubleSolenoid.Value.kForward);
-        }else if(posReq == PEZPos.HatchRelease || posReq == PEZPos.CargoRelease){
-            longS.set(DoubleSolenoid.Value.kOff);
-            shortS.set(DoubleSolenoid.Value.kOff);
+            pezSolenoid.set(true);
+            electricSolenoid.set(false);
+            prevPosReq = PEZPos.HatchGrab;
+        }else if(posReq == PEZPos.Release){
+            if (prevPosReq != PEZPos.Release){
+                retractTimeStart = solenoidTimer.getFPGATimestamp();
+                pezSolenoid.set (false);
+                electricSolenoid.set (false);
+            }
+            boolean isExtended = getPezSolenoidState();
+            if (isExtended == false) {
+                pezSolenoid.set (true);
+                electricSolenoid.set (true);
+            } else {} // waiting for cylinder to retract- do nothing //
+            prevPosReq = PEZPos.Release;
         }
 
         if(posReq == PEZPos.HatchGrab){
             curGamePiece = GamePiece.Hatch;
-        } else if(posReq == PEZPos.HatchRelease){
-            curGamePiece = GamePiece.Nothing;
         } else if(posReq == PEZPos.CargoGrab) {
             curGamePiece = GamePiece.Hatch;
-        } else if(posReq == PEZPos.CargoRelease) {
+        } else if(posReq == PEZPos.Release) {
             curGamePiece = GamePiece.Nothing;
         }
     }
