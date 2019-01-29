@@ -37,10 +37,12 @@ import frc.lib.DataServer.Signal;
 import frc.lib.LoadMon.CasseroleRIOLoadMonitor;
 import frc.lib.WebServer.CasseroleDriverView;
 import frc.lib.WebServer.CasseroleWebServer;
+import frc.lib.Util.CrashTracker;
 import frc.robot.Arm.ArmPosReq;
 import frc.robot.LEDController.LEDPatterns;
 import frc.robot.PEZControl.GamePiece;
 import frc.robot.auto.AutoSeqDistToTgtEst;
+
 
 
 /**
@@ -127,6 +129,8 @@ public class Robot extends TimedRobot {
         poseCalc = new RobotPose();
         matchState = MatchState.getInstance();
         DrivetrainClosedLoopTestVectors.getInstance();
+        CrashTracker.logRobotConstruction();
+        CrashTracker.logRobotInit();
 
         /* Init local telemetry signals */
         rioDSSampLoad = new Signal("dataserver stored samples", "count"); 
@@ -153,6 +157,8 @@ public class Robot extends TimedRobot {
         dataServer.logger.startLoggingTeleop();
         ledController.setPattern(LEDPatterns.Pattern3);
         matchState.SetPeriod(MatchState.Period.OperatorControl);
+        /*Update CrashTracker*/
+        CrashTracker.logTeleopInit();
     }
 
     @Override
@@ -160,6 +166,8 @@ public class Robot extends TimedRobot {
         dataServer.logger.startLoggingAuto();
         ledController.setPattern(LEDPatterns.Pattern4);
         matchState.SetPeriod(MatchState.Period.Autonomous);
+        /*Update CrashTracker*/
+        CrashTracker.logAutoInit();
     }
 
 
@@ -222,7 +230,9 @@ public class Robot extends TimedRobot {
         pneumaticsControl.update();
         climber.update();
         telemetryUpdate();
-
+        
+        /*Update CrashTracker*/
+        CrashTracker.logTeleopPeriodic();
         loopTiming.markLoopEnd();
     }
 
@@ -254,6 +264,8 @@ public class Robot extends TimedRobot {
         dataServer.logger.stopLogging();
         ledController.setPattern(LEDPatterns.Pattern2);
         matchState.SetPeriod(MatchState.Period.Disabled);
+        /*Update CrashTracker*/
+        CrashTracker.logDisabledInit();
     }
 
     /**
@@ -302,6 +314,8 @@ public class Robot extends TimedRobot {
         pneumaticsControl.update();
         climber.update();
         telemetryUpdate();
+        /*Update CrashTracker*/
+        CrashTracker.logDisabledPeriodic();
 
         loopTiming.markLoopEnd();
     }
