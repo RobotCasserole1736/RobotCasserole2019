@@ -127,6 +127,7 @@ public class Robot extends TimedRobot {
         poseCalc = new RobotPose();
         matchState = MatchState.getInstance();
         DrivetrainClosedLoopTestVectors.getInstance();
+        AutoSeqDistToTgtEst.getInstance();
 
         /* Init local telemetry signals */
         rioDSSampLoad = new Signal("dataserver stored samples", "count"); 

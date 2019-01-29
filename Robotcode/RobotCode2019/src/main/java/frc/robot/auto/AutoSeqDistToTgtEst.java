@@ -51,7 +51,7 @@ public class AutoSeqDistToTgtEst {
     //Constructor
     private AutoSeqDistToTgtEst(){
         //TODO - put init here
-        estdist = new Signal ("estimated distance to target", "ft");
+        estdist = new Signal ("Estimated distance to target", "ft");
     }
 
     /**

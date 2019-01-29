@@ -63,4 +63,14 @@ public class Utils {
     public static double FT_PER_SEC_TO_RPM(double fps_in){
         return fps_in / (2*Math.PI*RobotConstants.WHEEL_RADIUS_FT / 60) ;
     }
+
+    public static double capMotorCmd(double in){
+        if(in > 1.0){
+            return 1.0;
+        } else if (in < -1.0) {
+            return -1.0;
+        } else {
+            return in;
+        }
+    }
 }

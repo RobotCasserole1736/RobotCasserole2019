@@ -37,14 +37,23 @@ public class DrivetrainSim implements DrivetrainInterface {
     Signal ActualRightSimRPM;
     Signal ActualLeftSimRPM;
 
+    final double DT_MAX_SPEED_FT_PER_SEC = 15.0;
+    final double DT_MAX_ACCEL_FT_PER_SEC_PER_SEC = 8.0;
+
 
     public DrivetrainSim() {
         ActualRightSimRPM = new Signal("Drivetrain Sim Right Speed", "RPM");
         ActualLeftSimRPM = new Signal("Drivetrain Sim Left Speed", "RPM");
     }
 
-    public void setOpenLoopCmd(double forwardReverseCmd, double rotaionCmd) {
+    public void setOpenLoopCmd(double forwardReverseCmd, double rotationCmd) {
         opModeCmd = DrivetrainOpMode.OpenLoop;
+
+        double motorSpeedLeftCMD = Utils.capMotorCmd(forwardReverseCmd + rotationCmd);
+        double motorSpeedRightCMD = Utils.capMotorCmd(forwardReverseCmd - rotationCmd);
+
+        DesLeftRPM = Utils.FT_PER_SEC_TO_RPM(DT_MAX_SPEED_FT_PER_SEC)*motorSpeedLeftCMD;
+        DesRightRPM = Utils.FT_PER_SEC_TO_RPM(DT_MAX_SPEED_FT_PER_SEC)*motorSpeedRightCMD;
     }
 
     public boolean isGyroOnline(){
@@ -65,17 +74,10 @@ public class DrivetrainSim implements DrivetrainInterface {
             ActLeftRPM = DesLeftRPM;
             ActRightRPM = DesRightRPM;
         } else if (opModeCmd == DrivetrainOpMode.OpenLoop){
-            if(ActLeftRPM < DesLeftRPM){
-                ActLeftRPM++;
-            } else if (ActLeftRPM > DesLeftRPM){
-                ActLeftRPM--;
-            }
-            
-            if(ActRightRPM < DesRightRPM){
-                ActRightRPM++;
-            } else if (ActRightRPM > DesRightRPM){
-                ActRightRPM--;
-            }
+
+            ActLeftRPM = simMotor(ActLeftRPM, DesLeftRPM);
+            ActRightRPM = simMotor(ActRightRPM, DesRightRPM);
+
         }
 
         double sampleTimeMs = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
@@ -107,6 +109,41 @@ public class DrivetrainSim implements DrivetrainInterface {
         opModeCmd = DrivetrainOpMode.ClosedLoop;
         DesRightRPM = rightCmdRPM;
         DesLeftRPM = leftCmdRPM;
+    }
+
+    /* A crude aproximation of how a motor behaves */
+    private double simMotor(double actSpeedRPM, double desSpeedRPM){
+
+        double spdDelta = Utils.FT_PER_SEC_TO_RPM( DT_MAX_ACCEL_FT_PER_SEC_PER_SEC * 0.02);
+        double maxSpd = Utils.FT_PER_SEC_TO_RPM(DT_MAX_SPEED_FT_PER_SEC);
+
+        double delta = actSpeedRPM - desSpeedRPM ;
+
+        if(Math.abs(desSpeedRPM) < 10){
+            actSpeedRPM *= 0.90; // Frictional constant
+        } else {
+            actSpeedRPM *= 0.98; // Frictional constant
+        }
+
+
+        if(delta < spdDelta){
+            actSpeedRPM += spdDelta;
+        } else if (delta > spdDelta){
+            actSpeedRPM -= spdDelta;
+        } else {
+            //keep current speed
+        }
+
+        //Cap at absolute min/max
+        if(actSpeedRPM > maxSpd){
+            actSpeedRPM = maxSpd;
+        } else if(actSpeedRPM < -1.0*maxSpd) {
+            actSpeedRPM = -1.0*maxSpd;
+        }
+
+        return actSpeedRPM;
+
+
     }
 
 }
