@@ -92,8 +92,8 @@ public class PEZControl {
             extended = true;
         }   else if ((limitSwitch.get() == false) && (solenoidTimer.getFPGATimestamp() - retractTimeStart >= 250)) {
             extended = false; 
-        
         }
+        return extended;
     
 
     }
