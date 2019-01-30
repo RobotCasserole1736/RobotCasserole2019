@@ -1,5 +1,10 @@
  package frc.robot;
-
+ 
+ import java.net.InetAddress;
+ import java.net.NetworkInterface;
+ import java.net.SocketException;
+ import java.net.UnknownHostException;
+ 
 /*
  *******************************************************************************************
  * Copyright (C) 2019 FRC Team 1736 Robot Casserole - www.robotcasserole.org
@@ -43,6 +48,34 @@ public class Drivetrain implements DrivetrainInterface {
     }
 
     private Drivetrain(){
+
+        // Get MAC Address
+        InetAddress ip;
+        String macStr;
+
+        try {
+    
+            ip = InetAddress.getLocalHost();
+            NetworkInterface network = NetworkInterface.getByInetAddress(ip);
+            byte[] mac = network.getHardwareAddress();
+    
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < mac.length; i++) {
+                sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));        
+            }
+            macStr = sb.toString()
+    
+        } catch (UnknownHostException e) {
+    
+            macStr = "UnknownHostException"
+    
+        } catch (SocketException e){
+    
+            macStr = "SocketException"
+    
+        }
+    
+
         if(System.getProperty("os.name").contains("Windows")){
             dTrainIF = new DrivetrainSim(); //TODO make this work on linux laptops
         } else {
