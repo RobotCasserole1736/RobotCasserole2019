@@ -1,5 +1,10 @@
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+
+import edu.wpi.first.wpilibj.Servo;
+
 /*
  *******************************************************************************************
  * Copyright (C) 2019 FRC Team 1736 Robot Casserole - www.robotcasserole.org
@@ -20,7 +25,14 @@ package frc.robot;
  *   if you would consider donating to our club to help further STEM education.
  */
 
+
 public class Climber {
+
+    Servo climbServo;
+    WPI_TalonSRX windowTalon;
+    
+    public boolean startButton;
+    public double ServoCmd;
 
     /* Singleton stuff */
     private static Climber climbCtrl = null;
@@ -31,12 +43,19 @@ public class Climber {
     }
 
     private Climber(){
-        //TODO
+        climbServo = new Servo(RobotConstants.CLIMBER_SERVO);
+        windowTalon = new WPI_TalonSRX(RobotConstants.ClIMBER_WINDOW_MOTOR);
+
     }
 
     public void update(){
-        //TODO
+        if(startButton = true){
+            ServoCmd = 90;
+            climbServo.set(ServoCmd);
 
+            windowTalon.set(50);
+        }
+       
     }
 
 }
