@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.robot.auto;
 /*
  *******************************************************************************************
  * Copyright (C) 2019 FRC Team 1736 Robot Casserole - www.robotcasserole.org
@@ -19,7 +19,12 @@ package frc.robot;
  *   if you would consider donating to our club to help further STEM education.
  */
 
+import frc.lib.DataServer.Signal;
+import frc.robot.LoopTiming;
+
 public class AutoSeqDistToTgtEst {
+
+    private static AutoSeqDistToTgtEst autoSeqInstance = null;
 
     //The current estimate of distance to target
     double distanceEst_ft = 0;
@@ -34,11 +39,19 @@ public class AutoSeqDistToTgtEst {
 
     //The robot's present speed
     double robotLinearVelocity_ftpersec = 0;
+    Signal estdist;
 
+    public static synchronized AutoSeqDistToTgtEst getInstance() {
+        if(autoSeqInstance == null)
+            autoSeqInstance = new AutoSeqDistToTgtEst();
+        return autoSeqInstance;
+        
+    }
 
     //Constructor
-    public AutoSeqDistToTgtEst(){
+    private AutoSeqDistToTgtEst(){
         //TODO - put init here
+        estdist = new Signal ("Estimated distance to target", "ft");
     }
 
     /**
@@ -52,7 +65,7 @@ public class AutoSeqDistToTgtEst {
      * Call this when the current distance is known for sure (ie, line sensor first detects the line). It will force the current estimate to this number.
      */
     public void setDistance(double distance_ft){
-        //TODO
+        distanceEst_ft = distance_ft;
     }
 
     public void setVisionDistanceEstimate(double distance_ft, boolean visionAvailable_in){
@@ -60,8 +73,9 @@ public class AutoSeqDistToTgtEst {
         visionAvailable = visionAvailable_in;
     }
 
-    public void setUltrasonicDistanceEstimate(double distance_ft){
-        //TODO
+    public void setUltrasonicDistanceEstimate(double distance_ft,  boolean ultraSonicAvailable_in){
+        ultrasonicDistance_ft = distance_ft;
+        ultrasonicAvailable = ultraSonicAvailable_in;
     }
 
     public double getEstDistanceFt(){
@@ -69,8 +83,28 @@ public class AutoSeqDistToTgtEst {
     }
 
     public void update(){
-        //TODO 
+        
+        if(ultrasonicAvailable){
+            this.setDistance(ultrasonicDistance_ft);
+        }
+        else if(visionAvailable) {
+            this.setDistance(visionDistance_ft);
+        }
+        else
 
+        {
+            //double rev_per_update = ((Drivetrain.getInstance().getLeftWheelSpeedRPM() 
+            //+ Drivetrain.getInstance().getRightWheelSpeedRPM())/2)/3000;
+
+           // this.setDistance(rev_per_update*2*RobotConstants.WHEELRADIUS_FT*3.14);
+           distanceEst_ft += robotLinearVelocity_ftpersec * 0.02;
+        
+        } 
+        double sample_time_ms = LoopTiming.getInstance().getLoopStartTimeSec()*1000.0;
+        estdist.addSample(sample_time_ms, distanceEst_ft);
+       
     }
+
+   
 
 }

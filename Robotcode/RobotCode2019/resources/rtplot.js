@@ -44,6 +44,11 @@ if (typeof(Storage) !== "undefined") {
     local_storage_available = false;
 }
 
+document.onkeydown = function(evt) {
+    if (evt.keyCode == 27) {
+        closeNav()
+    }
+}
 //The following chunk of main code and handler functions are to add chart interaction
 // which I find useful, but which highcharts does not implement natively.
 // Namely, I want a mouse-wheel zoom, which centers around wherever the user's mouse
@@ -314,6 +319,10 @@ function handleStartBtnClick(){
     // Disable manual scrolling. Autoscroll happens during capture
     allow_scroll_zoom = false;
     
+
+
+
+
     //Disable signal selection
     document.getElementById("clear_btn").disabled = true;
     document.getElementById("start_btn").disabled = true;

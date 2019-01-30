@@ -38,10 +38,10 @@ public class LEDController {
     }
 
     public enum LEDPatterns {
-        Pattern1(0), /* TODO- what pattern is this? */
-        Pattern2(1), /* TODO- what pattern is this? */
-        Pattern3(2), /* TODO- what pattern is this? */
-        Pattern4(3); /* TODO- what pattern is this? */
+        Pattern1(0), /* "Meteor Rain" */
+        Pattern2(1), /* "Fire" */
+        Pattern3(2), /* "Theatre Chase" */
+        Pattern4(3); /* "Fade In and Fade Out" */
 
         public final int value;
 

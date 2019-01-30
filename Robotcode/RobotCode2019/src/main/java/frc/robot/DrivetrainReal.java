@@ -326,8 +326,8 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
             double motorSpeedLeftCMD = 0;
             double motorSpeedRightCMD = 0;
 
-            motorSpeedLeftCMD = forwardReverseCmd - rotationCmd;
-            motorSpeedRightCMD = forwardReverseCmd + rotationCmd;
+            motorSpeedLeftCMD = Utils.capMotorCmd(forwardReverseCmd + rotationCmd);
+            motorSpeedRightCMD = Utils.capMotorCmd(forwardReverseCmd - rotationCmd);
 
             rightTalon1.set(ControlMode.PercentOutput, motorSpeedRightCMD);
             leftTalon1.set(ControlMode.PercentOutput, motorSpeedLeftCMD);

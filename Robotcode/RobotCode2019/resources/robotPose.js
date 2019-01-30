@@ -92,7 +92,7 @@ var FIELDTAPEPOLY19_FT =
 
 var FIELDTAPEPOLY20_FT =
     [[-12.46, 35.7],[-10.96, 35.7],[-10.96, 35.5],[-12.46, 35.5],[-12.46, 35.7]];
-
+    //Human player station lines
 var FIELDTAPEPOLY21_FT =
     [[-10.6, 0],[-10.6, 1.5],[-10.8, 1.5],[-10.8, 0],[-10.6, 0]];
 
