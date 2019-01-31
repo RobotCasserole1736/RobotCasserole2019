@@ -94,7 +94,7 @@ public class JeVoisInterface {
      * Constructor (simple). Opens a USB serial port to the JeVois camera, sends a few test commands checking for error,
      * then fires up the user's program and begins listening for target info packets in the background
      */
-    public JeVoisInterface() {
+    private JeVoisInterface() {
         this(false); //Default - stream disabled, just run serial.
     }
 

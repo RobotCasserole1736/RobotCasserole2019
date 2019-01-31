@@ -30,7 +30,7 @@ public class AutoSeqPathPlan extends AutoEvent {
     final double PLANNER_SAMPLE_RATE_S = 0.02; // 20ms update rate
     final double ROBOT_TRACK_WIDTH_FT = 3.5; // 3.5 ft effective track width
 
-    public ArrayList<double[][]> waypoints;
+    public ArrayList<double[]> waypoints;
 
     double pathDurationSec = 0;
 
@@ -41,51 +41,44 @@ public class AutoSeqPathPlan extends AutoEvent {
      */
     public AutoSeqPathPlan(double tgt_pos_x_ft, double tgt_pos_y_ft, double tgt_pos_angle_deg){
 
-        waypoints = new ArrayList<double[][]>(0);
+        waypoints = new ArrayList<double[]>(0);
 
         //This matrix is for the x and y position of the target. It is supposed to be a 2 X 1.
-        double [][] pointAheadOfEndMatrix = {
-            {tgt_pos_x_ft-24},
-            {tgt_pos_y_ft}
-        };
+        double [] pointAheadOfEndMatrix = 
+            {tgt_pos_x_ft-24, tgt_pos_y_ft};
 
-        double [][] endOfLineMatrix = {
-            {tgt_pos_x_ft-18},
-            {tgt_pos_y_ft}
-        };
+        double [] endOfLineMatrix = 
+            {tgt_pos_x_ft-18, tgt_pos_y_ft};
 
         double [][] rotationMatrix = {
             {java.lang.Math.cos(tgt_pos_angle_deg), -java.lang.Math.sin(tgt_pos_angle_deg)},
             {java.lang.Math.sin(tgt_pos_angle_deg), java.lang.Math.cos(tgt_pos_angle_deg)}
         };
 
-        double [][] wayPoint3 = multiplyMatrices(rotationMatrix, pointAheadOfEndMatrix);
+        double [] wayPoint3 = multiplyMatrices(rotationMatrix, pointAheadOfEndMatrix);
 
-        double [][] wayPoint4 = multiplyMatrices(rotationMatrix, endOfLineMatrix);
+        double [] wayPoint4 = multiplyMatrices(rotationMatrix, endOfLineMatrix);
 
-        double[][] wp1 = {
-            {0},
-            {0}
-        };
+        double[] wp1 = 
+            {0, 0};
         waypoints.add(wp1);
 
-        double[][] wp2 = {
-            {0},
-            {0.5}
-        };
+        double[] wp2 = 
+            {0, 0.5};
+
         waypoints.add(wp2);
 
-        double[][] wp3 = wayPoint3;
+        double[] wp3 = wayPoint3;
         waypoints.add(wp3);
-        System.out.println(wayPoint3);
+        System.out.println(wayPoint3.toString());
 
-        double[][] wp4 = wayPoint4;
+        double[] wp4 = wayPoint4;
         waypoints.add(wp4);
-        System.out.println(wayPoint4);
+        System.out.println(wayPoint4.toString());
 
         //TODO add more waypoints based on the final location rquested
 
-        path = new FalconPathPlanner((double[][])waypoints.toArray());
+        path = new FalconPathPlanner(waypoints.toArray(new double[waypoints.size()][2]));
         path.calculate(pathDurationSec, PLANNER_SAMPLE_RATE_S, ROBOT_TRACK_WIDTH_FT);
 
     }
@@ -178,18 +171,18 @@ public class AutoSeqPathPlan extends AutoEvent {
         return false;
     }
 
-    public static double[][] multiplyMatrices(double[][] firstMatrix, double[][] secondMatrix) {
+    public static double[] multiplyMatrices(double[][] firstMatrix, double[] secondMatrix) {
 
         int r1 = firstMatrix.length;
         int r2 = secondMatrix.length;
         int c1 = firstMatrix[0].length;
-        int c2 = secondMatrix[0].length;
+        int c2 = 1;
 
-        double[][] product = new double[r1][c2];
+        double[] product = new double[r1];
         for(int i = 0; i < r1; i++) {
             for (int j = 0; j < c2; j++) {
                 for (int k = 0; k < c1; k++) {
-                    product[i][j] += firstMatrix[i][k] * secondMatrix[k][j];
+                    product[i] += firstMatrix[i][k] * secondMatrix[k];
                 }
             }
         }
