@@ -37,8 +37,11 @@ public class RobotConstants {
     public static final int LINE_FOLLOWING_SENSOR_3_PORT = 6;
     public static final int LINE_FOLLOWING_SENSOR_4_PORT = 7;
     public static final int LINE_FOLLOWING_SENSOR_5_PORT = 8;
-    public static final int BALL_INTAKE_PORT = 9;
-    public static final int GRIPPER_RETRACTED_LIMIT_SWITCH = 10;
+    public static final int PEZ_SOLENOID_LIMIT_SWITCH_PORT = 9;
+    public static final int BALL_INTAKE_PORT = 10;
+
+    //Relay
+    public static final int PEZ_RELAY_PORT = 0;
 
     /////////////////////////////////////////////////////////////////////////////////////
     // PDP Ports
@@ -47,8 +50,7 @@ public class RobotConstants {
     /////////////////////////////////////////////////////////////////////////////////////
     // Solenoid Ports
     /////////////////////////////////////////////////////////////////////////////////////
-    public static final int PEZ_SOLENOID_CHANNEL = 0;
-    public static final int ELECTRIC_SOLENOID_CHANNEL = 1;
+    public static final int PEZ_SOLENOID_PORT = 0;
     public static final int INTAKE_ARM_BAR_PORT = 4;
     public static final int ARM_MECH_BRAKE_SOL_PORT = 5;
 

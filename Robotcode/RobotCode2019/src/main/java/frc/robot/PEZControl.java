@@ -1,9 +1,10 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.Relay.Value;
 import frc.lib.WebServer.CasseroleDriverView;
 
 /*
@@ -31,10 +32,8 @@ public class PEZControl {
     
     private static PEZControl pezCtrl = null;
 
-    Solenoid pezSolenoid; 
-    Solenoid electricSolenoid;
-
-    Timer solenoidTimer;
+    Solenoid pezSolenoid;
+    Relay pezRelay;
 
     DriverController dController;
     OperatorController opController;
@@ -75,27 +74,22 @@ public class PEZControl {
 
     // This is the private constructor that will be called once by getInstance() and it should instantiate anything that will be required by the class
     private  PEZControl() {
-        pezSolenoid = new Solenoid (RobotConstants.PEZ_SOLENOID_CHANNEL);
-        electricSolenoid = new Solenoid(RobotConstants.ELECTRIC_SOLENOID_CHANNEL);
+        pezSolenoid = new Solenoid (RobotConstants.PEZ_SOLENOID_PORT);
+        pezRelay = new Relay(RobotConstants.PEZ_RELAY_PORT);
         dController = DriverController.getInstance();
         opController = OperatorController.getInstance();
-        solenoidTimer = new Timer();
-        limitSwitch = new DigitalInput(RobotConstants.GRIPPER_RETRACTED_LIMIT_SWITCH); // we'll find out real port later ;) //
-
-        solenoidTimer.start();
+        limitSwitch = new DigitalInput(RobotConstants.PEZ_SOLENOID_LIMIT_SWITCH_PORT); // we'll find out real port later ;) //
     }
     private boolean getPezSolenoidState(){ 
         boolean  extended = true;
         if (limitSwitch.get() == true){
             extended = false;
-        }   else if ((limitSwitch.get() == false) && (solenoidTimer.getFPGATimestamp() - retractTimeStart < 250)) {
+        }   else if ((limitSwitch.get() == false) && (Timer.getFPGATimestamp() - retractTimeStart < .250)) {
             extended = true;
-        }   else if ((limitSwitch.get() == false) && (solenoidTimer.getFPGATimestamp() - retractTimeStart >= 250)) {
+        }   else if ((limitSwitch.get() == false) && (Timer.getFPGATimestamp() - retractTimeStart >= .250)) {
             extended = false; 
         }
         return extended;
-    
-
     }
 
     public void update() {
@@ -109,13 +103,7 @@ public class PEZControl {
                 //Hatch Pickup Requested
                 setPositionCmd(PEZPos.HatchGrab);
             } else if(opController.getReleaseReq()) {
-                //Release whatever we currently have in our gripper
-                if(getHeldGamePiece() == GamePiece.Cargo || getHeldGamePiece() == GamePiece.Hatch){
-                    setPositionCmd(PEZPos.Release);
-    
-                } else {
-                    setPositionCmd(PEZPos.None);
-                }
+                setPositionCmd(PEZPos.Release);
             } else {
                 setPositionCmd(PEZPos.None);
             }
@@ -134,22 +122,22 @@ public class PEZControl {
 
         if(posReq == PEZPos.CargoGrab){
             pezSolenoid.set(false);
-            electricSolenoid.set(false);
+            pezRelay.set(Value.kOff);
             prevPosReq = PEZPos.CargoGrab;
         } else if(posReq == PEZPos.HatchGrab){
             pezSolenoid.set(true);
-            electricSolenoid.set(false);
+            pezRelay.set(Value.kOff);
             prevPosReq = PEZPos.HatchGrab;
         }else if(posReq == PEZPos.Release){
             if (prevPosReq != PEZPos.Release){
-                retractTimeStart = solenoidTimer.getFPGATimestamp();
+                retractTimeStart = Timer.getFPGATimestamp();
                 pezSolenoid.set (false);
-                electricSolenoid.set (false);
+                pezRelay.set(Value.kOff);
             }
             boolean isExtended = getPezSolenoidState();
             if (isExtended == false) {
                 pezSolenoid.set (true);
-                electricSolenoid.set (true);
+                pezRelay.set(Value.kForward);
             } else {} // waiting for cylinder to retract- do nothing //
             prevPosReq = PEZPos.Release;
         }
