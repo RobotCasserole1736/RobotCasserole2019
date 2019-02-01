@@ -21,26 +21,29 @@ package frc.robot;
  */
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import frc.lib.Calibration.Calibration;
+import frc.lib.DataServer.Signal;
 
 public class LineFollower {
 
-    public double forwardReverseCmd;
-    public double rotationCmd;
-    public boolean sensor1State;
-    public boolean sensor2State;
-    public boolean sensor3State;
-    public boolean sensor4State;
-    public boolean sensor5State;
-    public boolean sensor1Prev;
-    public boolean sensor2Prev;
-    public boolean sensor3Prev;
-    public boolean sensor4Prev;
-    public boolean sensor5Prev;
-    public double sensor1Pos = 4;
-    public double sensor2Pos = 2;
-    public double sensor3Pos = 0;
-    public double sensor4Pos = -2;
-    public double sensor5Pos = -4;
+    final int NUM_SENSORS = 5;
+
+    double forwardReverseCmd;
+    double rotationCmd;
+    boolean[] sensorStates = {false, false, false, false, false};
+    boolean[] sensorStatesPrev = {false, false, false, false, false};
+
+    double estPosFt = 0;
+    boolean estPosAvailable = false;
+
+    final double[] SENSOR_POS_FT = {0.5, 0.25, 0.0, -0.25, -0.5};
+
+    Signal estPosSig;
+    Signal estPosAvailSig;
+    Signal measPosSig;
+    Signal measPosAvailSig;
+
+    Calibration rotGain_P;
     
     DigitalInput digitalInput1;
     DigitalInput digitalInput2;
@@ -48,12 +51,26 @@ public class LineFollower {
     DigitalInput digitalInput4;
     DigitalInput digitalInput5;
 
+    /* Singleton stuff */
+    private static LineFollower lnFlwr = null;
+    public static synchronized LineFollower getInstance() {
+        if(lnFlwr == null) lnFlwr = new LineFollower();
+        return lnFlwr;
+    }
+
     private LineFollower(){
         digitalInput1 = new DigitalInput(RobotConstants.LINE_FOLLOWING_SENSOR_1_PORT);
         digitalInput2 = new DigitalInput(RobotConstants.LINE_FOLLOWING_SENSOR_2_PORT);
         digitalInput3 = new DigitalInput(RobotConstants.LINE_FOLLOWING_SENSOR_3_PORT);
         digitalInput4 = new DigitalInput(RobotConstants.LINE_FOLLOWING_SENSOR_4_PORT);
         digitalInput5 = new DigitalInput(RobotConstants.LINE_FOLLOWING_SENSOR_5_PORT);
+        
+        estPosSig       = new Signal("Line Follower Estimated Position", "ft");
+        estPosAvailSig  = new Signal("Line Follower Estimated Position Available", "bool");
+        measPosSig      = new Signal("Line Follower Measured Position", "ft");
+        measPosAvailSig = new Signal("Line Follower Measured Position Available", "bool");
+
+        rotGain_P = new Calibration("Line Follower Rotation P Gain", 0.0);
     }
 
     public double getForwardCmd() {
@@ -64,57 +81,65 @@ public class LineFollower {
         return rotationCmd;
     }
 
+    public double getEstLinePosFt(){
+        return estPosFt;
+    }
+
+    public boolean isEstLinePosAvailable(){
+        return estPosAvailable;
+    }
+
     public void update() {
-        sensor1State = digitalInput1.get();
-        sensor2State = digitalInput2.get();
-        sensor3State = digitalInput3.get();
-        sensor4State = digitalInput4.get();
-        sensor5State = digitalInput5.get();
-        if(sensor1State == true && sensor1Prev == false){
-            forwardReverseCmd = 0;
-            rotationCmd = 1;
-        } else if(sensor1State == false && sensor1Prev == false){
-            forwardReverseCmd = 0;
-            rotationCmd = 0;
+        sensorStatesPrev = sensorStates;
+        sensorStates[0] = digitalInput1.get();
+        sensorStates[1] = digitalInput2.get();
+        sensorStates[2] = digitalInput3.get();
+        sensorStates[3] = digitalInput4.get();
+        sensorStates[4] = digitalInput5.get();
+
+        //Based on line position sensors, genreate a "measurement" of where we think the line is
+        int numSensorsSeeingLine = 0;
+        double measPos = 0;
+        boolean measPosAvailable = false;
+        for(int i = 0; i < NUM_SENSORS; i++){
+            if(sensorStates[i]){
+                numSensorsSeeingLine++;
+                measPos += SENSOR_POS_FT[i];
+            }
         }
 
-        if(sensor2State == true && sensor2Prev == false) {
-            forwardReverseCmd = 0;
-            rotationCmd = 50;
-        } else if(sensor2State == false && sensor2Prev == false){
-            forwardReverseCmd = 0;
-            rotationCmd = 0;
+        if(numSensorsSeeingLine > 0){
+            measPos /= numSensorsSeeingLine;
+            measPosAvailable = true;
+        } else {
+            measPosAvailable = false;
         }
 
-        if(sensor3State == true && sensor3Prev == false){
-            forwardReverseCmd = 1;
-            rotationCmd = 0;
-        } else if(sensor3State == false && sensor3Prev == false){
-            forwardReverseCmd = 0;
-            rotationCmd = 0;
-        }
 
-        if(sensor4State == true && sensor4Prev == false){
-            forwardReverseCmd = 0;
-            rotationCmd = -50;
-        } else if(sensor4State == false && sensor5Prev == false){
-            forwardReverseCmd = 0;
-            rotationCmd = 0;
-        }
-
-        if(sensor5State == true && sensor5Prev == false){
-            forwardReverseCmd = 0;
-            rotationCmd = -1;
-        } else if(sensor5State == false && sensor5Prev == false){
-            forwardReverseCmd = 0;
-            rotationCmd = 0;
+        //Incorporate the measuremnet (if available) into our estimate of where the line is at.
+        //TODO: Maybe a more complex translation from measurements to estimate?
+        if(measPosAvailable){
+            estPosFt = measPos;
+            estPosAvailable = true;
+        } else {
+            estPosAvailable = false;
         }
         
-        sensor1Prev = sensor1State;
-        sensor2Prev = sensor2State;
-        sensor3Prev = sensor3State;
-        sensor4Prev = sensor4State;
-        sensor5Prev = sensor5State;
+        
+        double sample_time_ms = LoopTiming.getInstance().getLoopStartTimeSec()*1000.0;
+        estPosSig.addSample(sample_time_ms, estPosFt);
+        estPosAvailSig.addSample(sample_time_ms, estPosAvailable?1.0:0.0);
+        measPosSig.addSample(sample_time_ms, measPos);
+        measPosAvailSig.addSample(sample_time_ms, measPosAvailable?1.0:0.0);
+    }
+
+    public void updateController(){
+        //Simple P controller to rotation command
+        if(estPosAvailable){
+            rotationCmd = rotGain_P.get()*estPosFt;
+        } else {
+            rotationCmd = 0;
+        }
     }
     
 }

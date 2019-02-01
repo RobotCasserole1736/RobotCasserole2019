@@ -83,6 +83,7 @@ public class Robot extends TimedRobot {
     PEZControl pezControl;
     FrontUltrasonic frontUltrasonic;
     BackUltrasonic backUltrasonic;
+    LineFollower linefollow;
 
     //Top level telemetry signals
     Signal rioDSSampLoad;
@@ -118,6 +119,7 @@ public class Robot extends TimedRobot {
         onboardAccel = new BuiltInAccelerometer();
         frontUltrasonic = FrontUltrasonic.getInstance();
         backUltrasonic = BackUltrasonic.getInstance();
+        linefollow = LineFollower.getInstance();
 
         /* Init input from humans */
         operatorController = OperatorController.getInstance();
@@ -181,6 +183,7 @@ public class Robot extends TimedRobot {
         /* Sample Sensors */
         frontUltrasonic.update();
         backUltrasonic.update();
+        linefollow.update();
 
         /* Sample inputs from humans */
         driverController.update();
@@ -279,6 +282,7 @@ public class Robot extends TimedRobot {
         /* Sample Sensors */
         frontUltrasonic.update();
         backUltrasonic.update();
+        linefollow.update();
 
         /* Sample inputs from humans to keep telemetry updated, but we won't actually use it. */
         driverController.update();
@@ -341,6 +345,7 @@ public class Robot extends TimedRobot {
         CasseroleDriverView.setBoolean("Gyro Offline", !drivetrain.isGyroOnline());
         CasseroleDriverView.setBoolean("Vision Camera Offline", !jevois.isVisionOnline());
         CasseroleDriverView.setBoolean("Vision Target Available", jevois.isTgtVisible());
+        CasseroleDriverView.setBoolean("Line Seen", linefollow.isEstLinePosAvailable());
     }
         
     /**
@@ -357,5 +362,6 @@ public class Robot extends TimedRobot {
         CasseroleDriverView.newBoolean("Gyro Offline", "red");
         CasseroleDriverView.newBoolean("Vision Camera Offline", "red");
         CasseroleDriverView.newBoolean("Vision Target Available", "green");
+        CasseroleDriverView.newBoolean("Line Seen", "green");
     }
 }
