@@ -42,6 +42,7 @@ import frc.robot.Arm.ArmPosReq;
 import frc.robot.LEDController.LEDPatterns;
 import frc.robot.PEZControl.GamePiece;
 import frc.robot.auto.AutoSeqDistToTgtEst;
+import frc.robot.auto.Autonomous;
 
 
 
@@ -95,6 +96,7 @@ public class Robot extends TimedRobot {
 
     //Vision Tracking Camera
     JeVoisInterface jevois;
+    Autonomous autonomous;
 
     /**
      * This function is run when the robot is first started up and should be
@@ -110,7 +112,7 @@ public class Robot extends TimedRobot {
         pdp = new PowerDistributionPanel(RobotConstants.POWER_DISTRIBUTION_PANEL_CANID);
         ledController = LEDController.getInstance();
         pneumaticsControl = PneumaticsControl.getInstance();
-        jevois = new JeVoisInterface(false);
+        jevois = JeVoisInterface.getInstance();
         arm = Arm.getInstance();
         drivetrain = Drivetrain.getInstance();
         climber = Climber.getInstance();
@@ -134,6 +136,7 @@ public class Robot extends TimedRobot {
         AutoSeqDistToTgtEst.getInstance();
         CrashTracker.logRobotConstruction();
         CrashTracker.logRobotInit();
+        autonomous = Autonomous.getInstance();
 
         /* Init local telemetry signals */
         rioDSSampLoad = new Signal("dataserver stored samples", "count"); 
@@ -188,7 +191,7 @@ public class Robot extends TimedRobot {
         /* Sample inputs from humans */
         driverController.update();
         operatorController.update();
-
+        autonomous.update();
 
         //Operator Controller provides commands to Arm
         //TODO: AutoSequencer will want to provide more inputs here.

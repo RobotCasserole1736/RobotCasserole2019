@@ -141,6 +141,7 @@ public class OperatorController {
             intakeSpdReq = IntakeSpd.Stop;
         }
 
+        autoMove = false;
         //code for Third level placement. 0 references the top button of the Dpad on the Xbox controller
         if(xb.getPOV() == 0 && xb.getXButton()){
             topLevelPlace = true;
@@ -148,7 +149,6 @@ public class OperatorController {
         }
         else {
             topLevelPlace = false;
-            autoMove = false;
         }
 
         //code for Second level placement. 90 and 270 are referencing the sides of the Dpad on the Xbox controller
@@ -159,7 +159,6 @@ public class OperatorController {
         }
         else {
             midLevelPlace = false;
-            autoMove = false;
         }
 
         //code for first level placement. 180 references the bottom button of the Dpad on the Xbox controller
@@ -169,7 +168,6 @@ public class OperatorController {
         }
         else {
             lowLevelPlace = false;
-            autoMove = false;
         }
 
         /* Update Telemetry */

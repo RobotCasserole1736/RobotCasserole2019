@@ -1,11 +1,11 @@
 package frc.robot.auto;
 
 import java.util.ArrayList;
-
 import frc.lib.AutoSequencer.AutoEvent;
 import frc.lib.PathPlanner.FalconPathPlanner;
 import frc.robot.RobotConstants;
 import frc.robot.Utils;
+import frc.robot.JeVoisInterface;
 
 /*
  *******************************************************************************************
@@ -38,24 +38,57 @@ public class AutoSeqPathPlan extends AutoEvent {
     /**
      * Creates a new path from the current robot position up to a point in front of the target, pointed straight at it.
      */
-    public AutoSeqPathPlan(double tgt_pos_x_ft, double tgt_pos_y_ft, double tgt_pos_angle_deg){
+    public AutoSeqPathPlan(double tgt_pos_x_ft, double tgt_pos_y_ft, double tgt_pos_angle_rad){
+
+        double targetAngle = tgt_pos_angle_rad+(java.lang.Math.PI/2);
 
         waypoints = new ArrayList<double[]>(0);
 
-        double[] wp1 = {0,0};
+        //This matrix is for the x and y position of the target. It is supposed to be a 2 X 1.
+        double [] pointAheadOfEndMatrix = 
+            {tgt_pos_x_ft-24, tgt_pos_y_ft};
+
+        double [] endOfLineMatrix = 
+            {tgt_pos_x_ft-18, tgt_pos_y_ft};
+            System.out.println("Target Position X = " + tgt_pos_x_ft);
+            System.out.println("Target Position Y = " + tgt_pos_y_ft);
+
+        double [][] rotationMatrix = {
+            {java.lang.Math.cos(targetAngle), -java.lang.Math.sin(targetAngle)},
+            {java.lang.Math.sin(targetAngle), java.lang.Math.cos(targetAngle)}
+        };
+            System.out.println("Angle from Target = " + tgt_pos_angle_rad);
+
+        double [] wayPoint3 = multiplyMatrices(rotationMatrix, pointAheadOfEndMatrix);
+
+        double [] wayPoint4 = multiplyMatrices(rotationMatrix, endOfLineMatrix);
+
+        double[] wp1 = 
+            {0, 0};
         waypoints.add(wp1);
 
-        double[] wp2 = {0,0.5};
+        double[] wp2 = 
+            {0, 0.5};
         waypoints.add(wp2);
 
-        //TODO add more waypoints based on the final location rquested
+        double[] wp3 = wayPoint3;
+        waypoints.add(wp3);
+        System.out.println("Waypoint3 X = " + wayPoint3[0]);
+        System.out.println("Waypoint3 Y = " + wayPoint3[1]);
 
-        path = new FalconPathPlanner((double[][])waypoints.toArray());
+        double[] wp4 = wayPoint4;
+        waypoints.add(wp4);
+        System.out.println("Waypoint4 X = " + wayPoint4[0]);
+        System.out.println("Waypoint4 Y = " + wayPoint4[1]);
+
+        path = new FalconPathPlanner(waypoints.toArray(new double[waypoints.size()][2]));
         path.setPathBeta(0.2);
         path.setPathAlpha(0.5);
         path.setVelocityAlpha(0.001);
         path.setVelocityBeta(0.9);
         path.calculate(pathDurationSec, RobotConstants.MAIN_LOOP_SAMPLE_RATE_S, RobotConstants.ROBOT_TRACK_WIDTH_FT);
+
+
 
     }
 
@@ -143,6 +176,25 @@ public class AutoSeqPathPlan extends AutoEvent {
     @Override
     public boolean isDone() {
         return false;
+    }
+
+    public static double[] multiplyMatrices(double[][] firstMatrix, double[] secondMatrix) {
+
+        int r1 = firstMatrix.length;
+        int r2 = secondMatrix.length;
+        int c1 = firstMatrix[0].length;
+        int c2 = 1;
+
+        double[] product = new double[r1];
+        for(int i = 0; i < r1; i++) {
+            for (int j = 0; j < c2; j++) {
+                for (int k = 0; k < c1; k++) {
+                    product[i] += firstMatrix[i][k] * secondMatrix[k];
+                }
+            }
+        }
+
+        return product;
     }
 
 }

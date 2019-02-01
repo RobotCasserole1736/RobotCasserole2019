@@ -2,7 +2,6 @@ package frc.robot.auto;
 
 import frc.lib.AutoSequencer.AutoEvent;
 import frc.lib.AutoSequencer.AutoSequencer;
-import frc.robot.JeVoisInterface;
 import frc.robot.OperatorController;
 import frc.robot.Arm.ArmPosReq;
 import frc.robot.PEZControl.PEZPos;
@@ -130,14 +129,13 @@ public class Autonomous {
             double yTargetOffset = 0;
             double targetPositionAngle = 0;
 
-            xTargetOffset = JeVoisInterface.getInstance().getTgtPositionX();
-            yTargetOffset = JeVoisInterface.getInstance().getTgtPositionY();
-            targetPositionAngle = JeVoisInterface.getInstance().getTgtAngle();
-            
-
             AutoEvent parent = new AutoSeqPathPlan(xTargetOffset, yTargetOffset, targetPositionAngle);
             AutoSequencer.addEvent(parent);
+<<<<<<< HEAD
             parent = new AutoSeqFinalAlign();
+=======
+            //parent = new AutoSeqDistToTgtEst();
+>>>>>>> origin/sabrina_autosequencer
 
             if(OperatorController.getInstance().getLowLevelPlace()){
                 parent.addChildEvent(new MoveArmLowPos());
