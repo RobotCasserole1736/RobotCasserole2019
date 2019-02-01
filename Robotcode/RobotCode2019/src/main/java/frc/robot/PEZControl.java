@@ -80,7 +80,7 @@ public class PEZControl {
         dController = DriverController.getInstance();
         opController = OperatorController.getInstance();
         solenoidTimer = new Timer();
-        limitSwitch = new DigitalInput(2); // we'll find out real port later ;) //
+        limitSwitch = new DigitalInput(RobotConstants.GRIPPER_RETRACTED_LIMIT_SWITCH); // we'll find out real port later ;) //
 
         solenoidTimer.start();
     }

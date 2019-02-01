@@ -38,6 +38,7 @@ public class RobotConstants {
     public static final int LINE_FOLLOWING_SENSOR_4_PORT = 7;
     public static final int LINE_FOLLOWING_SENSOR_5_PORT = 8;
     public static final int BALL_INTAKE_PORT = 9;
+    public static final int GRIPPER_RETRACTED_LIMIT_SWITCH = 10;
 
     /////////////////////////////////////////////////////////////////////////////////////
     // PDP Ports
