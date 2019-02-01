@@ -61,10 +61,10 @@ public class JeVoisInterface {
 
     // Most recently seen target information
     private boolean tgtVisible = false;   //True if a target is seen, false otherwise
-    private double  tgtAngle_deg = 0;     //Angle from center that the target appears in the camera. Shows if the robot is pointed at the target, or off to the side.
+    private double  tgtAngle_rad = 0;     //Angle from center that the target appears in the camera. Shows if the robot is pointed at the target, or off to the side.
     private double  tgtXPos_ft = 0;       //Position of the target relative to the robot in Ft
     private double  tgtYPos_ft = 0;       //Position of the target relative to the robot in Ft
-    private double  tgtRotation_deg = 0;  //Skew of the target - if it's pointed at the robot, or away from the robot. AKA normal vector away from the wall.
+    private double  latchCounter = 0;  //Skew of the target - if it's pointed at the robot, or away from the robot. AKA normal vector away from the wall.
     private double  tgtTime = 0;          //Estimated to time of image capture (on the scale of Timer.getFPGATimestamp())
     
     // Info about the JeVois performace & status
@@ -108,7 +108,7 @@ public class JeVoisInterface {
 
         // Configure telemetry signals
         tgtVisibleSig = new Signal("Jevois Target Visible", "bool");
-        tgtAngleSig = new Signal("Jevois Target Angle", "deg");
+        tgtAngleSig = new Signal("Jevois Target Angle", "rad");
         tgtXPosSig = new Signal("Jevois Target X Position", "ft");
         tgtYPosSig = new Signal("Jevois Target Y Position", "ft");
         tgtRotationSig = new Signal("Jevois Target Rotation Angle", "deg");
@@ -221,7 +221,7 @@ public class JeVoisInterface {
      * Returns the most recently seen target's X position in the image, converted to an angle from the robot.
      */
     public double getTgtAngle() {
-        return tgtAngle_deg;
+        return tgtAngle_rad;
     }
 
     /**
@@ -241,8 +241,8 @@ public class JeVoisInterface {
     /**
      * Returns the most recently seen target's skew rotation (aka Normal Vector from the wall)
      */
-    public double getTgtRotation() {
-        return tgtRotation_deg;
+    public double getLatchCounter() {
+        return latchCounter;
     }
     
     /**
@@ -607,7 +607,7 @@ public class JeVoisInterface {
         final int ANGLE_TO_TGT_TOKEN_IDX = 1;
         final int TGT_X_LOCATION_TOKEN_IDX  = 2;
         final int TGT_Y_LOCATION_TOKEN_IDX  = 3;
-        final int TGT_ROTATION_TOKEN_IDX = 4;
+        final int LATCH_COUNTER_TOKEN_IDX = 4;
         final int JV_FRMRT_TOKEN_IDX = 5;
         final int JV_CPULOAD_TOKEN_IDX = 6;
         final int JV_CPUTEMP_TOKEN_IDX = 7;
@@ -637,10 +637,10 @@ public class JeVoisInterface {
             }
 
             //Use Java built-in double to string conversion on most of the rest
-            tgtAngle_deg    = Double.parseDouble(tokens[ANGLE_TO_TGT_TOKEN_IDX]);
+            tgtAngle_rad    = Double.parseDouble(tokens[ANGLE_TO_TGT_TOKEN_IDX]);
             tgtXPos_ft    = Double.parseDouble(tokens[TGT_X_LOCATION_TOKEN_IDX]);
             tgtYPos_ft    = Double.parseDouble(tokens[TGT_Y_LOCATION_TOKEN_IDX]);
-            tgtRotation_deg = Double.parseDouble(tokens[TGT_ROTATION_TOKEN_IDX]);
+            latchCounter = Double.parseDouble(tokens[LATCH_COUNTER_TOKEN_IDX]);
             jeVoisFramerateFPS = Double.parseDouble(tokens[JV_FRMRT_TOKEN_IDX]);
             tgtTime  = rx_Time - Double.parseDouble(tokens[JV_PIPLINE_DELAY_TOKEN_IDX])/1000000.0;
             jeVoisCpuTempC   = Double.parseDouble(tokens[JV_CPUTEMP_TOKEN_IDX]);
@@ -653,10 +653,10 @@ public class JeVoisInterface {
 
         double sample_time_ms = Timer.getFPGATimestamp()*1000;
         tgtVisibleSig.addSample(sample_time_ms, tgtVisible);
-        tgtAngleSig.addSample(sample_time_ms, tgtAngle_deg);
+        tgtAngleSig.addSample(sample_time_ms, tgtAngle_rad);
         tgtXPosSig.addSample(sample_time_ms, tgtXPos_ft);
         tgtYPosSig.addSample(sample_time_ms, tgtYPos_ft);
-        tgtRotationSig.addSample(sample_time_ms, tgtRotation_deg);
+        tgtRotationSig.addSample(sample_time_ms, latchCounter);
         tgtCaptureTimeSig.addSample(sample_time_ms, tgtTime);
         jevoisCpuTempSig.addSample(sample_time_ms, jeVoisCpuTempC);
         jevoisCpuLoadSig.addSample(sample_time_ms, jeVoisCpuLoadPct);

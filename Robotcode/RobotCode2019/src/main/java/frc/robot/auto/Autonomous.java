@@ -132,7 +132,7 @@ public class Autonomous {
 
             xTargetOffset = JeVoisInterface.getInstance().getTgtPositionX();
             yTargetOffset = JeVoisInterface.getInstance().getTgtPositionY();
-            targetPositionAngle = JeVoisInterface.getInstance().getTgtRotation();
+            targetPositionAngle = JeVoisInterface.getInstance().getTgtAngle();
             
 
             AutoEvent parent = new AutoSeqPathPlan(xTargetOffset, yTargetOffset, targetPositionAngle);

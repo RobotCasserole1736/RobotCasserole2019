@@ -39,7 +39,9 @@ public class AutoSeqPathPlan extends AutoEvent {
     /**
      * Creates a new path from the current robot position up to a point in front of the target, pointed straight at it.
      */
-    public AutoSeqPathPlan(double tgt_pos_x_ft, double tgt_pos_y_ft, double tgt_pos_angle_deg){
+    public AutoSeqPathPlan(double tgt_pos_x_ft, double tgt_pos_y_ft, double tgt_pos_angle_rad){
+
+        double targetAngle = tgt_pos_angle_rad+(java.lang.Math.PI/2);
 
         waypoints = new ArrayList<double[]>(0);
 
@@ -49,11 +51,14 @@ public class AutoSeqPathPlan extends AutoEvent {
 
         double [] endOfLineMatrix = 
             {tgt_pos_x_ft-18, tgt_pos_y_ft};
+            System.out.println("Target Position X = " + tgt_pos_x_ft);
+            System.out.println("Target Position Y = " + tgt_pos_y_ft);
 
         double [][] rotationMatrix = {
-            {java.lang.Math.cos(tgt_pos_angle_deg), -java.lang.Math.sin(tgt_pos_angle_deg)},
-            {java.lang.Math.sin(tgt_pos_angle_deg), java.lang.Math.cos(tgt_pos_angle_deg)}
+            {java.lang.Math.cos(targetAngle), -java.lang.Math.sin(targetAngle)},
+            {java.lang.Math.sin(targetAngle), java.lang.Math.cos(targetAngle)}
         };
+            System.out.println("Angle from Target = " + tgt_pos_angle_rad);
 
         double [] wayPoint3 = multiplyMatrices(rotationMatrix, pointAheadOfEndMatrix);
 
@@ -65,16 +70,17 @@ public class AutoSeqPathPlan extends AutoEvent {
 
         double[] wp2 = 
             {0, 0.5};
-
         waypoints.add(wp2);
 
         double[] wp3 = wayPoint3;
         waypoints.add(wp3);
-        System.out.println(wayPoint3.toString());
+        System.out.println("Waypoint3 X = " + wayPoint3[0]);
+        System.out.println("Waypoint3 Y = " + wayPoint3[1]);
 
         double[] wp4 = wayPoint4;
         waypoints.add(wp4);
-        System.out.println(wayPoint4.toString());
+        System.out.println("Waypoint4 X = " + wayPoint4[0]);
+        System.out.println("Waypoint4 Y = " + wayPoint4[1]);
 
         //TODO add more waypoints based on the final location rquested
 
