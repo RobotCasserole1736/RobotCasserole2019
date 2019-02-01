@@ -241,4 +241,12 @@ public class OperatorController {
     public boolean getTopLevelPlace() {
         return this.topLevelPlace;
     }
+
+    public boolean getClimberEnable() {
+        return this.xb.getBackButton();
+    }
+
+    public boolean getClimberReleace() {
+        return Math.abs(this.xb.getY(Hand.kRight)) > 0.5;
+    }
 }

@@ -65,5 +65,7 @@ public class RobotConstants {
     public static final double MAIN_LOOP_SAMPLE_RATE_S = 0.02; // 20ms update rate
     public static final double ROBOT_TRACK_WIDTH_FT = 3.5; // 3.5 ft effective track width
     public static final double WHEEL_RADIUS_FT = 8.25/2/12.0; //8.25 inch diameter wheels
+    public static final int CLIMBER_SERVO = 7;
+    public static final int ClIMBER_WINDOW_MOTOR = 8;
 
 }

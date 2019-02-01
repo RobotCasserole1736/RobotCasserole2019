@@ -1,5 +1,10 @@
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+
+import edu.wpi.first.wpilibj.Servo;
+import frc.lib.Calibration.Calibration;
+
 /*
  *******************************************************************************************
  * Copyright (C) 2019 FRC Team 1736 Robot Casserole - www.robotcasserole.org
@@ -20,7 +25,17 @@ package frc.robot;
  *   if you would consider donating to our club to help further STEM education.
  */
 
+
 public class Climber {
+
+    Servo climbServo;
+    WPI_TalonSRX windowTalon;
+
+    Calibration servoLockedCal;
+    Calibration servoUnLockedCal;
+    
+    public boolean startButton;
+    public double ServoCmd;
 
     /* Singleton stuff */
     private static Climber climbCtrl = null;
@@ -31,12 +46,35 @@ public class Climber {
     }
 
     private Climber(){
-        //TODO
+        climbServo = new Servo(RobotConstants.CLIMBER_SERVO);
+        windowTalon = new WPI_TalonSRX(RobotConstants.ClIMBER_WINDOW_MOTOR);
+        servoLockedCal = new Calibration("Servo Locked Angle (DEG)", 180);
+        servoUnLockedCal = new Calibration("Servo Unlocked Angle (DEG)", 0);
+
     }
 
     public void update(){
-        //TODO
+        boolean enable = OperatorController.getInstance().getClimberEnable();
+        boolean release = OperatorController.getInstance().getClimberReleace();
 
+        if(enable){
+            ServoCmd = 90;
+            climbServo.set(servoUnLockedCal.get());
+            if(release){
+
+                windowTalon.set(0.5);
+
+            }
+        } else {
+            climbServo.set(servoLockedCal.get());
+        }
+
+        if(!release){
+
+            windowTalon.set(0);
+
+        }
+       
     }
 
 }
