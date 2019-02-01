@@ -34,15 +34,16 @@
   * NOTE: Any new method added to either drivetrain implementation needs to be added to the other implementation, as well as to
   *       this switchyard.
   */
+
+import frc.lib.Calibration.Calibration;
+
 public class Drivetrain implements DrivetrainInterface {
 
     private static DrivetrainInterface dTrainIF = null;
     private static Drivetrain dTrain = null;
 
-    final String ROBOTMAC = "0x12345"; // The MAC address of the robot RoboRIO
-
-    Calibration forceDriveTrainSim:
-
+    Calibration forceDriveTrainSim;
+    final String ROBOTMAC = "0x12345"; /* The MAC address of the robot RoboRIO */
     
     public static synchronized Drivetrain getInstance() {
         if (dTrain == null){
@@ -81,7 +82,7 @@ public class Drivetrain implements DrivetrainInterface {
         }
     
 
-        if(System.getProperty("os.name").contains("Windows") or (macStr != ROBOTMAC and forceDriveTrainSim > 0.0001)){
+        if(System.getProperty("os.name").contains("Windows") || (macStr != ROBOTMAC && forceDriveTrainSim.get() > 0.0001)){
             dTrainIF = new DrivetrainSim(); //TODO make this work on linux laptops
         } else {
             dTrainIF = new DrivetrainReal();
