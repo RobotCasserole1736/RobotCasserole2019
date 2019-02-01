@@ -39,6 +39,10 @@ public class Drivetrain implements DrivetrainInterface {
     private static DrivetrainInterface dTrainIF = null;
     private static Drivetrain dTrain = null;
 
+    final String ROBOTMAC = "0x12345"; // The MAC address of the robot RoboRIO
+
+    Calibration forceDriveTrainSim:
+
     
     public static synchronized Drivetrain getInstance() {
         if (dTrain == null){
@@ -52,6 +56,7 @@ public class Drivetrain implements DrivetrainInterface {
         // Get MAC Address
         InetAddress ip;
         String macStr;
+        forceDriveTrainSim  = new Calibration("Force Simulated Drivetrain (>0.0001 forces simulation)", 0.0000);
 
         try {
     
@@ -63,20 +68,20 @@ public class Drivetrain implements DrivetrainInterface {
             for (int i = 0; i < mac.length; i++) {
                 sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));        
             }
-            macStr = sb.toString()
+            macStr = sb.toString();
     
         } catch (UnknownHostException e) {
     
-            macStr = "UnknownHostException"
+            macStr = "UnknownHostException";
     
         } catch (SocketException e){
     
-            macStr = "SocketException"
+            macStr = "SocketException";
     
         }
     
 
-        if(System.getProperty("os.name").contains("Windows")){
+        if(System.getProperty("os.name").contains("Windows") or (macStr != ROBOTMAC and forceDriveTrainSim > 0.0001)){
             dTrainIF = new DrivetrainSim(); //TODO make this work on linux laptops
         } else {
             dTrainIF = new DrivetrainReal();
