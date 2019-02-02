@@ -92,7 +92,7 @@ public class Drivetrain implements DrivetrainInterface {
         return dTrainIF.getRightWheelSpeedRPM();
     }
 
-    public String setMACAddr(){
+    public void setMACAddr(){
 
         // Get MAC Address
         InetAddress ip;

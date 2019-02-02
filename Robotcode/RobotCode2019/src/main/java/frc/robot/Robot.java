@@ -146,7 +146,7 @@ public class Robot extends TimedRobot {
         dataServer.startServer();
 
         /* Set the MAC address for the drivetrain */
-        drivetrain.setMACAddr()
+        drivetrain.setMACAddr();
     }
 
 /////////////////////////////////////////////////////////////////////////////////////
