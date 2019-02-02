@@ -144,6 +144,9 @@ public class Robot extends TimedRobot {
         webserver.startServer();
         dataServer = CasseroleDataServer.getInstance();
         dataServer.startServer();
+
+        /* Set the MAC address for the drivetrain */
+        drivetrain.setMACAddr()
     }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -154,6 +157,9 @@ public class Robot extends TimedRobot {
         dataServer.logger.startLoggingTeleop();
         ledController.setPattern(LEDPatterns.Pattern3);
         matchState.SetPeriod(MatchState.Period.OperatorControl);
+
+        /* print the MAC address to the console for debugging */
+        System.out.println(drivetrain.getMACAddr());
     }
 
     @Override

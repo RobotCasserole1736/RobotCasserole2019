@@ -44,6 +44,7 @@ public class Drivetrain implements DrivetrainInterface {
 
     Calibration forceDriveTrainSim;
     final String ROBOTMAC = "0x12345"; /* The MAC address of the robot RoboRIO */
+    private static String macStr = "MACnotInitialized";
     
     public static synchronized Drivetrain getInstance() {
         if (dTrain == null){
@@ -54,34 +55,8 @@ public class Drivetrain implements DrivetrainInterface {
 
     private Drivetrain(){
 
-        // Get MAC Address
-        InetAddress ip;
-        String macStr;
         forceDriveTrainSim  = new Calibration("Force Simulated Drivetrain (>0.0001 forces simulation)", 0.0000);
-
-        try {
     
-            ip = InetAddress.getLocalHost();
-            NetworkInterface network = NetworkInterface.getByInetAddress(ip);
-            byte[] mac = network.getHardwareAddress();
-    
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < mac.length; i++) {
-                sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));        
-            }
-            macStr = sb.toString();
-    
-        } catch (UnknownHostException e) {
-    
-            macStr = "UnknownHostException";
-    
-        } catch (SocketException e){
-    
-            macStr = "SocketException";
-    
-        }
-    
-
         if(System.getProperty("os.name").contains("Windows") || (macStr != ROBOTMAC && forceDriveTrainSim.get() > 0.0001)){
             dTrainIF = new DrivetrainSim(); //TODO make this work on linux laptops
         } else {
@@ -115,6 +90,38 @@ public class Drivetrain implements DrivetrainInterface {
 
     public double getRightWheelSpeedRPM(){
         return dTrainIF.getRightWheelSpeedRPM();
+    }
+
+    public String setMACAddr(){
+
+        // Get MAC Address
+        InetAddress ip;
+
+        try {
+
+            ip = InetAddress.getLocalHost();
+            NetworkInterface network = NetworkInterface.getByInetAddress(ip);
+            byte[] mac = network.getHardwareAddress();
+
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < mac.length; i++) {
+                sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));        
+            }
+            macStr = sb.toString();
+
+        } catch (UnknownHostException e) {
+
+            macStr = "UnknownHostException";
+
+        } catch (SocketException e){
+
+            macStr = "SocketException";
+
+        }
+    }
+
+    public String getMACAddr(){
+        return macStr;
     }
 
     @Override
