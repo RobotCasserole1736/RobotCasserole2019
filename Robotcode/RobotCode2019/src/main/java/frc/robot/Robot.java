@@ -153,6 +153,9 @@ public class Robot extends TimedRobot {
         webserver.startServer();
         dataServer = CasseroleDataServer.getInstance();
         dataServer.startServer();
+
+        /* Set the MAC address for the drivetrain */
+        drivetrain.setMACAddr();
     }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -160,20 +163,24 @@ public class Robot extends TimedRobot {
 /////////////////////////////////////////////////////////////////////////////////////
     @Override
     public void teleopInit() {
+        /*Update CrashTracker*/
+        CrashTracker.logTeleopInit();
+
         dataServer.logger.startLoggingTeleop();
         ledController.setPattern(LEDPatterns.Pattern3);
         matchState.SetPeriod(MatchState.Period.OperatorControl);
-        /*Update CrashTracker*/
-        CrashTracker.logTeleopInit();
+
+        /* print the MAC address to the console for debugging */
+        System.out.println(drivetrain.getMACAddr());
     }
 
     @Override
     public void autonomousInit() {
+        /*Update CrashTracker*/
+        CrashTracker.logAutoInit();
         dataServer.logger.startLoggingAuto();
         ledController.setPattern(LEDPatterns.Pattern4);
         matchState.SetPeriod(MatchState.Period.Autonomous);
-        /*Update CrashTracker*/
-        CrashTracker.logAutoInit();
     }
 
 
