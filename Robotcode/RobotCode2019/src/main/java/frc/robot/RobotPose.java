@@ -54,7 +54,7 @@ public class RobotPose {
 
     public void setMeasuredPoseAngle(double poseAngle_in, boolean angleAvailable_in) {
          angleAvail = angleAvailable_in;
-         poseAngle   = poseAngle_in ;
+		 poseAngle   = poseAngle_in ;
     }
 
 
@@ -67,11 +67,6 @@ public class RobotPose {
 		double robotAngle_DPS = ((rightVelosity_FPS-leftVelosity_FPS)/(2*robotRadius_Ft));
         double X_dot = (rightVelosity_FPS+leftVelosity_FPS)/2; 
         
-	
-
-		
-
-
 		
 		Math.toRadians(poseThaddeus);
 
@@ -101,8 +96,14 @@ public class RobotPose {
 		
 		poseX += velosityX;
 		poseY += velosityY;
-		poseThaddeus += 0.02 * robotAngle_DPS;
 		//CasseroleRobotPoseView.setRobotPose(poseX, poseY, poseTheta - 90);
+		if (angleAvail){
+			 poseThaddeus = poseAngle;
+		} else {
+			poseThaddeus += 0.02 * robotAngle_DPS;
+		}
+
+
 
 		double sample_time_ms = LoopTiming.getInstance().getLoopStartTime_sec()*1000.0;
 		DesX.addSample(sample_time_ms,0);
@@ -121,6 +122,5 @@ public class RobotPose {
 		leftVelosity_RPM = 0;
 		rightVelosity_RPM = 0;
     }
-    }
-	
 }
+
