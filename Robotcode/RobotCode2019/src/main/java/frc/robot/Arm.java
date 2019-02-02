@@ -126,6 +126,7 @@ public class Arm {
         /////Movers\\\\\
         armBrake = new Solenoid(RobotConstants.ARM_MECH_BRAKE_SOL_PORT);
         sadey = new CANSparkMax(RobotConstants.ARM_MOTOR_PORT, MotorType.kBrushless);
+        sadey.setSmartCurrentLimit(60);
         armEncoder = sadey.get();
         armPID = sadey.getPIDController();
         
