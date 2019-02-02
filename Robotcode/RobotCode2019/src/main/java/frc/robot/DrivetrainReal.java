@@ -42,8 +42,7 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
     public double rotationCmd;
 
     private static final int TIMEOUT_MS = 0;
-    private static final double ENCODER_CYCLES_PER_REV = 2048;
-    private static final double GEARBOX_RATIO = 72.0 / 12.0;
+    private static final double ENCODER_CYCLES_PER_REV = 360;
     private double motorSpeedRPMRight = 0;
     private double motorSpeedRPMLeft = 0;
 
@@ -246,10 +245,6 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
     public double getGyroLockRotationCmd(){
         return gyroLockRotationCmd;
     }
-
-    // public double getMotorSpeedRadpSec() {
-    // return motor_speed_rpm*0.104719*GEARBOX_RATIO;
-    // }
 
     private double CTRE_VelUnitsToRPM(double ctreUnits) {
         return ctreUnits * 600.0 / ENCODER_CYCLES_PER_REV / 4.0;

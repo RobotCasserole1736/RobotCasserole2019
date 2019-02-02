@@ -24,6 +24,7 @@ package frc.robot;
 //import org.usfirst.frc.team1736.lib.Util.CrashTracker;
 
 import frc.lib.Calibration.*;
+import frc.lib.DataServer.Signal;
 import frc.robot.IntakeControl.IntakePos;
 //import edu.wpi.first.wpilibj.Spark;
 
@@ -48,10 +49,10 @@ public class Arm {
 
 
     /////Know Where The Arm Is(From SparkMax)\\\\\
-    public double armEncoder;
-    public double curArmAngle;
+    CANEncoder armEncoder;
+    double curArmAngle;
     /////The PID StartUps\\\\\
-    public double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, maxRPM;
+    double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, maxRPM;
 
 
     /////////Sensors\\\\\\\\\
@@ -66,25 +67,24 @@ public class Arm {
     ArmPosReq posIn;
 
     /////////State Varibles\\\\\\\\\\\\
-    public double   desAngle;
-    public double   potUpVolt;
-    public double   potLowVolt;
-    public boolean  brakeActivated;
-    public double   pastManMoveCmd = 0;
-    public double   curManMoveCmd = 0;
-    public double   uncompensatedMotorCmd = 0;
-    public boolean  brakeIn = false;
-    public boolean  isZeroed = false;
-    public IntakePos curIntakePos;
-    public boolean  intakeExtend = false;
-    public boolean  isManMode = false;
+    double   desAngle;
+    double   potUpVolt;
+    double   potLowVolt;
+    boolean  brakeActivated;
+    double   pastManMoveCmd = 0;
+    double   curManMoveCmd = 0;
+    double   uncompensatedMotorCmd = 0;
+    boolean  brakeIn = false;
+    boolean  isZeroed = false;
+    IntakePos curIntakePos;
+    boolean  intakeExtend = false;
 
     //Arm State Heights\\
     
-    public double topRocket;
-    public double midRocket;
-    public double lowRocket;
-    public double intakeHeight;
+    double topRocket;
+    double midRocket;
+    double lowRocket;
+    double intakeHeight;
     
     
     Calibration topRocketCal;
@@ -98,16 +98,25 @@ public class Arm {
     Calibration rampRate;    
 
     ///////////Pot State\\\\\\\\\\\\
-    public double UpperLimitDegrees = 270;
-    public double UpperLimitVoltage = 12;
-    public double LowerLimitDegrees = 0;
-    public double LowerLimitVoltage = 12;
-    public double armPotPos;
+    double UpperLimitDegrees = 270;
+    double UpperLimitVoltage = 12;
+    double LowerLimitDegrees = 0;
+    double LowerLimitVoltage = 12;
+    double armPotPos;
 
 
     /////////Limit Switches\\\\\\\\\\
-    public boolean topOfMotion;
-    public boolean bottomOfMotion; 
+    boolean topOfMotion;
+    boolean bottomOfMotion; 
+
+    Signal armMotorCurrentSig;
+    Signal armMotorCmdSig;
+    Signal armDesPosSig;
+    Signal armActPosSig;
+
+    final double MAX_MANUAL_DEG_PER_SEC = 10.0;
+    final double ARM_GEAR_RATIO = 150.0/1.0;
+    final double REV_ENCODER_TICKS_PER_REV = 42.0;
 
 
     
@@ -127,13 +136,18 @@ public class Arm {
         armBrake = new Solenoid(RobotConstants.ARM_MECH_BRAKE_SOL_PORT);
         sadey = new CANSparkMax(RobotConstants.ARM_MOTOR_PORT, MotorType.kBrushless);
         sadey.setSmartCurrentLimit(60);
-        armEncoder = sadey.get();
+        armEncoder = sadey.getEncoder();
         armPID = sadey.getPIDController();
+
+        armMotorCmdSig = new Signal("Arm Motor Command", "cmd");
+        armMotorCurrentSig = new Signal("Arm Motor Current", "A");
+        armDesPosSig = new Signal("Arm Desired Position", "deg");
+        armActPosSig = new Signal("Arm Actual Position", "deg");
         
         /////PID Values\\\\\
         kP = 0.1; 
-        kI = 1;
-        kD = 1; 
+        kI = 0;
+        kD = 0; 
         kIz = 0; 
         kFF = 0; 
         kMaxOutput = 1; 
@@ -157,8 +171,8 @@ public class Arm {
         lowRocketCal = new Calibration("Arm Bottom Level Pos (Deg)", 10);
         intakeHeightCal = new Calibration("Arm Intake Level Pos (Deg)", 0);
         armAngleOffsetCal = new Calibration("Arm Is Offset From Flat Ground(Deg)", 20);
-        gravOffsetHorz = new Calibration("Required Voltage at Horz(Volts)", 0.5);
-        rampRate = new Calibration("Spark Ramp Rate (Volts)", 0.3);
+        gravOffsetHorz = new Calibration("Arm Required Voltage at Horz(Volts)", 0.5);
+        rampRate = new Calibration("Arm Spark Ramp Rate (Volts)", 0.3);
         sadey.setRampRate(rampRate.get());
     } 
     
@@ -184,11 +198,11 @@ public class Arm {
                 (UpperLimitVoltage - LowerLimitVoltage) + LowerLimitDegrees;
     }*/
     double convertRotationsToDeg(double rotations_in) {
-        return (rotations_in / 1024);
+        return (rotations_in / REV_ENCODER_TICKS_PER_REV * ARM_GEAR_RATIO);
     }
 
     double convertDegToRotations(double degrees_in) {
-        return(degrees_in *1024);
+        return(degrees_in *REV_ENCODER_TICKS_PER_REV / ARM_GEAR_RATIO);
     }
 
     public void sampleSensors() {
@@ -199,55 +213,45 @@ public class Arm {
     
     /////Use Sensor Data in Calculations\\\\\
     public void update() {
+
+        curArmAngle = convertRotationsToDeg(armEncoder.getPosition());
+
         sadey.setRampRate(rampRate.get());
         double setAngle = curArmAngle;
 
+        //TEMP - pretend we are always zeroed until the limit switches are installed.
+        isZeroed =true;
+
         if(!isZeroed) {
-        armPID.setReference(-0.01, ControlType.kVoltage);
-        if(bottomOfMotion) {
-            isZeroed = true;
-            armPID.setReference(0.0, ControlType.kVoltage);
-        }
+            armPID.setReference(-0.01, ControlType.kVoltage);
+            if(bottomOfMotion) {
+                isZeroed = true;
+                armPID.setReference(0.0, ControlType.kVoltage);
+            }
         } 
         else {
-            //Preset Heights Logic
-            //If arm == 0 ??needed??
-                
-        
-            //Joystick Operation by Drivers
+            //Update the position based on what the driver requested
+            defArmPos();
 
             if(curManMoveCmd != 0) {
-                setAngle = curArmAngle + curManMoveCmd;
-                isManMode = true;
+                setAngle = curArmAngle + curManMoveCmd*MAX_MANUAL_DEG_PER_SEC*0.02;
+                desAngle = setAngle;
             }
-            else if(!isManMode) {
+            else {
                 setAngle = desAngle;
             }
-
 
             double desRotation = convertDegToRotations(setAngle);
             double gravComp = gravComp();
             armPID.setReference(desRotation, ControlType.kPosition, 0, gravComp);
 
-        /*
-            if(topOfMotion && uncompensatedMotorCmd < 0) {
-                sadey.set(uncompensatedMotorCmd);
-            } 
-            else if(bottomOfMotion && uncompensatedMotorCmd > 0) {
-                sadey.set(uncompensatedMotorCmd);
-            }
-
-            else {
-                sadey.set(uncompensatedMotorCmd);
-            } 
-*/            
-            /*if(uncompensatedMotorCmd == 0) {
-                armBrake.set(true);
-            } 
-            else {
-                armBrake.set(false);
-            }*/
         } 
+
+        double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
+        armMotorCmdSig.addSample(sampleTimeMS, sadey.getAppliedOutput());
+        armMotorCurrentSig.addSample(sampleTimeMS, sadey.getOutputCurrent());
+        armDesPosSig.addSample(sampleTimeMS, setAngle);
+        armActPosSig.addSample(sampleTimeMS, curArmAngle);
     }
 
     public void setPositionCmd(ArmPosReq posIn) {
@@ -259,27 +263,22 @@ public class Arm {
         switch(posIn) {
             case Top:
             desAngle = topRocketCal.get();
-            isManMode = false;
             break;
 
             case Middle:
             desAngle = midRocketCal.get();
-            isManMode = false;
             break;
 
             case Lower:
             desAngle = lowRocketCal.get();
-            isManMode = false;
             break;
 
             case Intake:
             desAngle = intakeHeightCal.get();
-            isManMode = false;
             break;
 
             case None:
             // Don't change desiredArmAngle
-            isManMode = true;
             break;
             
         }
@@ -335,7 +334,7 @@ public class Arm {
     
     }
     public boolean atDesiredHeight() {
-        return(desAngle == curArmAngle);
+        return(Math.abs(desAngle - curArmAngle)<2.0); //hardcode to 2 degree desired height
     }
 
     /**
