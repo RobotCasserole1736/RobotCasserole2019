@@ -18,7 +18,9 @@ public class RobotPose {
 	public double poseY = 0;
 	public double poseThaddeus = 90;
 	public double velosityX = 0;
-	public double velosityY = 0;
+    public double velosityY = 0;
+    public double poseAngle = 0;
+    public boolean angleAvail =  false;
 
 	Signal DesX;
 	Signal DesY;
@@ -46,21 +48,28 @@ public class RobotPose {
 	
 	public double getRobotVelocity_ftpersec(){
 		return velosityX;
-	}
-	
-	public void	setMeasuredPoseAngle(double poseAngle_in, boolean angleAvailable_in) {
+    }
+    
+    
+
+    public void setMeasuredPoseAngle(double poseAngle_in, boolean angleAvailable_in) {
+         angleAvail = angleAvailable_in;
+         poseAngle   = poseAngle_in ;
+    }
 
 
 		
-	}
+    
 	public void update() {
+
 		double leftVelosity_FPS = leftVelosity_RPM * (2*Math_PI*wheelRadius_Ft / 60);
 		double rightVelosity_FPS = rightVelosity_RPM * (2*Math_PI*wheelRadius_Ft / 60);
 		double robotAngle_DPS = ((rightVelosity_FPS-leftVelosity_FPS)/(2*robotRadius_Ft));
-		double X_dot = (rightVelosity_FPS+leftVelosity_FPS)/2; 
+        double X_dot = (rightVelosity_FPS+leftVelosity_FPS)/2; 
+        
 	
 
-		}
+		
 
 
 		
@@ -111,6 +120,7 @@ public class RobotPose {
 		poseThaddeus = 90;
 		leftVelosity_RPM = 0;
 		rightVelosity_RPM = 0;
-	}
+    }
+    }
 	
 }
