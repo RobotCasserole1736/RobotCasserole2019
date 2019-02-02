@@ -1,9 +1,8 @@
  package frc.robot;
  
- import java.net.InetAddress;
  import java.net.NetworkInterface;
+ import java.util.Enumeration;
  import java.net.SocketException;
- import java.net.UnknownHostException;
  
 /*
  *******************************************************************************************
@@ -43,7 +42,7 @@ public class Drivetrain implements DrivetrainInterface {
     private static Drivetrain dTrain = null;
 
     Calibration forceDriveTrainSim;
-    final String ROBOTMAC = "0x12345"; /* The MAC address of the robot RoboRIO */
+    final String ROBOTMAC = "00-80-2F-17-F5-E5"; /* The MAC address of the robot RoboRIO (test board now)*/
     private static String macStr = "MACnotInitialized";
     
     public static synchronized Drivetrain getInstance() {
@@ -95,23 +94,16 @@ public class Drivetrain implements DrivetrainInterface {
     public void setMACAddr(){
 
         // Get MAC Address
-        InetAddress ip;
-
         try {
-
-            ip = InetAddress.getLocalHost();
-            NetworkInterface network = NetworkInterface.getByInetAddress(ip);
-            byte[] mac = network.getHardwareAddress();
+            //Enumeration<NetworkInterface> netInterfaces = NetworkInterface.getNetworkInterfaces();
+            NetworkInterface neti = NetworkInterface.getByName("eth0");
+            byte[] mac = neti.getHardwareAddress();
 
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < mac.length; i++) {
                 sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));        
             }
             macStr = sb.toString();
-
-        } catch (UnknownHostException e) {
-
-            macStr = "UnknownHostException";
 
         } catch (SocketException e){
 
