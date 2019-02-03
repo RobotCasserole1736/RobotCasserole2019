@@ -139,6 +139,9 @@ public class Arm {
         armEncoder = sadey.getEncoder();
         armPID = sadey.getPIDController();
 
+        //Mechanically reversed direction is forward
+        sadey.setInverted(true);
+
         armMotorCmdSig = new Signal("Arm Motor Command", "cmd");
         armMotorCurrentSig = new Signal("Arm Motor Current", "A");
         armDesPosSig = new Signal("Arm Desired Position", "deg");

@@ -104,9 +104,12 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void robotInit() {
+        Thread.currentThread().setPriority(10);
+
         /* Init website utilties */
         webserver = new CasseroleWebServer();
         wrangler = new CalWrangler();
+        dataServer = CasseroleDataServer.getInstance();
 
         /* Init Robot parts */
         pdp = new PowerDistributionPanel(RobotConstants.POWER_DISTRIBUTION_PANEL_CANID);
@@ -151,7 +154,6 @@ public class Robot extends TimedRobot {
 
         /* Fire up webserver & telemetry dataserver */
         webserver.startServer();
-        dataServer = CasseroleDataServer.getInstance();
         dataServer.startServer();
 
         /* Set the MAC address for the drivetrain */
@@ -312,9 +314,6 @@ public class Robot extends TimedRobot {
 
         //Keep drivetrain stopped.
         drivetrain.setOpenLoopCmd(0,0);
-
-        //temp test only
-        DrivetrainClosedLoopTestVectors.getInstance().update();
 
         drivetrain.update();
         drivetrain.updateGains(false);

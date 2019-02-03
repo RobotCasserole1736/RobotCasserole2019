@@ -33,7 +33,7 @@ public class IntakeControl {
     Spark intakeMotor;
 
     Solenoid intakeArmBar;
-    Integer loopCounter;
+    int loopCounter = 0;
     IntakePos currentPosition = IntakePos.Retract;
 
     Signal retractStateEstSig;
