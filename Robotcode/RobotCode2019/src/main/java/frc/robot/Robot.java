@@ -155,9 +155,6 @@ public class Robot extends TimedRobot {
         /* Fire up webserver & telemetry dataserver */
         webserver.startServer();
         dataServer.startServer();
-
-        /* Set the MAC address for the drivetrain */
-        drivetrain.setMACAddr();
     }
 
 /////////////////////////////////////////////////////////////////////////////////////
