@@ -3,7 +3,10 @@ package frc.lib.Util;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.UUID;
 
 import edu.wpi.first.wpilibj.DriverStation;
@@ -103,7 +106,7 @@ public class CrashTracker {
 	private static void logMarker(String mark, Throwable nullableException) {
 		
 	        try (PrintWriter writer = new PrintWriter(new FileWriter("/home/lvuser/crash_tracking.txt", true))) {
-	        	writer.print("[" + new Date().toString() + "]");
+	        	writer.print("[" + getDateTimeString() + "]");
 	            writer.print(" ");
 	            writer.print(mark);
 	            
@@ -119,4 +122,10 @@ public class CrashTracker {
 	            e.printStackTrace();
 	        }
 	}
+
+	private static String getDateTimeString() {
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        df.setTimeZone(TimeZone.getTimeZone("US/Central"));
+        return df.format(new Date());
+    }
 }

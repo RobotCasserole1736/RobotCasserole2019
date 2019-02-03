@@ -155,6 +155,9 @@ public class Robot extends TimedRobot {
         /* Fire up webserver & telemetry dataserver */
         webserver.startServer();
         dataServer.startServer();
+
+        /* print the MAC address to the console for debugging */
+        System.out.println("Current MAC address: " + drivetrain.getMACAddr());
     }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -162,24 +165,31 @@ public class Robot extends TimedRobot {
 /////////////////////////////////////////////////////////////////////////////////////
     @Override
     public void teleopInit() {
-        /*Update CrashTracker*/
-        CrashTracker.logTeleopInit();
+        try{
+            /*Update CrashTracker*/
+            CrashTracker.logTeleopInit();
 
-        dataServer.logger.startLoggingTeleop();
-        ledController.setPattern(LEDPatterns.Pattern3);
-        matchState.SetPeriod(MatchState.Period.OperatorControl);
-
-        /* print the MAC address to the console for debugging */
-        System.out.println(drivetrain.getMACAddr());
+            dataServer.logger.startLoggingTeleop();
+            ledController.setPattern(LEDPatterns.Pattern3);
+            matchState.SetPeriod(MatchState.Period.OperatorControl);
+        } catch(Throwable t) {
+			CrashTracker.logThrowableCrash(t);
+			throw t;
+		}
     }
 
     @Override
     public void autonomousInit() {
-        /*Update CrashTracker*/
-        CrashTracker.logAutoInit();
-        dataServer.logger.startLoggingAuto();
-        ledController.setPattern(LEDPatterns.Pattern4);
-        matchState.SetPeriod(MatchState.Period.Autonomous);
+        try{
+            /*Update CrashTracker*/
+            CrashTracker.logAutoInit();
+            dataServer.logger.startLoggingAuto();
+            ledController.setPattern(LEDPatterns.Pattern4);
+            matchState.SetPeriod(MatchState.Period.Autonomous);
+        } catch(Throwable t) {
+			CrashTracker.logThrowableCrash(t);
+			throw t;
+		}
     }
 
 
@@ -187,66 +197,72 @@ public class Robot extends TimedRobot {
      * This function is called periodically in both Auto("sandstorm") and Teleop
      */
     private void matchPeriodicCommon(){
-        loopTiming.markLoopStart();
+        try{
+            loopTiming.markLoopStart();
 
-        /* Sample Sensors */
-        frontUltrasonic.update();
-        backUltrasonic.update();
-        linefollow.update();
+            /* Sample Sensors */
+            frontUltrasonic.update();
+            backUltrasonic.update();
+            linefollow.update();
 
-        /* Sample inputs from humans */
-        driverController.update();
-        operatorController.update();
-        autonomous.update();
+            /* Sample inputs from humans */
+            driverController.update();
+            operatorController.update();
+            autonomous.update();
 
-        //Operator Controller provides commands to Arm
-        //TODO: AutoSequencer will want to provide more inputs here.
-        arm.setIntakeActualState(intakeControl.getEstimatedPosition());
-        arm.setManualMovementCmd(operatorController.getArmManualPosCmd());
-        arm.setPositionCmd(operatorController.getArmPosReq());
-        arm.update();
+            //Operator Controller provides commands to Arm
+            //TODO: AutoSequencer will want to provide more inputs here.
+            arm.setIntakeActualState(intakeControl.getEstimatedPosition());
+            arm.setManualMovementCmd(operatorController.getArmManualPosCmd());
+            arm.setPositionCmd(operatorController.getArmPosReq());
+            arm.update();
 
-        pezControl.update();
+            pezControl.update();
 
-        intakeControl.update();
+            intakeControl.update();
 
-        if(arm.getActualArmHeight() < 90) {
-            AutoSeqDistToTgtEst.getInstance().setVisionDistanceEstimate(jevois.getTgtPositionY(), jevois.isTgtVisible());
-            AutoSeqDistToTgtEst.getInstance().setUltrasonicDistanceEstimate(frontUltrasonic.getdistance_ft(), true);
-            AutoSeqDistToTgtEst.getInstance().setRobotLinearVelocity(poseCalc.getRobotVelocity_ftpersec());
-        } else{
-            AutoSeqDistToTgtEst.getInstance().setVisionDistanceEstimate(0, false);
-            AutoSeqDistToTgtEst.getInstance().setUltrasonicDistanceEstimate(backUltrasonic.getdistance_ft(), true);
-            AutoSeqDistToTgtEst.getInstance().setRobotLinearVelocity(-1 * poseCalc.getRobotVelocity_ftpersec());
+            if(arm.getActualArmHeight() < 90) {
+                AutoSeqDistToTgtEst.getInstance().setVisionDistanceEstimate(jevois.getTgtPositionY(), jevois.isTgtVisible());
+                AutoSeqDistToTgtEst.getInstance().setUltrasonicDistanceEstimate(frontUltrasonic.getdistance_ft(), true);
+                AutoSeqDistToTgtEst.getInstance().setRobotLinearVelocity(poseCalc.getRobotVelocity_ftpersec());
+            } else{
+                AutoSeqDistToTgtEst.getInstance().setVisionDistanceEstimate(0, false);
+                AutoSeqDistToTgtEst.getInstance().setUltrasonicDistanceEstimate(backUltrasonic.getdistance_ft(), true);
+                AutoSeqDistToTgtEst.getInstance().setRobotLinearVelocity(-1 * poseCalc.getRobotVelocity_ftpersec());
+            }
+            AutoSeqDistToTgtEst.getInstance().update();
+
+            //Arbitrate driver & auto sequencer inputs to drivetrain
+            if(driverController.getGyroAngleLockReq()){
+                //Map driver inputs to drivetrain in gyro-lock mode
+                drivetrain.setGyroLockCmd(driverController.getDriverFwdRevCmd());
+            } else {
+                // Map driver inputs to drivetrain open loop
+                drivetrain.setOpenLoopCmd(driverController.getDriverFwdRevCmd(), driverController.getDriverRotateCmd());
+            }
+
+            DrivetrainClosedLoopTestVectors.getInstance().update();
+            
+            drivetrain.update();
+
+            poseCalc.setLeftMotorSpeed(drivetrain.getLeftWheelSpeedRPM());
+            poseCalc.setRightMotorSpeed(drivetrain.getRightWheelSpeedRPM());
+            poseCalc.update();
+
+            /* Update Other subsytems */
+            ledController.update();
+            pneumaticsControl.update();
+            climber.update();
+            telemetryUpdate();
+            
+            /*Update CrashTracker*/
+            CrashTracker.logTeleopPeriodic();
+            loopTiming.markLoopEnd();
+
+        } catch(Throwable t) {
+            CrashTracker.logThrowableCrash(t);
+            throw t;
         }
-        AutoSeqDistToTgtEst.getInstance().update();
-
-        //Arbitrate driver & auto sequencer inputs to drivetrain
-        if(driverController.getGyroAngleLockReq()){
-            //Map driver inputs to drivetrain in gyro-lock mode
-            drivetrain.setGyroLockCmd(driverController.getDriverFwdRevCmd());
-        } else {
-            // Map driver inputs to drivetrain open loop
-            drivetrain.setOpenLoopCmd(driverController.getDriverFwdRevCmd(), driverController.getDriverRotateCmd());
-        }
-
-        DrivetrainClosedLoopTestVectors.getInstance().update();
-        
-        drivetrain.update();
-
-        poseCalc.setLeftMotorSpeed(drivetrain.getLeftWheelSpeedRPM());
-        poseCalc.setRightMotorSpeed(drivetrain.getRightWheelSpeedRPM());
-        poseCalc.update();
-
-        /* Update Other subsytems */
-        ledController.update();
-        pneumaticsControl.update();
-        climber.update();
-        telemetryUpdate();
-        
-        /*Update CrashTracker*/
-        CrashTracker.logTeleopPeriodic();
-        loopTiming.markLoopEnd();
     }
 
     /**
@@ -274,11 +290,15 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void disabledInit() {
-        dataServer.logger.stopLogging();
-        ledController.setPattern(LEDPatterns.Pattern2);
-        matchState.SetPeriod(MatchState.Period.Disabled);
-        /*Update CrashTracker*/
-        CrashTracker.logDisabledInit();
+        try{
+            CrashTracker.logDisabledInit();
+            dataServer.logger.stopLogging();
+            ledController.setPattern(LEDPatterns.Pattern2);
+            matchState.SetPeriod(MatchState.Period.Disabled);
+        } catch(Throwable t) {
+            CrashTracker.logThrowableCrash(t);
+            throw t;
+        }
     }
 
     /**
@@ -286,49 +306,54 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void disabledPeriodic() {
-        loopTiming.markLoopStart();
+        try{
+            loopTiming.markLoopStart();
 
-        /* Sample Sensors */
-        frontUltrasonic.update();
-        backUltrasonic.update();
-        linefollow.update();
+            /* Sample Sensors */
+            frontUltrasonic.update();
+            backUltrasonic.update();
+            linefollow.update();
 
-        /* Sample inputs from humans to keep telemetry updated, but we won't actually use it. */
-        driverController.update();
-        operatorController.update();
+            /* Sample inputs from humans to keep telemetry updated, but we won't actually use it. */
+            driverController.update();
+            operatorController.update();
 
-        /* Map subsystem IO */
+            /* Map subsystem IO */
 
-        //Initial Match State - Arm in Lower Position
-        arm.setIntakeActualState(intakeControl.getEstimatedPosition());
-        arm.setManualMovementCmd(0);
-        arm.setPositionCmd(ArmPosReq.Lower);
-        arm.update();
+            //Initial Match State - Arm in Lower Position
+            arm.setIntakeActualState(intakeControl.getEstimatedPosition());
+            arm.setManualMovementCmd(0);
+            arm.setPositionCmd(ArmPosReq.Lower);
+            arm.update();
 
-        pezControl.update();
+            pezControl.update();
 
-        intakeControl.update();
+            intakeControl.update();
 
-        //Keep drivetrain stopped.
-        drivetrain.setOpenLoopCmd(0,0);
+            //Keep drivetrain stopped.
+            drivetrain.setOpenLoopCmd(0,0);
 
-        drivetrain.update();
-        drivetrain.updateGains(false);
+            drivetrain.update();
+            drivetrain.updateGains(false);
 
-        poseCalc.setLeftMotorSpeed(drivetrain.getLeftWheelSpeedRPM());
-        poseCalc.setRightMotorSpeed(drivetrain.getRightWheelSpeedRPM());
-        poseCalc.update();
+            poseCalc.setLeftMotorSpeed(drivetrain.getLeftWheelSpeedRPM());
+            poseCalc.setRightMotorSpeed(drivetrain.getRightWheelSpeedRPM());
+            poseCalc.update();
 
 
-        /* Update Other subsytems */
-        ledController.update();
-        pneumaticsControl.update();
-        climber.update();
-        telemetryUpdate();
-        /*Update CrashTracker*/
-        CrashTracker.logDisabledPeriodic();
+            /* Update Other subsytems */
+            ledController.update();
+            pneumaticsControl.update();
+            climber.update();
+            telemetryUpdate();
+            /*Update CrashTracker*/
+            CrashTracker.logDisabledPeriodic();
 
-        loopTiming.markLoopEnd();
+            loopTiming.markLoopEnd();
+        } catch(Throwable t) {
+            CrashTracker.logThrowableCrash(t);
+            throw t;
+        }
     }
     
 //////////////////////////////////////////////////////////////////////////
