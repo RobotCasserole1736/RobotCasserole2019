@@ -349,7 +349,7 @@ public class Robot extends TimedRobot {
         onboardAccelZ.addSample(sampleTimeMs, onboardAccel.getZ());
     
         CasseroleDriverView.setDialValue("Main System Pressure", pneumaticsControl.getPressure());
-        CasseroleDriverView.setDialValue("Speed", poseCalc.getRobotVelocity_ftpersec());
+        CasseroleDriverView.setDialValue("Speed", Math.abs(poseCalc.getRobotVelocity_ftpersec()));
         CasseroleDriverView.setDialValue("Arm Angle", arm.getActualArmHeight());
         CasseroleDriverView.setBoolean("Gyro Offline", !drivetrain.isGyroOnline());
         CasseroleDriverView.setBoolean("Vision Camera Offline", !jevois.isVisionOnline());

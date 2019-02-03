@@ -122,7 +122,7 @@ public class CasseroleWebServer {
             }
         });
         serverThread.setName("CasseroleWebServerThread");
-        serverThread.setPriority(10);
+        serverThread.setPriority(2);
         serverThread.start();
 
     }

@@ -116,6 +116,7 @@ public class RobotPose {
     }
 
     public void update() {
+
         updatePoseFromWheelSpeeds();
         handleFieldColission();
 
@@ -138,6 +139,8 @@ public class RobotPose {
     }
 
     private void updatePoseFromWheelSpeeds(){
+        delta_t_sec = LoopTiming.getInstance().getPeriodSec();
+
         //Robot frome velocity
         double leftVelocity_FPS = Utils.RPM_TO_FT_PER_SEC(leftWheelSpeed_RPM);
         double rightVelocity_FPS = Utils.RPM_TO_FT_PER_SEC(rightWheelSpeed_RPM);

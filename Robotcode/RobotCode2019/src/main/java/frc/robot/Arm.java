@@ -68,10 +68,7 @@ public class Arm {
 
     /////////State Varibles\\\\\\\\\\\\
     double   desAngle;
-    double   potUpVolt;
-    double   potLowVolt;
-    boolean  brakeActivated;
-    double   pastManMoveCmd = 0;
+    double   prevManMoveCmd = 0;
     double   curManMoveCmd = 0;
     double   uncompensatedMotorCmd = 0;
     boolean  brakeIn = false;
@@ -97,13 +94,6 @@ public class Arm {
     Calibration gravOffsetHorz;
     Calibration rampRate;    
 
-    ///////////Pot State\\\\\\\\\\\\
-    double UpperLimitDegrees = 270;
-    double UpperLimitVoltage = 12;
-    double LowerLimitDegrees = 0;
-    double LowerLimitVoltage = 12;
-    double armPotPos;
-
 
     /////////Limit Switches\\\\\\\\\\
     boolean topOfMotion;
@@ -114,7 +104,7 @@ public class Arm {
     Signal armDesPosSig;
     Signal armActPosSig;
 
-    final double MAX_MANUAL_DEG_PER_SEC = 10.0;
+    final double MAX_MANUAL_DEG_PER_SEC = 25.0;
     final double ARM_GEAR_RATIO = 150.0/1.0;
     final double REV_ENCODER_TICKS_PER_REV = 42.0;
 
@@ -194,12 +184,6 @@ public class Arm {
         }
     }
 
-    /*No more Potentiometer
-    double convertVoltsToDeg(double voltage_in) {
-        return (voltage_in - LowerLimitVoltage) * 
-                (UpperLimitDegrees - LowerLimitDegrees) / 
-                (UpperLimitVoltage - LowerLimitVoltage) + LowerLimitDegrees;
-    }*/
     double convertRotationsToDeg(double rotations_in) {
         return (rotations_in / REV_ENCODER_TICKS_PER_REV * ARM_GEAR_RATIO);
     }
@@ -217,10 +201,9 @@ public class Arm {
     /////Use Sensor Data in Calculations\\\\\
     public void update() {
 
-        curArmAngle = convertRotationsToDeg(armEncoder.getPosition());
+        curArmAngle = convertRotationsToDeg(-1.0*armEncoder.getPosition());
 
         sadey.setRampRate(rampRate.get());
-        double setAngle = curArmAngle;
 
         //TEMP - pretend we are always zeroed until the limit switches are installed.
         isZeroed =true;
@@ -234,27 +217,27 @@ public class Arm {
         } 
         else {
             //Update the position based on what the driver requested
-            defArmPos();
-
+            
             if(curManMoveCmd != 0) {
-                setAngle = curArmAngle + curManMoveCmd*MAX_MANUAL_DEG_PER_SEC*0.02;
-                desAngle = setAngle;
+                armPID.setReference(curManMoveCmd*6.0, ControlType.kVoltage);
+                desAngle = curArmAngle;
             }
             else {
-                setAngle = desAngle;
+                defArmPos();
+                double desRotation = convertDegToRotations(desAngle);
+                double gravComp = gravComp();
+                armPID.setReference(desRotation, ControlType.kPosition, 0, gravComp);
             }
-
-            double desRotation = convertDegToRotations(setAngle);
-            double gravComp = gravComp();
-            armPID.setReference(desRotation, ControlType.kPosition, 0, gravComp);
 
         } 
 
         double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
         armMotorCmdSig.addSample(sampleTimeMS, sadey.getAppliedOutput());
         armMotorCurrentSig.addSample(sampleTimeMS, sadey.getOutputCurrent());
-        armDesPosSig.addSample(sampleTimeMS, setAngle);
+        armDesPosSig.addSample(sampleTimeMS, desAngle);
         armActPosSig.addSample(sampleTimeMS, curArmAngle);
+
+        prevManMoveCmd = curManMoveCmd;
     }
 
     public void setPositionCmd(ArmPosReq posIn) {
@@ -289,21 +272,16 @@ public class Arm {
 
     public void setManualMovementCmd(double mov_cmd_in) {
         
-        if(mov_cmd_in>0.5 || mov_cmd_in<-0.5) {    
-            curManMoveCmd = mov_cmd_in;
-            brakeIn = false;
-        
+        if(mov_cmd_in>0.5 || mov_cmd_in<-0.5) {        
+            brakeIn = false;    
         }
         else if(mov_cmd_in < 0.5 && mov_cmd_in > -0.5) {
-        
-            curManMoveCmd = 0;
             brakeIn = true;
-
         }
         else {
-            curManMoveCmd = 0;
-            
+
         }
+        curManMoveCmd = mov_cmd_in;
     }
 
     public void setSolBrake(boolean brakeIn) {
@@ -311,7 +289,7 @@ public class Arm {
             armBrake.set(true); 
         }
         else {
-            armBrake.set(true);
+            armBrake.set(false);
         }
     }
         

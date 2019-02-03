@@ -63,8 +63,8 @@ public class RobotConstants {
     public static final String CAM_1_STREAM_URL = "http://10.17.36.10:1181/stream.mjpg";
     public static final String CAM_2_STREAM_URL = "http://10.17.36.10:1182/stream.mjpg";
     public static final double MAIN_LOOP_SAMPLE_RATE_S = 0.02; // 20ms update rate
-    public static final double ROBOT_TRACK_WIDTH_FT = 3.5; // 3.5 ft effective track width
-    public static final double WHEEL_RADIUS_FT = 8.25/2/12.0; //8.25 inch diameter wheels
+    public static final double ROBOT_TRACK_WIDTH_FT = 22.0/12; // 22 inch  effective track width
+    public static final double WHEEL_RADIUS_FT = 8.75/2/12.0; //8.75 inch diameter wheels
     public static final int CLIMBER_SERVO = 7;
     public static final int ClIMBER_WINDOW_MOTOR = 8;
 
