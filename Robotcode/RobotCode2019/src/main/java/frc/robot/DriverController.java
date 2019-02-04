@@ -85,6 +85,9 @@ public class DriverController {
 
     /** Main update function */
     public void update(){
+        //Temp, give some default values
+        intakeSpdReq = IntakeSpd.Stop;
+        intakePosReq = IntakePos.Retract;
 
         //if(xb.getBumper(Hand.kRight)){
         //    intakePosReq = IntakePos.Extend;

@@ -37,7 +37,6 @@ public class PEZControl {
 
     DriverController dController;
     OperatorController opController;
-    Superstructure superstructure;
 
     GamePiece curGamePiece;
 
@@ -79,7 +78,6 @@ public class PEZControl {
         pezRelay = new Relay(RobotConstants.PEZ_RELAY_PORT);
         dController = DriverController.getInstance();
         opController = OperatorController.getInstance();
-        superstructure = Superstructure.getInstance();
         limitSwitch = new DigitalInput(RobotConstants.PEZ_SOLENOID_LIMIT_SWITCH_PORT); 
     }
 
