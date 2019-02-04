@@ -24,9 +24,10 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import frc.lib.Calibration.Calibration;
 import frc.lib.DataServer.Signal;
-import frc.robot.Arm.ArmPosReq;
+import frc.robot.Arm.ArmPos;
 import frc.robot.IntakeControl.IntakePos;
 import frc.robot.IntakeControl.IntakeSpd;
+import frc.robot.Superstructure.OpMode;
 
 public class OperatorController {
 
@@ -34,31 +35,29 @@ public class OperatorController {
     XboxController xb;
 
     /* Operator commands state*/
-    boolean ballPickupReq;
-    boolean hatchPickupReq;
+    OpMode opModeReq;
     boolean releaseReq;
-    ArmPosReq armPosReq;
+    boolean grabReq;
+    ArmPosCmd armPosReq;
     double  armManualPosCmd;
+    IntakeSpd intakeSpdReq;
+    IntakePos intakePosReq;
+    boolean climberReleaseReq;
+    boolean climberRelEnable;
+
+    /* Auto Alignment Related Variables */
+    boolean   autoMove;
     boolean autoAlignHighReq;
     boolean autoAlignMidReq;
     boolean autoAlignLowReq;
-    IntakeSpd intakeSpdReq;
-    IntakePos intakePosReq;
-
-    /* State Machine Related Variables */
-    boolean   topLevelPlace;
-    boolean   midLevelPlace;
-    boolean   lowLevelPlace;
-    boolean   autoMove;
 
     /* Behavior/feel calibrations */
     Calibration joystickExpScaleFactor;
     Calibration joystickDeadzone;
 
     /* Telemetry */
-    Signal ballPickupReqSig;
-    Signal hatchPickupReqSig;
-    Signal releaseReqSig;
+    Signal gamepieceGrabReqSig;
+    Signal gamepieceReleaseReqSig;
     Signal armPosReqSig;
     Signal armManualPosCmdSig;
     Signal autoAlignHighReqSig;
@@ -66,6 +65,8 @@ public class OperatorController {
     Signal autoAlignLowReqSig;
     Signal intakeSpdReqSig;
     Signal intakePosReqSig;
+    Signal climberEnableReqSig;
+    Signal climberReleaseReqSig;
     
 
     /* Singleton stuff */
@@ -76,15 +77,32 @@ public class OperatorController {
         return opCtrl;
     }
 
+    public enum ArmPosCmd {
+        Top(4),
+        Middle(3),
+        Lower(2),
+        Intake(1),
+        None(0);
+
+        public final int value;
+
+        private ArmPosCmd(int value) {
+            this.value = value;
+        }
+                
+        public int toInt(){
+            return this.value;
+        }
+    }
+
     private OperatorController(){
         xb = new XboxController(RobotConstants.OPERATOR_CONTROLLER_USB_IDX);
 
         joystickExpScaleFactor = new Calibration("Operator Joystick Exponential Scale Factor", 3.0 , 1, 10);
         joystickDeadzone = new Calibration("Operator Joystick Deadzone ", 0.15, 0, 1);
 
-        ballPickupReqSig = new Signal("Operator Ball Pickup Command", "bool");
-        hatchPickupReqSig = new Signal("Operator Hatch Pickup Command", "bool");
-        releaseReqSig = new Signal("Operator Gamepiece Release Command", "bool");
+        gamepieceGrabReqSig = new Signal("Operator Gamepiece Grab Command", "bool");
+        gamepieceReleaseReqSig = new Signal("Operator Gamepiece Release Command", "bool");
         armPosReqSig = new Signal("Operator Arm Position Command", "Arm Pos Enum");
         armManualPosCmdSig = new Signal("Operator Manual Arm Position Command", "cmd");
         autoAlignHighReqSig = new Signal("Operator Auto Align Top Command", "bool");
@@ -92,34 +110,50 @@ public class OperatorController {
         autoAlignLowReqSig = new Signal("Operator Auto Align Low Command", "bool");
         intakeSpdReqSig = new Signal("Operator Intake Speed Command", "speed enum");
         intakePosReqSig = new Signal("Operator Intake Position Command", "pos enum");
+        climberEnableReqSig = new Signal("Operator Climber Release Enable Command", "bool");
+        climberReleaseReqSig = new Signal("Operator Climber Release Command", "bool");
     }
 
 
     public void update(){
-        ballPickupReq = xb.getAButton();
-        hatchPickupReq = xb.getYButton();
-        releaseReq = xb.getBButton();
-
-        armPosReq = ArmPosReq.None;
+        //Init requests
+        opModeReq = OpMode.None;
+        armPosReq = ArmPosCmd.None;
         autoAlignHighReq = false;
         autoAlignMidReq = false;
         autoAlignLowReq = false;
+        autoMove = false;
+
+        //Get Gamepiece Release/Grab request
+        grabReq = xb.getBumper(Hand.kLeft);
+        releaseReq = xb.getBumper(Hand.kRight);
+
+        //Get arm or auto-align requests
         int povAngle = xb.getPOV(0);
         if(xb.getXButton()){
             if(povAngle == 0){
                 autoAlignHighReq = true;
+                autoMove = true;
             } else if(povAngle == 90 || povAngle == 270) {
                 autoAlignMidReq = true;
+                autoMove = true;
             } else if(povAngle == 180) {
                 autoAlignLowReq = true;
+                autoMove = true;
             }
         } else {
             if(povAngle == 0){
-                armPosReq = ArmPosReq.Top;
+                armPosReq = ArmPosCmd.Top;
             } else if(povAngle == 90 || povAngle == 270) {
-                armPosReq = ArmPosReq.Middle;
+                armPosReq = ArmPosCmd.Middle;
             } else if(povAngle == 180) {
-                armPosReq = ArmPosReq.Lower;
+                armPosReq = ArmPosCmd.Lower;
+            } else if(xb.getYButton()) {
+                armPosReq = ArmPosCmd.Intake;
+                opModeReq = OpMode.Hatch;
+            } else if(xb.getAButton()) {
+                armPosReq = ArmPosCmd.Intake;
+                opModeReq = OpMode.Cargo;
             }
         }
 
@@ -141,40 +175,13 @@ public class OperatorController {
             intakeSpdReq = IntakeSpd.Stop;
         }
 
-        autoMove = false;
-        //code for Third level placement. 0 references the top button of the Dpad on the Xbox controller
-        if(xb.getPOV() == 0 && xb.getXButton()){
-            topLevelPlace = true;
-            autoMove = true;
-        }
-        else {
-            topLevelPlace = false;
-        }
-
-        //code for Second level placement. 90 and 270 are referencing the sides of the Dpad on the Xbox controller
-        //90 is the right while 270 is the left
-        if((xb.getPOV() == 90 || xb.getPOV() == 270) && xb.getXButton()){
-            midLevelPlace = true;
-            autoMove = true;
-        }
-        else {
-            midLevelPlace = false;
-        }
-
-        //code for first level placement. 180 references the bottom button of the Dpad on the Xbox controller
-        if(xb.getPOV() == 180 && xb.getXButton()){
-            lowLevelPlace = true;
-            autoMove = true;
-        }
-        else {
-            lowLevelPlace = false;
-        }
+        climberRelEnable = xb.getBackButton();
+        climberReleaseReq = ( Math.abs(xb.getY(Hand.kRight)) > 0.5);
 
         /* Update Telemetry */
         double sample_time_ms = LoopTiming.getInstance().getLoopStartTimeSec()*1000.0;
-        ballPickupReqSig.addSample(sample_time_ms,ballPickupReq);
-        hatchPickupReqSig.addSample(sample_time_ms,hatchPickupReq);
-        releaseReqSig.addSample(sample_time_ms,releaseReq);
+        gamepieceGrabReqSig.addSample(sample_time_ms,grabReq);
+        gamepieceReleaseReqSig.addSample(sample_time_ms,releaseReq);
         armPosReqSig.addSample(sample_time_ms,armPosReq.toInt());
         armManualPosCmdSig.addSample(sample_time_ms,armManualPosCmd);
         autoAlignHighReqSig.addSample(sample_time_ms,autoAlignHighReq);
@@ -182,23 +189,24 @@ public class OperatorController {
         autoAlignLowReqSig.addSample(sample_time_ms,autoAlignLowReq);
         intakeSpdReqSig.addSample(sample_time_ms, intakeSpdReq.toInt());
         intakePosReqSig.addSample(sample_time_ms, intakePosReq.toInt());
+        climberEnableReqSig.addSample(sample_time_ms, climberRelEnable);
+        climberReleaseReqSig.addSample(sample_time_ms, climberReleaseReq);
     }
 
 
-
-    public boolean getBallPickupReq() {
-        return this.ballPickupReq;
+    public OpMode getOpMode() {
+        return this.opModeReq;
     }
 
-    public boolean getHatchPickupReq() {
-        return this.hatchPickupReq;
+    public boolean getGampieceGrabRequest() {
+        return this.grabReq;
     }
 
-    public boolean getReleaseReq() {
+    public boolean getGampieceReleaseRequest() {
         return this.releaseReq;
     }
 
-    public ArmPosReq getArmPosReq() {
+    public ArmPosCmd getArmPosReq() {
         return this.armPosReq;
     }
 
@@ -230,23 +238,11 @@ public class OperatorController {
         return this.autoMove;
     }
 
-    public boolean getLowLevelPlace() {
-        return this.lowLevelPlace;
-    }
-
-    public boolean getMidLevelPlace() {
-        return this.midLevelPlace;
-    }
-
-    public boolean getTopLevelPlace() {
-        return this.topLevelPlace;
-    }
-
     public boolean getClimberEnable() {
-        return this.xb.getBackButton();
+        return this.climberRelEnable;
     }
 
     public boolean getClimberReleace() {
-        return Math.abs(this.xb.getY(Hand.kRight)) > 0.5;
+        return this.climberReleaseReq;
     }
 }

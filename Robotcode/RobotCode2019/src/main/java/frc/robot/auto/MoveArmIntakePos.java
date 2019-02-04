@@ -24,26 +24,26 @@ import frc.robot.Superstructure.OpMode;
  *   if you would consider donating to our club to help further STEM education.
  */
 
-public class MoveArmLowPos extends AutoEvent {
-    
+public class MoveArmIntakePos extends AutoEvent {
+
     OpMode curOpMode;
 
-	public MoveArmLowPos(OpMode opMode_in) {
+	public MoveArmIntakePos(OpMode opMode_in) {
         curOpMode = opMode_in;
     }
 
     @Override
     public void userStart() {
         if(curOpMode == OpMode.Cargo){
-            Arm.getInstance().setPositionCmd(Arm.ArmPos.LowerCargo);
+            Arm.getInstance().setPositionCmd(Arm.ArmPos.IntakeCargo);
         } else if(curOpMode == OpMode.Hatch){
-            Arm.getInstance().setPositionCmd(Arm.ArmPos.LowerHatch);
+            Arm.getInstance().setPositionCmd(Arm.ArmPos.IntakeHatch);
         }
     }
 
     @Override
     public void userUpdate() {
-        
+
     }
 
     @Override
@@ -58,6 +58,6 @@ public class MoveArmLowPos extends AutoEvent {
 
     @Override
     public boolean isDone() {
-        return Arm.getInstance().atDesiredHeight();
+        return Arm.getInstance().atDesiredHeight();    
     }
 }

@@ -36,13 +36,30 @@ import edu.wpi.first.wpilibj.Timer;
  */
 public class AutoSequencer {
 
-    static ArrayList<AutoEvent> events = new ArrayList<AutoEvent>();
+    ArrayList<AutoEvent> events = new ArrayList<AutoEvent>();
 
-    static AutoEvent activeEvent = null;
+    AutoEvent activeEvent = null;
 
-    public static long globalUpdateCount = 0;
+    long globalUpdateCount = 0;
 
-    public static int globalEventIndex = 0;
+    int globalEventIndex = 0;
+
+    String name;
+
+
+
+
+    public AutoSequencer(){
+        commonConstructor("Auto");
+    }
+
+    public AutoSequencer(String name_in){
+        commonConstructor(name_in);
+    }
+
+    private void commonConstructor(String name_in){
+        name = name_in;
+    }
 
 
     /**
@@ -50,31 +67,31 @@ public class AutoSequencer {
      * 
      * @param event_in
      */
-    public static void addEvent(AutoEvent event_in) {
+    public void addEvent(AutoEvent event_in) {
         events.add(event_in);
-        System.out.println("[Auto] New event registered - " + event_in.getClass().getName());
+        System.out.println("["+name+"] New event registered - " + event_in.getClass().getName());
         if(event_in.childEvents.size() > 0) {
-        	System.out.println("[Auto] Child Events: ");
+        	System.out.println("["+name+"] Child Events: ");
         	for(AutoEvent child : event_in.childEvents) {
-        		System.out.println("[Auto]       " + child.getClass().getName());
+        		System.out.println("["+name+"]       " + child.getClass().getName());
         	}
         }
     }
     
-    public static void clearAllEvents() {
+    public void clearAllEvents() {
         events.clear();
-        System.out.println("[Auto] Cleared event list");
+        System.out.println("["+name+"] Cleared event list");
     }
 
 
     /**
      * Reset to the start of the autonomous sequence.
      */
-    public static void start() {
+    public void start() {
         globalEventIndex = 0;
         globalUpdateCount = 0;
         
-        System.out.println("[Auto] Starting...");
+        System.out.println("["+name+"] Starting...");
 
         if (events.size() > 0) {
             activeEvent = events.get(globalEventIndex);
@@ -87,14 +104,14 @@ public class AutoSequencer {
      * Stop anything which might be running now. Will call the userForceStop() on any presently
      * running events.
      */
-    public static void stop() {
+    public void stop() {
         // if something is running, we'll need to stop it.
         if (activeEvent != null) {
 
             // Force stop this event and its children
             activeEvent.forceStopAllChildren();
             activeEvent.userForceStop();
-            System.out.println("[Auto] Stopped.");
+            System.out.println("["+name+"] Stopped.");
         }
         
 
@@ -103,7 +120,7 @@ public class AutoSequencer {
     }
 
 
-    public static void update() {
+    public void update() {
 
         // Don't bother to do anything if there is no active event right now.
         if (activeEvent != null) {
@@ -119,7 +136,7 @@ public class AutoSequencer {
                 	if(!child.completed) {
 	                    if (child.isRunning == false & child.isTriggered()) {
 	                        child.isRunning = true;
-	                        System.out.println("[Auto] Starting new child auto event " + child.getClass().getName());
+	                        System.out.println("["+name+"] Starting new child auto event " + child.getClass().getName());
 	                        child.userStart();
 	                    }
 	                    // Call update if the child is running
@@ -130,7 +147,7 @@ public class AutoSequencer {
 	                    if (child.isRunning == true & child.isDone()) {
 	                        child.isRunning = false;
 	                        child.completed = true;
-	                        System.out.println("[Auto] Finished child auto event " + child.getClass().getName());
+	                        System.out.println("["+name+"] Finished child auto event " + child.getClass().getName());
 	                    }
                 	}
 
@@ -148,7 +165,7 @@ public class AutoSequencer {
                 if (globalEventIndex >= events.size()) {
                     // terminal condition. we have no more states to run. Stop running things.
                     activeEvent = null;
-                    System.out.println("[Auto] Finished all events in sequence.");
+                    System.out.println("["+name+"] Finished all events in sequence.");
                     return;
                 } 
                 
@@ -157,7 +174,7 @@ public class AutoSequencer {
             }
             
 	        if(globalUpdateCount % 50 == 0){
-	        	System.out.println("[Auto] Running. timestep = " + Double.toString(globalUpdateCount*0.02) + "s | ActualTime = " + Double.toString(Timer.getFPGATimestamp()));
+	        	System.out.println("["+name+"] Running. timestep = " + Double.toString(globalUpdateCount*0.02) + "s | ActualTime = " + Double.toString(Timer.getFPGATimestamp()));
 	        }
 
         }
@@ -171,7 +188,7 @@ public class AutoSequencer {
      * @param event
      * @return
      */
-    private static boolean allChildrenDone(AutoEvent event) {
+    private  boolean allChildrenDone(AutoEvent event) {
         if (event.childEvents.size() > 0) {
             for (AutoEvent child : event.childEvents) {
             	if(child.isRunning) {
@@ -187,8 +204,8 @@ public class AutoSequencer {
      * Performs all actions required to start an event.
      * @param event
      */
-    private static void startEvent(AutoEvent event) {
-        System.out.println("[Auto] Starting new auto event " + activeEvent.getClass().getName());
+    private  void startEvent(AutoEvent event) {
+        System.out.println("["+name+"] Starting new auto event " + activeEvent.getClass().getName());
         activeEvent.userStart();
     	
         if (event.childEvents.size() > 0) {
@@ -206,7 +223,7 @@ public class AutoSequencer {
      * 
      * @return True if the auto sequencer is executing something, false otherwise
      */
-    public static boolean isRunning() {
+    public boolean isRunning() {
         return activeEvent != null;
     }
 

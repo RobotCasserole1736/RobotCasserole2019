@@ -27,7 +27,7 @@ import frc.lib.AutoSequencer.AutoEvent;
 
 public class Backup extends AutoEvent {
 	
-	Backup() {
+	public Backup() {
         driveBackward = new PathPlannerAutoEvent(waypoints, time, true, 0.2, 0.5, 0.001, 0.9);
     }
 

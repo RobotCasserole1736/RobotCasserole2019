@@ -86,25 +86,25 @@ public class DriverController {
     /** Main update function */
     public void update(){
 
-        if(xb.getBumper(Hand.kRight)){
-            intakePosReq = IntakePos.Extend;
-        } else {
-            intakePosReq = IntakePos.Retract;
-        }
+        //if(xb.getBumper(Hand.kRight)){
+        //    intakePosReq = IntakePos.Extend;
+        //} else {
+        //    intakePosReq = IntakePos.Retract;
+        //}
 
-        if(xb.getTriggerAxis(Hand.kRight) > 0.5){
-            //When pulling a ball in, override the intake to be extended.
-            intakePosReq = IntakePos.Extend;
-            intakeSpdReq = IntakeSpd.Intake;
-        } else if(xb.getTriggerAxis(Hand.kLeft) > 0.5){
-            //Same deal as pulling a ball in
-            intakePosReq = IntakePos.Extend;
-            intakeSpdReq = IntakeSpd.Eject;
-        } else {
-            intakeSpdReq = IntakeSpd.Stop;
-            //If not pressing a trigger or right bumper, override the intake to be retracted
-            intakePosReq = IntakePos.Retract;
-        }
+        //if(xb.getTriggerAxis(Hand.kRight) > 0.5){
+        //    //When pulling a ball in, override the intake to be extended.
+        //    intakePosReq = IntakePos.Extend;
+        //    intakeSpdReq = IntakeSpd.Intake;
+        //} else if(xb.getTriggerAxis(Hand.kLeft) > 0.5){
+        //    //Same deal as pulling a ball in
+        //    intakePosReq = IntakePos.Extend;
+        //    intakeSpdReq = IntakeSpd.Eject;
+        //} else {
+        //    intakeSpdReq = IntakeSpd.Stop;
+        //    //If not pressing a trigger or right bumper, override the intake to be retracted
+        //    intakePosReq = IntakePos.Retract;
+        //}
 
         if(xb.getStartButton()){
             compressorEnableReq = true;

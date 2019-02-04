@@ -1,8 +1,8 @@
 package frc.robot.auto;
 
 import frc.lib.AutoSequencer.AutoEvent;
-import frc.robot.Arm;
-import frc.robot.Superstructure.OpMode;
+import frc.robot.PEZControl;
+import frc.robot.PEZControl.PEZPos;
 
 /*
  *******************************************************************************************
@@ -24,40 +24,36 @@ import frc.robot.Superstructure.OpMode;
  *   if you would consider donating to our club to help further STEM education.
  */
 
-public class MoveArmLowPos extends AutoEvent {
-    
-    OpMode curOpMode;
+public class MoveGripper extends AutoEvent {
 
-	public MoveArmLowPos(OpMode opMode_in) {
-        curOpMode = opMode_in;
+    PEZPos desPos;
+
+	public MoveGripper(PEZPos desPos_in) {
+        desPos = desPos_in;
     }
 
     @Override
     public void userStart() {
-        if(curOpMode == OpMode.Cargo){
-            Arm.getInstance().setPositionCmd(Arm.ArmPos.LowerCargo);
-        } else if(curOpMode == OpMode.Hatch){
-            Arm.getInstance().setPositionCmd(Arm.ArmPos.LowerHatch);
-        }
+        PEZControl.getInstance().setPositionCmd(desPos);
     }
 
     @Override
     public void userUpdate() {
-        
+
     }
 
     @Override
     public void userForceStop() {
-        Arm.getInstance().forceArmStop();
+        //Nothing to do, since this is pneumatics. It is where it is....
     }
 
     @Override
     public boolean isTriggered() {
-        return !Arm.getInstance().atDesiredHeight();
+        return true; //always run right away
     }
 
     @Override
     public boolean isDone() {
-        return Arm.getInstance().atDesiredHeight();
+        return PEZControl.getInstance().isAtDesPos();
     }
 }

@@ -38,7 +38,7 @@ import frc.lib.LoadMon.CasseroleRIOLoadMonitor;
 import frc.lib.WebServer.CasseroleDriverView;
 import frc.lib.WebServer.CasseroleWebServer;
 import frc.lib.Util.CrashTracker;
-import frc.robot.Arm.ArmPosReq;
+import frc.robot.Arm.ArmPos;
 import frc.robot.LEDController.LEDPatterns;
 import frc.robot.PEZControl.GamePiece;
 import frc.robot.auto.AutoSeqDistToTgtEst;
@@ -85,6 +85,7 @@ public class Robot extends TimedRobot {
     FrontUltrasonic frontUltrasonic;
     BackUltrasonic backUltrasonic;
     LineFollower linefollow;
+    Superstructure superstructure;
 
     //Top level telemetry signals
     Signal rioDSSampLoad;
@@ -98,66 +99,76 @@ public class Robot extends TimedRobot {
     JeVoisInterface jevois;
     Autonomous autonomous;
 
+    public Robot() {
+        CrashTracker.logRobotConstruction();
+    }
+
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
      */
     @Override
     public void robotInit() {
-        Thread.currentThread().setPriority(10);
+        try{
+            CrashTracker.logRobotInit();
 
-        /* Init website utilties */
-        webserver = new CasseroleWebServer();
-        wrangler = new CalWrangler();
-        dataServer = CasseroleDataServer.getInstance();
+            Thread.currentThread().setPriority(10);
 
-        /* Init Robot parts */
-        pdp = new PowerDistributionPanel(RobotConstants.POWER_DISTRIBUTION_PANEL_CANID);
-        ledController = LEDController.getInstance();
-        pneumaticsControl = PneumaticsControl.getInstance();
-        jevois = JeVoisInterface.getInstance();
-        arm = Arm.getInstance();
-        drivetrain = Drivetrain.getInstance();
-        climber = Climber.getInstance();
-        intakeControl = IntakeControl.getInstance();
-        pezControl = PEZControl.getInstance();
-        onboardAccel = new BuiltInAccelerometer();
-        frontUltrasonic = FrontUltrasonic.getInstance();
-        backUltrasonic = BackUltrasonic.getInstance();
-        linefollow = LineFollower.getInstance();
+            /* Init website utilties */
+            webserver = new CasseroleWebServer();
+            wrangler = new CalWrangler();
+            dataServer = CasseroleDataServer.getInstance();
 
-        /* Init input from humans */
-        operatorController = OperatorController.getInstance();
-        driverController = DriverController.getInstance();
+            /* Init Robot parts */
+            pdp = new PowerDistributionPanel(RobotConstants.POWER_DISTRIBUTION_PANEL_CANID);
+            ledController = LEDController.getInstance();
+            pneumaticsControl = PneumaticsControl.getInstance();
+            jevois = JeVoisInterface.getInstance();
+            arm = Arm.getInstance();
+            drivetrain = Drivetrain.getInstance();
+            climber = Climber.getInstance();
+            intakeControl = IntakeControl.getInstance();
+            pezControl = PEZControl.getInstance();
+            onboardAccel = new BuiltInAccelerometer();
+            frontUltrasonic = FrontUltrasonic.getInstance();
+            backUltrasonic = BackUltrasonic.getInstance();
+            linefollow = LineFollower.getInstance();
+            superstructure = Superstructure.getInstance();
 
-        /* Init software utilities */
-        loadMon= new CasseroleRIOLoadMonitor();
-        loopTiming = LoopTiming.getInstance();
-        poseCalc = new RobotPose();
-        matchState = MatchState.getInstance();
-        DrivetrainClosedLoopTestVectors.getInstance();
-        AutoSeqDistToTgtEst.getInstance();
-        CrashTracker.logRobotConstruction();
-        CrashTracker.logRobotInit();
-        autonomous = Autonomous.getInstance();
+            /* Init input from humans */
+            operatorController = OperatorController.getInstance();
+            driverController = DriverController.getInstance();
 
-        /* Init local telemetry signals */
-        rioDSSampLoad = new Signal("dataserver stored samples", "count"); 
-        rioCurrDrawLoad = new Signal("overall current draw", "A");
-        rioBattVoltLoad = new Signal("battery voltage", "V");
-        onboardAccelX = new Signal("Onboard Accelerometer X Value", "g");
-        onboardAccelY = new Signal("Onboard Accelerometer Y Value", "g");
-        onboardAccelZ = new Signal("Onboard Accelerometer Z Value", "g");
-        
-        /* Website setup */
-        initDriverView();
+            /* Init software utilities */
+            loadMon= new CasseroleRIOLoadMonitor();
+            loopTiming = LoopTiming.getInstance();
+            poseCalc = new RobotPose();
+            matchState = MatchState.getInstance();
+            DrivetrainClosedLoopTestVectors.getInstance();
+            AutoSeqDistToTgtEst.getInstance();
+            autonomous = Autonomous.getInstance();
 
-        /* Fire up webserver & telemetry dataserver */
-        webserver.startServer();
-        dataServer.startServer();
+            /* Init local telemetry signals */
+            rioDSSampLoad = new Signal("dataserver stored samples", "count"); 
+            rioCurrDrawLoad = new Signal("overall current draw", "A");
+            rioBattVoltLoad = new Signal("battery voltage", "V");
+            onboardAccelX = new Signal("Onboard Accelerometer X Value", "g");
+            onboardAccelY = new Signal("Onboard Accelerometer Y Value", "g");
+            onboardAccelZ = new Signal("Onboard Accelerometer Z Value", "g");
+            
+            /* Website setup */
+            initDriverView();
 
-        /* print the MAC address to the console for debugging */
-        System.out.println("Current MAC address: " + drivetrain.getMACAddr());
+            /* Fire up webserver & telemetry dataserver */
+            webserver.startServer();
+            dataServer.startServer();
+
+            /* print the MAC address to the console for debugging */
+            System.out.println("Current MAC address: " + drivetrain.getMACAddr());
+        } catch(Throwable t) {
+            CrashTracker.logThrowableCrash(t);
+            throw t;
+        }
     }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -173,9 +184,9 @@ public class Robot extends TimedRobot {
             ledController.setPattern(LEDPatterns.Pattern3);
             matchState.SetPeriod(MatchState.Period.OperatorControl);
         } catch(Throwable t) {
-			CrashTracker.logThrowableCrash(t);
-			throw t;
-		}
+            CrashTracker.logThrowableCrash(t);
+            throw t;
+        }
     }
 
     @Override
@@ -187,9 +198,9 @@ public class Robot extends TimedRobot {
             ledController.setPattern(LEDPatterns.Pattern4);
             matchState.SetPeriod(MatchState.Period.Autonomous);
         } catch(Throwable t) {
-			CrashTracker.logThrowableCrash(t);
-			throw t;
-		}
+            CrashTracker.logThrowableCrash(t);
+            throw t;
+        }
     }
 
 
@@ -208,13 +219,18 @@ public class Robot extends TimedRobot {
             /* Sample inputs from humans */
             driverController.update();
             operatorController.update();
+
+
             autonomous.update();
 
             //Operator Controller provides commands to Arm
-            //TODO: AutoSequencer will want to provide more inputs here.
-            arm.setIntakeActualState(intakeControl.getEstimatedPosition());
-            arm.setManualMovementCmd(operatorController.getArmManualPosCmd());
-            arm.setPositionCmd(operatorController.getArmPosReq());
+            //TODO: Superstructure will want to provide more inputs here.
+            //arm.setIntakeActualState(intakeControl.getEstimatedPosition());
+            //arm.setManualMovementCmd(operatorController.getArmManualPosCmd());
+            //arm.setPositionCmd(operatorController.getArmPosReq());
+
+            superstructure.update();
+
             arm.update();
 
             pezControl.update();
@@ -320,10 +336,10 @@ public class Robot extends TimedRobot {
 
             /* Map subsystem IO */
 
-            //Initial Match State - Arm in Lower Position
+            //Initial Match State - Arm Not Moving
             arm.setIntakeActualState(intakeControl.getEstimatedPosition());
             arm.setManualMovementCmd(0);
-            arm.setPositionCmd(ArmPosReq.Lower);
+            arm.setPositionCmd(ArmPos.None);
             arm.update();
 
             pezControl.update();
@@ -359,6 +375,14 @@ public class Robot extends TimedRobot {
 //////////////////////////////////////////////////////////////////////////
 // Utilties
 //////////////////////////////////////////////////////////////////////////
+    final String[] gpOptions =    {GamePiece.Cargo.toString(), GamePiece.Hatch.toString(), GamePiece.Nothing.toString()};
+
+    private void setMatchInitialCommands(){
+        if(CasseroleDriverView.getAutoSelectorVal("Starting Gamepiece") == gpOptions[0]){
+            
+        }
+    }
+
     private void telemetryUpdate(){
         double sampleTimeMs = loopTiming.getLoopStartTimeSec()*1000.0;
 
@@ -383,7 +407,6 @@ public class Robot extends TimedRobot {
      * This function sets up the driver view website
      */
     private void initDriverView(){
-        String[] gpOptions =    {GamePiece.Cargo.toString(), GamePiece.Hatch.toString(), GamePiece.Nothing.toString()};
         CasseroleDriverView.newAutoSelector("Starting Gamepiece", gpOptions);
         CasseroleDriverView.newDial("Main System Pressure", 0, 140, 10, 80, 125);
         CasseroleDriverView.newWebcam("cam1", RobotConstants.CAM_1_STREAM_URL, 0, 0, 0);

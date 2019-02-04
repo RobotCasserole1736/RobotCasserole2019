@@ -2,6 +2,7 @@ package frc.robot.auto;
 
 import frc.lib.AutoSequencer.AutoEvent;
 import frc.robot.Arm;
+import frc.robot.Superstructure.OpMode;
 
 /*
  *******************************************************************************************
@@ -25,13 +26,19 @@ import frc.robot.Arm;
 
 public class MoveArmTopPos extends AutoEvent {
 
-	MoveArmTopPos() {
+    OpMode curOpMode;
 
+	public MoveArmTopPos(OpMode opMode_in) {
+        curOpMode = opMode_in;
     }
 
     @Override
     public void userStart() {
-        Arm.getInstance().setPositionCmd(Arm.ArmPosReq.Top);
+        if(curOpMode == OpMode.Cargo){
+            Arm.getInstance().setPositionCmd(Arm.ArmPos.TopCargo);
+        } else if(curOpMode == OpMode.Hatch){
+            Arm.getInstance().setPositionCmd(Arm.ArmPos.TopHatch);
+        }
     }
 
     @Override

@@ -1,8 +1,7 @@
 package frc.robot.auto;
 
+import edu.wpi.first.wpilibj.Timer;
 import frc.lib.AutoSequencer.AutoEvent;
-import frc.robot.Arm;
-import frc.robot.Superstructure.OpMode;
 
 /*
  *******************************************************************************************
@@ -24,40 +23,45 @@ import frc.robot.Superstructure.OpMode;
  *   if you would consider donating to our club to help further STEM education.
  */
 
-public class MoveArmLowPos extends AutoEvent {
+public class Delay extends AutoEvent {
     
-    OpMode curOpMode;
+    double startTime;
+    
+    double duration;
 
-	public MoveArmLowPos(OpMode opMode_in) {
-        curOpMode = opMode_in;
-    }
+    boolean isDone = false;
 
-    @Override
-    public void userStart() {
-        if(curOpMode == OpMode.Cargo){
-            Arm.getInstance().setPositionCmd(Arm.ArmPos.LowerCargo);
-        } else if(curOpMode == OpMode.Hatch){
-            Arm.getInstance().setPositionCmd(Arm.ArmPos.LowerHatch);
-        }
+    public Delay(double duration_in_sec) {
+        duration = duration_in_sec;
     }
 
     @Override
     public void userUpdate() {
-        
+        if((Timer.getFPGATimestamp() - startTime) > duration){
+            isDone = true;
+        } else {
+            isDone = false;
+        }
     }
 
     @Override
     public void userForceStop() {
-        Arm.getInstance().forceArmStop();
+
     }
 
     @Override
     public boolean isTriggered() {
-        return !Arm.getInstance().atDesiredHeight();
+        return true;
     }
 
     @Override
     public boolean isDone() {
-        return Arm.getInstance().atDesiredHeight();
+        return isDone;
+    }
+
+    @Override
+    public void userStart() {
+        startTime = Timer.getFPGATimestamp();
+        isDone = false;
     }
 }

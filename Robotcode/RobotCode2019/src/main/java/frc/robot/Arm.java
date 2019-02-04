@@ -56,15 +56,13 @@ public class Arm {
 
 
     /////////Sensors\\\\\\\\\
-    AnalogPotentiometer armPot;
-    int potChannel;
     double voltageToDegreeMult;
     double zeroOffset;
     DigitalInput upperLimSwitch;
     DigitalInput lowLimSwitch;
 
     /////////Input Commands\\\\\\\\\\\
-    ArmPosReq posIn;
+    ArmPos posIn;
 
     /////////State Varibles\\\\\\\\\\\\
     double   desAngle;
@@ -77,23 +75,21 @@ public class Arm {
     boolean  intakeExtend = false;
 
     //Arm State Heights\\
-    
-    double topRocket;
-    double midRocket;
-    double lowRocket;
-    double intakeHeight;
-    
-    
-    Calibration topRocketCal;
-    Calibration midRocketCal;
-    Calibration lowRocketCal;
-    Calibration intakeHeightCal;
-    Calibration armUpCal;
-    Calibration armDownCal;
+    Calibration topCargoHeightCal;
+    Calibration midCargoHeightCal;
+    Calibration lowCargoHeightCal;
+    Calibration intakeCargoHeightCal;
+
+    Calibration topHatchHeightCal;
+    Calibration midHatchHeightCal;
+    Calibration lowHatchHeightCal;
+    Calibration intakeHatchHeightCal;
+
+    Calibration intakeDangerZoneUpperHeight; //Lowest height allowable in Hatch Mode
+
     Calibration armAngleOffsetCal;
     Calibration gravOffsetHorz;
     Calibration rampRate;    
-
 
     /////////Limit Switches\\\\\\\\\\
     boolean topOfMotion;
@@ -104,6 +100,7 @@ public class Arm {
     Signal armDesPosSig;
     Signal armActPosSig;
 
+    /////////Physical Mechanism Constants\\\\\\\\\\
     final double MAX_MANUAL_DEG_PER_SEC = 25.0;
     final double ARM_GEAR_RATIO = 150.0/1.0;
     final double REV_ENCODER_TICKS_PER_REV = 42.0;
@@ -120,8 +117,6 @@ public class Arm {
     }
 
     private Arm() {
-        /////Analog Inputs\\\\\\\\
-        armPot = new AnalogPotentiometer(RobotConstants.ARM_POS_SENSOR_PORT, voltageToDegreeMult, zeroOffset);
         /////Movers\\\\\
         armBrake = new Solenoid(RobotConstants.ARM_MECH_BRAKE_SOL_PORT);
         sadey = new CANSparkMax(RobotConstants.ARM_MOTOR_PORT, MotorType.kBrushless);
@@ -159,10 +154,18 @@ public class Arm {
         lowLimSwitch = new DigitalInput(RobotConstants.ARM_LOWER_LIMIT_SWITCH_PORT);
         
         /////Calibration Things\\\\\
-        topRocketCal = new Calibration("Arm Top Level Pos (Deg)", 190);
-        midRocketCal = new Calibration("Arm Mid Level Pos (Deg)", 50);
-        lowRocketCal = new Calibration("Arm Bottom Level Pos (Deg)", 10);
-        intakeHeightCal = new Calibration("Arm Intake Level Pos (Deg)", 0);
+        topCargoHeightCal = new Calibration("Arm Top Cargo Level Pos (Deg)", 180);
+        midCargoHeightCal = new Calibration("Arm Mid Cargo Level Pos (Deg)", 50);
+        lowCargoHeightCal = new Calibration("Arm Bottom Cargo Level Pos (Deg)", 10);
+        intakeCargoHeightCal = new Calibration("Arm Intake Cargo Level Pos (Deg)", 0);
+
+        topHatchHeightCal = new Calibration("Arm Top Hatch Level Pos (Deg)", 190);
+        midHatchHeightCal = new Calibration("Arm Mid Hatch Level Pos (Deg)", 45);
+        lowHatchHeightCal = new Calibration("Arm Bottom Hatch Level Pos (Deg)", 5);
+        intakeHatchHeightCal = new Calibration("Arm Intake Hatch Level Pos (Deg)", 5);
+
+        intakeDangerZoneUpperHeight = new Calibration("Arm Intake Danger Zone Upper Pos (Deg)", 3);
+        
         armAngleOffsetCal = new Calibration("Arm Is Offset From Flat Ground(Deg)", 20);
         gravOffsetHorz = new Calibration("Arm Required Voltage at Horz(Volts)", 0.5);
         rampRate = new Calibration("Arm Spark Ramp Rate (Volts)", 0.3);
@@ -170,12 +173,20 @@ public class Arm {
     } 
     
 
-    public enum ArmPosReq {
-        Top(4), Middle(3), Lower(2), Intake(1), None(0);
+    public enum ArmPos {
+        TopCargo(8), 
+        TopHatch(7), 
+        MiddleCargo(6), 
+        MiddleHatch(5), 
+        LowerCargo(4), 
+        LowerHatch(3), 
+        IntakeCargo(2), 
+        IntakeHatch(1), 
+        None(0);
 
         public final int value;
 
-        private ArmPosReq(int value) {
+        private ArmPos(int value) {
             this.value = value;
         }
                 
@@ -240,31 +251,47 @@ public class Arm {
         prevManMoveCmd = curManMoveCmd;
     }
 
-    public void setPositionCmd(ArmPosReq posIn) {
+    public void setPositionCmd(ArmPos posIn) {
         this.posIn = posIn;
     }
     
     /////Movement Settings\\\\\
     public void defArmPos() {
         switch(posIn) {
-            case Top:
-            desAngle = topRocketCal.get();
+            case TopCargo:
+                desAngle = topCargoHeightCal.get();
             break;
 
-            case Middle:
-            desAngle = midRocketCal.get();
+            case MiddleCargo:
+                desAngle = midCargoHeightCal.get();
             break;
 
-            case Lower:
-            desAngle = lowRocketCal.get();
+            case LowerCargo:
+                desAngle = lowCargoHeightCal.get();
             break;
 
-            case Intake:
-            desAngle = intakeHeightCal.get();
+            case IntakeCargo:
+                desAngle = intakeCargoHeightCal.get();
+            break;
+
+            case TopHatch:
+                desAngle = topHatchHeightCal.get();
+            break;
+
+            case MiddleHatch:
+                desAngle = midHatchHeightCal.get();
+            break;
+
+            case LowerHatch:
+                desAngle = lowHatchHeightCal.get();
+            break;
+
+            case IntakeHatch:
+                desAngle = intakeHatchHeightCal.get();
             break;
 
             case None:
-            // Don't change desiredArmAngle
+                // Don't change desiredArmAngle
             break;
             
         }
@@ -306,6 +333,10 @@ public class Arm {
         return curArmAngle;
     }
 
+    public boolean isAboveDangerZone(){
+        return  (curArmAngle > intakeDangerZoneUpperHeight.get());
+    }
+
     public double getDesiredArmHeight() {
         return desAngle;
     }
@@ -345,7 +376,10 @@ public class Arm {
         double compVolt = cosAngle * gravOffsetHorz.get();
         return(compVolt);
     }
+
     public void forceArmStop() {
-        //TODO
+        setPositionCmd(ArmPos.None);
+        setManualMovementCmd(0.0);
+        desAngle = curArmAngle;
     }
 }
