@@ -96,6 +96,7 @@ public class Superstructure {
             seq.addEvent(new MoveGripper(PEZPos.CargoGrab)); //Move gripper to be cargo grab so it's out of the way of the frame
             seq.addEvent(new MoveArmIntakePos(OpMode.Cargo)); //Lower the arm into the frame
             seq.addEvent(new MoveGripper(PEZPos.Release)); //Return gripper to the neutral position in prep for recieving a ball.
+            seq.start();
 
             seq.update();
 
@@ -112,6 +113,7 @@ public class Superstructure {
             seq.addEvent(new MoveIntake(IntakePos.Retract)); //Pull the intake back within the robot
             seq.addEvent(new MoveArmIntakePos(OpMode.Hatch)); // Move the arm to the hatch intake position in prep for grabbing a hatch
             seq.addEvent(new MoveGripper(PEZPos.Release)); //Move the gripper to the neutral position in prep for grabbing a hatch
+            seq.start();
 
             seq.update();
 
