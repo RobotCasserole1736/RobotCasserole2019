@@ -1,6 +1,7 @@
 package frc.robot;
 
 import frc.lib.AutoSequencer.AutoSequencer;
+import frc.lib.DataServer.Signal;
 import frc.robot.Arm.ArmPos;
 import frc.robot.IntakeControl.IntakePos;
 import frc.robot.IntakeControl.IntakeSpd;
@@ -52,12 +53,20 @@ public class Superstructure {
 
     AutoSequencer seq;
 
+    Signal cmdModeSig;
+    Signal actModeSig;
+    Signal seqStepSig;
+
     public enum OpMode {
-        Hatch(0), Cargo(1), TransitionToCargo(2), TransitionToHatch(3), None(-1);
+        Hatch(0), CargoIntake(1), CargoCarry(2), TransitionToCargoIntake(3), TransitoinToCargoCarry(4), TransitionToHatch(5), None(-1);
         public final int value;
 
         private OpMode(int value) {
             this.value = value;
+        }
+
+        public int toInt(){
+            return this.value;
         }
     }
 
@@ -72,56 +81,139 @@ public class Superstructure {
 
     private Superstructure(){
         actualOpMode = OpMode.None;
+        prevActualOpMode = OpMode.None;
+        cmdOpMode = OpMode.None;
+        prevCmdOpMode = OpMode.None;
         gripper = PEZControl.getInstance();
         opCtrl = OperatorController.getInstance();
         intake = IntakeControl.getInstance();
         arm = Arm.getInstance();
+
+        seq = new AutoSequencer("Default");
+
+        cmdModeSig = new Signal("Superstructure Commanded Mode", "OpMode");
+        actModeSig = new Signal("Superstructure Actual Mode", "OpMode");
+        seqStepSig = new Signal("Superstructure Sequencer Step", "idx");
     }
 
     public void update(){
         prevActualOpMode = actualOpMode;
         prevCmdOpMode = cmdOpMode;
 
-        cmdOpMode = OperatorController.getInstance().getOpMode();
 
-        if(prevCmdOpMode == OpMode.Hatch  && cmdOpMode == OpMode.Cargo){
-            //Start transition from hatch mode to cargo mode.
-            actualOpMode = OpMode.TransitionToCargo;
-            seq = new AutoSequencer("ToCargo");
-            //TODO: Combine the envents which can happen in parallel
-            seq.addEvent(new EjectBall()); //Eject any ball that is presently in the intake
-            seq.addEvent(new MoveGripper(PEZPos.Release)); //Drop any gamepiece we may currently have
-            seq.addEvent(new MoveArmLowPos(OpMode.Cargo)); //Move arm toward intake position
-            seq.addEvent(new MoveIntake(IntakePos.Extend)); //Extend the intake so it's out of the way of the arm
-            seq.addEvent(new MoveGripper(PEZPos.CargoGrab)); //Move gripper to be cargo grab so it's out of the way of the frame
-            seq.addEvent(new MoveArmIntakePos(OpMode.Cargo)); //Lower the arm into the frame
-            seq.addEvent(new MoveGripper(PEZPos.Release)); //Return gripper to the neutral position in prep for recieving a ball.
-            seq.start();
+        ArmPosCmd opArmPosCmd = OperatorController.getInstance().getArmPosReq();
 
-            seq.update();
+        //Determine new Op Mode
+        if(actualOpMode == OpMode.Hatch){
+            if(opArmPosCmd == ArmPosCmd.IntakeCargo){
+                cmdOpMode = OpMode.CargoIntake;
+            } else {
+                //No other operator inputs can change OpMode
+            }
+        } else if(actualOpMode == OpMode.CargoIntake){
+            if(opArmPosCmd == ArmPosCmd.Lower || opArmPosCmd == ArmPosCmd.Middle || opArmPosCmd == ArmPosCmd.Top){
+                cmdOpMode = OpMode.CargoCarry;
+            } else if(opArmPosCmd == ArmPosCmd.IntakeHatch) {
+                cmdOpMode = OpMode.Hatch;
+            } else {
+                //No other operator inputs can change state
+            }
+        } else if(actualOpMode == OpMode.CargoCarry) {
+            if(opArmPosCmd == ArmPosCmd.IntakeCargo){
+                cmdOpMode = OpMode.CargoIntake;
+            } else if (opArmPosCmd == ArmPosCmd.IntakeHatch){
+                cmdOpMode = OpMode.Hatch;
+            }
+        } else {
+            //Ignore operator commands in other op modes.
+        }
 
-        } else if(prevCmdOpMode == OpMode.Cargo  && cmdOpMode == OpMode.Hatch){
-            //Start transition from Cargo mode to Hatch mode.
-            actualOpMode = OpMode.TransitionToHatch;
-            seq = new AutoSequencer("ToHatch");
-            //TODO: Combine the envents which can happen in parallel
-            seq.addEvent(new EjectBall()); //Eject any ball that is presently in the intake
-            seq.addEvent(new MoveGripper(PEZPos.Release)); //Drop any gamepiece we may have
-            seq.addEvent(new Delay(0.2)); //Wait for gamepiece to actually drop.
-            seq.addEvent(new MoveGripper(PEZPos.CargoGrab)); //Move grabber to cargo grab position
-            seq.addEvent(new MoveArmLowPos(OpMode.Hatch)); //Move arm out of the way of the intake
-            seq.addEvent(new MoveIntake(IntakePos.Retract)); //Pull the intake back within the robot
-            seq.addEvent(new MoveArmIntakePos(OpMode.Hatch)); // Move the arm to the hatch intake position in prep for grabbing a hatch
-            seq.addEvent(new MoveGripper(PEZPos.Release)); //Move the gripper to the neutral position in prep for grabbing a hatch
-            seq.start();
 
-            seq.update();
+        //Process Transitions between modes
+        if(prevCmdOpMode == OpMode.Hatch){
+            //Transitions out of OpMode
+            if(cmdOpMode == OpMode.CargoIntake){
+                //Start transition from hatch mode to cargo mode.
+                actualOpMode = OpMode.TransitionToCargoIntake;
+                seq = new AutoSequencer("HatchToCargoIntake");
+                //TODO: Combine the events which can happen in parallel
+                seq.addEvent(new EjectBall()); //Eject any ball that is presently in the intake
+                seq.addEvent(new MoveGripper(PEZPos.Release)); //Drop any gamepiece we may currently have
+                seq.addEvent(new MoveArmLowPos(OpMode.CargoCarry)); //Move arm toward intake position
+                seq.addEvent(new MoveIntake(IntakePos.Extend)); //Extend the intake so it's out of the way of the arm
+                seq.addEvent(new MoveGripper(PEZPos.CargoGrab)); //Move gripper to be cargo grab so it's out of the way of the frame
+                seq.addEvent(new MoveArmIntakePos(OpMode.CargoCarry)); //Lower the arm into the frame
+                seq.addEvent(new MoveGripper(PEZPos.Release)); //Return gripper to the neutral position in prep for recieving a ball.
+                seq.start();
+            } else if(cmdOpMode == OpMode.CargoCarry){
+                //Invalid, this transition should not occurr
+                System.out.println("Error: Superstructure - invalid transition from Hatch to CargoCarry");
+                cmdOpMode = OpMode.Hatch;
+            }
 
-        } else if(actualOpMode == OpMode.TransitionToCargo){
+        } else if(prevCmdOpMode == OpMode.CargoCarry){
+            //Transitions out of CargoCarry
+            if(cmdOpMode == OpMode.Hatch){
+                //Start transition from Cargo Intake mode to Hatch mode.
+                actualOpMode = OpMode.TransitionToHatch;
+                seq = new AutoSequencer("CargoCarryToHatch");
+                //TODO: Combine the envents which can happen in parallel
+                seq.addEvent(new EjectBall()); //Eject any ball that is presently in the intake
+                seq.addEvent(new MoveGripper(PEZPos.Release)); //Drop any gamepiece we may have
+                seq.addEvent(new Delay(0.2)); //Wait for gamepiece to actually drop.
+                seq.addEvent(new MoveGripper(PEZPos.CargoGrab)); //Move grabber to cargo grab position
+                seq.addEvent(new MoveArmLowPos(OpMode.Hatch)); //Move arm out of the way of the intake
+                seq.addEvent(new MoveIntake(IntakePos.Retract)); //Pull the intake back within the robot
+                seq.addEvent(new MoveArmIntakePos(OpMode.Hatch)); // Move the arm to the hatch intake position in prep for grabbing a hatch
+                seq.addEvent(new MoveGripper(PEZPos.Release)); //Move the gripper to the neutral position in prep for grabbing a hatch
+                seq.start();
+            } else if(cmdOpMode == OpMode.CargoIntake){
+                //Start transition from Cargo Intake mode to Cargo Carry.
+                actualOpMode = OpMode.TransitionToHatch;
+                seq = new AutoSequencer("CargoCarryToCargoIntake");
+                //TODO: Combine the envents which can happen in parallel
+                seq.addEvent(new EjectBall()); //Eject any ball that is presently in the intake
+                seq.addEvent(new MoveGripper(PEZPos.Release)); //Drop any gamepiece we may have
+                seq.addEvent(new Delay(0.2)); //Wait for gamepiece to actually drop.
+                seq.addEvent(new MoveGripper(PEZPos.CargoGrab)); //Move grabber to cargo grab position
+                seq.addEvent(new MoveArmLowPos(OpMode.CargoCarry)); //Move arm out of the way of the intake
+                seq.addEvent(new MoveIntake(IntakePos.Extend)); //Pull the intake back within the robot
+                seq.addEvent(new MoveArmIntakePos(OpMode.CargoIntake)); // Move the arm to the hatch intake position in prep for grabbing a hatch
+                seq.addEvent(new MoveGripper(PEZPos.Release)); //Move the gripper to the neutral position in prep for grabbing a hatch
+                seq.start();
+            }
+        } else if(prevCmdOpMode == OpMode.CargoIntake){
+            //Handle transitions out of CargoIntake mode
+            if(cmdOpMode == OpMode.CargoCarry){
+                //Start transition from Cargo Intake mode to Cargo Carry.
+                actualOpMode = OpMode.TransitionToHatch;
+                seq = new AutoSequencer("CargoIntakeToCarryCargo");
+                seq.addEvent(new MoveGripper(PEZPos.CargoGrab)); //Ensure we're grabbing the ball
+                seq.addEvent(new MoveIntake(IntakePos.Ground)); //Put the intake all the way out, out of the way of the the arm and ball as they come up
+                seq.addEvent(new MoveArmLowPos(OpMode.CargoCarry)); //Move arm to the lower position by default.
+                seq.start();
+            } else if(cmdOpMode == OpMode.Hatch) {
+                //Start transition from Cargo Intake mode to Cargo Carry.
+                actualOpMode = OpMode.TransitionToHatch;
+                seq = new AutoSequencer("CargoIntakeToHatch");
+                seq.addEvent(new MoveGripper(PEZPos.CargoGrab)); //Ensure we're grabbing to stay out of the way of the frame as we raise up
+                seq.addEvent(new MoveIntake(IntakePos.Ground)); //Put the intake all the way out, out of the way of the the arm and ball as they come up
+                seq.addEvent(new MoveArmLowPos(OpMode.Hatch)); //Move arm to the lower position by default.
+                seq.addEvent(new MoveIntake(IntakePos.Retract));
+                seq.addEvent(new MoveGripper(PEZPos.Release)); //Drop any gamepiece we may have
+                seq.addEvent(new Delay(0.2)); //Wait for gamepiece to actually drop.
+                seq.start();
+            }
+
+        }
+        
+
+        //Process during-state updates
+        if(actualOpMode == OpMode.TransitionToCargoIntake){
             //Handle actions to take while transitioning to Cargo mode
             seq.update();
             if(seq.isRunning() == false){
-                actualOpMode = OpMode.Cargo;
+                actualOpMode = OpMode.CargoIntake;
             }
 
         } else if(actualOpMode == OpMode.TransitionToHatch){
@@ -131,8 +223,36 @@ public class Superstructure {
                 actualOpMode = OpMode.Hatch;
             }
 
-        } else if(actualOpMode == OpMode.Cargo) {
-            //Handle actions to take while in to Cargo mode
+        } else if(actualOpMode == OpMode.TransitoinToCargoCarry){
+            //Handle actions to take while transitioning to Hatch mode
+            seq.update();
+            if(seq.isRunning() == false){
+                actualOpMode = OpMode.CargoCarry;
+            }
+
+        } else if(actualOpMode == OpMode.CargoIntake) {
+            //Handle actions to take while in to Cargo Intake mode
+
+            //Map grab/release requests to gripper positions
+            //Additionally, autmoatically go to grab when we detect a ball
+            if(opCtrl.getGampieceGrabRequest() || intake.isBallDetected()){
+                gripperPosCmd = PEZPos.CargoGrab;
+            } else if(opCtrl.getGampieceReleaseRequest()){
+                gripperPosCmd = PEZPos.Release;
+            } else {
+                gripperPosCmd = PEZPos.None;
+            }
+            gripper.setPositionCmd(gripperPosCmd);
+
+            //Operator can command intake speed, but position is fixed
+            intake.setSpeedCmd(opCtrl.getIntakeSpdReq());
+            intake.setPositionCmd(IntakePos.Extend);
+
+            //Ignore all arm commands
+
+
+        } else if(actualOpMode == OpMode.CargoCarry) {
+            //Handle actions to take while in to Cargo Intake mode
 
             //Map grab/release requests to gripper positions
             if(opCtrl.getGampieceGrabRequest()){
@@ -144,7 +264,28 @@ public class Superstructure {
             }
             gripper.setPositionCmd(gripperPosCmd);
 
-            //TODO Map relevant operator inputs to commands, or split this into muilple states
+            //Operator can command intake speed, but position is fixed
+            intake.setSpeedCmd(opCtrl.getIntakeSpdReq());
+            intake.setPositionCmd(IntakePos.Ground);
+
+            //Allow all hatch-related arm position commands
+            if(opCtrl.getArmPosReq() == ArmPosCmd.Lower){
+                arm.setPositionCmd(ArmPos.LowerCargo);
+            } else if(opCtrl.getArmPosReq() == ArmPosCmd.Middle){
+                arm.setPositionCmd(ArmPos.MiddleCargo);
+            } else if(opCtrl.getArmPosReq() == ArmPosCmd.Top){
+                arm.setPositionCmd(ArmPos.TopCargo);
+            } else {
+                arm.setPositionCmd(ArmPos.None);
+            }
+
+            //Limit manual motion command if we're on the highway to the danger zone.
+            if(!arm.isAboveDangerZone() && opCtrl.getArmManualPosCmd() < 0.0 ){
+                arm.setManualMovementCmd(0.0);
+            } else {
+                arm.setManualMovementCmd(opCtrl.getArmManualPosCmd());
+            }
+
 
         } else if(actualOpMode == OpMode.Hatch) {
             //Handle actions to take while in to Hatch mode
@@ -164,7 +305,7 @@ public class Superstructure {
             intake.setPositionCmd(IntakePos.Retract);
 
             //Allow all hatch-related arm position commands
-            if(opCtrl.getArmPosReq() == ArmPosCmd.Intake){
+            if(opCtrl.getArmPosReq() == ArmPosCmd.IntakeHatch){
                 arm.setPositionCmd(ArmPos.IntakeHatch);
             } else if(opCtrl.getArmPosReq() == ArmPosCmd.Lower){
                 arm.setPositionCmd(ArmPos.LowerHatch);
@@ -187,6 +328,12 @@ public class Superstructure {
             //Do nothing until some operation mode is commanded.
         }
 
+        /* Update Telemetry */
+        double sample_time_ms = LoopTiming.getInstance().getLoopStartTimeSec()*1000.0;
+        cmdModeSig.addSample(sample_time_ms, cmdOpMode.toInt());
+        actModeSig.addSample(sample_time_ms, actualOpMode.toInt());
+        seqStepSig.addSample(sample_time_ms, seq.getEventIndex());
+
     }
 
     public void setInitialOpMode(OpMode initMode){
@@ -205,6 +352,9 @@ public class Superstructure {
         return gripperPosCmd;
     }
 
+    public String getOpModeString(){
+        return actualOpMode.toString();
+    }
 
 
 

@@ -129,7 +129,7 @@ public class Autonomous {
         boolean autoMoveRequested = OperatorController.getInstance().getAutoMove();
 
         OpMode curOpMode = Superstructure.getInstance().getActualOpMode();
-        boolean opModeIsStable = (curOpMode == OpMode.Cargo || curOpMode == OpMode.Hatch);
+        boolean opModeIsStable = (curOpMode == OpMode.CargoCarry || curOpMode == OpMode.CargoIntake || curOpMode == OpMode.Hatch);
         
         if(autoMoveRequested && !prevAutoMoveRequested && opModeIsStable){
             //Initialize autoMove sequence on rising edge of auto move request from operator, and only if operational mode is not in transistion.
@@ -170,11 +170,12 @@ public class Autonomous {
             seq.start();
         }
 
-        seq.update();
-
-        if(!autoMoveRequested && seq.isRunning()){
-            //Cancel sequence
-            seq.stop();
+        if(seq != null){
+            seq.update();
+            if(!autoMoveRequested && seq.isRunning()){
+                //Cancel sequence
+                seq.stop();
+            }
         }
 
         prevAutoMoveRequested = autoMoveRequested;

@@ -41,6 +41,7 @@ import frc.lib.Util.CrashTracker;
 import frc.robot.Arm.ArmPos;
 import frc.robot.LEDController.LEDPatterns;
 import frc.robot.PEZControl.GamePiece;
+import frc.robot.Superstructure.OpMode;
 import frc.robot.auto.AutoSeqDistToTgtEst;
 import frc.robot.auto.Autonomous;
 
@@ -197,6 +198,12 @@ public class Robot extends TimedRobot {
             dataServer.logger.startLoggingAuto();
             ledController.setPattern(LEDPatterns.Pattern4);
             matchState.SetPeriod(MatchState.Period.Autonomous);
+            if(CasseroleDriverView.getAutoSelectorVal("Starting Gamepiece").compareTo(GamePiece.Cargo.toString()) == 0){
+                superstructure.setInitialOpMode(OpMode.CargoCarry);
+            } else {
+                superstructure.setInitialOpMode(OpMode.Hatch);
+            }
+
         } catch(Throwable t) {
             CrashTracker.logThrowableCrash(t);
             throw t;
@@ -334,6 +341,8 @@ public class Robot extends TimedRobot {
             driverController.update();
             operatorController.update();
 
+            superstructure.update();
+
             /* Map subsystem IO */
 
             //Initial Match State - Arm Not Moving
@@ -401,6 +410,7 @@ public class Robot extends TimedRobot {
         CasseroleDriverView.setBoolean("Vision Camera Offline", !jevois.isVisionOnline());
         CasseroleDriverView.setBoolean("Vision Target Available", jevois.isTgtVisible());
         CasseroleDriverView.setBoolean("Line Seen", linefollow.isEstLinePosAvailable());
+        CasseroleDriverView.setStringBox("Op Mode", superstructure.getOpModeString());
     }
         
     /**
@@ -417,5 +427,6 @@ public class Robot extends TimedRobot {
         CasseroleDriverView.newBoolean("Vision Camera Offline", "red");
         CasseroleDriverView.newBoolean("Vision Target Available", "green");
         CasseroleDriverView.newBoolean("Line Seen", "green");
+        CasseroleDriverView.newStringBox("Op Mode");
     }
 }

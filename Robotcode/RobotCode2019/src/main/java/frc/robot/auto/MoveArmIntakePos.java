@@ -34,10 +34,12 @@ public class MoveArmIntakePos extends AutoEvent {
 
     @Override
     public void userStart() {
-        if(curOpMode == OpMode.Cargo){
+        if(curOpMode == OpMode.CargoIntake){
             Arm.getInstance().setPositionCmd(Arm.ArmPos.IntakeCargo);
         } else if(curOpMode == OpMode.Hatch){
             Arm.getInstance().setPositionCmd(Arm.ArmPos.IntakeHatch);
+        } else {
+            //unsupported OpMode
         }
     }
 

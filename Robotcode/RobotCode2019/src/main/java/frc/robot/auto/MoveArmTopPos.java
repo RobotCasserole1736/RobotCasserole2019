@@ -34,10 +34,12 @@ public class MoveArmTopPos extends AutoEvent {
 
     @Override
     public void userStart() {
-        if(curOpMode == OpMode.Cargo){
+        if(curOpMode == OpMode.CargoCarry){
             Arm.getInstance().setPositionCmd(Arm.ArmPos.TopCargo);
         } else if(curOpMode == OpMode.Hatch){
             Arm.getInstance().setPositionCmd(Arm.ArmPos.TopHatch);
+        } else {
+            //non-supported op mode
         }
     }
 

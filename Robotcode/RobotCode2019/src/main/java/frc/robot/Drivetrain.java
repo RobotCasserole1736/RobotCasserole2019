@@ -61,7 +61,7 @@ public class Drivetrain implements DrivetrainInterface {
         if(System.getProperty("os.name").contains("Windows") || (macStr != ROBOTMAC && forceDriveTrainSim.get() > 0.0001)){
             dTrainIF = new DrivetrainSim(); //TODO make this work on linux laptops
         } else {
-            dTrainIF = new DrivetrainReal();
+            dTrainIF = new DrivetrainSim();
         }
     }
 

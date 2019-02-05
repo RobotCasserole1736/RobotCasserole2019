@@ -34,10 +34,12 @@ public class MoveArmLowPos extends AutoEvent {
 
     @Override
     public void userStart() {
-        if(curOpMode == OpMode.Cargo){
+        if(curOpMode == OpMode.CargoCarry){
             Arm.getInstance().setPositionCmd(Arm.ArmPos.LowerCargo);
         } else if(curOpMode == OpMode.Hatch){
             Arm.getInstance().setPositionCmd(Arm.ArmPos.LowerHatch);
+        } else {
+            //unsupported operational mode
         }
     }
 

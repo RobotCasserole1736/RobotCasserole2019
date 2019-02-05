@@ -47,8 +47,6 @@ public class AutoSequencer {
     String name;
 
 
-
-
     public AutoSequencer(){
         commonConstructor("Auto");
     }
@@ -227,5 +225,12 @@ public class AutoSequencer {
         return activeEvent != null;
     }
 
+    public int getEventIndex(){
+        if(activeEvent != null){
+            return globalEventIndex;
+        } else {
+            return -1;
+        }
+    }
 
 }

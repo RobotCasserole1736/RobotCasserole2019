@@ -34,10 +34,12 @@ public class MoveArmMidPos extends AutoEvent {
 
     @Override
     public void userStart() {
-        if(curOpMode == OpMode.Cargo){
+        if(curOpMode == OpMode.CargoCarry){
             Arm.getInstance().setPositionCmd(Arm.ArmPos.MiddleCargo);
         } else if(curOpMode == OpMode.Hatch){
             Arm.getInstance().setPositionCmd(Arm.ArmPos.MiddleHatch);
+        } else {
+            //Unsupported op mode
         }
     }
 

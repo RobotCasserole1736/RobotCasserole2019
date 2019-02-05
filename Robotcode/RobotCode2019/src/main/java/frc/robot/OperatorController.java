@@ -35,7 +35,6 @@ public class OperatorController {
     XboxController xb;
 
     /* Operator commands state*/
-    OpMode opModeReq;
     boolean releaseReq;
     boolean grabReq;
     ArmPosCmd armPosReq;
@@ -81,8 +80,9 @@ public class OperatorController {
         Top(4),
         Middle(3),
         Lower(2),
-        Intake(1),
-        None(0);
+        IntakeHatch(1),
+        IntakeCargo(0),
+        None(-1);
 
         public final int value;
 
@@ -117,7 +117,6 @@ public class OperatorController {
 
     public void update(){
         //Init requests
-        opModeReq = OpMode.None;
         armPosReq = ArmPosCmd.None;
         autoAlignHighReq = false;
         autoAlignMidReq = false;
@@ -149,11 +148,9 @@ public class OperatorController {
             } else if(povAngle == 180) {
                 armPosReq = ArmPosCmd.Lower;
             } else if(xb.getYButton()) {
-                armPosReq = ArmPosCmd.Intake;
-                opModeReq = OpMode.Hatch;
+                armPosReq = ArmPosCmd.IntakeHatch;
             } else if(xb.getAButton()) {
-                armPosReq = ArmPosCmd.Intake;
-                opModeReq = OpMode.Cargo;
+                armPosReq = ArmPosCmd.IntakeCargo;
             }
         }
 
@@ -191,11 +188,6 @@ public class OperatorController {
         intakePosReqSig.addSample(sample_time_ms, intakePosReq.toInt());
         climberEnableReqSig.addSample(sample_time_ms, climberRelEnable);
         climberReleaseReqSig.addSample(sample_time_ms, climberReleaseReq);
-    }
-
-
-    public OpMode getOpMode() {
-        return this.opModeReq;
     }
 
     public boolean getGampieceGrabRequest() {
