@@ -375,7 +375,12 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
 
     @Override
     public void pidWrite(double output) {
-        gyroLockRotationCmd = output;
+        if(gyro.isOnline()){
+            gyroLockRotationCmd = output;
+        } else {
+            gyroLockRotationCmd = 0; //If gyro is faulted, don't attempt to rotate.
+        }
+
     }
 
     @Override
