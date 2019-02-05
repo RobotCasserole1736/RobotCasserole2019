@@ -78,8 +78,9 @@ public class PEZControl {
         pezRelay = new Relay(RobotConstants.PEZ_RELAY_PORT);
         dController = DriverController.getInstance();
         opController = OperatorController.getInstance();
-        limitSwitch = new DigitalInput(RobotConstants.PEZ_SOLENOID_LIMIT_SWITCH_PORT); // we'll find out real port later ;) //
+        limitSwitch = new DigitalInput(RobotConstants.PEZ_SOLENOID_LIMIT_SWITCH_PORT); 
     }
+
     private boolean getPezSolenoidState(){ 
         boolean  extended = true;
         if (limitSwitch.get() == true){
@@ -93,22 +94,9 @@ public class PEZControl {
     }
 
     public void update() {
-        if(MatchState.getInstance().GetPeriod() == MatchState.Period.OperatorControl ||
-           MatchState.getInstance().GetPeriod() == MatchState.Period.Autonomous){
-            //Update Gripper Control
-            if(opController.getBallPickupReq()){
-                //Cargo Pickup is requested
-                setPositionCmd(PEZPos.CargoGrab);
-            } else if(opController.getHatchPickupReq()){
-                //Hatch Pickup Requested
-                setPositionCmd(PEZPos.HatchGrab);
-            } else if(opController.getReleaseReq()) {
-                setPositionCmd(PEZPos.Release);
-            } else {
-                setPositionCmd(PEZPos.None);
-            }
-        }
-        else{
+
+        if(MatchState.getInstance().GetPeriod() != MatchState.Period.OperatorControl &&
+           MatchState.getInstance().GetPeriod() != MatchState.Period.Autonomous){
             //Update Gripper Control - pull position command from driver view interface.
             String gripStart = CasseroleDriverView.getAutoSelectorVal("Starting Gamepiece");
             if(gripStart.compareTo(GamePiece.Cargo.toString())==0){
@@ -157,5 +145,10 @@ public class PEZControl {
 
     public GamePiece getHeldGamePiece(){
         return curGamePiece;           
+    }
+
+    public boolean isAtDesPos(){
+        //TODO - add logic to determine if the current state of the gripper matches the desired state.
+        return true;
     }
 }

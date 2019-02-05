@@ -55,11 +55,13 @@ public class Drivetrain implements DrivetrainInterface {
     private Drivetrain(){
 
         forceDriveTrainSim  = new Calibration("Force Simulated Drivetrain (>0.0001 forces simulation)", 0.0000);
+
+        setMACAddr();
     
         if(System.getProperty("os.name").contains("Windows") || (macStr != ROBOTMAC && forceDriveTrainSim.get() > 0.0001)){
             dTrainIF = new DrivetrainSim(); //TODO make this work on linux laptops
         } else {
-            dTrainIF = new DrivetrainReal();
+            dTrainIF = new DrivetrainSim();
         }
     }
 
@@ -98,6 +100,10 @@ public class Drivetrain implements DrivetrainInterface {
             //Enumeration<NetworkInterface> netInterfaces = NetworkInterface.getNetworkInterfaces();
             NetworkInterface neti = NetworkInterface.getByName("eth0");
             byte[] mac = neti.getHardwareAddress();
+
+            if(mac == null){ //happens on windows sometimes
+                throw new SocketException();
+            }
 
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < mac.length; i++) {

@@ -1,8 +1,9 @@
 package frc.robot.auto;
 
 import frc.lib.AutoSequencer.AutoEvent;
-import frc.robot.Arm;
-import frc.robot.Superstructure.OpMode;
+import frc.robot.IntakeControl;
+import frc.robot.IntakeControl.IntakePos;
+import frc.robot.IntakeControl.IntakeSpd;
 
 /*
  *******************************************************************************************
@@ -24,42 +25,49 @@ import frc.robot.Superstructure.OpMode;
  *   if you would consider donating to our club to help further STEM education.
  */
 
-public class MoveArmTopPos extends AutoEvent {
+public class EjectBall extends AutoEvent {
 
-    OpMode curOpMode;
 
-	public MoveArmTopPos(OpMode opMode_in) {
-        curOpMode = opMode_in;
+	public EjectBall() {
+
     }
 
     @Override
     public void userStart() {
-        if(curOpMode == OpMode.CargoCarry){
-            Arm.getInstance().setPositionCmd(Arm.ArmPos.TopCargo);
-        } else if(curOpMode == OpMode.Hatch){
-            Arm.getInstance().setPositionCmd(Arm.ArmPos.TopHatch);
-        } else {
-            //non-supported op mode
-        }
+        IntakeControl.getInstance().setPositionCmd(IntakePos.Extend);
+        IntakeControl.getInstance().setSpeedCmd(IntakeSpd.Eject);
     }
 
     @Override
     public void userUpdate() {
-
+        if(IntakeControl.getInstance().isBallDetected()==false){
+            IntakeControl.getInstance().setSpeedCmd(IntakeSpd.Stop);
+        } else {
+            IntakeControl.getInstance().setSpeedCmd(IntakeSpd.Eject);
+        }
     }
 
     @Override
     public void userForceStop() {
-        Arm.getInstance().forceArmStop();
+        IntakeControl.getInstance().forceStop();
     }
 
     @Override
     public boolean isTriggered() {
-        return !Arm.getInstance().atDesiredHeight();
+        return true; //always run right away
     }
 
     @Override
     public boolean isDone() {
-        return Arm.getInstance().atDesiredHeight();    
+        boolean retVal = false;
+
+        if(IntakeControl.getInstance().isBallDetected()==false){
+            IntakeControl.getInstance().setSpeedCmd(IntakeSpd.Stop);
+            retVal = true;
+        } else {
+            retVal = false;
+        }
+
+        return retVal;
     }
 }
