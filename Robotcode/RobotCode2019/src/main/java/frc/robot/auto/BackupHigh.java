@@ -25,10 +25,13 @@ import frc.lib.AutoSequencer.AutoEvent;
  *   if you would consider donating to our club to help further STEM education.
  */
 
-public class Backup extends AutoEvent {
+
+//BackupHigh is almost identical to Backup except for that it goes the opposite direction.
+//False in the PathPlannerAutoEvent sets it to go forwards while true sets it to go in reverse
+public class BackupHigh extends AutoEvent {
 	
-	public Backup() {
-        driveBackward = new PathPlannerAutoEvent(waypoints, time, true, 0.2, 0.5, 0.001, 0.9);
+	BackupHigh() {
+        driveBackward = new PathPlannerAutoEvent(waypoints, time, false, 0.2, 0.5, 0.001, 0.9);
     }
 
     PathPlannerAutoEvent driveBackward;
@@ -66,7 +69,7 @@ public class Backup extends AutoEvent {
 		driveBackward.userStart();
 	}
     public static void main(String[] args) {
-    	Backup autoEvent = new Backup();
+    	BackupHigh autoEvent = new BackupHigh();
 		FalconPathPlanner.plotPath(autoEvent.driveBackward.path);
 	}
 }

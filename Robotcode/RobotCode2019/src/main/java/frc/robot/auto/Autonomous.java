@@ -165,9 +165,13 @@ public class Autonomous {
 
             seq.addEvent(parent);
 
-            seq.addEvent(new Backup());
+            if(OperatorController.getInstance().getAutoAlignHighReq()){
+                parent.addChildEvent(new BackupHigh());
+            }
 
-            seq.start();
+            else {
+                parent.addChildEvent(new Backup());
+            }
         }
 
         if(seq != null){
