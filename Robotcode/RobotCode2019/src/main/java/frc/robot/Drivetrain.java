@@ -42,7 +42,7 @@ public class Drivetrain implements DrivetrainInterface {
     private static Drivetrain dTrain = null;
 
     Calibration forceDriveTrainSim;
-    final String ROBOTMAC = "00-80-2F-17-F5-E5"; /* The MAC address of the robot RoboRIO (test board now)*/
+    final String ROBOTMAC = "00-80-2F-17-F5-E5"; /* The MAC address of the robot RoboRIO */
     private static String macStr = "MACnotInitialized";
     
     public static synchronized Drivetrain getInstance() {
