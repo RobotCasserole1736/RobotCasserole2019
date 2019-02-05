@@ -157,7 +157,13 @@ public class Autonomous {
 
             AutoSequencer.addEvent(parent);
 
-            AutoSequencer.addEvent(new Backup());
+            if(OperatorController.getInstance().getTopLevelPlace()){
+                parent.addChildEvent(new BackupHigh());
+            }
+
+            else {
+                parent.addChildEvent(new Backup());
+            }
         }
 
         if(!currentAutoMoveState && previousAutoMoveState){

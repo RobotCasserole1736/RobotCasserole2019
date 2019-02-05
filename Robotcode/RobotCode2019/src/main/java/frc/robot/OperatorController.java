@@ -142,7 +142,7 @@ public class OperatorController {
         }
 
         autoMove = false;
-        //code for Third level placement. 0 references the top button of the Dpad on the Xbox controller
+        //code for Third (top) level placement. 0 references the top button of the Dpad on the Xbox controller
         if(xb.getPOV() == 0 && xb.getXButton()){
             topLevelPlace = true;
             autoMove = true;
