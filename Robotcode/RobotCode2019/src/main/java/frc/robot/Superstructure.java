@@ -161,11 +161,7 @@ public class Superstructure {
                 seq.addEvent(new EjectBall()); //Eject any ball that is presently in the intake
                 seq.addEvent(new MoveGripper(PEZPos.Release)); //Drop any gamepiece we may have
                 seq.addEvent(new Delay(0.2)); //Wait for gamepiece to actually drop.
-                seq.addEvent(new MoveGripper(PEZPos.CargoGrab)); //Move grabber to cargo grab position
-                seq.addEvent(new MoveArmLowPos(OpMode.Hatch)); //Move arm out of the way of the intake
-                seq.addEvent(new MoveIntake(IntakePos.Retract)); //Pull the intake back within the robot
                 seq.addEvent(new MoveArmIntakePos(OpMode.Hatch)); // Move the arm to the hatch intake position in prep for grabbing a hatch
-                seq.addEvent(new MoveGripper(PEZPos.Release)); //Move the gripper to the neutral position in prep for grabbing a hatch
                 seq.start();
             } else if(cmdOpMode == OpMode.CargoIntake){
                 //Start transition from Cargo Intake mode to Cargo Carry.
@@ -191,6 +187,7 @@ public class Superstructure {
                 seq.addEvent(new MoveGripper(PEZPos.CargoGrab)); //Ensure we're grabbing the ball
                 seq.addEvent(new MoveIntake(IntakePos.Ground)); //Put the intake all the way out, out of the way of the the arm and ball as they come up
                 seq.addEvent(new MoveArmLowPos(OpMode.CargoCarry)); //Move arm to the lower position by default.
+                seq.addEvent(new MoveIntake(IntakePos.Retract)); //Ensure the intake is all the way back in the robot
                 seq.start();
             } else if(cmdOpMode == OpMode.Hatch) {
                 //Start transition from Cargo Intake mode to Cargo Carry.
