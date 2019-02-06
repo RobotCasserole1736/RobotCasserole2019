@@ -227,16 +227,9 @@ public class Robot extends TimedRobot {
             driverController.update();
             operatorController.update();
 
+            superstructure.update();
 
             autonomous.update();
-
-            //Operator Controller provides commands to Arm
-            //TODO: Superstructure will want to provide more inputs here.
-            //arm.setIntakeActualState(intakeControl.getEstimatedPosition());
-            //arm.setManualMovementCmd(operatorController.getArmManualPosCmd());
-            //arm.setPositionCmd(operatorController.getArmPosReq());
-
-            superstructure.update();
 
             arm.update();
 

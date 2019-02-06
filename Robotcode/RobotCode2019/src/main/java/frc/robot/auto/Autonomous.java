@@ -128,18 +128,35 @@ public class Autonomous {
         return false;
     }
 
+    double xTargetOffset = 0;
+    double yTargetOffset = 0;
+    double targetPositionAngle = 0;
+
+
     //Commands called from other parts of the code need to be inputed into the parentheses, I think
     public void update(){
         boolean autoMoveRequested = OperatorController.getInstance().getAutoMove();
 
         OpMode curOpMode = Superstructure.getInstance().getActualOpMode();
         boolean opModeAllowsAuto = (curOpMode == OpMode.CargoCarry || curOpMode == OpMode.Hatch);
+
+        boolean jeVoisHasNewTarget = false; 
         
         if(autoMoveRequested && !prevAutoMoveRequested && opModeAllowsAuto){
             //Initialize autoMove sequence on rising edge of auto move request from operator, and only if operational mode is not in transistion.
-            double xTargetOffset = 0;
-            double yTargetOffset = 0;
-            double targetPositionAngle = 0;
+            xTargetOffset = 0;
+            yTargetOffset = 0;
+            targetPositionAngle = 0;
+
+            JeVoisInterface.getInstance().latchTarget();
+        }
+
+        //TODO - populate the "jevois has target" based on reading the "latch" counter, and comparing at least a few readings to ensure the target visuilization is stable
+        jeVoisHasNewTarget = true; // A silly and bad algorithm. Change me please.
+
+        //TODO - add timeout here to indicate to driver if no new target is found soon
+
+        if(autoMoveRequested && jeVoisHasNewTarget){
 
             if(OperatorController.getInstance().getAutoAlignHighReq()){
                 isForward = false;
@@ -154,8 +171,10 @@ public class Autonomous {
             
             seq = new AutoSequencer("AutoAlign");
 
-            AutoEvent parent = new AutoSeqPathPlan(xTargetOffset, yTargetOffset, targetPositionAngle);
+            AutoEvent parent = new AutoSeqPathPlan(xTargetOffset, yTargetOffset, targetPositionAngle); //TODO - handle the case where the path planner can't create a path based on current angle constraints with "getPathAvailable()"
             seq.addEvent(parent);
+
+
             parent = new AutoSeqFinalAlign();
 
             if(OperatorController.getInstance().getAutoAlignLowReq()){
