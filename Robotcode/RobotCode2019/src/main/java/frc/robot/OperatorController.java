@@ -40,7 +40,6 @@ public class OperatorController {
     ArmPosCmd armPosReq;
     double  armManualPosCmd;
     IntakeSpd intakeSpdReq;
-    IntakePos intakePosReq;
     boolean climberReleaseReq;
     boolean climberRelEnable;
 
@@ -63,7 +62,6 @@ public class OperatorController {
     Signal autoAlignMidReqSig;
     Signal autoAlignLowReqSig;
     Signal intakeSpdReqSig;
-    Signal intakePosReqSig;
     Signal climberEnableReqSig;
     Signal climberReleaseReqSig;
     
@@ -109,7 +107,6 @@ public class OperatorController {
         autoAlignMidReqSig = new Signal("Operator Auto Align Mid Command", "bool");
         autoAlignLowReqSig = new Signal("Operator Auto Align Low Command", "bool");
         intakeSpdReqSig = new Signal("Operator Intake Speed Command", "speed enum");
-        intakePosReqSig = new Signal("Operator Intake Position Command", "pos enum");
         climberEnableReqSig = new Signal("Operator Climber Release Enable Command", "bool");
         climberReleaseReqSig = new Signal("Operator Climber Release Command", "bool");
     }
@@ -156,16 +153,8 @@ public class OperatorController {
 
         armManualPosCmd = Utils.ctrlAxisScale(-1*xb.getY(Hand.kLeft), joystickExpScaleFactor.get(), joystickDeadzone.get());
 
-        if(xb.getBumper(Hand.kRight)){
-            intakePosReq = IntakePos.Extend;
-        } else {
-            intakePosReq = IntakePos.Retract;
-        }
-
         if(xb.getTriggerAxis(Hand.kRight) > 0.5){
             intakeSpdReq = IntakeSpd.Intake;
-            //When pulling a ball in, override the intake to be extended.
-            intakePosReq = IntakePos.Extend;
         } else if(xb.getTriggerAxis(Hand.kLeft) > 0.5){
             intakeSpdReq = IntakeSpd.Eject;
         } else {
@@ -185,7 +174,6 @@ public class OperatorController {
         autoAlignMidReqSig.addSample(sample_time_ms,autoAlignMidReq);
         autoAlignLowReqSig.addSample(sample_time_ms,autoAlignLowReq);
         intakeSpdReqSig.addSample(sample_time_ms, intakeSpdReq.toInt());
-        intakePosReqSig.addSample(sample_time_ms, intakePosReq.toInt());
         climberEnableReqSig.addSample(sample_time_ms, climberRelEnable);
         climberReleaseReqSig.addSample(sample_time_ms, climberReleaseReq);
     }
@@ -220,10 +208,6 @@ public class OperatorController {
 
     public IntakeSpd getIntakeSpdReq() {
         return this.intakeSpdReq;
-    }
-
-    public IntakePos getIntakePosReq() {
-        return this.intakePosReq;
     }
 
     public boolean getAutoMove() {

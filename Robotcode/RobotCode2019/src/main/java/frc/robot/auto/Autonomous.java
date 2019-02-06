@@ -32,10 +32,14 @@ import frc.robot.Superstructure.OpMode;
 public class Autonomous {
     //State Variables
     boolean prevAutoMoveRequested = false;
+    boolean isForward;
 
     private double visionAngle = 0;
 
     AutoSequencer seq;
+
+    AutoSeqDistToTgtEst distEst;
+
 
     // name and "empty" with a variable name
     private static Autonomous empty = null;
@@ -63,7 +67,7 @@ public class Autonomous {
 
     //needs something inside of the parentheses, probably
     private Autonomous() {
-
+        distEst = AutoSeqDistToTgtEst.getInstance();
     }
 
     public void setVisionAngleToTgt(double angle_in) {
@@ -129,13 +133,20 @@ public class Autonomous {
         boolean autoMoveRequested = OperatorController.getInstance().getAutoMove();
 
         OpMode curOpMode = Superstructure.getInstance().getActualOpMode();
-        boolean opModeIsStable = (curOpMode == OpMode.CargoCarry || curOpMode == OpMode.CargoIntake || curOpMode == OpMode.Hatch);
+        boolean opModeAllowsAuto = (curOpMode == OpMode.CargoCarry || curOpMode == OpMode.Hatch);
         
-        if(autoMoveRequested && !prevAutoMoveRequested && opModeIsStable){
+        if(autoMoveRequested && !prevAutoMoveRequested && opModeAllowsAuto){
             //Initialize autoMove sequence on rising edge of auto move request from operator, and only if operational mode is not in transistion.
             double xTargetOffset = 0;
             double yTargetOffset = 0;
             double targetPositionAngle = 0;
+
+            if(OperatorController.getInstance().getAutoAlignHighReq()){
+                isForward = false;
+            } else {
+                isForward = true;
+            }
+
 
             xTargetOffset = JeVoisInterface.getInstance().getTgtPositionX();
             yTargetOffset = JeVoisInterface.getInstance().getTgtPositionY();
@@ -149,27 +160,19 @@ public class Autonomous {
 
             if(OperatorController.getInstance().getAutoAlignLowReq()){
                 parent.addChildEvent(new MoveArmLowPos(curOpMode));
-            }
-
-            else if(OperatorController.getInstance().getAutoAlignMidReq()){
+            } else if(OperatorController.getInstance().getAutoAlignMidReq()){
                 parent.addChildEvent(new MoveArmMidPos(curOpMode));
-            }
-
-            else if(OperatorController.getInstance().getAutoAlignHighReq()){
+            } else if(OperatorController.getInstance().getAutoAlignHighReq()){
                 parent.addChildEvent(new MoveArmTopPos(curOpMode));
-            }
-
-            else {
+            } else {
                 System.out.println("Error invalid Autostate.");
             }
 
             seq.addEvent(parent);
 
-            if(OperatorController.getInstance().getAutoAlignHighReq()){
+            if(isForward){
                 parent.addChildEvent(new BackupHigh());
-            }
-
-            else {
+            } else {
                 parent.addChildEvent(new Backup());
             }
         }
