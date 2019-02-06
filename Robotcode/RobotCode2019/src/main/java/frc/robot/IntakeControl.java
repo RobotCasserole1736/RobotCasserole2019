@@ -24,18 +24,25 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.PWMVictorSPX;
+import edu.wpi.first.wpilibj.AnalogPotentiometer;
+import edu.wpi.first.wpilibj.PIDSource;
 import frc.lib.Calibration.Calibration;
 import frc.lib.DataServer.Signal;
 
-public class IntakeControl {
+public class IntakeControl implements PIDSource{
 
     DigitalInput ballInIntake;
 
     Spark intakeMotor;
+    PWMVictorSPX intakeLeftArmMotor;
+    PWMVictorSPX intakeRightArmMotor;
 
-    Solenoid intakeArmBar;
+    AnalogPotentiometer leftArmPot;
+    AnalogPotentiometer rightArmPot;
+    
     int loopCounter = 0;
-    IntakePos currentPosition = IntakePos.Retract;
+    double currentLeftPosition = 0;
+    double currentRightPosition = 0;
 
     Signal retractStateEstSig;
     Signal retractStateCmdSig;
@@ -45,6 +52,11 @@ public class IntakeControl {
     Calibration intakeSpeed;
     Calibration ejectSpeed;
     Calibration extendTime;
+    Calibration retractAngle;
+    Calibration extendAngle;
+    Calibration groundAngle;
+    Calibration angleRange;
+
 
     DriverController dController;
     OperatorController opController;
@@ -64,9 +76,23 @@ public class IntakeControl {
         intakeSpeed = new Calibration("Intake Intake Speed (motor cmd)", 0.25, 0, 1);
         ejectSpeed = new Calibration("Intake Eject Speed (motor cmd)", 0.25, 0, 1);
         extendTime = new Calibration("Intake Est Extend Time (sec)", 0.500, 0, 5);
+
+        //Properly set calibrations
+        retractAngle = new Calibration("Angle of Retracted State (deg)", 0);
+        extendAngle = new Calibration("Angle of Extended State (deg)", 90);
+        groundAngle = new Calibration("Angle of Ground State (deg)", 115);
+        angleRange = new Calibration("Range of Potentiometer (deg)", 315);
+        
         ballInIntake = new DigitalInput(RobotConstants.BALL_INTAKE_PORT);
         intakeMotor = new Spark(RobotConstants.INTAKE_MOTOR_PORT);
-        intakeArmBar = new Solenoid(RobotConstants.INTAKE_ARM_BAR_PORT);
+        //Change Constants
+        intakeLeftArmMotor = new PWMVictorSPX(RobotConstants.INTAKE_MOTOR_PORT);
+        //Change Constants
+        intakeRightArmMotor = new PWMVictorSPX(RobotConstants.INTAKE_MOTOR_PORT);
+        //Change Constants
+        leftArmPot = new AnalogPotentiometer(RobotConstants.SOMETHING);
+        //Change Constants
+        rightArmPot = new AnalogPotentiometer(RobotConstants.SOMETHING);
 
         dController = DriverController.getInstance();
         opController = OperatorController.getInstance();
@@ -117,6 +143,8 @@ public class IntakeControl {
             intakePosCmd = IntakePos.Retract;
         }else if(posIn == IntakePos.Extend){
             intakePosCmd = IntakePos.Extend;
+        }else if(posIn == IntakePos.Ground){
+            intakePosCmd = IntakePos.Ground;
         }
     }
 
@@ -136,8 +164,19 @@ public class IntakeControl {
     }
 
     public boolean isAtDesPos(){
+        //change those values from 0
+        if(currentLeftPosition==0 && currentRightPosition==0){
+            return true;
+        }else{
+            return false;
+        }
         //TODO: add logic to determine if the intake has reached the commanded position or not.
-        return true;
+        
+    }
+
+    double convertVoltsToDeg(double voltage_in){
+        //DEFINE THE STUFF IN HERE
+        return (voltage_in - LowerLimitVoltage) * (angleRange.get() - LowerLimitDegrees) / (UpperLimitVoltage - LowerLimitVoltage) + LowerLimitDegrees;
     }
 
 
@@ -153,13 +192,30 @@ public class IntakeControl {
 
         //Pneumatic arm bar thingy control
         if(intakePosCmd == IntakePos.Retract){
-            intakeArmBar.set(false);
+            if(currentLeftPosition != retractAngle.get()){
+
+            }
+            if(currentRightPosition != retractAngle.get()){
+                
+            }
+
         }else if(intakePosCmd == IntakePos.Extend){
-            intakeArmBar.set(true);
+            if(currentLeftPosition != extendAngle.get()){
+
+            }
+            if(currentRightPosition != extendAngle.get()){
+                
+            }
+
         }else if(intakePosCmd == IntakePos.Ground){
+            if(currentLeftPosition != groundAngle.get()){
+
+            }
+            if(currentRightPosition != groundAngle.get()){
+                
+            }
             //TODO - handle position on ground
         }else{ //if for some reason it is confused, pick up the intake arm bar thingy
-            intakeArmBar.set(false);
         }
 
         ballDetected = !ballInIntake.get(); //Sensor outputs high for no ball, low for ball 
@@ -179,24 +235,13 @@ public class IntakeControl {
 
         intakeMotor.set(intakeMotorCmd);
 
-        // Calcualte an estimate of current position
-        if(intakePosCmd == IntakePos.Extend){
-            
-            if(loopCounter == 0){
-                currentPosition = IntakePos.Extend; 
-            }
-            else {
-                loopCounter--;
-            }
-        }
-
-        if(intakePosCmd == IntakePos.Retract){
-            loopCounter = (int)Math.floor(extendTime.get()/0.02);
-            currentPosition = IntakePos.Retract;
-        }
+        // Calculate current position
+            currentLeftPosition = convertVoltstoDeg(leftArmPot.get());
+            currentRightPosition = convertVoltstoDeg(rightArmPot.get());
         
         /* Update Telemetry */
         double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
+        //FIX THIS MILES
         retractStateEstSig.addSample(sampleTimeMS, currentPosition.toInt());
         retractStateCmdSig.addSample(sampleTimeMS, intakePosCmd.toInt());
         motorSpeedCmdSig.addSample(sampleTimeMS, intakeMotorCmd);
@@ -204,7 +249,9 @@ public class IntakeControl {
     }
 
     public IntakePos getEstimatedPosition() {
-        return currentPosition;
+        //POTENTIALLY UPDATE THINGS BASED OFF OF THIS AS IT NOW RETURNS TWO THINGS
+        return currentLeftPosition;
+        return currentRightPosition;
     }
 
     public boolean isBallDetected(){
