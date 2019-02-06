@@ -19,12 +19,48 @@ package frc.robot.auto;
  *   if you would consider donating to our club to help further STEM education.
  */
 
+import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.PIDOutput;
+import edu.wpi.first.wpilibj.PIDSource;
+import edu.wpi.first.wpilibj.PIDSourceType;
 import frc.lib.AutoSequencer.AutoEvent;
+import frc.robot.JeVoisInterface;
 
 public class AutoSeqFinalAlign extends AutoEvent {
 
+    private JeVoisInterface camera;
+
+    //most likely will need to change the name. It is just a placeholder.
+    PIDController motorMove;
+
+    double motorRotationCmd;
+    double desiredAngle;
+
+    int angleOffset;
+
+    //(personal note for Aden) Ask Chris how to actually set the motors to the rotation command
     public AutoSeqFinalAlign(){
         //TODO, if any init is needed.
+    }
+
+    public double getJeVoisAngle() {
+		return angleOffset - camera.getTgtAngle();
+    }
+
+    public void pidWrite(double output) {
+        motorRotationCmd = output;
+    }
+
+    public void setPIDSourceType(PIDSourceType pidSource) {
+        
+    }
+
+    public PIDSourceType getPIDSourceType() {
+        return PIDSourceType.kDisplacement;
+    }
+
+    public double pidGet() {
+        return getJeVoisAngle();
     }
 
     @Override
@@ -34,7 +70,7 @@ public class AutoSeqFinalAlign extends AutoEvent {
 
     @Override
     public void userUpdate() {
-
+        
     }
 
     @Override
