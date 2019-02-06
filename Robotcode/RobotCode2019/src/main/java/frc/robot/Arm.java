@@ -91,6 +91,9 @@ public class Arm {
     Calibration gravOffsetHorz;
     Calibration rampRate;    
 
+    Calibration bottomLimitSwitchDegreeCal;
+    Calibration topLimitSwitchDegreeCal;
+
     /////////Limit Switches\\\\\\\\\\
     boolean topOfMotion;
     boolean bottomOfMotion; 
@@ -122,6 +125,7 @@ public class Arm {
         sadey = new CANSparkMax(RobotConstants.ARM_MOTOR_PORT, MotorType.kBrushless);
         sadey.setSmartCurrentLimit(60);
         armEncoder = sadey.getEncoder();
+        armEncoder.setPositionConversionFactor(1/(ARM_GEAR_RATIO*REV_ENCODER_TICKS_PER_REV));
         armPID = sadey.getPIDController();
 
         //Mechanically reversed direction is forward
@@ -169,7 +173,9 @@ public class Arm {
         armAngleOffsetCal = new Calibration("Arm Is Offset From Flat Ground(Deg)", 20);
         gravOffsetHorz = new Calibration("Arm Required Voltage at Horz(Volts)", 0.5);
         rampRate = new Calibration("Arm Spark Ramp Rate (Volts)", 0.3);
-        sadey.setRampRate(rampRate.get());
+        bottomLimitSwitchDegreeCal = new Calibration("Angle at bottom limit switch (deg)", -30);
+        topLimitSwitchDegreeCal = new Calibration("Angle at bottom limit switch (deg)", 110);
+        //sadey.setRampRate(rampRate.get());
     } 
     
 
@@ -195,26 +201,27 @@ public class Arm {
         }
     }
 
-    double convertRotationsToDeg(double rotations_in) {
-        return (rotations_in / REV_ENCODER_TICKS_PER_REV * ARM_GEAR_RATIO);
-    }
-
-    double convertDegToRotations(double degrees_in) {
-        return(degrees_in *REV_ENCODER_TICKS_PER_REV / ARM_GEAR_RATIO);
-    }
+   
 
     public void sampleSensors() {
        topOfMotion = upperLimSwitch.get();
-       topOfMotion = lowLimSwitch.get();
+       bottomOfMotion = lowLimSwitch.get();
+       if (topOfMotion){
+           armEncoder.setPosition(topLimitSwitchDegreeCal.get());
+       } 
+       if (bottomOfMotion){
+           armEncoder.setPosition(bottomLimitSwitchDegreeCal.get());
+       }
+
     }
 
     
     /////Use Sensor Data in Calculations\\\\\
     public void update() {
 
-        curArmAngle = convertRotationsToDeg(-1.0*armEncoder.getPosition());
+        curArmAngle = -1.0*armEncoder.getPosition();
 
-        sadey.setRampRate(rampRate.get());
+        //sadey.setRampRate(rampRate.get());
 
         //TEMP - pretend we are always zeroed until the limit switches are installed.
         isZeroed =true;
@@ -235,7 +242,7 @@ public class Arm {
             }
             else {
                 defArmPos();
-                double desRotation = convertDegToRotations(desAngle);
+                double desRotation = desAngle;
                 double gravComp = gravComp();
                 armPID.setReference(desRotation, ControlType.kPosition, 0, gravComp);
             }
