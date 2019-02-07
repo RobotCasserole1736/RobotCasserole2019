@@ -20,8 +20,6 @@ package frc.robot.auto;
  */
 
 import edu.wpi.first.wpilibj.PIDController;
-import edu.wpi.first.wpilibj.PIDOutput;
-import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.PIDSourceType;
 import frc.lib.AutoSequencer.AutoEvent;
 import frc.robot.JeVoisInterface;
@@ -40,11 +38,16 @@ public class AutoSeqFinalAlign extends AutoEvent {
     int angleOffset;
 
     public AutoSeqFinalAlign(){
-        //TODO, if any init is needed.
+        motorRotationCmd = 0;
+        angleOffset = 0;
     }
 
     public double getJeVoisAngle() {
 		return angleOffset - camera.getTgtAngle();
+    }
+
+    public double pidGet() {
+        return getJeVoisAngle();
     }
 
     public void pidWrite(double output) {
@@ -57,10 +60,6 @@ public class AutoSeqFinalAlign extends AutoEvent {
 
     public PIDSourceType getPIDSourceType() {
         return PIDSourceType.kDisplacement;
-    }
-
-    public double pidGet() {
-        return getJeVoisAngle();
     }
 
     @Override

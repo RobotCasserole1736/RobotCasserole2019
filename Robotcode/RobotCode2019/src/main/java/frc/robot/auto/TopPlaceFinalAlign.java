@@ -20,47 +20,22 @@ package frc.robot.auto;
  */
 
 import edu.wpi.first.wpilibj.PIDController;
-import edu.wpi.first.wpilibj.PIDOutput;
-import edu.wpi.first.wpilibj.PIDSource;
-import edu.wpi.first.wpilibj.PIDSourceType;
 import frc.lib.AutoSequencer.AutoEvent;
-import frc.robot.JeVoisInterface;
+import frc.robot.LineFollower;
 import frc.robot.Drivetrain;
 
 public class TopPlaceFinalAlign extends AutoEvent {
 
-    private JeVoisInterface camera;
-
-    //most likely will need to change the name. It is just a placeholder.
-    PIDController motorMove;
+    private LineFollower lineFollower;
 
     double motorRotationCmd;
-    double desiredAngle;
-
-    int angleOffset;
 
     public TopPlaceFinalAlign(){
-        //TODO, if any init is needed.
+        motorRotationCmd = 0;
     }
 
-    public double getJeVoisAngle() {
-		return angleOffset - camera.getTgtAngle();
-    }
-
-    public void pidWrite(double output) {
-        motorRotationCmd = output;
-    }
-
-    public void setPIDSourceType(PIDSourceType pidSource) {
-        
-    }
-
-    public PIDSourceType getPIDSourceType() {
-        return PIDSourceType.kDisplacement;
-    }
-
-    public double pidGet() {
-        return getJeVoisAngle();
+    public void getLineFollowerAngle() {
+		motorRotationCmd = lineFollower.getRotationCmd();
     }
 
     @Override
@@ -70,6 +45,7 @@ public class TopPlaceFinalAlign extends AutoEvent {
 
     @Override
     public void userUpdate() {
+        getLineFollowerAngle();
         Drivetrain.getInstance().setOpenLoopCmd(-0.2,motorRotationCmd);
     }
 
