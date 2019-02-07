@@ -179,10 +179,13 @@ public class Autonomous {
 
             if(OperatorController.getInstance().getAutoAlignLowReq()){
                 parent.addChildEvent(new MoveArmLowPos(curOpMode));
+                parent.addChildEvent(new MoveGripper(PEZPos.Release));
             } else if(OperatorController.getInstance().getAutoAlignMidReq()){
                 parent.addChildEvent(new MoveArmMidPos(curOpMode));
+                parent.addChildEvent(new MoveGripper(PEZPos.Release));
             } else if(OperatorController.getInstance().getAutoAlignHighReq()){
                 parent.addChildEvent(new MoveArmTopPos(curOpMode));
+                parent.addChildEvent(new MoveGripper(PEZPos.Release));
             } else {
                 System.out.println("Error invalid Autostate.");
             }

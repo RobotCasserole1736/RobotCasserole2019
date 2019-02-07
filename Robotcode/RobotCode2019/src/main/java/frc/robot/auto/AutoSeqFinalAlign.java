@@ -85,7 +85,8 @@ public class AutoSeqFinalAlign extends AutoEvent {
 
     @Override
     public boolean isDone() {
-        return false;
+        // 1/12 is to say 1 inch instead of 1 foot.
+        return AutoSeqDistToTgtEst.getInstance().getEstDistanceFt() < 1/12;
     }
 
 }
