@@ -1,7 +1,9 @@
 package frc.robot.auto;
 
+import edu.wpi.first.wpilibj.Timer;
 import frc.lib.AutoSequencer.AutoEvent;
 import frc.lib.AutoSequencer.AutoSequencer;
+import frc.lib.SignalMath.MathyCircularBuffer;
 import frc.robot.JeVoisInterface;
 import frc.robot.OperatorController;
 import frc.robot.Superstructure;
@@ -40,6 +42,28 @@ public class Autonomous {
 
     AutoSeqDistToTgtEst distEst;
 
+    //Jevois over-sample stuff
+    MathyCircularBuffer tgtXPosBuf;
+    MathyCircularBuffer tgtYPosBuf;
+    MathyCircularBuffer tgtAngleBuf;
+    final int NUM_AVG_JEVOIS_SAMPLES = 3;
+    final double VISION_TIMEOUT_SEC =3.0;
+    long prevFrameCounter = 0;
+    final double MAX_ALLOWABLE_DISTANCE_STANDARD_DEV = 50; //these are probably way too big, but can be tuned down on actual robot.
+    final double MAX_ALLOWABLE_ANGLE_STANDARD_DEV = 100;
+
+    //Blinky auto failed constants
+    final double BLINK_RATE_SEC = 0.25;
+    double nextBlinkTransitionTime = 0;
+    boolean blinkState =false;
+
+    //Jevois & auto startup state
+    int jeVoisSampleCounter = 0;
+    int jeVoisPreLatchCount = 0;
+    boolean stableTargetFound = false;
+    double autoStartTimestamp = 0;
+    boolean autoFailed = false;
+
 
     // name and "empty" with a variable name
     private static Autonomous empty = null;
@@ -68,64 +92,10 @@ public class Autonomous {
     //needs something inside of the parentheses, probably
     private Autonomous() {
         distEst = AutoSeqDistToTgtEst.getInstance();
-    }
 
-    public void setVisionAngleToTgt(double angle_in) {
-
-    }
-
-    public void setVisionTargetTranslation(double x_in, double y_in) {
-
-    }
-
-    public void setVisionTargetSkewAngle(double angle_deg_in) {
-
-    }
-
-    //The type double was placed to remove the error. Replacement may be neccessary.
-    public void setAutoAlignCommand(double cmd_in) {
-
-    }
-
-    public void setFrontDistanceMeas(double distance_ft, boolean dist_avail) {
-
-    }
-
-    public void setRearDistanceMeas(double distance_ft, boolean dist_avail) {
-
-    }
-
-    public void setDrivetrainMeasDist(double right_distance_ft, double left_distance_ft) {
-
-    }
-
-    public ArmPos getArmPosCmd() {
-        return ArmPos.None;
-    }
-
-    public PEZPos getGripperPosCmd(){
-        return PEZPos.None;
-    }
-
-    //The return false statements are just to get rid of errors. Replacement neccessary.
-    public boolean getIntakeExtendLockout(){
-        return false;
-    }
-
-    public boolean getAutoSequencerActive(){
-        return false;
-    }
-
-    public boolean getLeftMotorSpeedCmd_RPM(){
-        return false;
-    }
-
-    public boolean getRightMotorSpeedCmd_RPM(){
-        return false;
-    }
-
-    public boolean getHeadingCmd_deg(){
-        return false;
+        tgtXPosBuf  = new MathyCircularBuffer(NUM_AVG_JEVOIS_SAMPLES);
+        tgtYPosBuf  = new MathyCircularBuffer(NUM_AVG_JEVOIS_SAMPLES);
+        tgtAngleBuf = new MathyCircularBuffer(NUM_AVG_JEVOIS_SAMPLES);
     }
 
     double xTargetOffset = 0;
@@ -139,60 +109,117 @@ public class Autonomous {
 
         OpMode curOpMode = Superstructure.getInstance().getActualOpMode();
         boolean opModeAllowsAuto = (curOpMode == OpMode.CargoCarry || curOpMode == OpMode.Hatch);
+        boolean visionAvailable = JeVoisInterface.getInstance().isTgtVisible() && JeVoisInterface.getInstance().isVisionOnline();
 
-        boolean jeVoisHasNewTarget = false; 
         
-        if(autoMoveRequested && !prevAutoMoveRequested && opModeAllowsAuto){
-            //Initialize autoMove sequence on rising edge of auto move request from operator, and only if operational mode is not in transistion.
-            xTargetOffset = 0;
-            yTargetOffset = 0;
-            targetPositionAngle = 0;
+        if(autoMoveRequested){
 
-            JeVoisInterface.getInstance().latchTarget();
-        }
+            if(!prevAutoMoveRequested){
+                //We got a rising edge on the auto move request
+                
+                if(opModeAllowsAuto && visionAvailable){
+                    //We are in an operational mode where auto align is supported, and have a vison target available.
+                    // We're good to go!
+                    autoStartTimestamp = Timer.getFPGATimestamp();
 
-        //TODO - populate the "jevois has target" based on reading the "latch" counter, and comparing at least a few readings to ensure the target visuilization is stable
-        jeVoisHasNewTarget = true; // A silly and bad algorithm. Change me please.
+                    //Initialize autoMove sequence on rising edge of auto move request from operator, and only if operational mode is not in transistion.
+                    xTargetOffset = 0;
+                    yTargetOffset = 0;
+                    targetPositionAngle = 0;
+                    jeVoisSampleCounter = 0;
+                    autoFailed = false;
+                    tgtXPosBuf.reset();
+                    tgtYPosBuf.reset();
+                    tgtAngleBuf.reset();
 
-        //TODO - add timeout here to indicate to driver if no new target is found soon
+                    jeVoisPreLatchCount = JeVoisInterface.getInstance().getLatchCounter();
+                    stableTargetFound = false;
+                    JeVoisInterface.getInstance().latchTarget();
 
-        if(autoMoveRequested && jeVoisHasNewTarget){
+                } else {
+                    autoFailed = true;
+                }
+            }
 
-            if(OperatorController.getInstance().getAutoAlignHighReq()){
-                isForward = false;
-            } else {
-                isForward = true;
+            if(JeVoisInterface.getInstance().getLatchCounter() > jeVoisPreLatchCount && visionAvailable){
+                //Jevois latched a new target. Start collecting samples
+
+                long frameCounter = JeVoisInterface.getInstance().getFrameRXCount();
+                if(frameCounter != prevFrameCounter){
+                    //A new sample has come in from the vision camera
+                    tgtXPosBuf.pushFront(JeVoisInterface.getInstance().getTgtPositionX());
+                    tgtYPosBuf.pushFront(JeVoisInterface.getInstance().getTgtPositionY());
+                    tgtAngleBuf.pushFront(JeVoisInterface.getInstance().getTgtAngle());
+                    prevFrameCounter = frameCounter;
+                    jeVoisSampleCounter++;
+                }
+
+                if(jeVoisSampleCounter >= NUM_AVG_JEVOIS_SAMPLES){
+                    //We've got enough vision samples to start evaluating if the target is stable
+                    if( (tgtXPosBuf.getStdDev() < MAX_ALLOWABLE_DISTANCE_STANDARD_DEV) &&
+                        (tgtYPosBuf.getStdDev() < MAX_ALLOWABLE_DISTANCE_STANDARD_DEV) &&
+                        (tgtAngleBuf.getStdDev() < MAX_ALLOWABLE_ANGLE_STANDARD_DEV) 
+                      ){
+                        //Target is declared "Stable"
+                        xTargetOffset = tgtXPosBuf.getAverage();
+                        yTargetOffset = tgtYPosBuf.getAverage();
+                        targetPositionAngle = tgtAngleBuf.getAverage();
+                        stableTargetFound = true; 
+                    }
+                }
             }
 
 
-            xTargetOffset = JeVoisInterface.getInstance().getTgtPositionX();
-            yTargetOffset = JeVoisInterface.getInstance().getTgtPositionY();
-            targetPositionAngle = JeVoisInterface.getInstance().getTgtAngle();
-            
-            seq = new AutoSequencer("AutoAlign");
-
-            AutoEvent parent = new AutoSeqPathPlan(xTargetOffset, yTargetOffset, targetPositionAngle); //TODO - handle the case where the path planner can't create a path based on current angle constraints with "getPathAvailable()"
-            seq.addEvent(parent);
-
-
-            parent = new AutoSeqFinalAlign();
-
-            if(OperatorController.getInstance().getAutoAlignLowReq()){
-                parent.addChildEvent(new MoveArmLowPos(curOpMode));
-            } else if(OperatorController.getInstance().getAutoAlignMidReq()){
-                parent.addChildEvent(new MoveArmMidPos(curOpMode));
-            } else if(OperatorController.getInstance().getAutoAlignHighReq()){
-                parent.addChildEvent(new MoveArmTopPos(curOpMode));
-            } else {
-                System.out.println("Error invalid Autostate.");
+            if(!stableTargetFound && Timer.getFPGATimestamp() > (autoStartTimestamp + VISION_TIMEOUT_SEC) ){
+                //took too long to get stable results from the Jevois. Fail.
+                autoFailed = true;
             }
 
-            seq.addEvent(parent);
+            if(stableTargetFound){
 
-            if(isForward){
-                parent.addChildEvent(new BackupHigh());
+                if(OperatorController.getInstance().getAutoAlignHighReq()){
+                    isForward = false;
+                } else {
+                    isForward = true;
+                }
+
+                
+                seq = new AutoSequencer("AutoAlign");
+
+                AutoEvent parent = new AutoSeqPathPlan(xTargetOffset, yTargetOffset, targetPositionAngle); //TODO - handle the case where the path planner can't create a path based on current angle constraints with "getPathAvailable()"
+                seq.addEvent(parent);
+
+
+                parent = new AutoSeqFinalAlign();
+
+                if(OperatorController.getInstance().getAutoAlignLowReq()){
+                    parent.addChildEvent(new MoveArmLowPos(curOpMode));
+                } else if(OperatorController.getInstance().getAutoAlignMidReq()){
+                    parent.addChildEvent(new MoveArmMidPos(curOpMode));
+                } else if(OperatorController.getInstance().getAutoAlignHighReq()){
+                    parent.addChildEvent(new MoveArmTopPos(curOpMode));
+                } else {
+                    System.out.println("Error invalid Autostate.");
+                }
+
+                seq.addEvent(parent);
+
+                if(isForward){
+                    parent.addChildEvent(new BackupHigh());
+                } else {
+                    parent.addChildEvent(new Backup());
+                }
+            }
+
+            if(autoFailed){
+                double curTime = Timer.getFPGATimestamp();
+                //Blink a driver station LED while failed
+                if(curTime >= nextBlinkTransitionTime){
+                    nextBlinkTransitionTime = curTime + BLINK_RATE_SEC;
+                    blinkState = !blinkState;
+                }
             } else {
-                parent.addChildEvent(new Backup());
+                blinkState = false;
             }
         }
 
@@ -206,4 +233,10 @@ public class Autonomous {
 
         prevAutoMoveRequested = autoMoveRequested;
     }
+
+    public boolean getAutoFailedLEDState(){
+        return blinkState;
+    }
 }
+
+

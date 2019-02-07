@@ -64,13 +64,15 @@ public class JeVoisInterface {
     private double  tgtAngle_rad = 0;     //Angle from center that the target appears in the camera. Shows if the robot is pointed at the target, or off to the side.
     private double  tgtXPos_ft = 0;       //Position of the target relative to the robot in Ft
     private double  tgtYPos_ft = 0;       //Position of the target relative to the robot in Ft
-    private double  latchCounter = 0;  //Skew of the target - if it's pointed at the robot, or away from the robot. AKA normal vector away from the wall.
+    private int     latchCounter = 0;  //Skew of the target - if it's pointed at the robot, or away from the robot. AKA normal vector away from the wall.
     private double  tgtTime = 0;          //Estimated to time of image capture (on the scale of Timer.getFPGATimestamp())
     
     // Info about the JeVois performace & status
     private double jeVoisCpuTempC = 0;
     private double jeVoisCpuLoadPct = 0;
     private double jeVoisFramerateFPS = 0;
+
+    private long frameCounter = 0;
 
     private Signal tgtVisibleSig;
     private Signal tgtAngleSig;
@@ -82,6 +84,8 @@ public class JeVoisInterface {
     private Signal jevoisCpuLoadSig;
     private Signal jevoisFramerateSig;
     private Signal jevoisPacketsPerSecSig;
+    private Signal framecounterSig;
+
 
 
     
@@ -117,6 +121,7 @@ public class JeVoisInterface {
         jevoisCpuLoadSig = new Signal("Jevois CPU Load", "pct");
         jevoisFramerateSig = new Signal("Jevois Framerate", "fps");
         jevoisPacketsPerSecSig = new Signal("Jevois Packets Per Sec", "pps");
+        framecounterSig = new Signal("Jevois Frame Count", "count");
         
         //Retry strategy to get this serial port open.
         //I have yet to see a single retry used assuming the camera is plugged in
@@ -241,7 +246,7 @@ public class JeVoisInterface {
     /**
      * Returns the most recently seen target's skew rotation (aka Normal Vector from the wall)
      */
-    public double getLatchCounter() {
+    public int getLatchCounter() {
         return latchCounter;
     }
     
@@ -288,6 +293,14 @@ public class JeVoisInterface {
      */
     public double getJeVoisFramerate_FPS(){
         return jeVoisFramerateFPS;
+    }
+
+    /**
+     * Returns the number of serial packets we've recieved from the JeVois
+     * @return
+     */
+    public long getFrameRXCount(){
+        return frameCounter;
     }
 
     /**
@@ -640,11 +653,12 @@ public class JeVoisInterface {
             tgtAngle_rad    = Double.parseDouble(tokens[ANGLE_TO_TGT_TOKEN_IDX]);
             tgtXPos_ft    = Double.parseDouble(tokens[TGT_X_LOCATION_TOKEN_IDX]);
             tgtYPos_ft    = Double.parseDouble(tokens[TGT_Y_LOCATION_TOKEN_IDX]);
-            latchCounter = Double.parseDouble(tokens[LATCH_COUNTER_TOKEN_IDX]);
+            latchCounter = (int)Math.round(Double.parseDouble(tokens[LATCH_COUNTER_TOKEN_IDX]));
             jeVoisFramerateFPS = Double.parseDouble(tokens[JV_FRMRT_TOKEN_IDX]);
             tgtTime  = rx_Time - Double.parseDouble(tokens[JV_PIPLINE_DELAY_TOKEN_IDX])/1000000.0;
             jeVoisCpuTempC   = Double.parseDouble(tokens[JV_CPUTEMP_TOKEN_IDX]);
             jeVoisCpuLoadPct = Double.parseDouble(tokens[JV_CPULOAD_TOKEN_IDX]);
+            frameCounter++;
 
         } catch (Exception e) {
             DriverStation.reportError("Unhandled exception while parsing Vision packet: " + e.getMessage() + "\n" + e.getStackTrace(), false);
@@ -662,6 +676,7 @@ public class JeVoisInterface {
         jevoisCpuLoadSig.addSample(sample_time_ms, jeVoisCpuLoadPct);
         jevoisFramerateSig.addSample(sample_time_ms, jeVoisFramerateFPS);
         jevoisPacketsPerSecSig.addSample(sample_time_ms, packetRxRatePPS);
+        framecounterSig.addSample(sample_time_ms, frameCounter);
 
         return 0;
     }
