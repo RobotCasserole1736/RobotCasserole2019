@@ -28,9 +28,9 @@ void loop() {
 
   if ((PWMV >= 0) && (PWMV <= 100))
   {
-    strip.show();
+    chase(strip.Color(0, 0, 0)); // Blank
     patternNumber = 0;
-    patternName = "Blank";
+    patternName = "Chase: Blank";
   }
 
   if ((PWMV >= 900) && (PWMV <= 1100))
@@ -78,6 +78,15 @@ void loop() {
   Serial.print("Current PWM Value: ");
   Serial.print(PWMV);
   Serial.println("");
+}
+
+static void chase(uint32_t c) {
+  for(uint16_t i=0; i<strip.numPixels()+4; i++) {
+      strip.setPixelColor(i  , c); // Draw new pixel
+      strip.setPixelColor(i-4, 0); // Erase pixel a few steps back
+      strip.show();
+      delay(25);
+  }
 }
 
 void Fire(int Cooling, int Sparking, int SpeedDelay) {
