@@ -114,9 +114,21 @@ public class RobotPose {
     public double getRobotVelocity_ftpersec(){
         return delta_y_robot_ft/delta_t_sec;
     }
+    
+    
 
+    public void setMeasuredPoseAngle(double poseAngle_in, boolean angleAvailable_in) {
+         angleAvail = angleAvailable_in;
+		 poseAngle   = poseAngle_in ;
+    }
+
+
+		
+    
     public void update() {
 
+        double X_dot = (rightVelosity_FPS+leftVelosity_FPS)/2; 
+        
         updatePoseFromWheelSpeeds();
         handleFieldColission();
 
@@ -205,7 +217,14 @@ public class RobotPose {
             poseX += (FIELD_LEFT_BOUNDARY_FT - robotLeftBounds); //Reset bot within field
             //System.out.println("Colission with Left field boundary");
         }
-    }
+	
+	if (angleAvail){
+		 poseThaddeus = poseAngle;
+	} else {
+		poseThaddeus += 0.02 * robotAngle_DPS;
+	}
+
+
 
     //Utility Math helper functions
     private double cos(double in_deg){
@@ -224,3 +243,4 @@ public class RobotPose {
         return Math.min(in1, Math.min(in2, Math.min(in3, in4)));
     }
 }
+
