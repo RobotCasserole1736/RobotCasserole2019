@@ -19,47 +19,22 @@ package frc.robot.auto;
  *   if you would consider donating to our club to help further STEM education.
  */
 
-import edu.wpi.first.wpilibj.PIDController;
-import edu.wpi.first.wpilibj.PIDSourceType;
 import frc.lib.AutoSequencer.AutoEvent;
-import frc.robot.JeVoisInterface;
+import frc.robot.LineFollower;
 import frc.robot.Drivetrain;
 
-public class AutoSeqFinalAlign extends AutoEvent {
+public class TopPlaceFinalAlign extends AutoEvent {
 
-    private JeVoisInterface camera;
-
-    //most likely will need to change the name. It is just a placeholder.
-    PIDController motorMove;
+    private LineFollower lineFollower;
 
     double motorRotationCmd;
-    double desiredAngle;
 
-    int angleOffset;
-
-    public AutoSeqFinalAlign(){
+    public TopPlaceFinalAlign(){
         motorRotationCmd = 0;
-        angleOffset = 0;
     }
 
-    public double getJeVoisAngle() {
-		return angleOffset - camera.getTgtAngle();
-    }
-
-    public double pidGet() {
-        return getJeVoisAngle();
-    }
-
-    public void pidWrite(double output) {
-        motorRotationCmd = output;
-    }
-
-    public void setPIDSourceType(PIDSourceType pidSource) {
-        
-    }
-
-    public PIDSourceType getPIDSourceType() {
-        return PIDSourceType.kDisplacement;
+    public void getLineFollowerAngle() {
+		motorRotationCmd = lineFollower.getRotationCmd();
     }
 
     @Override
@@ -69,7 +44,8 @@ public class AutoSeqFinalAlign extends AutoEvent {
 
     @Override
     public void userUpdate() {
-        Drivetrain.getInstance().setOpenLoopCmd(0.2,motorRotationCmd);
+        getLineFollowerAngle();
+        Drivetrain.getInstance().setOpenLoopCmd(-0.2,motorRotationCmd);
     }
 
     @Override
