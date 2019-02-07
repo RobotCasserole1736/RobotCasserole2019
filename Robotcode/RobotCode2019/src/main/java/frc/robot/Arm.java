@@ -362,7 +362,7 @@ public class Arm {
      * 
      */
     public void setIntakeActualState(IntakePos state_in) {
-        curIntakePos = IntakeControl.getInstance().getEstimatedPosition();   
+        curIntakePos = IntakeControl.getInstance().getPositionCmd();   
     }
 
     /**

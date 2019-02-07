@@ -339,7 +339,7 @@ public class Robot extends TimedRobot {
             /* Map subsystem IO */
 
             //Initial Match State - Arm Not Moving
-            arm.setIntakeActualState(intakeControl.getEstimatedPosition());
+            arm.setIntakeActualState(intakeControl.getPositionCmd());
             arm.setManualMovementCmd(0);
             arm.setPositionCmd(ArmPos.None);
             arm.update();

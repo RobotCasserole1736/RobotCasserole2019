@@ -23,20 +23,29 @@ package frc.robot;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Spark;
+import edu.wpi.first.wpilibj.PWMVictorSPX;
+import edu.wpi.first.wpilibj.AnalogPotentiometer;
+import edu.wpi.first.wpilibj.PIDSource;
+import edu.wpi.first.wpilibj.PIDSourceType;
 import frc.lib.Calibration.Calibration;
 import frc.lib.DataServer.Signal;
 
-public class IntakeControl {
+public class IntakeControl{
 
     DigitalInput ballInIntake;
 
     Spark intakeMotor;
+    IntakeMotorBase intakeLeftArmMotor;
+    IntakeMotorBase intakeRightArmMotor;
 
-    Solenoid intakeArmBar;
+    AnalogPotentiometer leftArmPot;
+    AnalogPotentiometer rightArmPot;
+    
     int loopCounter = 0;
-    IntakePos currentPosition = IntakePos.Retract;
 
-    Signal retractStateEstSig;
+
+    Signal leftIntakeMotorPosSig;
+    Signal rightIntakeMotorPosSig;
     Signal retractStateCmdSig;
     Signal motorSpeedCmdSig;
     Signal ballInIntakeSig;
@@ -44,6 +53,22 @@ public class IntakeControl {
     Calibration intakeSpeed;
     Calibration ejectSpeed;
     Calibration extendTime;
+    Calibration retractAngle;
+    Calibration extendAngle;
+    Calibration groundAngle;
+    Calibration intakeMotorP;
+    Calibration intakeMotorI;
+    Calibration intakeMotorD;
+    Calibration lowerLeftPotVoltage;
+    Calibration upperLeftPotVoltage;
+    Calibration lowerRightPotVoltage;
+    Calibration upperRightPotVoltage;
+    Calibration minIntakeAngle;
+    Calibration maxIntakeAngle;
+
+    double currentLeftPosition;
+    double currentRightPosition;
+
 
     DriverController dController;
     OperatorController opController;
@@ -63,14 +88,40 @@ public class IntakeControl {
         intakeSpeed = new Calibration("Intake Intake Speed (motor cmd)", 0.25, 0, 1);
         ejectSpeed = new Calibration("Intake Eject Speed (motor cmd)", 0.25, 0, 1);
         extendTime = new Calibration("Intake Est Extend Time (sec)", 0.500, 0, 5);
+        intakeMotorP = new Calibration("Intake Motor P", .01);
+        intakeMotorI = new Calibration("Intake Motor I", 0);
+        intakeMotorD = new Calibration("Intake Motor D", 0);
+        retractAngle = new Calibration("Angle of Retracted State (deg)", 0);
+        extendAngle = new Calibration("Angle of Extended State (deg)", 90);
+        groundAngle = new Calibration("Angle of Ground State (deg)", 115);
+
+        lowerLeftPotVoltage = new Calibration("Lowest Value of Left Potentiometer (vol)", 0, 0, 6);
+        upperLeftPotVoltage = new Calibration("Highest Value of Left Potentiometer (vol)", 5, 0, 6);
+        lowerRightPotVoltage = new Calibration("Lowest Value of Right Potentiometer (vol)", 0, 0, 6);
+        upperRightPotVoltage = new Calibration("Highest Value of Right Potentiometer (vol)", 5, 0, 6);
+        minIntakeAngle = new Calibration("Minimum Angle of Intake (deg)", 0) ;
+        maxIntakeAngle = new Calibration("Minimum Angle of Intake (deg)", 360) ;
+        
         ballInIntake = new DigitalInput(RobotConstants.BALL_INTAKE_PORT);
         intakeMotor = new Spark(RobotConstants.INTAKE_MOTOR_PORT);
-        intakeArmBar = new Solenoid(RobotConstants.INTAKE_ARM_BAR_PORT);
+        //TODO figure out which one is inverted
+        intakeLeftArmMotor = new IntakeMotorBase(intakeMotorP.get(),intakeMotorI.get(),intakeMotorD.get(),RobotConstants.INTAKE_MOTOR_LEFT_PORT,RobotConstants.INTAKE_LEFT_POT_PORT);
+        intakeRightArmMotor = new IntakeMotorBase(intakeMotorP.get(),intakeMotorI.get(),intakeMotorD.get(),RobotConstants.INTAKE_MOTOR_RIGHT_PORT,RobotConstants.INTAKE_RIGHT_POT_PORT);
+        intakeLeftArmMotor.setInverted(true);
+        intakeLeftArmMotor.setLowerLimitVoltage(lowerLeftPotVoltage.get());
+        intakeLeftArmMotor.setUpperLimitVoltage(upperLeftPotVoltage.get());
+        intakeLeftArmMotor.setLowerLimitDegrees(minIntakeAngle.get());
+        intakeLeftArmMotor.setUpperLimitDegrees(maxIntakeAngle.get());
+        intakeRightArmMotor.setLowerLimitVoltage(lowerRightPotVoltage.get());
+        intakeRightArmMotor.setUpperLimitVoltage(upperRightPotVoltage.get());
+        intakeRightArmMotor.setLowerLimitDegrees(minIntakeAngle.get());
+        intakeRightArmMotor.setUpperLimitDegrees(maxIntakeAngle.get());
 
         dController = DriverController.getInstance();
         opController = OperatorController.getInstance();
         arm = Arm.getInstance();
-        retractStateEstSig = new Signal("Intake Estimated Position", "Intake Pos Enum");
+        leftIntakeMotorPosSig = new Signal("Left Intake Motor Position","deg");
+        rightIntakeMotorPosSig = new Signal("Right Intake Motor Position","deg");
         retractStateCmdSig = new Signal("Intake Commanded Position", "Intake Pos Enum");
         motorSpeedCmdSig = new Signal("Intake Motor Command", "cmd");
         ballInIntakeSig = new Signal("Intake Ball Present", "bool");
@@ -78,7 +129,7 @@ public class IntakeControl {
 
     //Intake positions that can be requested
     public enum IntakePos {
-        Extend(0), Retract(1), Ground(2), InTransit(3);
+        Extend(0), Retract(1), Ground(2), Stop(3);
 
         public final int value;
 
@@ -112,36 +163,42 @@ public class IntakeControl {
     private IntakeSpd intakeSpdCmd = IntakeSpd.Stop;
 
     public void setPositionCmd(IntakePos posIn){
-        if(posIn == IntakePos.Retract){
-            intakePosCmd = IntakePos.Retract;
-        }else if(posIn == IntakePos.Extend){
-            intakePosCmd = IntakePos.Extend;
-        }
+        intakePosCmd = posIn;
+    }
+
+    public IntakePos getPositionCmd(){
+        return intakePosCmd;
     }
 
     public void setSpeedCmd(IntakeSpd speedIn){
-        if(speedIn == IntakeSpd.Stop){
-            intakeSpdCmd = IntakeSpd.Stop;
-        }else if(speedIn == IntakeSpd.Intake){
-            intakeSpdCmd = IntakeSpd.Intake;
-        }else if(speedIn == IntakeSpd.Eject){
-            intakeSpdCmd = IntakeSpd.Eject;
-        }
-
+        intakeSpdCmd=speedIn;
     }
 
     public void forceStop(){
-        //TODO - Implement a safety method to stop motors when called
+        intakeLeftArmMotor.stop();
+        intakeRightArmMotor.stop();
+        intakePosCmd=IntakePos.Stop;
+        intakeSpdCmd=IntakeSpd.Stop;
+        intakeMotor.set(0);
     }
 
     public boolean isAtDesPos(){
-        //TODO: add logic to determine if the intake has reached the commanded position or not.
-        return true;
+        if(Math.abs(intakeLeftArmMotor.getCurError())<=2 && Math.abs(intakeRightArmMotor.getCurError())<=2){
+            return true;
+        }else{
+            return false;
+        }
+        
     }
+
 
 
     public void update(){
         double intakeMotorCmd = 0;
+
+        currentLeftPosition= intakeLeftArmMotor.returnPIDInput();
+        currentRightPosition= intakeRightArmMotor.returnPIDInput();
+
 
         if(MatchState.getInstance().GetPeriod() != MatchState.Period.OperatorControl &&
            MatchState.getInstance().GetPeriod() != MatchState.Period.Autonomous) {
@@ -150,16 +207,21 @@ public class IntakeControl {
             setSpeedCmd(IntakeSpd.Stop);
         }
 
-        //Pneumatic arm bar thingy control
-        if(intakePosCmd == IntakePos.Retract){
-            intakeArmBar.set(false);
-        }else if(intakePosCmd == IntakePos.Extend){
-            intakeArmBar.set(true);
-        }else if(intakePosCmd == IntakePos.Ground){
-            //TODO - handle position on ground
-        }else{ //if for some reason it is confused, pick up the intake arm bar thingy
-            intakeArmBar.set(false);
+        //Intake Arm stuffs
+        if(intakePosCmd==IntakePos.Extend){
+            intakeLeftArmMotor.setSetpoint(extendAngle.get());
+            intakeRightArmMotor.setSetpoint(extendAngle.get());
+        }else if(intakePosCmd==IntakePos.Ground){
+            intakeLeftArmMotor.setSetpoint(groundAngle.get());
+            intakeRightArmMotor.setSetpoint(groundAngle.get()); 
+        }else if(intakePosCmd==IntakePos.Retract){
+            intakeLeftArmMotor.setSetpoint(retractAngle.get());
+            intakeRightArmMotor.setSetpoint(retractAngle.get()); 
+        }else{
+            intakeLeftArmMotor.stop();
+            intakeRightArmMotor.stop();
         }
+        
 
         ballDetected = !ballInIntake.get(); //Sensor outputs high for no ball, low for ball 
 
@@ -178,35 +240,26 @@ public class IntakeControl {
 
         intakeMotor.set(intakeMotorCmd);
 
-        // Calcualte an estimate of current position
-        if(intakePosCmd == IntakePos.Extend){
-            
-            if(loopCounter == 0){
-                currentPosition = IntakePos.Extend; 
-            }
-            else {
-                loopCounter--;
-            }
-        }
-
-        if(intakePosCmd == IntakePos.Retract){
-            loopCounter = (int)Math.floor(extendTime.get()/0.02);
-            currentPosition = IntakePos.Retract;
-        }
         
         /* Update Telemetry */
         double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
-        retractStateEstSig.addSample(sampleTimeMS, currentPosition.toInt());
+        leftIntakeMotorPosSig.addSample(sampleTimeMS, currentLeftPosition);
+        rightIntakeMotorPosSig.addSample(sampleTimeMS, currentRightPosition);
         retractStateCmdSig.addSample(sampleTimeMS, intakePosCmd.toInt());
         motorSpeedCmdSig.addSample(sampleTimeMS, intakeMotorCmd);
         ballInIntakeSig.addSample(sampleTimeMS, ballDetected);
     }
 
-    public IntakePos getEstimatedPosition() {
-        return currentPosition;
+    public double getLeftArmPosition() {
+        return currentLeftPosition;
+    }
+
+    public double getRightArmPosition() {
+        return currentRightPosition;
     }
 
     public boolean isBallDetected(){
         return ballDetected;
     }
+
 }
