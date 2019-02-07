@@ -402,6 +402,7 @@ public class Robot extends TimedRobot {
         CasseroleDriverView.setBoolean("Gyro Offline", !drivetrain.isGyroOnline());
         CasseroleDriverView.setBoolean("Vision Camera Offline", !jevois.isVisionOnline());
         CasseroleDriverView.setBoolean("Vision Target Available", jevois.isTgtVisible());
+        CasseroleDriverView.setBoolean("Auto Failed", autonomous.getAutoFailedLEDState());
         CasseroleDriverView.setBoolean("Line Seen", linefollow.isEstLinePosAvailable());
         CasseroleDriverView.setStringBox("Op Mode", superstructure.getOpModeString());
     }
@@ -418,6 +419,7 @@ public class Robot extends TimedRobot {
         CasseroleDriverView.newDial("Arm Angle", -45, 225, 15,  -45, 100);
         CasseroleDriverView.newBoolean("Gyro Offline", "red");
         CasseroleDriverView.newBoolean("Vision Camera Offline", "red");
+        CasseroleDriverView.newBoolean("Auto Failed", "red");
         CasseroleDriverView.newBoolean("Vision Target Available", "green");
         CasseroleDriverView.newBoolean("Line Seen", "green");
         CasseroleDriverView.newStringBox("Op Mode");
