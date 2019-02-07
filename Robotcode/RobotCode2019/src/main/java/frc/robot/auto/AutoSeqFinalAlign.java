@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.PIDSourceType;
 import frc.lib.AutoSequencer.AutoEvent;
 import frc.robot.JeVoisInterface;
+import frc.robot.Drivetrain;
 
 public class AutoSeqFinalAlign extends AutoEvent {
 
@@ -38,7 +39,6 @@ public class AutoSeqFinalAlign extends AutoEvent {
 
     int angleOffset;
 
-    //(personal note for Aden) Ask Chris how to actually set the motors to the rotation command
     public AutoSeqFinalAlign(){
         //TODO, if any init is needed.
     }
@@ -70,7 +70,7 @@ public class AutoSeqFinalAlign extends AutoEvent {
 
     @Override
     public void userUpdate() {
-        
+        Drivetrain.getInstance().setOpenLoopCmd(0.2,motorRotationCmd);
     }
 
     @Override
@@ -80,7 +80,7 @@ public class AutoSeqFinalAlign extends AutoEvent {
 
     @Override
     public boolean isTriggered() {
-        return false;
+        return true;
     }
 
     @Override

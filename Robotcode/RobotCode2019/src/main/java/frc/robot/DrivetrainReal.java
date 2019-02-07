@@ -178,10 +178,10 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
         updateGains(true);
     }
 
-    public void setOpenLoopCmd(double forwardReverseCmd, double rotaionCmd) {
+    public void setOpenLoopCmd(double forwardReverseCmd, double rotationCmd) {
         opModeCmd = DrivetrainOpMode.OpenLoop;
         this.forwardReverseCmd = forwardReverseCmd;
-        this.rotationCmd = rotaionCmd;
+        this.rotationCmd = rotationCmd;
     }
 
     public void setGyroLockCmd(double forwardReverseCmd) {

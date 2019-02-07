@@ -50,8 +50,8 @@ public class Drivetrain implements DrivetrainInterface {
         }
     }
 
-    public void setOpenLoopCmd(double forwardReverseCmd, double rotaionCmd){
-        dTrainIF.setOpenLoopCmd(forwardReverseCmd, rotaionCmd);
+    public void setOpenLoopCmd(double forwardReverseCmd, double rotationCmd){
+        dTrainIF.setOpenLoopCmd(forwardReverseCmd, rotationCmd);
     }
 
     public void setGyroLockCmd(double forwardReverseCmd){
