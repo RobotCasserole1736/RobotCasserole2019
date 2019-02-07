@@ -218,11 +218,12 @@ public class RobotPose {
             //System.out.println("Colission with Left field boundary");
         }
 	
-	if (angleAvail){
-		 poseThaddeus = poseAngle;
-	} else {
-		poseThaddeus += 0.02 * robotAngle_DPS;
-	}
+        if (angleAvail){
+            poseThaddeus = poseAngle;
+        } else {
+            poseThaddeus += 0.02 * robotAngle_DPS;
+        }
+    }
 
 
 
