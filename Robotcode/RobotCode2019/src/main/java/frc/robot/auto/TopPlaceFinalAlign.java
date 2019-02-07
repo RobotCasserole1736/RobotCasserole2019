@@ -19,7 +19,6 @@ package frc.robot.auto;
  *   if you would consider donating to our club to help further STEM education.
  */
 
-import edu.wpi.first.wpilibj.PIDController;
 import frc.lib.AutoSequencer.AutoEvent;
 import frc.robot.LineFollower;
 import frc.robot.Drivetrain;
