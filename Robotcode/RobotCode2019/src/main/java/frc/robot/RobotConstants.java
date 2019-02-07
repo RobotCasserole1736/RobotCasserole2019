@@ -7,7 +7,12 @@ public class RobotConstants {
     // RoboRIO Output Ports
     /////////////////////////////////////////////////////////////////////////////////////
     // PWM Motors
-    public static final int INTAKE_MOTOR_PORT = 1;
+    public static final int INTAKE_MOTOR_PORT =1;
+    public static final int INTAKE_MOTOR_LEFT_PORT = 31;
+    public static final int INTAKE_MOTOR_RIGHT_PORT = 32;
+
+    public static final int INTAKE_LEFT_POT_PORT = 1;
+    public static final int INTAKE_RIGHT_POT_PORT = 1;
 
     /////////////////////////////////////////////////////////////////////////////////////
     // CAN Device ID's
