@@ -28,7 +28,7 @@ public class MoveArmLowPos extends AutoEvent {
     
     OpMode curOpMode;
 
-	public MoveArmLowPos(OpMode opMode_in) {
+    public MoveArmLowPos(OpMode opMode_in) {
         curOpMode = opMode_in;
     }
 

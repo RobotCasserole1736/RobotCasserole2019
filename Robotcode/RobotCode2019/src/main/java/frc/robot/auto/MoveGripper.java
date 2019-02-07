@@ -28,7 +28,7 @@ public class MoveGripper extends AutoEvent {
 
     PEZPos desPos;
 
-	public MoveGripper(PEZPos desPos_in) {
+    public MoveGripper(PEZPos desPos_in) {
         desPos = desPos_in;
     }
 

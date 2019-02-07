@@ -28,7 +28,7 @@ import frc.robot.IntakeControl.IntakeSpd;
 public class EjectBall extends AutoEvent {
 
 
-	public EjectBall() {
+    public EjectBall() {
 
     }
 

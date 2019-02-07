@@ -43,7 +43,7 @@ public class AutoSeqFinalAlign extends AutoEvent {
     }
 
     public double getJeVoisAngle() {
-		return angleOffset - camera.getTgtAngle();
+        return angleOffset - camera.getTgtAngle();
     }
 
     public double pidGet() {

@@ -29,47 +29,47 @@ import frc.lib.AutoSequencer.AutoEvent;
 //BackupHigh is almost identical to Backup except for that it goes the opposite direction.
 //False in the PathPlannerAutoEvent sets it to go forwards while true sets it to go in reverse
 public class BackupHigh extends AutoEvent {
-	
-	BackupHigh() {
+    
+    BackupHigh() {
         driveBackward = new PathPlannerAutoEvent(waypoints, time, false, 0.2, 0.5, 0.001, 0.9);
     }
 
     PathPlannerAutoEvent driveBackward;
 
-	private final double[][] waypoints = new double[][] {
-		{0,0},
-		{0,-8}
-	};
-	
-	private final double time = 1.5;
+    private final double[][] waypoints = new double[][] {
+        {0,0},
+        {0,-8}
+    };
+    
+    private final double time = 1.5;
 
-	@Override
-	public void userUpdate() {
-		driveBackward.userUpdate();
-		// shotCTRL.setDesiredShooterState(ShooterStates.PREP_TO_SHOOT);
-	}
+    @Override
+    public void userUpdate() {
+        driveBackward.userUpdate();
+        // shotCTRL.setDesiredShooterState(ShooterStates.PREP_TO_SHOOT);
+    }
 
-	@Override
-	public void userForceStop() {
-		driveBackward.userForceStop();
-	}
+    @Override
+    public void userForceStop() {
+        driveBackward.userForceStop();
+    }
 
-	@Override
-	public boolean isTriggered() {
-		return driveBackward.isTriggered();
-	}
+    @Override
+    public boolean isTriggered() {
+        return driveBackward.isTriggered();
+    }
 
-	@Override
-	public boolean isDone() {
-		return driveBackward.isDone();
-	}
+    @Override
+    public boolean isDone() {
+        return driveBackward.isDone();
+    }
 
-	@Override
-	public void userStart() {
-		driveBackward.userStart();
-	}
+    @Override
+    public void userStart() {
+        driveBackward.userStart();
+    }
     public static void main(String[] args) {
-    	BackupHigh autoEvent = new BackupHigh();
-		FalconPathPlanner.plotPath(autoEvent.driveBackward.path);
-	}
+        BackupHigh autoEvent = new BackupHigh();
+        FalconPathPlanner.plotPath(autoEvent.driveBackward.path);
+    }
 }

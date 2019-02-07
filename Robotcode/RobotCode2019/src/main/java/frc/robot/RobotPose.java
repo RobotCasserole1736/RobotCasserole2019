@@ -119,11 +119,11 @@ public class RobotPose {
 
     public void setMeasuredPoseAngle(double poseAngle_in, boolean angleAvailable_in) {
          angleAvail = angleAvailable_in;
-		 poseAngle   = poseAngle_in ;
+         poseAngle   = poseAngle_in ;
     }
 
 
-		
+        
     
     public void update() {
 
@@ -217,7 +217,7 @@ public class RobotPose {
             poseX += (FIELD_LEFT_BOUNDARY_FT - robotLeftBounds); //Reset bot within field
             //System.out.println("Colission with Left field boundary");
         }
-	
+    
         if (angleAvail){
             poseThaddeus = poseAngle;
         } else {

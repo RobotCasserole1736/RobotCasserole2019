@@ -40,17 +40,17 @@ public class BackUltrasonic {
     Signal voltageSig;
     Signal distanceAvailableSig;
 
-	// You will want to rename all instances of "BackUltrasonic" with your actual class name and "empty" with a variable name
-	private static BackUltrasonic empty = null;
+    // You will want to rename all instances of "BackUltrasonic" with your actual class name and "empty" with a variable name
+    private static BackUltrasonic empty = null;
 
-	public static synchronized BackUltrasonic getInstance() {
-		if(empty == null)
-			empty = new BackUltrasonic();
-		return empty;
-	}
+    public static synchronized BackUltrasonic getInstance() {
+        if(empty == null)
+            empty = new BackUltrasonic();
+        return empty;
+    }
 
-	// This is the private constructor that will be called once by getInstance() and it should instantiate anything that will be required by the class
-	BackUltrasonic() {
+    // This is the private constructor that will be called once by getInstance() and it should instantiate anything that will be required by the class
+    BackUltrasonic() {
         analogIn = new AnalogInput(3); 
 
         filt = new AveragingFilter(3,0);

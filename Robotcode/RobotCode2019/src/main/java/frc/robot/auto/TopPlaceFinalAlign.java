@@ -34,7 +34,7 @@ public class TopPlaceFinalAlign extends AutoEvent {
     }
 
     public void getLineFollowerAngle() {
-		motorRotationCmd = lineFollower.getRotationCmd();
+        motorRotationCmd = lineFollower.getRotationCmd();
     }
 
     @Override

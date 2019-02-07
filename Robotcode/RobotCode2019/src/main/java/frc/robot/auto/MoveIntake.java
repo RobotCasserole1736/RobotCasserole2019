@@ -29,7 +29,7 @@ public class MoveIntake extends AutoEvent {
 
     IntakePos desPos;
 
-	public MoveIntake(IntakePos desPos_in) {
+    public MoveIntake(IntakePos desPos_in) {
         desPos = desPos_in;
     }
 
