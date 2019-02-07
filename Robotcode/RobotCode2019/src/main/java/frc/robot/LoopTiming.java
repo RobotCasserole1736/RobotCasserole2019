@@ -32,10 +32,12 @@ public class LoopTiming{
     double prevLoopStartTime;
     double prevLoopEndTime;
 
+    double loopPeriodSec;
+
     double loopDelta;
 
-    Signal loopDuration;
-    Signal loopPeriod;
+    Signal loopDurationSig;
+    Signal loopPeriodSig;
 
     /* Singleton stuff */
     private static LoopTiming loopTiming = null;
@@ -46,15 +48,16 @@ public class LoopTiming{
     }
 
     private LoopTiming(){
-        loopDuration = new Signal("Main Loop Process Duration", "sec");
-        loopPeriod = new Signal("Main Loop Call Period", "sec");
+        loopDurationSig = new Signal("Main Loop Process Duration", "sec");
+        loopPeriodSig = new Signal("Main Loop Call Period", "sec");
     }
 
     public void markLoopStart(){
         prevLoopStartTime = loopStartTime;
         loopStartTime = Timer.getFPGATimestamp();
-        loopDuration.addSample(prevLoopStartTime*1000, loopEndTime - prevLoopStartTime);
-        loopPeriod.addSample(loopStartTime*1000, loopStartTime - prevLoopStartTime);
+        loopPeriodSec = loopStartTime - prevLoopStartTime;
+        loopDurationSig.addSample(prevLoopStartTime*1000, loopEndTime - prevLoopStartTime);
+        loopPeriodSig.addSample(loopStartTime*1000, loopPeriodSec);
     }
 
     public void markLoopEnd(){
@@ -64,5 +67,9 @@ public class LoopTiming{
 
     public double getLoopStartTimeSec(){
         return loopStartTime;
+    }
+
+    public double getPeriodSec(){
+        return loopPeriodSec;
     }
 }

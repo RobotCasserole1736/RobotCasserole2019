@@ -33,7 +33,7 @@ public class IntakeControl {
     Spark intakeMotor;
 
     Solenoid intakeArmBar;
-    Integer loopCounter;
+    int loopCounter = 0;
     IntakePos currentPosition = IntakePos.Retract;
 
     Signal retractStateEstSig;
@@ -48,6 +48,8 @@ public class IntakeControl {
     DriverController dController;
     OperatorController opController;
     Arm arm;
+
+    boolean ballDetected = false;
 
     private static IntakeControl iControl = null;
 
@@ -76,7 +78,7 @@ public class IntakeControl {
 
     //Intake positions that can be requested
     public enum IntakePos {
-        Extend(0), Retract(1);
+        Extend(0), Retract(1), Ground(2), InTransit(3);
 
         public final int value;
 
@@ -128,33 +130,21 @@ public class IntakeControl {
 
     }
 
+    public void forceStop(){
+        //TODO - Implement a safety method to stop motors when called
+    }
+
+    public boolean isAtDesPos(){
+        //TODO: add logic to determine if the intake has reached the commanded position or not.
+        return true;
+    }
+
+
     public void update(){
         double intakeMotorCmd = 0;
-        boolean ballDetected = false;
 
-        if(MatchState.getInstance().GetPeriod() == MatchState.Period.OperatorControl ||
-           MatchState.getInstance().GetPeriod() == MatchState.Period.Autonomous) {
-            //Arbitrate Intake commands from driver and operator and arm
-            if(dController.getIntakePosReq() == IntakePos.Extend || 
-            opController.getIntakePosReq() == IntakePos.Extend || 
-            arm.intakeExtendOverride() == true) {
-                setPositionCmd(IntakePos.Extend);
-            } else {
-                setPositionCmd(IntakePos.Retract);
-            }
-
-            if(dController.getIntakeSpdReq() == IntakeSpd.Eject ||
-            opController.getIntakeSpdReq() == IntakeSpd.Eject ){
-                setSpeedCmd(IntakeSpd.Eject);
-            } else if(dController.getIntakeSpdReq() == IntakeSpd.Intake ||
-                    opController.getIntakeSpdReq() == IntakeSpd.Intake ){
-                setSpeedCmd(IntakeSpd.Intake);
-            } else {
-                setSpeedCmd(IntakeSpd.Stop);
-            }
-        }
-        else
-        {
+        if(MatchState.getInstance().GetPeriod() != MatchState.Period.OperatorControl &&
+           MatchState.getInstance().GetPeriod() != MatchState.Period.Autonomous) {
             //Start intake within frame perimiter and in safe state
             setPositionCmd(IntakePos.Retract);
             setSpeedCmd(IntakeSpd.Stop);
@@ -165,6 +155,8 @@ public class IntakeControl {
             intakeArmBar.set(false);
         }else if(intakePosCmd == IntakePos.Extend){
             intakeArmBar.set(true);
+        }else if(intakePosCmd == IntakePos.Ground){
+            //TODO - handle position on ground
         }else{ //if for some reason it is confused, pick up the intake arm bar thingy
             intakeArmBar.set(false);
         }
@@ -212,5 +204,9 @@ public class IntakeControl {
 
     public IntakePos getEstimatedPosition() {
         return currentPosition;
+    }
+
+    public boolean isBallDetected(){
+        return ballDetected;
     }
 }

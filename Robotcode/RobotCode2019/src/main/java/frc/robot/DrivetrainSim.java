@@ -1,6 +1,6 @@
 package frc.robot;
 
-import com.ctre.phoenix.motorcontrol.InvertType;
+import frc.lib.DataServer.Signal;
 
 /*
  *******************************************************************************************
@@ -25,44 +25,125 @@ import com.ctre.phoenix.motorcontrol.InvertType;
 
 public class DrivetrainSim implements DrivetrainInterface {
 
-    public DrivetrainSim() {
+    DrivetrainOpMode opModeCmd;
+    DrivetrainOpMode opMode;
+    DrivetrainOpMode prevOpMode;
 
+    public double DesRightRPM;
+    public double DesLeftRPM;
+    public double ActRightRPM;
+    public double ActLeftRPM;
+
+    Signal ActualRightSimRPM;
+    Signal ActualLeftSimRPM;
+
+    final double DT_MAX_SPEED_FT_PER_SEC = 15.0;
+    final double DT_MAX_ACCEL_FT_PER_SEC_PER_SEC = 8.0;
+
+
+    public DrivetrainSim() {
+        ActualRightSimRPM = new Signal("Drivetrain Sim Right Speed", "RPM");
+        ActualLeftSimRPM = new Signal("Drivetrain Sim Left Speed", "RPM");
     }
 
-    public void setOpenLoopCmd(double forwardReverseCmd, double rotaionCmd) {
-        //TODO
+    public void setOpenLoopCmd(double forwardReverseCmd, double rotationCmd) {
+        opModeCmd = DrivetrainOpMode.OpenLoop;
+
+        double motorSpeedLeftCMD = Utils.capMotorCmd(forwardReverseCmd + rotationCmd);
+        double motorSpeedRightCMD = Utils.capMotorCmd(forwardReverseCmd - rotationCmd);
+
+        DesLeftRPM = Utils.FT_PER_SEC_TO_RPM(DT_MAX_SPEED_FT_PER_SEC)*motorSpeedLeftCMD;
+        DesRightRPM = Utils.FT_PER_SEC_TO_RPM(DT_MAX_SPEED_FT_PER_SEC)*motorSpeedRightCMD;
     }
 
     public boolean isGyroOnline(){
-        return true;
+        return false;
     }
 
     public void setGyroLockCmd(double forwardReverseCmd) {
-        //TODO
+        opModeCmd = DrivetrainOpMode.GyroLock;
     }
 
     public void update() {
-        //TODO
+
+        prevOpMode = opMode;
+        opMode = opModeCmd;
+
+        if(opModeCmd == DrivetrainOpMode.ClosedLoop || opModeCmd == DrivetrainOpMode.ClosedLoopWithGyro){
+            //Asssume perfect drivetrain closed loop.
+            ActLeftRPM = DesLeftRPM;
+            ActRightRPM = DesRightRPM;
+        } else if (opModeCmd == DrivetrainOpMode.OpenLoop){
+
+            ActLeftRPM = simMotor(ActLeftRPM, DesLeftRPM);
+            ActRightRPM = simMotor(ActRightRPM, DesRightRPM);
+
+        }
+
+        double sampleTimeMs = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
+
+        ActualLeftSimRPM.addSample(sampleTimeMs, getLeftWheelSpeedRPM());
+        ActualRightSimRPM.addSample(sampleTimeMs, getRightWheelSpeedRPM());
     }
 
     public double getLeftWheelSpeedRPM() {
-        return 0; //TODO
+        return ActLeftRPM;
     }
 
     public double getRightWheelSpeedRPM() {
-        return 0; //TODO
-    }
+        return ActRightRPM;
+    } 
 
     public void updateGains(boolean force) {
+        //TODO
+    }
+
+    public void setClosedLoopSpeedCmd(double leftCmdRPM, double rightCmdRPM, double headingCmdDeg) {
+        opModeCmd = DrivetrainOpMode.ClosedLoopWithGyro;
+        DesRightRPM = rightCmdRPM;
+        DesLeftRPM = leftCmdRPM;
     }
 
     @Override
     public void setClosedLoopSpeedCmd(double leftCmdRPM, double rightCmdRPM) {
+        opModeCmd = DrivetrainOpMode.ClosedLoop;
+        DesRightRPM = rightCmdRPM;
+        DesLeftRPM = leftCmdRPM;
+    }
+
+    /* A crude aproximation of how a motor behaves */
+    private double simMotor(double actSpeedRPM, double desSpeedRPM){
+
+        double spdDelta = Utils.FT_PER_SEC_TO_RPM( DT_MAX_ACCEL_FT_PER_SEC_PER_SEC * 0.02);
+        double maxSpd = Utils.FT_PER_SEC_TO_RPM(DT_MAX_SPEED_FT_PER_SEC);
+
+        double delta = actSpeedRPM - desSpeedRPM ;
+
+        if(Math.abs(desSpeedRPM) < 10){
+            actSpeedRPM *= 0.90; // Frictional constant
+        } else {
+            actSpeedRPM *= 0.98; // Frictional constant
+        }
+
+
+        if(delta < spdDelta){
+            actSpeedRPM += spdDelta;
+        } else if (delta > spdDelta){
+            actSpeedRPM -= spdDelta;
+        } else {
+            //keep current speed
+        }
+
+        //Cap at absolute min/max
+        if(actSpeedRPM > maxSpd){
+            actSpeedRPM = maxSpd;
+        } else if(actSpeedRPM < -1.0*maxSpd) {
+            actSpeedRPM = -1.0*maxSpd;
+        }
+
+        return actSpeedRPM;
+
 
     }
 
-    @Override
-    public void setClosedLoopSpeedCmd(double leftCmdRPM, double rightCmdRPM, double headingCmdDeg) {
-
-    }
 }

@@ -3,6 +3,8 @@ package frc.robot.auto;
 import java.util.ArrayList;
 import frc.lib.AutoSequencer.AutoEvent;
 import frc.lib.PathPlanner.FalconPathPlanner;
+import frc.robot.RobotConstants;
+import frc.robot.Utils;
 import frc.robot.JeVoisInterface;
 
 /*
@@ -26,9 +28,6 @@ import frc.robot.JeVoisInterface;
  */
 
 public class AutoSeqPathPlan extends AutoEvent {
-
-    final double PLANNER_SAMPLE_RATE_S = 0.02; // 20ms update rate
-    final double ROBOT_TRACK_WIDTH_FT = 3.5; // 3.5 ft effective track width
 
     public ArrayList<double[]> waypoints;
 
@@ -82,10 +81,14 @@ public class AutoSeqPathPlan extends AutoEvent {
         System.out.println("Waypoint4 X = " + wayPoint4[0]);
         System.out.println("Waypoint4 Y = " + wayPoint4[1]);
 
-        //TODO add more waypoints based on the final location rquested
-
         path = new FalconPathPlanner(waypoints.toArray(new double[waypoints.size()][2]));
-        path.calculate(pathDurationSec, PLANNER_SAMPLE_RATE_S, ROBOT_TRACK_WIDTH_FT);
+        path.setPathBeta(0.2);
+        path.setPathAlpha(0.5);
+        path.setVelocityAlpha(0.001);
+        path.setVelocityBeta(0.9);
+        path.calculate(pathDurationSec, RobotConstants.MAIN_LOOP_SAMPLE_RATE_S, RobotConstants.ROBOT_TRACK_WIDTH_FT);
+
+
 
     }
 
@@ -108,15 +111,14 @@ public class AutoSeqPathPlan extends AutoEvent {
      * Return the left motor speed command at the specified time (in sec)
      */
     public double getLeftSpeedCmdRPM(double time_sec){
-        int timestep = (int)Math.floor(time_sec/PLANNER_SAMPLE_RATE_S);
+        int timestep = (int)Math.floor(time_sec/RobotConstants.MAIN_LOOP_SAMPLE_RATE_S);
         double cmdSpeed = 0;
 
         if(timestep < path.smoothLeftVelocity.length){
-            cmdSpeed = path.smoothLeftVelocity[timestep][1];
+            cmdSpeed = Utils.FT_PER_SEC_TO_RPM(path.smoothLeftVelocity[timestep][1]);
         } 
 
-        //TODO Convert ft/sec to RPM
-        return 0;
+        return cmdSpeed;
     }
 
 
@@ -124,15 +126,14 @@ public class AutoSeqPathPlan extends AutoEvent {
      * Return the right motor speed command at the specified time (in sec)
      */
     public double getRightSpeedCmdRPM(double time_sec){
-        int timestep = (int)Math.floor(time_sec/PLANNER_SAMPLE_RATE_S);
+        int timestep = (int)Math.floor(time_sec/RobotConstants.MAIN_LOOP_SAMPLE_RATE_S);
         double cmdSpeed = 0;
 
         if(timestep < path.smoothRightVelocity.length){
-            cmdSpeed = path.smoothRightVelocity[timestep][1];
+            cmdSpeed = Utils.FT_PER_SEC_TO_RPM(path.smoothRightVelocity[timestep][1]);
         } 
 
-        //TODO Convert ft/sec to RPM
-        return 0;
+        return cmdSpeed;
     }
 
 
@@ -140,7 +141,7 @@ public class AutoSeqPathPlan extends AutoEvent {
      * Return the heading command, relative to how the gyro returns angles, at the specified time (in sec)
      */
     public double getHeadingCmdRPM(double time_sec){
-        int timestep = (int)Math.floor(time_sec/PLANNER_SAMPLE_RATE_S);
+        int timestep = (int)Math.floor(time_sec/RobotConstants.MAIN_LOOP_SAMPLE_RATE_S);
         double cmdHeading = 0;
 
         if(timestep < path.heading.length){

@@ -4,8 +4,10 @@ import frc.lib.AutoSequencer.AutoEvent;
 import frc.lib.AutoSequencer.AutoSequencer;
 import frc.robot.JeVoisInterface;
 import frc.robot.OperatorController;
-import frc.robot.Arm.ArmPosReq;
+import frc.robot.Superstructure;
+import frc.robot.Arm.ArmPos;
 import frc.robot.PEZControl.PEZPos;
+import frc.robot.Superstructure.OpMode;
 
 /*
  *******************************************************************************************
@@ -29,9 +31,15 @@ import frc.robot.PEZControl.PEZPos;
 
 public class Autonomous {
     //State Variables
-    boolean previousAutoMoveState = false;
+    boolean prevAutoMoveRequested = false;
+    boolean isForward;
 
     private double visionAngle = 0;
+
+    AutoSequencer seq;
+
+    AutoSeqDistToTgtEst distEst;
+
 
     // name and "empty" with a variable name
     private static Autonomous empty = null;
@@ -59,7 +67,7 @@ public class Autonomous {
 
     //needs something inside of the parentheses, probably
     private Autonomous() {
-
+        distEst = AutoSeqDistToTgtEst.getInstance();
     }
 
     public void setVisionAngleToTgt(double angle_in) {
@@ -91,8 +99,8 @@ public class Autonomous {
 
     }
 
-    public ArmPosReq getArmPosCmd() {
-        return ArmPosReq.None;
+    public ArmPos getArmPosCmd() {
+        return ArmPos.None;
     }
 
     public PEZPos getGripperPosCmd(){
@@ -120,57 +128,82 @@ public class Autonomous {
         return false;
     }
 
+    double xTargetOffset = 0;
+    double yTargetOffset = 0;
+    double targetPositionAngle = 0;
+
+
     //Commands called from other parts of the code need to be inputed into the parentheses, I think
     public void update(){
-        boolean currentAutoMoveState = OperatorController.getInstance().getAutoMove();
+        boolean autoMoveRequested = OperatorController.getInstance().getAutoMove();
+
+        OpMode curOpMode = Superstructure.getInstance().getActualOpMode();
+        boolean opModeAllowsAuto = (curOpMode == OpMode.CargoCarry || curOpMode == OpMode.Hatch);
+
+        boolean jeVoisHasNewTarget = false; 
         
-        if(currentAutoMoveState && !previousAutoMoveState){
-            //Initialize autoMove sequence
-            double xTargetOffset = 0;
-            double yTargetOffset = 0;
-            double targetPositionAngle = 0;
+        if(autoMoveRequested && !prevAutoMoveRequested && opModeAllowsAuto){
+            //Initialize autoMove sequence on rising edge of auto move request from operator, and only if operational mode is not in transistion.
+            xTargetOffset = 0;
+            yTargetOffset = 0;
+            targetPositionAngle = 0;
+
+            JeVoisInterface.getInstance().latchTarget();
+        }
+
+        //TODO - populate the "jevois has target" based on reading the "latch" counter, and comparing at least a few readings to ensure the target visuilization is stable
+        jeVoisHasNewTarget = true; // A silly and bad algorithm. Change me please.
+
+        //TODO - add timeout here to indicate to driver if no new target is found soon
+
+        if(autoMoveRequested && jeVoisHasNewTarget){
+
+            if(OperatorController.getInstance().getAutoAlignHighReq()){
+                isForward = false;
+            } else {
+                isForward = true;
+            }
+
 
             xTargetOffset = JeVoisInterface.getInstance().getTgtPositionX();
             yTargetOffset = JeVoisInterface.getInstance().getTgtPositionY();
             targetPositionAngle = JeVoisInterface.getInstance().getTgtAngle();
             
+            seq = new AutoSequencer("AutoAlign");
 
-            AutoEvent parent = new AutoSeqPathPlan(xTargetOffset, yTargetOffset, targetPositionAngle);
-            AutoSequencer.addEvent(parent);
+            AutoEvent parent = new AutoSeqPathPlan(xTargetOffset, yTargetOffset, targetPositionAngle); //TODO - handle the case where the path planner can't create a path based on current angle constraints with "getPathAvailable()"
+            seq.addEvent(parent);
+
+
             parent = new AutoSeqFinalAlign();
 
-            if(OperatorController.getInstance().getLowLevelPlace()){
-                parent.addChildEvent(new MoveArmLowPos());
-            }
-
-            else if(OperatorController.getInstance().getMidLevelPlace()){
-                parent.addChildEvent(new MoveArmMidPos());
-            }
-
-            else if(OperatorController.getInstance().getTopLevelPlace()){
-                parent.addChildEvent(new MoveArmTopPos());
-            }
-
-            else {
+            if(OperatorController.getInstance().getAutoAlignLowReq()){
+                parent.addChildEvent(new MoveArmLowPos(curOpMode));
+            } else if(OperatorController.getInstance().getAutoAlignMidReq()){
+                parent.addChildEvent(new MoveArmMidPos(curOpMode));
+            } else if(OperatorController.getInstance().getAutoAlignHighReq()){
+                parent.addChildEvent(new MoveArmTopPos(curOpMode));
+            } else {
                 System.out.println("Error invalid Autostate.");
             }
 
-            AutoSequencer.addEvent(parent);
+            seq.addEvent(parent);
 
-            if(OperatorController.getInstance().getTopLevelPlace()){
+            if(isForward){
                 parent.addChildEvent(new BackupHigh());
-            }
-
-            else {
+            } else {
                 parent.addChildEvent(new Backup());
             }
         }
 
-        if(!currentAutoMoveState && previousAutoMoveState){
-            //Cancel sequence
-            AutoSequencer.stop();
+        if(seq != null){
+            seq.update();
+            if(!autoMoveRequested && seq.isRunning()){
+                //Cancel sequence
+                seq.stop();
+            }
         }
 
-        previousAutoMoveState = currentAutoMoveState;
+        prevAutoMoveRequested = autoMoveRequested;
     }
 }

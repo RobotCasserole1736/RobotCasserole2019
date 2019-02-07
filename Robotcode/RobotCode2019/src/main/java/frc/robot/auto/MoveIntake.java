@@ -1,9 +1,9 @@
 package frc.robot.auto;
 
-import frc.lib.PathPlanner.FalconPathPlanner;
-import frc.lib.PathPlanner.PathPlannerAutoEvent;
-
 import frc.lib.AutoSequencer.AutoEvent;
+import frc.robot.IntakeControl;
+import frc.robot.IntakeControl.IntakePos;
+import frc.robot.IntakeControl.IntakeSpd;
 
 /*
  *******************************************************************************************
@@ -25,48 +25,37 @@ import frc.lib.AutoSequencer.AutoEvent;
  *   if you would consider donating to our club to help further STEM education.
  */
 
-public class Backup extends AutoEvent {
-	
-	public Backup() {
-        driveBackward = new PathPlannerAutoEvent(waypoints, time, true, 0.2, 0.5, 0.001, 0.9);
+public class MoveIntake extends AutoEvent {
+
+    IntakePos desPos;
+
+	public MoveIntake(IntakePos desPos_in) {
+        desPos = desPos_in;
     }
 
-    PathPlannerAutoEvent driveBackward;
+    @Override
+    public void userStart() {
+        IntakeControl.getInstance().setPositionCmd(desPos);
+        IntakeControl.getInstance().setSpeedCmd(IntakeSpd.Stop);
+    }
 
-	private final double[][] waypoints = new double[][] {
-		{0,0},
-		{0,-8}
-	};
-	
-	private final double time = 1.5;
+    @Override
+    public void userUpdate() {
 
-	@Override
-	public void userUpdate() {
-		driveBackward.userUpdate();
-		// shotCTRL.setDesiredShooterState(ShooterStates.PREP_TO_SHOOT);
-	}
+    }
 
-	@Override
-	public void userForceStop() {
-		driveBackward.userForceStop();
-	}
+    @Override
+    public void userForceStop() {
+        IntakeControl.getInstance().forceStop();
+    }
 
-	@Override
-	public boolean isTriggered() {
-		return driveBackward.isTriggered();
-	}
+    @Override
+    public boolean isTriggered() {
+        return true; //always run right away
+    }
 
-	@Override
-	public boolean isDone() {
-		return driveBackward.isDone();
-	}
-
-	@Override
-	public void userStart() {
-		driveBackward.userStart();
-	}
-    public static void main(String[] args) {
-    	Backup autoEvent = new Backup();
-		FalconPathPlanner.plotPath(autoEvent.driveBackward.path);
-	}
+    @Override
+    public boolean isDone() {
+        return IntakeControl.getInstance().isAtDesPos();
+    }
 }

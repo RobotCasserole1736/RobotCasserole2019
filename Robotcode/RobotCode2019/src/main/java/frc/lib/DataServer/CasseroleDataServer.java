@@ -135,7 +135,7 @@ public class CasseroleDataServer {
         });
 
         serverThread.setName("CasseroleDataServerThread");
-        serverThread.setPriority(Thread.MIN_PRIORITY + 2);
+        serverThread.setPriority(10);
         serverThread.start();
     }
 

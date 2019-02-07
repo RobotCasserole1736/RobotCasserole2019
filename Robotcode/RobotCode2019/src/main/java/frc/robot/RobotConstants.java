@@ -7,8 +7,8 @@ public class RobotConstants {
     // RoboRIO Output Ports
     /////////////////////////////////////////////////////////////////////////////////////
     // PWM Motors
-    public static final int ARM_MOTOR_PORT = 0;
     public static final int INTAKE_MOTOR_PORT = 1;
+    public static final int LED_CONTROLLER_PORT = 2;
 
     /////////////////////////////////////////////////////////////////////////////////////
     // CAN Device ID's
@@ -19,6 +19,7 @@ public class RobotConstants {
     public static final int DRIVETRAIN_RIGHT_2_CANID = 14;
     public static final int PNEUMATICS_CONTROL_MODULE_CANID = 0;
     public static final int POWER_DISTRIBUTION_PANEL_CANID = 0;
+    public static final int ARM_MOTOR_PORT = 0;
 
 
     /////////////////////////////////////////////////////////////////////////////////////
@@ -37,7 +38,11 @@ public class RobotConstants {
     public static final int LINE_FOLLOWING_SENSOR_3_PORT = 6;
     public static final int LINE_FOLLOWING_SENSOR_4_PORT = 7;
     public static final int LINE_FOLLOWING_SENSOR_5_PORT = 8;
-    public static final int BALL_INTAKE_PORT = 9;
+    public static final int PEZ_SOLENOID_LIMIT_SWITCH_PORT = 9;
+    public static final int BALL_INTAKE_PORT = 10;
+
+    //Relay
+    public static final int PEZ_RELAY_PORT = 0;
 
     /////////////////////////////////////////////////////////////////////////////////////
     // PDP Ports
@@ -46,10 +51,7 @@ public class RobotConstants {
     /////////////////////////////////////////////////////////////////////////////////////
     // Solenoid Ports
     /////////////////////////////////////////////////////////////////////////////////////
-    public static final int LONG_SOLENOID_FORWARD_CHANNEL = 0;
-    public static final int LONG_SOLENOID_REVERSE_CHANNEL = 1;
-    public static final int SHORT_SOLENOID_FORWARD_CHANNEL = 2;
-    public static final int SHORT_SOLENOID_REVERSE_CHANNEL = 3;
+    public static final int PEZ_SOLENOID_PORT = 0;
     public static final int INTAKE_ARM_BAR_PORT = 4;
     public static final int ARM_MECH_BRAKE_SOL_PORT = 5;
 
@@ -61,7 +63,10 @@ public class RobotConstants {
     public static final int OPERATOR_CONTROLLER_USB_IDX = 1;
     public static final String CAM_1_STREAM_URL = "http://10.17.36.10:1181/stream.mjpg";
     public static final String CAM_2_STREAM_URL = "http://10.17.36.10:1182/stream.mjpg";
-    public static final double WHEEL_RADIUS_FT = 0.24;
-    public static final double ROBOT_RADIUS_FT  = 0.9;
+    public static final double MAIN_LOOP_SAMPLE_RATE_S = 0.02; // 20ms update rate
+    public static final double ROBOT_TRACK_WIDTH_FT = 22.0/12; // 22 inch  effective track width
+    public static final double WHEEL_RADIUS_FT = 8.75/2/12.0; //8.75 inch diameter wheels
+    public static final int CLIMBER_SERVO = 7;
+    public static final int ClIMBER_WINDOW_MOTOR = 8;
 
 }

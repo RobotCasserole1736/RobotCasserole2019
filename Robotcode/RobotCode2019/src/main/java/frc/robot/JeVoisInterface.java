@@ -121,7 +121,7 @@ public class JeVoisInterface {
         //Retry strategy to get this serial port open.
         //I have yet to see a single retry used assuming the camera is plugged in
         // but you never know.
-        while(visionPort == null && retry_counter++ < 10){
+        while(visionPort == null && retry_counter++ < 3){
             try {
                 System.out.print("Creating JeVois SerialPort...");
                 visionPort = new SerialPort(BAUD_RATE,SerialPort.Port.kUSB);

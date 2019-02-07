@@ -2,6 +2,7 @@ package frc.robot.auto;
 
 import frc.lib.AutoSequencer.AutoEvent;
 import frc.robot.Arm;
+import frc.robot.Superstructure.OpMode;
 
 /*
  *******************************************************************************************
@@ -24,14 +25,22 @@ import frc.robot.Arm;
  */
 
 public class MoveArmLowPos extends AutoEvent {
-	
-	MoveArmLowPos() {
+    
+    OpMode curOpMode;
 
+	public MoveArmLowPos(OpMode opMode_in) {
+        curOpMode = opMode_in;
     }
 
     @Override
     public void userStart() {
-        Arm.getInstance().setPositionCmd(Arm.ArmPosReq.Lower);
+        if(curOpMode == OpMode.CargoCarry){
+            Arm.getInstance().setPositionCmd(Arm.ArmPos.LowerCargo);
+        } else if(curOpMode == OpMode.Hatch){
+            Arm.getInstance().setPositionCmd(Arm.ArmPos.LowerHatch);
+        } else {
+            //unsupported operational mode
+        }
     }
 
     @Override

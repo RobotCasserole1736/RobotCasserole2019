@@ -37,11 +37,14 @@ import frc.lib.DataServer.Signal;
 import frc.lib.LoadMon.CasseroleRIOLoadMonitor;
 import frc.lib.WebServer.CasseroleDriverView;
 import frc.lib.WebServer.CasseroleWebServer;
-import frc.robot.Arm.ArmPosReq;
+import frc.lib.Util.CrashTracker;
+import frc.robot.Arm.ArmPos;
 import frc.robot.LEDController.LEDPatterns;
 import frc.robot.PEZControl.GamePiece;
+import frc.robot.Superstructure.OpMode;
 import frc.robot.auto.AutoSeqDistToTgtEst;
 import frc.robot.auto.Autonomous;
+
 
 
 /**
@@ -82,6 +85,8 @@ public class Robot extends TimedRobot {
     PEZControl pezControl;
     FrontUltrasonic frontUltrasonic;
     BackUltrasonic backUltrasonic;
+    LineFollower linefollow;
+    Superstructure superstructure;
 
     //Top level telemetry signals
     Signal rioDSSampLoad;
@@ -95,56 +100,76 @@ public class Robot extends TimedRobot {
     JeVoisInterface jevois;
     Autonomous autonomous;
 
+    public Robot() {
+        CrashTracker.logRobotConstruction();
+    }
+
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
      */
     @Override
     public void robotInit() {
-        /* Init website utilties */
-        webserver = new CasseroleWebServer();
-        wrangler = new CalWrangler();
+        try{
+            CrashTracker.logRobotInit();
 
-        /* Init Robot parts */
-        pdp = new PowerDistributionPanel(RobotConstants.POWER_DISTRIBUTION_PANEL_CANID);
-        ledController = LEDController.getInstance();
-        pneumaticsControl = PneumaticsControl.getInstance();
-        jevois = JeVoisInterface.getInstance();
-        arm = Arm.getInstance();
-        drivetrain = Drivetrain.getInstance();
-        climber = Climber.getInstance();
-        intakeControl = IntakeControl.getInstance();
-        pezControl = PEZControl.getInstance();
-        onboardAccel = new BuiltInAccelerometer();
-        frontUltrasonic = FrontUltrasonic.getInstance();
-        backUltrasonic = BackUltrasonic.getInstance();
+            Thread.currentThread().setPriority(10);
 
-        /* Init input from humans */
-        operatorController = OperatorController.getInstance();
-        driverController = DriverController.getInstance();
+            /* Init website utilties */
+            webserver = new CasseroleWebServer();
+            wrangler = new CalWrangler();
+            dataServer = CasseroleDataServer.getInstance();
 
-        /* Init software utilities */
-        loadMon= new CasseroleRIOLoadMonitor();
-        loopTiming = LoopTiming.getInstance();
-        poseCalc = new RobotPose();
-        matchState = MatchState.getInstance();
-        autonomous = Autonomous.getInstance();
+            /* Init Robot parts */
+            pdp = new PowerDistributionPanel(RobotConstants.POWER_DISTRIBUTION_PANEL_CANID);
+            ledController = LEDController.getInstance();
+            pneumaticsControl = PneumaticsControl.getInstance();
+            jevois = JeVoisInterface.getInstance();
+            arm = Arm.getInstance();
+            drivetrain = Drivetrain.getInstance();
+            climber = Climber.getInstance();
+            intakeControl = IntakeControl.getInstance();
+            pezControl = PEZControl.getInstance();
+            onboardAccel = new BuiltInAccelerometer();
+            frontUltrasonic = FrontUltrasonic.getInstance();
+            backUltrasonic = BackUltrasonic.getInstance();
+            linefollow = LineFollower.getInstance();
+            superstructure = Superstructure.getInstance();
 
-        /* Init local telemetry signals */
-        rioDSSampLoad = new Signal("dataserver stored samples", "count"); 
-        rioCurrDrawLoad = new Signal("overall current draw", "A");
-        rioBattVoltLoad = new Signal("battery voltage", "V");
-        onboardAccelX = new Signal("Onboard Accelerometer X Value", "g");
-        onboardAccelY = new Signal("Onboard Accelerometer Y Value", "g");
-        onboardAccelZ = new Signal("Onboard Accelerometer Z Value", "g");
-        
-        /* Website setup */
-        initDriverView();
+            /* Init input from humans */
+            operatorController = OperatorController.getInstance();
+            driverController = DriverController.getInstance();
 
-        /* Fire up webserver & telemetry dataserver */
-        webserver.startServer();
-        dataServer = CasseroleDataServer.getInstance();
-        dataServer.startServer();
+            /* Init software utilities */
+            loadMon= new CasseroleRIOLoadMonitor();
+            loopTiming = LoopTiming.getInstance();
+            poseCalc = new RobotPose();
+            matchState = MatchState.getInstance();
+            DrivetrainClosedLoopTestVectors.getInstance();
+            AutoSeqDistToTgtEst.getInstance();
+            autonomous = Autonomous.getInstance();
+
+            /* Init local telemetry signals */
+            rioDSSampLoad = new Signal("dataserver stored samples", "count"); 
+            rioCurrDrawLoad = new Signal("overall current draw", "A");
+            rioBattVoltLoad = new Signal("battery voltage", "V");
+            onboardAccelX = new Signal("Onboard Accelerometer X Value", "g");
+            onboardAccelY = new Signal("Onboard Accelerometer Y Value", "g");
+            onboardAccelZ = new Signal("Onboard Accelerometer Z Value", "g");
+            
+            /* Website setup */
+            initDriverView();
+
+            /* Fire up webserver & telemetry dataserver */
+            webserver.startServer();
+            dataServer.startServer();
+
+            /* print the MAC address to the console for debugging */
+            System.out.println("Current MAC address: " + drivetrain.getMACAddr());
+        } catch(Throwable t) {
+            CrashTracker.logThrowableCrash(t);
+            throw t;
+        }
     }
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -152,16 +177,37 @@ public class Robot extends TimedRobot {
 /////////////////////////////////////////////////////////////////////////////////////
     @Override
     public void teleopInit() {
-        dataServer.logger.startLoggingTeleop();
-        ledController.setPattern(LEDPatterns.Pattern3);
-        matchState.SetPeriod(MatchState.Period.OperatorControl);
+        try{
+            /*Update CrashTracker*/
+            CrashTracker.logTeleopInit();
+
+            dataServer.logger.startLoggingTeleop();
+            ledController.setPattern(LEDPatterns.Pattern3);
+            matchState.SetPeriod(MatchState.Period.OperatorControl);
+        } catch(Throwable t) {
+            CrashTracker.logThrowableCrash(t);
+            throw t;
+        }
     }
 
     @Override
     public void autonomousInit() {
-        dataServer.logger.startLoggingAuto();
-        ledController.setPattern(LEDPatterns.Pattern4);
-        matchState.SetPeriod(MatchState.Period.Autonomous);
+        try{
+            /*Update CrashTracker*/
+            CrashTracker.logAutoInit();
+            dataServer.logger.startLoggingAuto();
+            ledController.setPattern(LEDPatterns.Pattern4);
+            matchState.SetPeriod(MatchState.Period.Autonomous);
+            if(CasseroleDriverView.getAutoSelectorVal("Starting Gamepiece").compareTo(GamePiece.Cargo.toString()) == 0){
+                superstructure.setInitialOpMode(OpMode.CargoCarry);
+            } else {
+                superstructure.setInitialOpMode(OpMode.Hatch);
+            }
+
+        } catch(Throwable t) {
+            CrashTracker.logThrowableCrash(t);
+            throw t;
+        }
     }
 
 
@@ -169,63 +215,70 @@ public class Robot extends TimedRobot {
      * This function is called periodically in both Auto("sandstorm") and Teleop
      */
     private void matchPeriodicCommon(){
-        loopTiming.markLoopStart();
+        try{
+            loopTiming.markLoopStart();
 
-        /* Sample inputs from humans */
-        driverController.update();
-        operatorController.update();
-        autonomous.update();
+            /* Sample Sensors */
+            frontUltrasonic.update();
+            backUltrasonic.update();
+            linefollow.update();
 
-        /* Map subsystem IO */
+            /* Sample inputs from humans */
+            driverController.update();
+            operatorController.update();
 
-        //Operator Controller provides commands to Arm
-        arm.setIntakeActualState(intakeControl.getEstimatedPosition());
-        arm.setManualMovementCmd(operatorController.getArmManualPosCmd());
-        arm.setPositionCmd(operatorController.getArmPosReq());
-        arm.update();
+            superstructure.update();
 
-        pezControl.update();
+            autonomous.update();
 
-        intakeControl.update();
+            arm.update();
 
-        frontUltrasonic.update();
-        backUltrasonic.update();
+            pezControl.update();
 
-        if(arm.getActualArmHeight() < 90) {
-            AutoSeqDistToTgtEst.getInstance().setVisionDistanceEstimate(jevois.getTgtPositionY(), jevois.isTgtVisible());
-            AutoSeqDistToTgtEst.getInstance().setUltrasonicDistanceEstimate(frontUltrasonic.getdistance_ft(), true);
-            AutoSeqDistToTgtEst.getInstance().setRobotLinearVelocity(poseCalc.getRobotVelocity_ftpersec());
-        } else{
-            AutoSeqDistToTgtEst.getInstance().setVisionDistanceEstimate(0, false);
-            AutoSeqDistToTgtEst.getInstance().setUltrasonicDistanceEstimate(backUltrasonic.getdistance_ft(), true);
-            AutoSeqDistToTgtEst.getInstance().setRobotLinearVelocity(-1 * poseCalc.getRobotVelocity_ftpersec());
+            intakeControl.update();
 
+            if(arm.getActualArmHeight() < 90) {
+                AutoSeqDistToTgtEst.getInstance().setVisionDistanceEstimate(jevois.getTgtPositionY(), jevois.isTgtVisible());
+                AutoSeqDistToTgtEst.getInstance().setUltrasonicDistanceEstimate(frontUltrasonic.getdistance_ft(), true);
+                AutoSeqDistToTgtEst.getInstance().setRobotLinearVelocity(poseCalc.getRobotVelocity_ftpersec());
+            } else{
+                AutoSeqDistToTgtEst.getInstance().setVisionDistanceEstimate(0, false);
+                AutoSeqDistToTgtEst.getInstance().setUltrasonicDistanceEstimate(backUltrasonic.getdistance_ft(), true);
+                AutoSeqDistToTgtEst.getInstance().setRobotLinearVelocity(-1 * poseCalc.getRobotVelocity_ftpersec());
+            }
+            AutoSeqDistToTgtEst.getInstance().update();
+
+            //Arbitrate driver & auto sequencer inputs to drivetrain
+            if(driverController.getGyroAngleLockReq()){
+                //Map driver inputs to drivetrain in gyro-lock mode
+                drivetrain.setGyroLockCmd(driverController.getDriverFwdRevCmd());
+            } else {
+                // Map driver inputs to drivetrain open loop
+                drivetrain.setOpenLoopCmd(driverController.getDriverFwdRevCmd(), driverController.getDriverRotateCmd());
+            }
+
+            DrivetrainClosedLoopTestVectors.getInstance().update();
+            
+            drivetrain.update();
+
+            poseCalc.setLeftMotorSpeed(drivetrain.getLeftWheelSpeedRPM());
+            poseCalc.setRightMotorSpeed(drivetrain.getRightWheelSpeedRPM());
+            poseCalc.update();
+
+            /* Update Other subsytems */
+            ledController.update();
+            pneumaticsControl.update();
+            climber.update();
+            telemetryUpdate();
+            
+            /*Update CrashTracker*/
+            CrashTracker.logTeleopPeriodic();
+            loopTiming.markLoopEnd();
+
+        } catch(Throwable t) {
+            CrashTracker.logThrowableCrash(t);
+            throw t;
         }
-
-        AutoSeqDistToTgtEst.getInstance().update();
-
-        //Arbitrate driver & auto sequencer inputs to drivetrain
-        if(driverController.getGyroAngleLockReq()){
-            //Map driver inputs to drivetrain in gyro-lock mode
-            drivetrain.setGyroLockCmd(driverController.getDriverFwdRevCmd());
-        } else {
-            // Map driver inputs to drivetrain open loop
-            drivetrain.setOpenLoopCmd(driverController.getDriverFwdRevCmd(), driverController.getDriverRotateCmd());
-        }
-
-        drivetrain.update();
-
-        poseCalc.setLeftMotorSpeed(drivetrain.getLeftWheelSpeedRPM());
-        poseCalc.setRightMotorSpeed(drivetrain.getRightWheelSpeedRPM());
-        poseCalc.update();
-
-        /* Update Other subsytems */
-        ledController.update();
-        pneumaticsControl.update();
-        climber.update();
-        telemetryUpdate();
-
-        loopTiming.markLoopEnd();
     }
 
     /**
@@ -253,9 +306,15 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void disabledInit() {
-        dataServer.logger.stopLogging();
-        ledController.setPattern(LEDPatterns.Pattern2);
-        matchState.SetPeriod(MatchState.Period.Disabled);
+        try{
+            CrashTracker.logDisabledInit();
+            dataServer.logger.stopLogging();
+            ledController.setPattern(LEDPatterns.Pattern2);
+            matchState.SetPeriod(MatchState.Period.Disabled);
+        } catch(Throwable t) {
+            CrashTracker.logThrowableCrash(t);
+            throw t;
+        }
     }
 
     /**
@@ -263,50 +322,69 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void disabledPeriodic() {
-        loopTiming.markLoopStart();
+        try{
+            loopTiming.markLoopStart();
 
-        /* Sample inputs from humans to keep telemetry updated, but we won't actually use it. */
-        driverController.update();
-        operatorController.update();
+            /* Sample Sensors */
+            frontUltrasonic.update();
+            backUltrasonic.update();
+            linefollow.update();
 
-        /* Map subsystem IO */
+            /* Sample inputs from humans to keep telemetry updated, but we won't actually use it. */
+            driverController.update();
+            operatorController.update();
 
-        //Initial Match State - Arm in Lower Position
-        arm.setIntakeActualState(intakeControl.getEstimatedPosition());
-        arm.setManualMovementCmd(0);
-        arm.setPositionCmd(ArmPosReq.Lower);
-        arm.update();
+            superstructure.update();
 
-        pezControl.update();
+            /* Map subsystem IO */
 
-        intakeControl.update();
+            //Initial Match State - Arm Not Moving
+            arm.setIntakeActualState(intakeControl.getEstimatedPosition());
+            arm.setManualMovementCmd(0);
+            arm.setPositionCmd(ArmPos.None);
+            arm.update();
 
-        frontUltrasonic.update();
-        backUltrasonic.update();
+            pezControl.update();
+
+            intakeControl.update();
+
+            //Keep drivetrain stopped.
+            drivetrain.setOpenLoopCmd(0,0);
+
+            drivetrain.update();
+            drivetrain.updateGains(false);
+
+            poseCalc.setLeftMotorSpeed(drivetrain.getLeftWheelSpeedRPM());
+            poseCalc.setRightMotorSpeed(drivetrain.getRightWheelSpeedRPM());
+            poseCalc.update();
 
 
-        //Keep drivetrain stopped.
-        drivetrain.setOpenLoopCmd(0,0);
-        drivetrain.update();
-        drivetrain.updateGains(false);
+            /* Update Other subsytems */
+            ledController.update();
+            pneumaticsControl.update();
+            climber.update();
+            telemetryUpdate();
+            /*Update CrashTracker*/
+            CrashTracker.logDisabledPeriodic();
 
-        poseCalc.setLeftMotorSpeed(drivetrain.getLeftWheelSpeedRPM());
-        poseCalc.setRightMotorSpeed(drivetrain.getRightWheelSpeedRPM());
-        poseCalc.update();
-
-
-        /* Update Other subsytems */
-        ledController.update();
-        pneumaticsControl.update();
-        climber.update();
-        telemetryUpdate();
-
-        loopTiming.markLoopEnd();
+            loopTiming.markLoopEnd();
+        } catch(Throwable t) {
+            CrashTracker.logThrowableCrash(t);
+            throw t;
+        }
     }
     
 //////////////////////////////////////////////////////////////////////////
 // Utilties
 //////////////////////////////////////////////////////////////////////////
+    final String[] gpOptions =    {GamePiece.Cargo.toString(), GamePiece.Hatch.toString(), GamePiece.Nothing.toString()};
+
+    private void setMatchInitialCommands(){
+        if(CasseroleDriverView.getAutoSelectorVal("Starting Gamepiece") == gpOptions[0]){
+            
+        }
+    }
+
     private void telemetryUpdate(){
         double sampleTimeMs = loopTiming.getLoopStartTimeSec()*1000.0;
 
@@ -319,18 +397,19 @@ public class Robot extends TimedRobot {
         onboardAccelZ.addSample(sampleTimeMs, onboardAccel.getZ());
     
         CasseroleDriverView.setDialValue("Main System Pressure", pneumaticsControl.getPressure());
-        CasseroleDriverView.setDialValue("Speed", poseCalc.getRobotVelocity_ftpersec());
+        CasseroleDriverView.setDialValue("Speed", Math.abs(poseCalc.getRobotVelocity_ftpersec()));
         CasseroleDriverView.setDialValue("Arm Angle", arm.getActualArmHeight());
         CasseroleDriverView.setBoolean("Gyro Offline", !drivetrain.isGyroOnline());
         CasseroleDriverView.setBoolean("Vision Camera Offline", !jevois.isVisionOnline());
         CasseroleDriverView.setBoolean("Vision Target Available", jevois.isTgtVisible());
+        CasseroleDriverView.setBoolean("Line Seen", linefollow.isEstLinePosAvailable());
+        CasseroleDriverView.setStringBox("Op Mode", superstructure.getOpModeString());
     }
         
     /**
      * This function sets up the driver view website
      */
     private void initDriverView(){
-        String[] gpOptions =    {GamePiece.Cargo.toString(), GamePiece.Hatch.toString(), GamePiece.Nothing.toString()};
         CasseroleDriverView.newAutoSelector("Starting Gamepiece", gpOptions);
         CasseroleDriverView.newDial("Main System Pressure", 0, 140, 10, 80, 125);
         CasseroleDriverView.newWebcam("cam1", RobotConstants.CAM_1_STREAM_URL, 0, 0, 0);
@@ -340,5 +419,7 @@ public class Robot extends TimedRobot {
         CasseroleDriverView.newBoolean("Gyro Offline", "red");
         CasseroleDriverView.newBoolean("Vision Camera Offline", "red");
         CasseroleDriverView.newBoolean("Vision Target Available", "green");
+        CasseroleDriverView.newBoolean("Line Seen", "green");
+        CasseroleDriverView.newStringBox("Op Mode");
     }
 }

@@ -24,74 +24,86 @@ package frc.robot;
 //import org.usfirst.frc.team1736.lib.Util.CrashTracker;
 
 import frc.lib.Calibration.*;
+import frc.lib.DataServer.Signal;
 import frc.robot.IntakeControl.IntakePos;
-import edu.wpi.first.wpilibj.Spark;
+//import edu.wpi.first.wpilibj.Spark;
 
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.DigitalInput;
 
-
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.ControlType;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.CANEncoder;
+import com.revrobotics.CANPIDController;
 
 
 public class Arm {
 
     /////////Moving Things\\\\\\\\\
     Solenoid armBrake;
-    Spark sadey;
+    CANSparkMax sadey;
+    
+    CANPIDController armPID;
+
+
+    /////Know Where The Arm Is(From SparkMax)\\\\\
+    CANEncoder armEncoder;
+    double curArmAngle;
+    /////The PID StartUps\\\\\
+    double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, maxRPM;
+
 
     /////////Sensors\\\\\\\\\
-    AnalogPotentiometer armPot;
-    int potChannel;
     double voltageToDegreeMult;
     double zeroOffset;
     DigitalInput upperLimSwitch;
     DigitalInput lowLimSwitch;
 
     /////////Input Commands\\\\\\\\\\\
-    ArmPosReq posIn;
+    ArmPos posIn;
 
     /////////State Varibles\\\\\\\\\\\\
-    public double   desiredArmAngle = 0;
-    public double   curHeight = 0;
-    public double   desHeight = 0;
-    public double   potUpVolt;
-    public double   potLowVolt;
-    public boolean  brakeActivated;
-    public double   pastManMoveCmd = 0;
-    public double   curManMoveCmd = 0;
-    public double   uncompensatedMotorCmd = 0;
-    public boolean  brakeIn = false;
-    public double   gravityCompensation = 0;
-    public boolean  isZeroed = false;
+    double   desAngle;
+    double   prevManMoveCmd = 0;
+    double   curManMoveCmd = 0;
+    double   uncompensatedMotorCmd = 0;
+    boolean  brakeIn = false;
+    boolean  isZeroed = false;
+    IntakePos curIntakePos;
+    boolean  intakeExtend = false;
 
     //Arm State Heights\\
-    
-    public double topRocket;
-    public double midRocket;
-    public double lowRocket;
-    public double intakeHeight;
-    
-    
-    Calibration topRocketCal;
-    Calibration midRocketCal;
-    Calibration lowRocketCal;
-    Calibration intakeHeightCal;
-    Calibration armUpCal;
-    Calibration armDownCal;
-    
+    Calibration topCargoHeightCal;
+    Calibration midCargoHeightCal;
+    Calibration lowCargoHeightCal;
+    Calibration intakeCargoHeightCal;
 
-    ///////////Pot State\\\\\\\\\\\\
-    public double UpperLimitDegrees = 270;
-    public double UpperLimitVoltage = 12;
-    public double LowerLimitDegrees = 0;
-    public double LowerLimitVoltage = 12;
-    public double armPotPos;
+    Calibration topHatchHeightCal;
+    Calibration midHatchHeightCal;
+    Calibration lowHatchHeightCal;
+    Calibration intakeHatchHeightCal;
 
+    Calibration intakeDangerZoneUpperHeight; //Lowest height allowable in Hatch Mode
+
+    Calibration armAngleOffsetCal;
+    Calibration gravOffsetHorz;
+    Calibration rampRate;    
 
     /////////Limit Switches\\\\\\\\\\
-    public boolean topOfMotion;
-    public boolean bottomOfMotion; 
+    boolean topOfMotion;
+    boolean bottomOfMotion; 
+
+    Signal armMotorCurrentSig;
+    Signal armMotorCmdSig;
+    Signal armDesPosSig;
+    Signal armActPosSig;
+
+    /////////Physical Mechanism Constants\\\\\\\\\\
+    final double MAX_MANUAL_DEG_PER_SEC = 25.0;
+    final double ARM_GEAR_RATIO = 150.0/1.0;
+    final double REV_ENCODER_TICKS_PER_REV = 42.0;
 
 
     
@@ -105,29 +117,76 @@ public class Arm {
     }
 
     private Arm() {
-        /////Analog Inputs\\\\\\\\
-        armPot = new AnalogPotentiometer(RobotConstants.ARM_POS_SENSOR_PORT, voltageToDegreeMult, zeroOffset);
         /////Movers\\\\\
         armBrake = new Solenoid(RobotConstants.ARM_MECH_BRAKE_SOL_PORT);
-        sadey = new Spark(RobotConstants.ARM_MOTOR_PORT);
+        sadey = new CANSparkMax(RobotConstants.ARM_MOTOR_PORT, MotorType.kBrushless);
+        sadey.setSmartCurrentLimit(60);
+        armEncoder = sadey.getEncoder();
+        armPID = sadey.getPIDController();
+
+        //Mechanically reversed direction is forward
+        sadey.setInverted(true);
+
+        armMotorCmdSig = new Signal("Arm Motor Command", "cmd");
+        armMotorCurrentSig = new Signal("Arm Motor Current", "A");
+        armDesPosSig = new Signal("Arm Desired Position", "deg");
+        armActPosSig = new Signal("Arm Actual Position", "deg");
+        
+        /////PID Values\\\\\
+        kP = 0.1; 
+        kI = 0;
+        kD = 0; 
+        kIz = 0; 
+        kFF = 0; 
+        kMaxOutput = 1; 
+        kMinOutput = -1;
+        maxRPM = 9000;
+        /////Set PID\\\\\
+        armPID.setP(kP);
+        armPID.setI(kI);
+        armPID.setD(kD);
+        armPID.setIZone(kIz);
+        armPID.setFF(kFF);
+        armPID.setOutputRange(kMinOutput, kMaxOutput);
+
         /////Digital Inputs\\\\\\\
         upperLimSwitch = new DigitalInput(RobotConstants.ARM_UPPER_LIMIT_SWITCH_PORT);
         lowLimSwitch = new DigitalInput(RobotConstants.ARM_LOWER_LIMIT_SWITCH_PORT);
         
         /////Calibration Things\\\\\
-        topRocketCal = new Calibration("Arm Top Level Pos (Deg)", 0);
-        midRocketCal = new Calibration("Arm Mid Level Pos (Deg)", 0);
-        lowRocketCal = new Calibration("Arm Bottom Level Pos (Deg)", 0);
-        intakeHeightCal = new Calibration("Arm Intake Level Pos (Deg)", 0);
+        topCargoHeightCal = new Calibration("Arm Top Cargo Level Pos (Deg)", 180);
+        midCargoHeightCal = new Calibration("Arm Mid Cargo Level Pos (Deg)", 50);
+        lowCargoHeightCal = new Calibration("Arm Bottom Cargo Level Pos (Deg)", 10);
+        intakeCargoHeightCal = new Calibration("Arm Intake Cargo Level Pos (Deg)", 0);
 
+        topHatchHeightCal = new Calibration("Arm Top Hatch Level Pos (Deg)", 190);
+        midHatchHeightCal = new Calibration("Arm Mid Hatch Level Pos (Deg)", 45);
+        lowHatchHeightCal = new Calibration("Arm Bottom Hatch Level Pos (Deg)", 5);
+        intakeHatchHeightCal = new Calibration("Arm Intake Hatch Level Pos (Deg)", 5);
+
+        intakeDangerZoneUpperHeight = new Calibration("Arm Intake Danger Zone Upper Pos (Deg)", 3);
+        
+        armAngleOffsetCal = new Calibration("Arm Is Offset From Flat Ground(Deg)", 20);
+        gravOffsetHorz = new Calibration("Arm Required Voltage at Horz(Volts)", 0.5);
+        rampRate = new Calibration("Arm Spark Ramp Rate (Volts)", 0.3);
+        sadey.setRampRate(rampRate.get());
     } 
+    
 
-    public enum ArmPosReq {
-        Top(4), Middle(3), Lower(2), Intake(1), None(0);
+    public enum ArmPos {
+        TopCargo(8), 
+        TopHatch(7), 
+        MiddleCargo(6), 
+        MiddleHatch(5), 
+        LowerCargo(4), 
+        LowerHatch(3), 
+        IntakeCargo(2), 
+        IntakeHatch(1), 
+        None(0);
 
         public final int value;
 
-        private ArmPosReq(int value) {
+        private ArmPos(int value) {
             this.value = value;
         }
                 
@@ -136,10 +195,12 @@ public class Arm {
         }
     }
 
-    double convertVoltsToDeg(double voltage_in) {
-        return (voltage_in - LowerLimitVoltage) * 
-                (UpperLimitDegrees - LowerLimitDegrees) / 
-                (UpperLimitVoltage - LowerLimitVoltage) + LowerLimitDegrees;
+    double convertRotationsToDeg(double rotations_in) {
+        return (rotations_in / REV_ENCODER_TICKS_PER_REV * ARM_GEAR_RATIO);
+    }
+
+    double convertDegToRotations(double degrees_in) {
+        return(degrees_in *REV_ENCODER_TICKS_PER_REV / ARM_GEAR_RATIO);
     }
 
     public void sampleSensors() {
@@ -150,83 +211,87 @@ public class Arm {
     
     /////Use Sensor Data in Calculations\\\\\
     public void update() {
+
+        curArmAngle = convertRotationsToDeg(-1.0*armEncoder.getPosition());
+
+        sadey.setRampRate(rampRate.get());
+
+        //TEMP - pretend we are always zeroed until the limit switches are installed.
+        isZeroed =true;
+
         if(!isZeroed) {
-            
+            armPID.setReference(-0.01, ControlType.kVoltage);
+            if(bottomOfMotion) {
+                isZeroed = true;
+                armPID.setReference(0.0, ControlType.kVoltage);
+            }
         } 
         else {
-            //Preset Heights Logic
-
-            //If arm == 0 ??needed??
-            desHeight = desiredArmAngle;
-
-            if(curHeight - desHeight <= -2) {
-                uncompensatedMotorCmd = 1;
-            }
-            else if (curHeight - desHeight >= 2) {
-                uncompensatedMotorCmd = -1;
+            //Update the position based on what the driver requested
+            
+            if(curManMoveCmd != 0) {
+                armPID.setReference(curManMoveCmd*6.0, ControlType.kVoltage);
+                desAngle = curArmAngle;
             }
             else {
-                uncompensatedMotorCmd = 0;
-            }
-            
-            if(curManMoveCmd != pastManMoveCmd) {
-
-            }
-            //Joystick Operation by Drivers
-            
-            if(curManMoveCmd != pastManMoveCmd) {
-                uncompensatedMotorCmd = curManMoveCmd;
+                defArmPos();
+                double desRotation = convertDegToRotations(desAngle);
+                double gravComp = gravComp();
+                armPID.setReference(desRotation, ControlType.kPosition, 0, gravComp);
             }
 
-            if(topOfMotion && uncompensatedMotorCmd < 0) {
-                sadey.set(uncompensatedMotorCmd);
-            } 
-            else if(bottomOfMotion && uncompensatedMotorCmd > 0) {
-                sadey.set(uncompensatedMotorCmd);
-            }
-
-            else {
-                sadey.set(uncompensatedMotorCmd);
-            } 
-            
-            if(uncompensatedMotorCmd == 0) {
-                armBrake.set(true);
-            } 
-            else {
-                armBrake.set(false);
-            }
         } 
+
+        double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
+        armMotorCmdSig.addSample(sampleTimeMS, sadey.getAppliedOutput());
+        armMotorCurrentSig.addSample(sampleTimeMS, sadey.getOutputCurrent());
+        armDesPosSig.addSample(sampleTimeMS, desAngle);
+        armActPosSig.addSample(sampleTimeMS, curArmAngle);
+
+        prevManMoveCmd = curManMoveCmd;
     }
 
-    public void setPositionCmd(ArmPosReq posIn) {
+    public void setPositionCmd(ArmPos posIn) {
         this.posIn = posIn;
     }
     
     /////Movement Settings\\\\\
     public void defArmPos() {
         switch(posIn) {
-            case Top:
-            desiredArmAngle = topRocket;
-             
+            case TopCargo:
+                desAngle = topCargoHeightCal.get();
             break;
 
-            case Middle:
-            desiredArmAngle = midRocket;
-
+            case MiddleCargo:
+                desAngle = midCargoHeightCal.get();
             break;
 
-            case Lower:
-            desiredArmAngle = lowRocket;
-
+            case LowerCargo:
+                desAngle = lowCargoHeightCal.get();
             break;
 
-            case Intake:
-            desiredArmAngle = intakeHeight;
+            case IntakeCargo:
+                desAngle = intakeCargoHeightCal.get();
+            break;
 
+            case TopHatch:
+                desAngle = topHatchHeightCal.get();
+            break;
+
+            case MiddleHatch:
+                desAngle = midHatchHeightCal.get();
+            break;
+
+            case LowerHatch:
+                desAngle = lowHatchHeightCal.get();
+            break;
+
+            case IntakeHatch:
+                desAngle = intakeHatchHeightCal.get();
             break;
 
             case None:
-            // Don't change desiredArmAngle
+                // Don't change desiredArmAngle
             break;
             
         }
@@ -234,21 +299,16 @@ public class Arm {
 
     public void setManualMovementCmd(double mov_cmd_in) {
         
-        if(mov_cmd_in>0.5 || mov_cmd_in<-0.5) {    
-            curManMoveCmd = mov_cmd_in;
-            brakeIn = false;
-        
+        if(mov_cmd_in>0.5 || mov_cmd_in<-0.5) {        
+            brakeIn = false;    
         }
-        else if(mov_cmd_in < 0.5 && mov_cmd_in > -0.5 /*&& !brakeActivated*/) {
-        
-            curManMoveCmd = 0;
+        else if(mov_cmd_in < 0.5 && mov_cmd_in > -0.5) {
             brakeIn = true;
-
         }
         else {
-            curManMoveCmd = 0;
-            
+
         }
+        curManMoveCmd = mov_cmd_in;
     }
 
     public void setSolBrake(boolean brakeIn) {
@@ -256,7 +316,7 @@ public class Arm {
             armBrake.set(true); 
         }
         else {
-            armBrake.set(true);
+            armBrake.set(false);
         }
     }
         
@@ -267,16 +327,18 @@ public class Arm {
 
     public boolean getBottomOfMotion() {
         return bottomOfMotion;
-    }
-            
+    }         
 
     public double getActualArmHeight() {
-        curHeight = armPot.get();
-        return curHeight;
+        return curArmAngle;
+    }
+
+    public boolean isAboveDangerZone(){
+        return  (curArmAngle > intakeDangerZoneUpperHeight.get());
     }
 
     public double getDesiredArmHeight() {
-        return desHeight;
+        return desAngle;
     }
 
     public double getuncompensatedMotorCmd() {
@@ -284,7 +346,7 @@ public class Arm {
     
     }
     public boolean atDesiredHeight() {
-        return(desHeight == curHeight);
+        return(Math.abs(desAngle - curArmAngle)<2.0); //hardcode to 2 degree desired height
     }
 
     /**
@@ -292,20 +354,32 @@ public class Arm {
      * inside the Danger Zone, motion should be stopped.
      * 
      */
-    public void setIntakeActualState(IntakePos state_in){
-        //Todo
+    public void setIntakeActualState(IntakePos state_in) {
+        curIntakePos = IntakeControl.getInstance().getEstimatedPosition();   
     }
 
     /**
      * 
      * @return True if the arm is forcing the intake to extend, false otherwise.
      */
-    public boolean intakeExtendOverride(){
+    public boolean intakeExtendOverride() {
         //TODO
-        return false;
+            if(curIntakePos == IntakePos.Retract && curArmAngle < 50) {
+               intakeExtend = true;
+            }
+        return intakeExtend;
+    }
+    
+    public double gravComp() {
+        double compArmAngle = curArmAngle - armAngleOffsetCal.get();
+        double cosAngle = Math.cos(compArmAngle);
+        double compVolt = cosAngle * gravOffsetHorz.get();
+        return(compVolt);
     }
 
-    public void forceArmStop(){
-        //TODO
+    public void forceArmStop() {
+        setPositionCmd(ArmPos.None);
+        setManualMovementCmd(0.0);
+        desAngle = curArmAngle;
     }
 }

@@ -1,6 +1,8 @@
 package frc.robot;
 
-import edu.wpi.first.wpilibj.DigitalOutput;
+import java.util.Set;
+
+import edu.wpi.first.wpilibj.PWM;
 
 /*
  *******************************************************************************************
@@ -26,8 +28,7 @@ public class LEDController {
 
     private static LEDController ledCtrl = null;
 
-    private DigitalOutput out0;
-    private DigitalOutput out1;
+    PWM ctrl;
 
     private LEDPatterns patternCmd;
 
@@ -38,10 +39,12 @@ public class LEDController {
     }
 
     public enum LEDPatterns {
-        Pattern1(0), /* TODO- what pattern is this? */
-        Pattern2(1), /* TODO- what pattern is this? */
-        Pattern3(2), /* TODO- what pattern is this? */
-        Pattern4(3); /* TODO- what pattern is this? */
+        Pattern0(0), /* "Blank" */ 
+        Pattern1(1), /* "Fire" */
+        Pattern2(2), /* "Meteor Rain" */
+        Pattern3(3), /* "Fade In and Fade Out R&W" */
+        Pattern4(4), /* "Running Lights R&W" */
+        Pattern5(5); /* "Theatre Chase R&W" */
 
         public final int value;
 
@@ -59,28 +62,36 @@ public class LEDController {
 
     // This is the private constructor that will be called once by getInstance() and it should instantiate anything that will be required by the class
     private LEDController() {
-        out0 = new DigitalOutput(RobotConstants.LED_PATTERN_OUTPUT_0);
-        out1 = new DigitalOutput(RobotConstants.LED_PATTERN_OUTPUT_1);
-        patternCmd = LEDPatterns.Pattern1;
+        
+        patternCmd = LEDPatterns.Pattern0;
+        ctrl = new PWM(RobotConstants.LED_CONTROLLER_PORT);
     }
 
     public void update(){
         switch(patternCmd){
+            case Pattern0:
+                ctrl.setDisabled();
+
+            break;
             case Pattern1:
-                out0.set(false);
-                out1.set(false);
+                ctrl.setSpeed(-1.0);
+
             break;
             case Pattern2:
-                out0.set(true);
-                out1.set(false);
+                ctrl.setSpeed(-0.5);
+
             break;
             case Pattern3:
-                out0.set(false);
-                out1.set(true);
+                ctrl.setSpeed(0.0);
+
             break;
             case Pattern4:
-                out0.set(true);
-                out1.set(true);
+                ctrl.setSpeed(0.5);
+
+            break;
+            case Pattern5:
+                ctrl.setSpeed(1.0);
+
             break;
         }
     }

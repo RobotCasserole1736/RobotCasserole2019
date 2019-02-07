@@ -1,8 +1,6 @@
 package frc.robot.auto;
 
-import frc.lib.PathPlanner.FalconPathPlanner;
-import frc.lib.PathPlanner.PathPlannerAutoEvent;
-
+import edu.wpi.first.wpilibj.Timer;
 import frc.lib.AutoSequencer.AutoEvent;
 
 /*
@@ -25,48 +23,45 @@ import frc.lib.AutoSequencer.AutoEvent;
  *   if you would consider donating to our club to help further STEM education.
  */
 
-public class Backup extends AutoEvent {
-	
-	public Backup() {
-        driveBackward = new PathPlannerAutoEvent(waypoints, time, true, 0.2, 0.5, 0.001, 0.9);
+public class Delay extends AutoEvent {
+    
+    double startTime;
+    
+    double duration;
+
+    boolean isDone = false;
+
+    public Delay(double duration_in_sec) {
+        duration = duration_in_sec;
     }
 
-    PathPlannerAutoEvent driveBackward;
+    @Override
+    public void userUpdate() {
+        if((Timer.getFPGATimestamp() - startTime) > duration){
+            isDone = true;
+        } else {
+            isDone = false;
+        }
+    }
 
-	private final double[][] waypoints = new double[][] {
-		{0,0},
-		{0,-8}
-	};
-	
-	private final double time = 1.5;
+    @Override
+    public void userForceStop() {
 
-	@Override
-	public void userUpdate() {
-		driveBackward.userUpdate();
-		// shotCTRL.setDesiredShooterState(ShooterStates.PREP_TO_SHOOT);
-	}
+    }
 
-	@Override
-	public void userForceStop() {
-		driveBackward.userForceStop();
-	}
+    @Override
+    public boolean isTriggered() {
+        return true;
+    }
 
-	@Override
-	public boolean isTriggered() {
-		return driveBackward.isTriggered();
-	}
+    @Override
+    public boolean isDone() {
+        return isDone;
+    }
 
-	@Override
-	public boolean isDone() {
-		return driveBackward.isDone();
-	}
-
-	@Override
-	public void userStart() {
-		driveBackward.userStart();
-	}
-    public static void main(String[] args) {
-    	Backup autoEvent = new Backup();
-		FalconPathPlanner.plotPath(autoEvent.driveBackward.path);
-	}
+    @Override
+    public void userStart() {
+        startTime = Timer.getFPGATimestamp();
+        isDone = false;
+    }
 }
