@@ -21,7 +21,7 @@ import sys, os, time, re, datetime
 TEAM_NUMBER_STR = '1736'
 #RIO_ADDRESS = 'roboRIO-'+TEAM_NUMBER_STR+'-FRC.local'
 RIO_ADDRESS = '10.17.36.2'
-LOG_RIO_FPATH = '/media/sda1/data_captures/'
+LOG_RIO_FPATH = '/u/data_captures/'
 LOG_LOCAL_PATH = '.\\downloaded_logs\\'
 CRASH_LOG_RIO_FPATH = '/home/lvuser/'
 CRASH_LOG_LOCAL_PATH = '.\\crash_logs\\'
