@@ -52,7 +52,24 @@ public class Arm {
     CANEncoder armEncoder;
     double curArmAngle;
     /////The PID StartUps\\\\\
-    double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, maxRPM;
+    public double kP;
+    public double kI;
+    public double kD;
+    public double kIz;
+    public double kFF;
+    public double kMaxOutput;
+    public double kMinOutput;
+    public double maxRPM;
+    public double maxVel = 2000;
+    public double minVel;
+    public double maxAcc = 1500;
+    public double allowedErr;
+
+
+    // Smart Motion Coefficients
+   
+    
+
 
 
     /////////Sensors\\\\\\\\\
@@ -108,10 +125,10 @@ public class Arm {
     final double ARM_GEAR_RATIO = 150.0/1.0;
     final double REV_ENCODER_TICKS_PER_REV = 42.0;
 
-
+}
     
     /////////Initialization Code\\\\\\\\\\\
-    private static Arm  singularInstance = null;
+    private static Arm singularInstance = null;
 
     public static synchronized Arm getInstance() {
         if ( singularInstance == null)
@@ -152,6 +169,14 @@ public class Arm {
         armPID.setIZone(kIz);
         armPID.setFF(kFF);
         armPID.setOutputRange(kMinOutput, kMaxOutput);
+        
+            //What is the Slot For
+        int smartMotionSlot = 0;
+        armPID.setSmartMotionMaxVelocity(maxVel, smartMotionSlot);
+        armPID.setSmartMotionMinOutputVelocity(minVel, smartMotionSlot);
+        armPID.setSmartMotionMaxAccel(maxAcc, smartMotionSlot);
+        armPID.setSmartMotionAllowedClosedLoopError(allowedErr, smartMotionSlot);
+
 
         /////Digital Inputs\\\\\\\
         upperLimSwitch = new DigitalInput(RobotConstants.ARM_UPPER_LIMIT_SWITCH_PORT);
@@ -172,7 +197,8 @@ public class Arm {
         
         armAngleOffsetCal = new Calibration("Arm Is Offset From Flat Ground(Deg)", 20);
         gravOffsetHorz = new Calibration("Arm Required Voltage at Horz(Volts)", 0.5);
-        rampRate = new Calibration("Arm Spark Ramp Rate (Volts)", 0.3);
+        //We Don't Want This Here Anymore With Trapezoid\\
+        //rampRate = new Calibration("Arm Spark Ramp Rate (Volts)", 0.3);
         bottomLimitSwitchDegreeCal = new Calibration("Angle at bottom limit switch (deg)", -30);
         topLimitSwitchDegreeCal = new Calibration("Angle at bottom limit switch (deg)", 110);
         //sadey.setRampRate(rampRate.get());
@@ -316,6 +342,15 @@ public class Arm {
 
         }
         curManMoveCmd = mov_cmd_in;
+    }
+    public void setSmartMotionAccelStrategy(CANPIDController.AccelStrategy.kTrapezoidal, 0) {
+
+    }
+    public void setSmartMotionMaxVelocity() {
+        smartMotionMaxVelocity = maxVel;
+    } 
+    public void setSmartMotionMaxAccel() {
+        smartMotionMaxAccel = maxAcc;
     }
 
     public void setSolBrake(boolean brakeIn) {
