@@ -171,11 +171,14 @@ public class Autonomous {
             
             seq = new AutoSequencer("AutoAlign");
 
-            AutoEvent parent = new AutoSeqPathPlan(xTargetOffset, yTargetOffset, targetPositionAngle); //TODO - handle the case where the path planner can't create a path based on current angle constraints with "getPathAvailable()"
-            seq.addEvent(parent);
-
-
-            parent = new AutoSeqFinalAlign();
+            AutoEvent parent;  
+            if(OperatorController.getInstance().getAutoAlignHighReq()){
+                parent = new TopPlaceFinalAlign();
+            } else {
+                parent = new AutoSeqPathPlan(xTargetOffset, yTargetOffset, targetPositionAngle); //TODO - handle the case where the path planner can't create a path based on current angle constraints with "getPathAvailable()"
+                seq.addEvent(parent);
+                parent = new AutoSeqFinalAlign();
+            }
 
             if(OperatorController.getInstance().getAutoAlignLowReq()){
                 parent.addChildEvent(new MoveArmLowPos(curOpMode));
