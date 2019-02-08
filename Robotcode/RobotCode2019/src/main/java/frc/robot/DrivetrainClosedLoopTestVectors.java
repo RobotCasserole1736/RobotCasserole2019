@@ -113,9 +113,9 @@ public class DrivetrainClosedLoopTestVectors {
                 }
 
                 if(triangleWaveUp){
-                    speedCmd += testAmpRPM.get() * (0.02/testPeriodSec.get()*4);
+                    speedCmd += testAmpRPM.get() * (RobotConstants.MAIN_LOOP_SAMPLE_RATE_S/testPeriodSec.get()*4);
                 } else {
-                    speedCmd -= testAmpRPM.get() * (0.02/testPeriodSec.get()*4);
+                    speedCmd -= testAmpRPM.get() * (RobotConstants.MAIN_LOOP_SAMPLE_RATE_S/testPeriodSec.get()*4);
                 }
 
                 leftSpeedCmd = speedCmd;

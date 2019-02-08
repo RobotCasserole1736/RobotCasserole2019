@@ -97,7 +97,7 @@ public class AutoSeqDistToTgtEst {
             //+ Drivetrain.getInstance().getRightWheelSpeedRPM())/2)/3000;
 
            // this.setDistance(rev_per_update*2*RobotConstants.WHEELRADIUS_FT*3.14);
-           distanceEst_ft += robotLinearVelocity_ftpersec * 0.02;
+           distanceEst_ft += robotLinearVelocity_ftpersec * RobotConstants.MAIN_LOOP_SAMPLE_RATE_S;
         
         } 
         double sample_time_ms = LoopTiming.getInstance().getLoopStartTimeSec()*1000.0;

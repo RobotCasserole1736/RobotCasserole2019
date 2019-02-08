@@ -102,9 +102,10 @@ public class Robot extends TimedRobot {
     Autonomous autonomous;
 
     public Robot() {
+        super(RobotConstants.MAIN_LOOP_SAMPLE_RATE_S);
         CrashTracker.logRobotConstruction();
     }
-    
+
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.

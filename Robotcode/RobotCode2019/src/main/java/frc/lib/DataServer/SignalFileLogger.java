@@ -96,9 +96,36 @@ public class SignalFileLogger {
 
         fileLoggerStateLock = new ReentrantLock();
 
-        updater = new java.util.Timer("DataServer File Logger Task");
-        updater.scheduleAtFixedRate(new dataFileLogTask(), 0, 1000); //Empty the sample queue every one second
-    
+		// Kick off monitor in brand new thread.
+	    // Thanks to Team 254 for an example of how to do this!
+	    Thread monitorThread = new Thread(new Runnable() {
+	        @Override
+            public void run() {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                fileLoggerStateLock.lock();
+                try{
+                    if(loggingActive){
+                        DataSample samp = sampleQueue.poll();
+                        while(samp != null){
+                            writeLogData(samp);
+                            samp = sampleQueue.poll();
+                        }
+                    }
+                } finally {
+                    fileLoggerStateLock.unlock();
+                }
+            }
+        });
+        
+	    //Set up thread properties and start it off
+	    monitorThread.setName("DataServer File Logger Task");
+	    monitorThread.setPriority(Thread.MIN_PRIORITY);
+	    monitorThread.start();
     }
 
     public void startLoggingAuto(){

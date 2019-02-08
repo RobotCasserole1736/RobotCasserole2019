@@ -86,7 +86,7 @@ public class RobotPose {
 
     //Simulation Timing
     double prevLoopTime = 0;
-    double delta_t_sec = 0.02;
+    double delta_t_sec = RobotConstants.MAIN_LOOP_SAMPLE_RATE_S;
 
 
     Signal DesX;

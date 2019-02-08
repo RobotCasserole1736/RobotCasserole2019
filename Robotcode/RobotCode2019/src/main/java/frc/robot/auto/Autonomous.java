@@ -58,7 +58,7 @@ public class Autonomous {
     final double MAX_ALLOWABLE_ANGLE_STANDARD_DEV = 100;
 
     //Blinky auto failed constants
-    final double BLINK_RATE_MSEC = 200;
+    final double BLINK_RATE_MSEC = 250;
     double nextBlinkTransitionTime = 0;
     boolean blinkState =false;
 
@@ -248,14 +248,13 @@ public class Autonomous {
                     nextBlinkTransitionTime = curTime + BLINK_RATE_MSEC;
                     blinkState = !blinkState;
                 }
-            } else {
-                blinkState = false;
             }
 
         } else {
             //When auto sequence not requested, reset some state variables
             autoFailed = false;
             stableTargetFound = false;
+            blinkState = false;
         }
 
         seq.update();

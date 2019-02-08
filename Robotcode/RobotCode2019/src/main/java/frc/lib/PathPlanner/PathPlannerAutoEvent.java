@@ -42,7 +42,7 @@ public class PathPlannerAutoEvent extends AutoEvent {
     boolean done = false;
 
     private int timestep;
-    private double taskRate = 0.02;
+    private double taskRate = RobotConstants.MAIN_LOOP_SAMPLE_RATE_S;
     private final double DT_TRACK_WIDTH_FT = 25.0 / 12.0; //Width in Feet
     
     //Special mode for supporting two-cube auto
