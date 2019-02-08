@@ -5,9 +5,11 @@ import frc.lib.AutoSequencer.AutoEvent;
 import frc.lib.AutoSequencer.AutoSequencer;
 import frc.lib.SignalMath.MathyCircularBuffer;
 import frc.robot.JeVoisInterface;
+import frc.robot.LEDController;
 import frc.robot.OperatorController;
 import frc.robot.Superstructure;
 import frc.robot.Arm.ArmPos;
+import frc.robot.LEDController.LEDPatterns;
 import frc.robot.PEZControl.PEZPos;
 import frc.robot.Superstructure.OpMode;
 
@@ -64,6 +66,8 @@ public class Autonomous {
     double autoStartTimestamp = 0;
     boolean autoFailed = false;
 
+    LEDController ledController;
+
 
     // name and "empty" with a variable name
     private static Autonomous empty = null;
@@ -92,6 +96,7 @@ public class Autonomous {
     //needs something inside of the parentheses, probably
     private Autonomous() {
         distEst = AutoSeqDistToTgtEst.getInstance();
+        ledController = LEDController.getInstance();
 
         tgtXPosBuf  = new MathyCircularBuffer(NUM_AVG_JEVOIS_SAMPLES);
         tgtYPosBuf  = new MathyCircularBuffer(NUM_AVG_JEVOIS_SAMPLES);
@@ -238,8 +243,12 @@ public class Autonomous {
     }
 
     public boolean getAutoFailedLEDState(){
+        if(blinkState == true){
+            ledController.setPattern(LEDPatterns.Pattern6);
+            if (blinkState == true) {
+                ledController.setPattern(LEDPatterns.Pattern0);
+            }
+        }
         return blinkState;
     }
 }
-
-
