@@ -84,4 +84,7 @@ public class IntakeMotorBase extends CasserolePID{
     protected void usePIDOutput(double pidOutput) {
         intakeArmMotor.set(ControlMode.PercentOutput,isInverted?-1*pidOutput:pidOutput);
     }
+    public void setManualMotorCommand(double cmd){
+        intakeArmMotor.set(ControlMode.PercentOutput,isInverted?-1*cmd:cmd); 
+}
 }

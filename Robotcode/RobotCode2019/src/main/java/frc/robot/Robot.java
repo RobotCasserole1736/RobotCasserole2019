@@ -31,6 +31,7 @@ import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.GenericHID.Hand;
 import frc.lib.Calibration.CalWrangler;
 import frc.lib.DataServer.CasseroleDataServer;
 import frc.lib.DataServer.Signal;
@@ -184,6 +185,7 @@ public class Robot extends TimedRobot {
             dataServer.logger.startLoggingTeleop();
             ledController.setPattern(LEDPatterns.Pattern3);
             matchState.SetPeriod(MatchState.Period.OperatorControl);
+            intakeControl.closedLoop();
         } catch(Throwable t) {
             CrashTracker.logThrowableCrash(t);
             throw t;
@@ -198,6 +200,7 @@ public class Robot extends TimedRobot {
             dataServer.logger.startLoggingAuto();
             ledController.setPattern(LEDPatterns.Pattern4);
             matchState.SetPeriod(MatchState.Period.Autonomous);
+            intakeControl.closedLoop();
             if(CasseroleDriverView.getAutoSelectorVal("Starting Gamepiece").compareTo(GamePiece.Cargo.toString()) == 0){
                 superstructure.setInitialOpMode(OpMode.CargoCarry);
             } else {
@@ -424,4 +427,19 @@ public class Robot extends TimedRobot {
         CasseroleDriverView.newBoolean("Line Seen", "green");
         CasseroleDriverView.newStringBox("Op Mode");
     }
+
+    @Override
+    public void testInit(){
+        intakeControl.openLoop();
+ }
+    @Override
+    public void testPeriodic(){
+        climber.setManualMotorCommand(operatorController.xb.getY(Hand.kLeft));
+        intakeControl.intakeLeftArmMotor.setManualMotorCommand(operatorController.xb.getY(Hand.kRight));
+        intakeControl.intakeRightArmMotor.setManualMotorCommand(operatorController.xb.getY(Hand.kRight));
+
+
+    }
+ 
+
 }
