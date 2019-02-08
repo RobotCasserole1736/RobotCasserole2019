@@ -28,6 +28,9 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
+import frc.lib.Util.CrashTracker;
+
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 
@@ -49,7 +52,7 @@ public class Socket extends WebSocketAdapter {
         try {
             handleIncoming((JSONObject) parser.parse(message));
         } catch (ParseException e) {
-            System.out.println("Warning: Error parsing message from client " + message);
+            CrashTracker.logAndPrint("[Data Server] Warning: Error parsing message from client " + message);
             e.printStackTrace();
         }
     }
@@ -57,7 +60,7 @@ public class Socket extends WebSocketAdapter {
     @Override
     public void onWebSocketConnect(Session sess) {
         super.onWebSocketConnect(sess);
-        System.out.println("[Data Server]: Socket Connection from " + sess.getRemoteAddress());
+        CrashTracker.logAndPrint("[Data Server]: Socket Connection from " + sess.getRemoteAddress());
         acqLists = new HashSet<AcqList>();
 
     }
@@ -65,7 +68,7 @@ public class Socket extends WebSocketAdapter {
     @Override
     public void onWebSocketClose(int statusCode, String reason) {
         super.onWebSocketClose(statusCode, reason);
-        System.out.println(
+        CrashTracker.logAndPrint(
                 "[Data Server]: Socket Connection close from " + getSession().getRemoteAddress() + " due to " + reason);
         handleClose();
         acqLists = null;
@@ -94,25 +97,25 @@ public class Socket extends WebSocketAdapter {
         } else if (cmd.equals("getSig")) {
             handleSignalListReq();
         } else {
-            System.out.println(
+            CrashTracker.logAndPrint(
                     "[Data Server]: Remote " + getSession().getRemoteAddress() + " sent unrecognized cmd " + cmd);
         }
     }
 
     public void handleNewDAQ(String id, double tx_period, double samplePeriod_ms, String[] signal_uuids) {
-        System.out.println("[Data Server]: Remote " + getSession().getRemoteAddress() + " requested new DAQ");
+        CrashTracker.logAndPrint("[Data Server]: Remote " + getSession().getRemoteAddress() + " requested new DAQ");
         acqLists.add(new AcqList(id, tx_period, samplePeriod_ms, signal_uuids, getRemote()));
     }
 
     public void handleStartReq() {
-        System.out.println("[Data Server]: Remote " + getSession().getRemoteAddress() + " requested TX start");
+        CrashTracker.logAndPrint("[Data Server]: Remote " + getSession().getRemoteAddress() + " requested TX start");
         for (AcqList daq : acqLists) {
             daq.startTransmit();
         }
     }
 
     public void handleStopReq() {
-        System.out.println("[Data Server]: Remote " + getSession().getRemoteAddress() + " requested TX stop");
+        CrashTracker.logAndPrint("[Data Server]: Remote " + getSession().getRemoteAddress() + " requested TX stop");
         for (AcqList daq : acqLists) {
             daq.stopTransmit();
         }
@@ -120,7 +123,7 @@ public class Socket extends WebSocketAdapter {
 
     public void handleSignalListReq() {
         JSONArray sig_arr = new JSONArray();
-        System.out.println("[Data Server]: Remote " + getSession().getRemoteAddress() + " requested signal list");
+        CrashTracker.logAndPrint("[Data Server]: Remote " + getSession().getRemoteAddress() + " requested signal list");
         for (Signal sig : CasseroleDataServer.getInstance().getAllSignals()) {
             sig_arr.add(sig.getJSONProperties());
         }
@@ -133,7 +136,7 @@ public class Socket extends WebSocketAdapter {
         try {
             getRemote().sendString(tx_obj.toJSONString());
         } catch (IOException e) {
-            System.out.println("Error: Cannot send signal list");
+            CrashTracker.logAndPrint("Error: Cannot send signal list");
             e.printStackTrace();
         }
     }

@@ -9,6 +9,8 @@ import org.eclipse.jetty.websocket.api.WriteCallback;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import frc.lib.Util.CrashTracker;
+
 public class AcqList {
 
     HashSet<Signal> signals;
@@ -105,8 +107,8 @@ public class AcqList {
 
         @Override
         public void writeFailed(Throwable arg0) {
-            System.out.println("Endpoint for acq list " + id + " threw error.");
-            System.out.println(arg0.getMessage());
+            CrashTracker.logAndPrint("[AcqList] Endpoint for acq list " + id + " threw error.");
+            CrashTracker.logAndPrint(arg0.getMessage());
             stopTransmit();
         }
 

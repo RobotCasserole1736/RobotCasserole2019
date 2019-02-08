@@ -23,6 +23,7 @@ package frc.lib.AutoSequencer;
 import java.util.ArrayList;
 
 import edu.wpi.first.wpilibj.Timer;
+import frc.lib.Util.CrashTracker;
 
 /**
  * Casserole Autonomous mode event sequencer. Provides an infrastructure for defining autonomous
@@ -67,18 +68,18 @@ public class AutoSequencer {
      */
     public void addEvent(AutoEvent event_in) {
         events.add(event_in);
-        System.out.println("["+name+"] New event registered - " + event_in.getClass().getName());
+        CrashTracker.logAndPrint("["+name+"] New event registered - " + event_in.getClass().getName());
         if(event_in.childEvents.size() > 0) {
-        	System.out.println("["+name+"] Child Events: ");
+        	CrashTracker.logAndPrint("["+name+"] Child Events: ");
         	for(AutoEvent child : event_in.childEvents) {
-        		System.out.println("["+name+"]       " + child.getClass().getName());
+        		CrashTracker.logAndPrint("["+name+"]       " + child.getClass().getName());
         	}
         }
     }
     
     public void clearAllEvents() {
         events.clear();
-        System.out.println("["+name+"] Cleared event list");
+        CrashTracker.logAndPrint("["+name+"] Cleared event list");
     }
 
 
@@ -89,7 +90,7 @@ public class AutoSequencer {
         globalEventIndex = 0;
         globalUpdateCount = 0;
         
-        System.out.println("["+name+"] Starting...");
+        CrashTracker.logAndPrint("["+name+"] Starting...");
 
         if (events.size() > 0) {
             activeEvent = events.get(globalEventIndex);
@@ -109,7 +110,7 @@ public class AutoSequencer {
             // Force stop this event and its children
             activeEvent.forceStopAllChildren();
             activeEvent.userForceStop();
-            System.out.println("["+name+"] Stopped.");
+            CrashTracker.logAndPrint("["+name+"] Stopped.");
         }
         
 
@@ -134,7 +135,7 @@ public class AutoSequencer {
                 	if(!child.completed) {
 	                    if (child.isRunning == false & child.isTriggered()) {
 	                        child.isRunning = true;
-	                        System.out.println("["+name+"] Starting new child auto event " + child.getClass().getName());
+	                        CrashTracker.logAndPrint("["+name+"] Starting new child auto event " + child.getClass().getName());
 	                        child.userStart();
 	                    }
 	                    // Call update if the child is running
@@ -145,7 +146,7 @@ public class AutoSequencer {
 	                    if (child.isRunning == true & child.isDone()) {
 	                        child.isRunning = false;
 	                        child.completed = true;
-	                        System.out.println("["+name+"] Finished child auto event " + child.getClass().getName());
+	                        CrashTracker.logAndPrint("["+name+"] Finished child auto event " + child.getClass().getName());
 	                    }
                 	}
 
@@ -163,7 +164,7 @@ public class AutoSequencer {
                 if (globalEventIndex >= events.size()) {
                     // terminal condition. we have no more states to run. Stop running things.
                     activeEvent = null;
-                    System.out.println("["+name+"] Finished all events in sequence.");
+                    CrashTracker.logAndPrint("["+name+"] Finished all events in sequence.");
                     return;
                 } 
                 
@@ -172,7 +173,7 @@ public class AutoSequencer {
             }
             
 	        if(globalUpdateCount % 50 == 0){
-	        	System.out.println("["+name+"] Running. timestep = " + Double.toString(globalUpdateCount*0.02) + "s | ActualTime = " + Double.toString(Timer.getFPGATimestamp()));
+	        	CrashTracker.logAndPrint("["+name+"] Running. timestep = " + Double.toString(globalUpdateCount*0.02) + "s | ActualTime = " + Double.toString(Timer.getFPGATimestamp()));
 	        }
 
         }
@@ -203,7 +204,7 @@ public class AutoSequencer {
      * @param event
      */
     private  void startEvent(AutoEvent event) {
-        System.out.println("["+name+"] Starting new auto event " + activeEvent.getClass().getName());
+        CrashTracker.logAndPrint("["+name+"] Starting new auto event " + activeEvent.getClass().getName());
         activeEvent.userStart();
     	
         if (event.childEvents.size() > 0) {

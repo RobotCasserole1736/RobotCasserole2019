@@ -6,6 +6,8 @@ import java.util.LinkedList;
 
 import org.json.simple.JSONObject;
 
+import frc.lib.Util.CrashTracker;
+
 public class Signal {
 
     String id;
@@ -74,7 +76,7 @@ public class Signal {
             if (!acqSpecs.contains(spec_in)) {
                 acqSpecs.add(spec_in);
             } else {
-                System.out.println("Warning: DataServer: Cannot add AcqSpec " + spec_in.toString()
+                CrashTracker.logAndPrint("[Signal] Warning: DataServer: Cannot add AcqSpec " + spec_in.toString()
                         + " - it has already been added to signal " + id);
             }
         }
@@ -92,7 +94,7 @@ public class Signal {
             if (acqSpecs.contains(spec_in)) {
                 acqSpecs.remove(spec_in);
             } else {
-                System.out.println("Warning: DataServer: Cannot remove AcqSpec " + spec_in.toString()
+                CrashTracker.logAndPrint("[Signal] Warning: DataServer: Cannot remove AcqSpec " + spec_in.toString()
                         + " - it is not in signal " + id);
             }
         }

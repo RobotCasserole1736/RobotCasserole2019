@@ -2,6 +2,7 @@ package frc.robot;
 
 import frc.lib.AutoSequencer.AutoSequencer;
 import frc.lib.DataServer.Signal;
+import frc.lib.Util.CrashTracker;
 import frc.robot.Arm.ArmPos;
 import frc.robot.IntakeControl.IntakePos;
 import frc.robot.IntakeControl.IntakeSpd;
@@ -147,7 +148,7 @@ public class Superstructure {
                 seq.start();
             } else if(cmdOpMode == OpMode.CargoCarry){
                 //Invalid, this transition should not occurr
-                System.out.println("Error: Superstructure - invalid transition from Hatch to CargoCarry");
+                CrashTracker.logAndPrint("[Superstructure] Error: Superstructure - invalid transition from Hatch to CargoCarry");
                 cmdOpMode = OpMode.Hatch;
             }
 

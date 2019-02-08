@@ -20,15 +20,11 @@ package frc.robot;
  *   if you would consider donating to our club to help further STEM education.
  */
 
-//import org.usfirst.frc.team1736.lib.Calibration.Calibration;
-//import org.usfirst.frc.team1736.lib.Util.CrashTracker;
-
 import frc.lib.Calibration.*;
 import frc.lib.DataServer.Signal;
 import frc.robot.IntakeControl.IntakePos;
-//import edu.wpi.first.wpilibj.Spark;
 
-import edu.wpi.first.wpilibj.AnalogPotentiometer;
+
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.DigitalInput;
 

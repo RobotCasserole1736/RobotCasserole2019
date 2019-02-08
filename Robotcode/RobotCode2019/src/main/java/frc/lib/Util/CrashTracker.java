@@ -90,7 +90,12 @@ public class CrashTracker {
 	public static void logClassInitEnd(Class class_in) {
 		logMarker("[Class Init] Finished "+(class_in.getSimpleName()));
 	}
-		
+
+	public static void logAndPrint(String message) {
+		System.out.println(message);
+		logMarker(message);
+	}
+
 	public static void logGenericMessage(String message) {
 			logMarker(message);
 	}

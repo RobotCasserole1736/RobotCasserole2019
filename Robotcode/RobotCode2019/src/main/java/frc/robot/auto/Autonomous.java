@@ -3,9 +3,12 @@ package frc.robot.auto;
 import edu.wpi.first.wpilibj.Timer;
 import frc.lib.AutoSequencer.AutoEvent;
 import frc.lib.AutoSequencer.AutoSequencer;
+import frc.lib.DataServer.Signal;
 import frc.lib.SignalMath.MathyCircularBuffer;
+import frc.lib.Util.CrashTracker;
 import frc.robot.JeVoisInterface;
 import frc.robot.LEDController;
+import frc.robot.LoopTiming;
 import frc.robot.OperatorController;
 import frc.robot.Superstructure;
 import frc.robot.Arm.ArmPos;
@@ -55,7 +58,7 @@ public class Autonomous {
     final double MAX_ALLOWABLE_ANGLE_STANDARD_DEV = 100;
 
     //Blinky auto failed constants
-    final double BLINK_RATE_SEC = 0.25;
+    final double BLINK_RATE_MSEC = 200;
     double nextBlinkTransitionTime = 0;
     boolean blinkState =false;
 
@@ -67,6 +70,12 @@ public class Autonomous {
     boolean autoFailed = false;
 
     LEDController ledController;
+
+    Signal autoReqSig;
+    Signal autoFailedSig;
+    Signal stableTargetFoundSig;
+    Signal autoSeqStepSig;
+
 
 
     // name and "empty" with a variable name
@@ -101,6 +110,13 @@ public class Autonomous {
         tgtXPosBuf  = new MathyCircularBuffer(NUM_AVG_JEVOIS_SAMPLES);
         tgtYPosBuf  = new MathyCircularBuffer(NUM_AVG_JEVOIS_SAMPLES);
         tgtAngleBuf = new MathyCircularBuffer(NUM_AVG_JEVOIS_SAMPLES);
+
+        autoReqSig = new Signal("Auto Alignment Requested", "bool");
+        autoFailedSig = new Signal("Auto Alignment Failed", "bool");
+        stableTargetFoundSig = new Signal("Auto Stable Target Found", "bool");
+        autoSeqStepSig = new Signal("Auto State Sequencer Step", "step");
+
+        seq = new AutoSequencer();
     }
 
     double xTargetOffset = 0;
@@ -110,6 +126,8 @@ public class Autonomous {
 
     //Commands called from other parts of the code need to be inputed into the parentheses, I think
     public void update(){
+        double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
+
         boolean autoMoveRequested = OperatorController.getInstance().getAutoMove();
 
         OpMode curOpMode = Superstructure.getInstance().getActualOpMode();
@@ -209,7 +227,7 @@ public class Autonomous {
                     parent.addChildEvent(new MoveArmTopPos(curOpMode));
                     parent.addChildEvent(new MoveGripper(PEZPos.Release));
                 } else {
-                    System.out.println("Error invalid Autostate.");
+                    CrashTracker.logAndPrint("[Autonomous] Error invalid Autostate.");
                 }
 
                 seq.addEvent(parent);
@@ -224,26 +242,35 @@ public class Autonomous {
             }
 
             if(autoFailed){
-                double curTime = Timer.getFPGATimestamp();
+                double curTime = sampleTimeMS;
                 //Blink a driver station LED while failed
                 if(curTime >= nextBlinkTransitionTime){
-                    nextBlinkTransitionTime = curTime + BLINK_RATE_SEC;
+                    nextBlinkTransitionTime = curTime + BLINK_RATE_MSEC;
                     blinkState = !blinkState;
                 }
             } else {
                 blinkState = false;
             }
+
+        } else {
+            //When auto sequence not requested, reset some state variables
+            autoFailed = false;
+            stableTargetFound = false;
         }
 
-        if(seq != null){
-            seq.update();
-            if(!autoMoveRequested && seq.isRunning()){
-                //Cancel sequence
-                seq.stop();
-            }
+        seq.update();
+
+        if(!autoMoveRequested && seq.isRunning()){
+            //Cancel sequence
+            seq.stop();
         }
 
         prevAutoMoveRequested = autoMoveRequested;
+
+        autoReqSig.addSample(sampleTimeMS, autoMoveRequested);
+        autoFailedSig.addSample(sampleTimeMS, autoFailed);
+        stableTargetFoundSig.addSample(sampleTimeMS, stableTargetFound);
+        autoSeqStepSig.addSample(sampleTimeMS, seq.getEventIndex());
     }
 
     public boolean getAutoFailed(){

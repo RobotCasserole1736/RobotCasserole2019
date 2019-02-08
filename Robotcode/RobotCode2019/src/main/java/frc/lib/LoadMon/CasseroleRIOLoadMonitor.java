@@ -27,6 +27,7 @@ import java.io.IOException;
 
 import edu.wpi.first.wpilibj.Timer;
 import frc.lib.DataServer.Signal;
+import frc.lib.Util.CrashTracker;
 
 /**
  * DESCRIPTION: <br>
@@ -158,7 +159,7 @@ public class CasseroleRIOLoadMonitor {
 				}
 				br.close();
 			} catch(IOException e){
-				System.out.println("WARNING: cannot get raw CPU load data. Giving up future attempts to read.");
+				CrashTracker.logAndPrint("[RIO Load Mon] WARNING: cannot get raw CPU load data. Giving up future attempts to read.");
 				e.printStackTrace();
 				giveUp = true;
 			}
@@ -180,7 +181,7 @@ public class CasseroleRIOLoadMonitor {
 				curSystemTime = Double.parseDouble(tokens[4]);
 				curIdleTime = Double.parseDouble(tokens[5]);
 			}catch(Exception e) {
-				System.out.println("WARNING: cannot parse CPU load. Giving up future attempts to read.");
+				CrashTracker.logAndPrint("[RIO Load Mon] WARNING: cannot parse CPU load. Giving up future attempts to read.");
 				e.printStackTrace();
 				giveUp = true;
 			}
@@ -228,7 +229,7 @@ public class CasseroleRIOLoadMonitor {
 				}
 				br.close();
 			} catch(IOException e){
-				System.out.println("WARNING: cannot get raw memory load data. Giving up future attempts to read.");
+				CrashTracker.logAndPrint("[RIO Load Mon] WARNING: cannot get raw memory load data. Giving up future attempts to read.");
 				e.printStackTrace();
 				giveUp = true;
 			}
@@ -245,7 +246,7 @@ public class CasseroleRIOLoadMonitor {
 				curTotalMem = Double.parseDouble(memTotalTokens[1]);
 				curFreeMem = Double.parseDouble(memFreeTokens[1]);
 			}catch(Exception e) {
-				System.out.println("WARNING: cannot parse memory load. Giving up future attempts to read.");
+				CrashTracker.logAndPrint("[RIO Load Mon] WARNING: cannot parse memory load. Giving up future attempts to read.");
 				e.printStackTrace();
 				giveUp = true;
 			}

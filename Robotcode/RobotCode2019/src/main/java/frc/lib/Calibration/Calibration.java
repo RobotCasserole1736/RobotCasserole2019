@@ -1,5 +1,7 @@
 package frc.lib.Calibration;
 
+import frc.lib.Util.CrashTracker;
+
 /*
  *******************************************************************************************
  * Copyright (C) 2017 FRC Team 1736 Robot Casserole - www.robotcasserole.org
@@ -122,11 +124,11 @@ public class Calibration {
         double temp;
         // Cross-check that default value is in-range
         if (in < min_cal) {
-            System.out.println("WARNING: Calibration: Requested value for " + name
+            CrashTracker.logAndPrint("WARNING: Calibration: Requested value for " + name
                     + " is too small. Setting value to minimum value of " + Double.toString(min_cal));
             temp = min_cal;
         } else if (in > max_cal) {
-            System.out.println("WARNING: Calibration: Requested value for " + name
+            CrashTracker.logAndPrint("WARNING: Calibration: Requested value for " + name
                     + " is too large. Setting value to maximum value of " + Double.toString(max_cal));
             temp = max_cal;
         } else {
@@ -189,7 +191,7 @@ public class Calibration {
      */
     public void acknowledgeValUpdate() {
         is_updated = false;
-        System.out.println("Info: Calibration " + this.name + " acknowledged update ");
+        CrashTracker.logAndPrint("Info: Calibration " + this.name + " acknowledged update ");
     }
 
 
@@ -215,7 +217,7 @@ public class Calibration {
         cur_val = temp;
         overridden = true;
         is_updated = true;
-        System.out.println("Info: Calibration " + this.name + " set to " + Double.toString(cur_val));
+        CrashTracker.logAndPrint("Info: Calibration " + this.name + " set to " + Double.toString(cur_val));
     }
 
 

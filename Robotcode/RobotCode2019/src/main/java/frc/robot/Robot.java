@@ -104,7 +104,7 @@ public class Robot extends TimedRobot {
     public Robot() {
         CrashTracker.logRobotConstruction();
     }
-
+    
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
@@ -166,7 +166,7 @@ public class Robot extends TimedRobot {
             dataServer.startServer();
 
             /* print the MAC address to the console for debugging */
-            System.out.println("Current MAC address: " + drivetrain.getMACAddr());
+            CrashTracker.logAndPrint("[MAC] Current MAC address: " + drivetrain.getMACAddr());
         } catch(Throwable t) {
             CrashTracker.logThrowableCrash(t);
             throw t;
@@ -205,6 +205,7 @@ public class Robot extends TimedRobot {
             } else {
                 superstructure.setInitialOpMode(OpMode.Hatch);
             }
+            CrashTracker.logMatchInfo();
 
         } catch(Throwable t) {
             CrashTracker.logThrowableCrash(t);

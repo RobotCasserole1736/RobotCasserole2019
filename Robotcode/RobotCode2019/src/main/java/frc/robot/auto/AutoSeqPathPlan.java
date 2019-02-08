@@ -3,6 +3,7 @@ package frc.robot.auto;
 import java.util.ArrayList;
 import frc.lib.AutoSequencer.AutoEvent;
 import frc.lib.PathPlanner.FalconPathPlanner;
+import frc.lib.Util.CrashTracker;
 import frc.robot.RobotConstants;
 import frc.robot.Utils;
 import frc.robot.JeVoisInterface;
@@ -50,14 +51,16 @@ public class AutoSeqPathPlan extends AutoEvent {
 
         double [] endOfLineMatrix = 
             {tgt_pos_x_ft-18, tgt_pos_y_ft};
-            System.out.println("Target Position X = " + tgt_pos_x_ft);
-            System.out.println("Target Position Y = " + tgt_pos_y_ft);
+
+        CrashTracker.logAndPrint("[AutoSeq Path Plan] Target Position X = " + tgt_pos_x_ft);
+        CrashTracker.logAndPrint("[AutoSeq Path Plan] Target Position Y = " + tgt_pos_y_ft);
 
         double [][] rotationMatrix = {
             {java.lang.Math.cos(targetAngle), -java.lang.Math.sin(targetAngle)},
             {java.lang.Math.sin(targetAngle), java.lang.Math.cos(targetAngle)}
         };
-            System.out.println("Angle from Target = " + tgt_pos_angle_rad);
+
+        CrashTracker.logAndPrint("[AutoSeq Path Plan] Angle from Target = " + tgt_pos_angle_rad);
 
         double [] wayPoint3 = multiplyMatrices(rotationMatrix, pointAheadOfEndMatrix);
 
@@ -73,13 +76,13 @@ public class AutoSeqPathPlan extends AutoEvent {
 
         double[] wp3 = wayPoint3;
         waypoints.add(wp3);
-        System.out.println("Waypoint3 X = " + wayPoint3[0]);
-        System.out.println("Waypoint3 Y = " + wayPoint3[1]);
+        CrashTracker.logAndPrint("[AutoSeq Path Plan] Waypoint3 X = " + wayPoint3[0]);
+        CrashTracker.logAndPrint("[AutoSeq Path Plan] Waypoint3 Y = " + wayPoint3[1]);
 
         double[] wp4 = wayPoint4;
         waypoints.add(wp4);
-        System.out.println("Waypoint4 X = " + wayPoint4[0]);
-        System.out.println("Waypoint4 Y = " + wayPoint4[1]);
+        CrashTracker.logAndPrint("[AutoSeq Path Plan] Waypoint4 X = " + wayPoint4[0]);
+        CrashTracker.logAndPrint("[AutoSeq Path Plan] Waypoint4 Y = " + wayPoint4[1]);
 
         path = new FalconPathPlanner(waypoints.toArray(new double[waypoints.size()][2]));
         path.setPathBeta(0.2);

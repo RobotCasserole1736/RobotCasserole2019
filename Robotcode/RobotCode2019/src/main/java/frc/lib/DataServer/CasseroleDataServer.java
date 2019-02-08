@@ -26,6 +26,8 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
+import frc.lib.Util.CrashTracker;
+
 /**
  * DESCRIPTION: <br>
  * Basic controls for a customized Jetty embedded data server, serving up
@@ -123,10 +125,10 @@ public class CasseroleDataServer {
             @Override
             public void run() {
                 try {
-                    System.out.println("[Data Server]: Starting server");
+                    CrashTracker.logAndPrint("[Data Server]: Starting server");
                     server.start();
                     server.join();
-                    System.out.println("[Data Server]: Server shut down");
+                    CrashTracker.logAndPrint("[Data Server]: Server shut down");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

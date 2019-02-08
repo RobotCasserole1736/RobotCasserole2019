@@ -21,12 +21,8 @@ package frc.robot;
  */
 
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Spark;
-import edu.wpi.first.wpilibj.PWMVictorSPX;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
-import edu.wpi.first.wpilibj.PIDSource;
-import edu.wpi.first.wpilibj.PIDSourceType;
 import frc.lib.Calibration.Calibration;
 import frc.lib.DataServer.Signal;
 
@@ -120,10 +116,10 @@ public class IntakeControl{
         dController = DriverController.getInstance();
         opController = OperatorController.getInstance();
         arm = Arm.getInstance();
-        leftIntakeMotorPosSig = new Signal("Left Intake Motor Position","deg");
-        rightIntakeMotorPosSig = new Signal("Right Intake Motor Position","deg");
+        leftIntakeMotorPosSig = new Signal("Intake Left Motor Actual Position","deg");
+        rightIntakeMotorPosSig = new Signal("Intake Right Motor Actual Position","deg");
         retractStateCmdSig = new Signal("Intake Commanded Position", "Intake Pos Enum");
-        motorSpeedCmdSig = new Signal("Intake Motor Command", "cmd");
+        motorSpeedCmdSig = new Signal("Intake Roller Motor Command", "cmd");
         ballInIntakeSig = new Signal("Intake Ball Present", "bool");
     }
 

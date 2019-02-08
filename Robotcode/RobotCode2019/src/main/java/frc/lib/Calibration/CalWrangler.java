@@ -31,6 +31,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import frc.lib.Util.CrashTracker;
+
 
 
 /**
@@ -117,20 +119,20 @@ public class CalWrangler {
                             try {
                                 double override_val = Double.parseDouble(line_parts[CAL_VAL_COL].trim());
                                 if (override_val < cal.min_cal) {
-                                    System.out.println("WARNING: Calibration Wrangler: " + line_parts[CAL_NAME_COL]
+                                    CrashTracker.logAndPrint("[CalWrangler] WARNING: Calibration Wrangler: " + line_parts[CAL_NAME_COL]
                                             + " was overridden to " + Double.toString(override_val)
                                             + ", but that override value is smaller than the minimum. Overriding to minimum value of "
                                             + Double.toString(cal.min_cal));
                                     cal.cur_val = cal.min_cal;
                                 } else if (override_val > cal.max_cal) {
-                                    System.out.println("WARNING: Calibration Wrangler: " + line_parts[CAL_NAME_COL]
+                                    CrashTracker.logAndPrint("[CalWrangler] WARNING: Calibration Wrangler: " + line_parts[CAL_NAME_COL]
                                             + " was overridden to " + Double.toString(override_val)
                                             + ", but that override value is larger than the maximum. Overriding to maximum value of "
                                             + Double.toString(cal.max_cal));
                                     cal.cur_val = cal.max_cal;
                                 } else {
                                     cal.cur_val = override_val;
-                                    System.out.println("Info: Calibration Wrangler: " + cal.name + " was overridden to "
+                                    CrashTracker.logAndPrint("[CalWrangler] Info: Calibration Wrangler: " + cal.name + " was overridden to "
                                             + Double.toString(cal.cur_val));
                                 }
                                 
@@ -142,20 +144,20 @@ public class CalWrangler {
                                 }
 
                             } catch (NumberFormatException e) {
-                                System.out.println("WARNING: Calibration Wrangler: " + line_parts[CAL_NAME_COL]
+                                CrashTracker.logAndPrint("[CalWrangler] WARNING: Calibration Wrangler: " + line_parts[CAL_NAME_COL]
                                         + " was overridden to " + line_parts[CAL_VAL_COL]
                                         + ", but that override value is not recognized as a number. No override applied.");
                                 cal.overridden = false;
                             }
                         } else {
-                            System.out.println("WARNING: Calibration Wrangler: " + line_parts[CAL_NAME_COL].trim()
+                            CrashTracker.logAndPrint("[CalWrangler] WARNING: Calibration Wrangler: " + line_parts[CAL_NAME_COL].trim()
                                     + " has been overriden more than once. Only first override will apply.");
                         }
                     }
                 }
 
                 if (match_found == false) {
-                    System.out.println(
+                    CrashTracker.logAndPrint(
                             "WARNING: Calibration Wrangler: Override was specified for " + line_parts[CAL_NAME_COL]
                                     + " but this calibration is not registered with the wrangler. No value overriden.");
                 }
@@ -168,11 +170,11 @@ public class CalWrangler {
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            System.out.println("ERROR: Calibration Wrangler: Cal File not found! Cannot open file " + calFile
+            CrashTracker.logAndPrint("[CalWrangler] ERROR: Calibration Wrangler: Cal File not found! Cannot open file " + calFile
                     + " for reading. Leaving all calibrations at default values.");
             errors_present = true;
         } catch (IOException e) {
-            System.out.println("ERROR: Calibration Wrangler: Cannot open file " + calFile
+            CrashTracker.logAndPrint("[CalWrangler] ERROR: Calibration Wrangler: Cannot open file " + calFile
                     + " for reading. Leaving all calibrations at default values.");
             e.printStackTrace();
             errors_present = true;
@@ -189,10 +191,10 @@ public class CalWrangler {
         // Indicate any errors
         if (errors_present) {
             resetAllCalsToDefault();
-            System.out.println("ERROR: Calibration: could not load cal file " + calFile + ". All calibrations left at default values.");
+            CrashTracker.logAndPrint("[CalWrangler] ERROR: Calibration: could not load cal file " + calFile + ". All calibrations left at default values.");
             return -1;
         } else {
-            System.out.println("Calibration: Successfully loaded cal file " + calFile);
+            CrashTracker.logAndPrint("[CalWrangler] Calibration: Successfully loaded cal file " + calFile);
             return 0;
         }
 
@@ -231,11 +233,11 @@ public class CalWrangler {
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            System.out.println("ERROR: Calibration Wrangler: Cal File not found! Cannot open file " + calFile
+            CrashTracker.logAndPrint("[CalWrangler] ERROR: Calibration Wrangler: Cal File not found! Cannot open file " + calFile
                     + " for reading. Leaving all calibrations at default values.");
             errors_present = true;
         } catch (IOException e) {
-            System.out.println("ERROR: Calibration Wrangler: Cannot open file " + calFile + " for writing.");
+            CrashTracker.logAndPrint("[CalWrangler] ERROR: Calibration Wrangler: Cannot open file " + calFile + " for writing.");
             e.printStackTrace();
             errors_present = true;
         } finally {
@@ -252,7 +254,7 @@ public class CalWrangler {
         if (errors_present) {
             return -1;
         } else {
-            System.out.println("Calibration: Cal file " + calFile + " successfully written.");
+            CrashTracker.logAndPrint("[CalWrangler] Calibration: Cal file " + calFile + " successfully written.");
             return 0;
         }
     }
@@ -285,7 +287,7 @@ public class CalWrangler {
     static public int register(Calibration cal_in) {
         int ret_val = 0;
         if (registeredCals.contains(cal_in)) {
-            System.out.println("WARNING: Calibration Wrangler: " + cal_in.name
+            CrashTracker.logAndPrint("[CalWrangler] WARNING: Calibration Wrangler: " + cal_in.name
                     + " has already been added to the cal wrangler. Nothing done.");
             ret_val = -1;
         } else {

@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.Timer;
 import frc.lib.DataServer.Signal;
+import frc.lib.Util.CrashTracker;
 
 public class JeVoisInterface {
 
@@ -128,14 +129,14 @@ public class JeVoisInterface {
         // but you never know.
         while(visionPort == null && retry_counter++ < 3){
             try {
-                System.out.print("Creating JeVois SerialPort...");
+                CrashTracker.logAndPrint("[JeVois Interface] Creating JeVois SerialPort...");
                 visionPort = new SerialPort(BAUD_RATE,SerialPort.Port.kUSB);
-                System.out.println("SUCCESS!!");
+                CrashTracker.logAndPrint("[JeVois Interface] SUCCESS!!");
             } catch (Exception e) {
-                System.out.println("FAILED!!");
+                CrashTracker.logAndPrint("[JeVois Interface] FAILED!!");
                 e.printStackTrace();
                 sleep(500);
-                System.out.println("Retry " + Integer.toString(retry_counter));
+                CrashTracker.logAndPrint("[JeVois Interface] Retry " + Integer.toString(retry_counter));
             }
         }
 
@@ -393,7 +394,7 @@ public class JeVoisInterface {
             camServer.setSource(visionCam);
             camStreamRunning = true;
             dataStreamRunning = true;
-            System.out.println("SUCCESS!!");
+            CrashTracker.logAndPrint("[JeVois Interface] SUCCESS!!");
         } catch (Exception e) {
             DriverStation.reportError("Cannot start camera stream from JeVois", false);
             e.printStackTrace();
@@ -420,7 +421,7 @@ public class JeVoisInterface {
     private int sendCmd(String cmd){
         int bytes;
         bytes = visionPort.writeString(cmd + "\n");
-        System.out.println("wrote " +  bytes + "/" + (cmd.length()+1) + " bytes, cmd: " + cmd);
+        CrashTracker.logAndPrint("[JeVois Interface] wrote " +  bytes + "/" + (cmd.length()+1) + " bytes, cmd: " + cmd);
         return bytes;
     }
     
@@ -435,9 +436,9 @@ public class JeVoisInterface {
         sendCmd(cmd);
         retval = blockAndCheckForOK(1.0);
         if(retval == -1){
-            System.out.println(cmd + " Produced an error");
+            CrashTracker.logAndPrint(cmd + " Produced an error");
         } else if (retval == -2) {
-            System.out.println(cmd + " timed out");
+            CrashTracker.logAndPrint(cmd + " timed out");
         }
         return retval;
     }
@@ -455,12 +456,12 @@ public class JeVoisInterface {
         if (visionPort != null){
             if (visionPort.getBytesReceived() > 0) {
                 String rxString = visionPort.readString();
-                System.out.println("Waited: " + loopCount + " loops, Rcv'd: " + rxString);
+                CrashTracker.logAndPrint("[JeVois Interface] Waited: " + loopCount + " loops, Rcv'd: " + rxString);
                 getBytesWork += rxString;
                 if(getBytesWork.contains("OK") || getBytesWork.contains("ERR")){
                     retval = getBytesWork;
                     getBytesWork = "";
-                    System.out.println(retval);
+                    CrashTracker.logAndPrint("[Jevois]" + retval);
                 }
                 loopCount = 0;
             } else {
@@ -486,7 +487,7 @@ public class JeVoisInterface {
             while(Timer.getFPGATimestamp() - startTime < timeout_s){
                 if (visionPort.getBytesReceived() > 0) {
                     testStr += visionPort.readString();
-                    System.out.println(testStr); //debug only 
+                    CrashTracker.logAndPrint("[JeVois] " + testStr); //debug only 
                     if(testStr.contains("OK")){
                         retval = 0;
                         break;
@@ -586,7 +587,7 @@ public class JeVoisInterface {
         try {
             Thread.sleep(time_ms);
         } catch (InterruptedException e) {
-            System.out.println("DO NOT WAKE THE SLEEPY BEAST");
+            CrashTracker.logAndPrint("[JeVois Interface] DO NOT WAKE THE SLEEPY BEAST");
             e.printStackTrace();
         }
     }
@@ -602,7 +603,7 @@ public class JeVoisInterface {
                 if (visionPort.getBytesReceived() > 0) {
                     System.out.print(visionPort.readString());
                 } else {
-                    System.out.println("Nothing Rx'ed");
+                    CrashTracker.logAndPrint("[JeVois Interface] Nothing Rx'ed");
                     sleep(100);
                 }
             }
