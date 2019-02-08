@@ -44,9 +44,9 @@ public class LEDController {
         Pattern2(2), /* "Meteor Rain" */
         Pattern3(3), /* "Fade In and Fade Out R&W" */
         Pattern4(4), /* "Running Lights R&W" */
-        Pattern5(5); /* "Theatre Chase R&W" */
-        Pattern6(6);  /*Blink red quickly*/
-
+        Pattern5(5), /* "Theatre Chase R&W" */
+        Pattern6(6); /* "Strobe" */
+     
         public final int value;
 
         private LEDPatterns(int value) {
@@ -79,23 +79,23 @@ public class LEDController {
 
             break;
             case Pattern2:
-                ctrl.setSpeed(-0.5);
+                ctrl.setSpeed(-0.25);
 
             break;
             case Pattern3:
-                ctrl.setSpeed(0.0);
+                ctrl.setSpeed(-0.5);
 
             break;
             case Pattern4:
-                ctrl.setSpeed(0.5);
+                ctrl.setSpeed(-0.75);
 
             break;
             case Pattern5:
-                ctrl.setSpeed(1.0);
+                ctrl.setSpeed(0.0);
 
             break;
             case Pattern6:
-                ctrl.setSpeed(1.0);
+                ctrl.setSpeed(0.25);
         }
     }
 

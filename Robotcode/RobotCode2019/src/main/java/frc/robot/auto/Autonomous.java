@@ -245,7 +245,7 @@ public class Autonomous {
     public boolean getAutoFailedLEDState(){
         if(blinkState == true){
             ledController.setPattern(LEDPatterns.Pattern6);
-            if(ledController == Pattern6){
+            if (blinkState == true) {
                 ledController.setPattern(LEDPatterns.Pattern0);
             }
         }

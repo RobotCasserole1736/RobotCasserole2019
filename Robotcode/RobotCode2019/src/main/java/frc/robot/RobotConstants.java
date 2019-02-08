@@ -34,8 +34,6 @@ public class RobotConstants {
     public static final int ARM_POS_SENSOR_PORT = 1;
 
     //Digital
-    public static final int LED_PATTERN_OUTPUT_0 = 0;
-    public static final int LED_PATTERN_OUTPUT_1 = 1;
     public static final int ARM_UPPER_LIMIT_SWITCH_PORT  = 2;
     public static final int ARM_LOWER_LIMIT_SWITCH_PORT  = 3;
     public static final int LINE_FOLLOWING_SENSOR_1_PORT = 4;
