@@ -261,5 +261,12 @@ public class IntakeControl{
     public boolean isBallDetected(){
         return ballDetected;
     }
-
+    public void openLoop(){
+        intakeLeftArmMotor.stop();
+        intakeRightArmMotor.stop();
+    }
+    public void closedLoop(){
+        intakeLeftArmMotor.start();
+        intakeRightArmMotor.start();
+    }
 }

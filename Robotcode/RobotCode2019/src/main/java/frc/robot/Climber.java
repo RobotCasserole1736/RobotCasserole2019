@@ -76,5 +76,8 @@ public class Climber {
         }
        
     }
+    public void setManualMotorCommand(double cmd){
+        windowTalon.set(cmd);
+    }
 
 }

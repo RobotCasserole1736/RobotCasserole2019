@@ -32,7 +32,7 @@ import frc.robot.Superstructure.OpMode;
 public class OperatorController {
 
     /* The USB controller itself */
-    XboxController xb;
+    public XboxController xb;
 
     /* Operator commands state*/
     boolean releaseReq;
