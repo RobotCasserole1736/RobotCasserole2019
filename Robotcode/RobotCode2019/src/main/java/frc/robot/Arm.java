@@ -125,7 +125,6 @@ public class Arm {
     final double ARM_GEAR_RATIO = 150.0/1.0;
     final double REV_ENCODER_TICKS_PER_REV = 42.0;
 
-}
     
     /////////Initialization Code\\\\\\\\\\\
     private static Arm singularInstance = null;
@@ -343,15 +342,7 @@ public class Arm {
         }
         curManMoveCmd = mov_cmd_in;
     }
-    public void setSmartMotionAccelStrategy(CANPIDController.AccelStrategy.kTrapezoidal, 0) {
 
-    }
-    public void setSmartMotionMaxVelocity() {
-        smartMotionMaxVelocity = maxVel;
-    } 
-    public void setSmartMotionMaxAccel() {
-        smartMotionMaxAccel = maxAcc;
-    }
 
     public void setSolBrake(boolean brakeIn) {
         if(brakeIn) {
