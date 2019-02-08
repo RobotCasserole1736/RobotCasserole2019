@@ -45,6 +45,7 @@ public class LEDController {
         Pattern3(3), /* "Fade In and Fade Out R&W" */
         Pattern4(4), /* "Running Lights R&W" */
         Pattern5(5); /* "Theatre Chase R&W" */
+        Pattern6(6);  /*Blink red quickly*/
 
         public final int value;
 
@@ -93,6 +94,8 @@ public class LEDController {
                 ctrl.setSpeed(1.0);
 
             break;
+            case Pattern6:
+                ctrl.setSpeed(1.0);
         }
     }
 
