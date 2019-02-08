@@ -183,7 +183,6 @@ public class Robot extends TimedRobot {
             CrashTracker.logTeleopInit();
 
             dataServer.logger.startLoggingTeleop();
-            ledController.setPattern(LEDPatterns.Pattern3);
             matchState.SetPeriod(MatchState.Period.OperatorControl);
             intakeControl.closedLoop();
         } catch(Throwable t) {
@@ -282,6 +281,12 @@ public class Robot extends TimedRobot {
             CrashTracker.logThrowableCrash(t);
             throw t;
         }
+
+        if(autonomous.getAutoFailed() == true){
+            ledController.setPattern(LEDPatterns.Pattern6);
+        } else {
+            ledController.setPattern(LEDPatterns.Pattern3);
+        }
     }
 
     /**
@@ -290,6 +295,7 @@ public class Robot extends TimedRobot {
     @Override
     public void teleopPeriodic() {
         matchPeriodicCommon();
+
     }
 
     /**

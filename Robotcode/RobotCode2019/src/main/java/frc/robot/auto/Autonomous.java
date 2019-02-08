@@ -246,6 +246,9 @@ public class Autonomous {
         prevAutoMoveRequested = autoMoveRequested;
     }
 
+    public boolean getAutoFailed(){
+        return autoFailed;
+    }
     public boolean getAutoFailedLEDState(){
         return blinkState;
     }
