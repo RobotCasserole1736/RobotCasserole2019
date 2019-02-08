@@ -81,6 +81,8 @@ public class RobotPose {
     double delta_y_robot_ft;
     double delta_x_robot_ft;
     double delta_t_robot_deg;
+    double poseAngle = 0;
+    boolean angleAvail = false;
 
     //Simulation Timing
     double prevLoopTime = 0;
@@ -126,8 +128,6 @@ public class RobotPose {
         
     
     public void update() {
-
-        double X_dot = (rightVelosity_FPS+leftVelosity_FPS)/2; 
         
         updatePoseFromWheelSpeeds();
         handleFieldColission();
@@ -165,7 +165,12 @@ public class RobotPose {
         //Transform to field coordinates
         poseX += cos(poseT)*delta_x_robot_ft + -1.0*sin(poseT)*delta_y_robot_ft;
         poseY += sin(poseT)*delta_x_robot_ft +      cos(poseT)*delta_y_robot_ft;
-        poseT += delta_t_robot_deg;
+
+        if (angleAvail){
+            poseT = poseAngle;
+        } else {
+            poseT += delta_t_robot_deg;
+        }
     }
 
     private void handleFieldColission(){
@@ -216,12 +221,6 @@ public class RobotPose {
             //Robot colliding with opposing alliance wall
             poseX += (FIELD_LEFT_BOUNDARY_FT - robotLeftBounds); //Reset bot within field
             //System.out.println("Colission with Left field boundary");
-        }
-    
-        if (angleAvail){
-            poseThaddeus = poseAngle;
-        } else {
-            poseThaddeus += 0.02 * robotAngle_DPS;
         }
     }
 
