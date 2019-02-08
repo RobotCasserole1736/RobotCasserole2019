@@ -242,13 +242,10 @@ public class Autonomous {
         prevAutoMoveRequested = autoMoveRequested;
     }
 
+    public boolean getAutoFailed(){
+        return autoFailed;
+    }
     public boolean getAutoFailedLEDState(){
-        if(blinkState == true){
-            ledController.setPattern(LEDPatterns.Pattern6);
-            if (blinkState == true) {
-                ledController.setPattern(LEDPatterns.Pattern0);
-            }
-        }
         return blinkState;
     }
 }
