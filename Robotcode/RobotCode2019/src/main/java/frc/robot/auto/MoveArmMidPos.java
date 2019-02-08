@@ -55,7 +55,7 @@ public class MoveArmMidPos extends AutoEvent {
 
     @Override
     public boolean isTriggered() {
-        return !Arm.getInstance().atDesiredHeight();
+        return true;
     }
 
     @Override

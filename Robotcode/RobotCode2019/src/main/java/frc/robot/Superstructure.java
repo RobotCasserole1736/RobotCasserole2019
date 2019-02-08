@@ -165,7 +165,7 @@ public class Superstructure {
                 seq.start();
             } else if(cmdOpMode == OpMode.CargoIntake){
                 //Start transition from Cargo Intake mode to Cargo Carry.
-                actualOpMode = OpMode.TransitionToHatch;
+                actualOpMode = OpMode.TransitionToCargoIntake;
                 seq = new AutoSequencer("CargoCarryToCargoIntake");
                 //TODO: Combine the envents which can happen in parallel
                 seq.addEvent(new EjectBall()); //Eject any ball that is presently in the intake
@@ -182,7 +182,7 @@ public class Superstructure {
             //Handle transitions out of CargoIntake mode
             if(cmdOpMode == OpMode.CargoCarry){
                 //Start transition from Cargo Intake mode to Cargo Carry.
-                actualOpMode = OpMode.TransitionToHatch;
+                actualOpMode = OpMode.TransitoinToCargoCarry;
                 seq = new AutoSequencer("CargoIntakeToCarryCargo");
                 seq.addEvent(new MoveGripper(PEZPos.CargoGrab)); //Ensure we're grabbing the ball
                 seq.addEvent(new MoveIntake(IntakePos.Ground)); //Put the intake all the way out, out of the way of the the arm and ball as they come up
