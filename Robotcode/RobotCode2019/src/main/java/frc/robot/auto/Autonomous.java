@@ -188,24 +188,26 @@ public class Autonomous {
                     isForward = true;
                 }
 
-                
-                seq = new AutoSequencer("AutoAlign");
-
-                AutoEvent parent = new AutoSeqPathPlan(xTargetOffset, yTargetOffset, targetPositionAngle); //TODO - handle the case where the path planner can't create a path based on current angle constraints with "getPathAvailable()"
-                seq.addEvent(parent);
-
-
-                parent = new AutoSeqFinalAlign();
+                AutoEvent parent;  
+                if(OperatorController.getInstance().getAutoAlignHighReq()){
+                    //If we're placing top, we can only start at the final alignment step going backward
+                    parent = new TopPlaceFinalAlign();
+                } else {
+                    //If we're placing mid/low, we use Jevois to path plan up to the target location
+                    parent = new AutoSeqPathPlan(xTargetOffset, yTargetOffset, targetPositionAngle); //TODO - handle the case where the path planner can't create a path based on current angle constraints with "getPathAvailable()"
+                    seq.addEvent(parent);
+                    parent = new AutoSeqFinalAlign();
+                }
 
                 if(OperatorController.getInstance().getAutoAlignLowReq()){
                     parent.addChildEvent(new MoveArmLowPos(curOpMode));
-                parent.addChildEvent(new MoveGripper(PEZPos.Release));
+                    parent.addChildEvent(new MoveGripper(PEZPos.Release));
                 } else if(OperatorController.getInstance().getAutoAlignMidReq()){
                     parent.addChildEvent(new MoveArmMidPos(curOpMode));
-                parent.addChildEvent(new MoveGripper(PEZPos.Release));
+                    parent.addChildEvent(new MoveGripper(PEZPos.Release));
                 } else if(OperatorController.getInstance().getAutoAlignHighReq()){
                     parent.addChildEvent(new MoveArmTopPos(curOpMode));
-                parent.addChildEvent(new MoveGripper(PEZPos.Release));
+                    parent.addChildEvent(new MoveGripper(PEZPos.Release));
                 } else {
                     System.out.println("Error invalid Autostate.");
                 }
@@ -217,6 +219,8 @@ public class Autonomous {
                 } else {
                     parent.addChildEvent(new Backup());
                 }
+
+                seq.start();
             }
 
             if(autoFailed){
@@ -243,12 +247,6 @@ public class Autonomous {
     }
 
     public boolean getAutoFailedLEDState(){
-        if(blinkState == true){
-            ledController.setPattern(LEDPatterns.Pattern6);
-            if (blinkState == true) {
-                ledController.setPattern(LEDPatterns.Pattern0);
-            }
-        }
         return blinkState;
     }
 }
