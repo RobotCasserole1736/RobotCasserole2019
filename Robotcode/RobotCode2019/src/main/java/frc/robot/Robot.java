@@ -8,6 +8,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
+import edu.wpi.first.wpilibj.DriverStation;
 
 /*
  *******************************************************************************************
@@ -30,6 +31,7 @@ import edu.wpi.first.wpilibj.BuiltInAccelerometer;
  */
 
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import frc.lib.Calibration.CalWrangler;
@@ -101,6 +103,9 @@ public class Robot extends TimedRobot {
     Signal intakeLeftCurrentSig;
     Signal intakeRightCurrentSig;
     Signal climberReleaseMotorCurrentSig;
+    Signal rioIsBrownoutSig;
+    Signal matchTimeSig;
+    Signal rioCANBusUsagePctSig;
 
     //Vision Tracking Camera
     JeVoisInterface jevois;
@@ -173,6 +178,9 @@ public class Robot extends TimedRobot {
             intakeLeftCurrentSig = new Signal("Intake Left Motor Current", "A");
             intakeRightCurrentSig = new Signal("Intake Right Motor Current", "A");
             climberReleaseMotorCurrentSig = new Signal("Climber Release Motor Current", "A");
+            rioIsBrownoutSig = new Signal("Robot Brownout", "bool");
+            matchTimeSig = new Signal("Match Time", "sec");
+            rioCANBusUsagePctSig = new Signal("Robot CAN Bus Utilization", "pct");
 
             
             /* Website setup */
@@ -435,6 +443,9 @@ public class Robot extends TimedRobot {
         intakeLeftCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.INTAKE_LEFT_MOTOR_PDP_PORT));
         intakeRightCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.INTAKE_LEFT_MOTOR_PDP_PORT));
         climberReleaseMotorCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.CLIMBER_RELEASE_MOTOR_PDP_PORT));
+        rioIsBrownoutSig.addSample(sampleTimeMs, RobotController.isBrownedOut());
+        matchTimeSig.addSample(sampleTimeMs, DriverStation.getInstance().getMatchTime());
+        rioCANBusUsagePctSig.addSample(sampleTimeMs, RobotController.getCANStatus().percentBusUtilization);
     
         CasseroleDriverView.setDialValue("Main System Pressure", pneumaticsControl.getPressure());
         CasseroleDriverView.setDialValue("Speed", Math.abs(poseCalc.getRobotVelocity_ftpersec()));
