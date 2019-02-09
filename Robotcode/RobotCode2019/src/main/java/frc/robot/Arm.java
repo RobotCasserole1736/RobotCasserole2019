@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
+import com.revrobotics.CANPIDController.AccelStrategy;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
@@ -48,19 +49,7 @@ public class Arm {
     CANEncoder armEncoder;
     double curArmAngle;
     /////The PID StartUps\\\\\
-    public double kP;
-    public double kI;
-    public double kD;
-    public double kIz;
-    public double kFF;
-    public double kMaxOutput;
-    public double kMinOutput;
-    public double maxRPM;
-    public double maxVel = 2000;
-    public double minVel;
-    public double maxAcc = 1500;
-    public double allowedErr;
-
+    public double  kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, maxRPM, maxVel, minVel, maxAcc, allowedErr;
 
     // Smart Motion Coefficients
    
@@ -102,7 +91,7 @@ public class Arm {
 
     Calibration armAngleOffsetCal;
     Calibration gravOffsetHorz;
-    Calibration rampRate;    
+    Calibration rampRate;//But we don't want this\\    
 
     Calibration bottomLimitSwitchDegreeCal;
     Calibration topLimitSwitchDegreeCal;
@@ -171,6 +160,8 @@ public class Arm {
         armPID.setSmartMotionMinOutputVelocity(minVel, smartMotionSlot);
         armPID.setSmartMotionMaxAccel(maxAcc, smartMotionSlot);
         armPID.setSmartMotionAllowedClosedLoopError(allowedErr, smartMotionSlot);
+        armPID.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, smartMotionSlot);
+
 
 
         /////Digital Inputs\\\\\\\
@@ -265,7 +256,7 @@ public class Arm {
                 defArmPos();
                 double desRotation = desAngle;
                 double gravComp = gravComp();
-                armPID.setReference(desRotation, ControlType.kPosition, 0, gravComp);
+                armPID.setReference(desRotation, ControlType.kSmartMotion, 0, gravComp);
             }
 
         } 
