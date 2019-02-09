@@ -3,6 +3,7 @@ package frc.robot;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.Servo;
+import edu.wpi.first.wpilibj.VictorSP;
 import frc.lib.Calibration.Calibration;
 
 /*
@@ -29,13 +30,10 @@ import frc.lib.Calibration.Calibration;
 public class Climber {
 
     Servo climbServo;
-    WPI_TalonSRX windowTalon;
+    VictorSP windowTalon;
 
     Calibration servoLockedCal;
     Calibration servoUnLockedCal;
-    
-    public boolean startButton;
-    public double ServoCmd;
 
     /* Singleton stuff */
     private static Climber climbCtrl = null;
@@ -47,7 +45,7 @@ public class Climber {
 
     private Climber(){
         climbServo = new Servo(RobotConstants.CLIMBER_SERVO);
-        windowTalon = new WPI_TalonSRX(RobotConstants.ClIMBER_WINDOW_MOTOR);
+        windowTalon = new VictorSP(RobotConstants.ClIMBER_WINDOW_MOTOR);
         servoLockedCal = new Calibration("Servo Locked Angle (DEG)", 180);
         servoUnLockedCal = new Calibration("Servo Unlocked Angle (DEG)", 0);
 
@@ -58,24 +56,20 @@ public class Climber {
         boolean release = OperatorController.getInstance().getClimberReleace();
 
         if(enable){
-            ServoCmd = 90;
             climbServo.set(servoUnLockedCal.get());
             if(release){
-
                 windowTalon.set(0.5);
-
+            } else {
+                windowTalon.set(0);
             }
         } else {
             climbServo.set(servoLockedCal.get());
-        }
-
-        if(!release){
-
             windowTalon.set(0);
-
         }
        
     }
+
+
     public void setManualMotorCommand(double cmd){
         windowTalon.set(cmd);
     }
