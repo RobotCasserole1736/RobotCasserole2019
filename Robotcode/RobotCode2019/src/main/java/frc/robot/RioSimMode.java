@@ -4,6 +4,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 
 import frc.lib.Calibration.Calibration;
+import frc.lib.Util.CrashTracker;
 
 /*
  *******************************************************************************************
@@ -38,18 +39,27 @@ import frc.lib.Calibration.Calibration;
 
     boolean isSimMode;
 
-    Calibration forceDriveTrainSim;
+    Calibration forceSimMode;
     final String ROBOTMAC = "00-80-2F-17-F5-E5"; /* The MAC address of the robot RoboRIO */
     private static String macStr = "MACnotInitialized";
 
 
     private RioSimMode(){
 
-        forceDriveTrainSim  = new Calibration("Force Simulated Drivetrain (>0.0001 forces simulation)", 1.0000); //Default to sim, unless we're on the robot
+        forceSimMode  = new Calibration("Force Simulation Mode (>0.0001 forces simulation)", 1.0000); //Default to sim, unless we're on the robot
 
         setMACAddr();
 
-        isSimMode = System.getProperty("os.name").contains("Windows") || (macStr != ROBOTMAC && forceDriveTrainSim.get() > 0.0001);
+        // We force sim mode whenever the OS is windows. This is because we all have windows development machines. Laugh it up, fuzzball.
+        // We force non-sim mode whenever the MAC address of our current platform is the roboRIO mounted on the real robot. 
+        // We allow user to select sim or non-sim mode when running on any other device (the testboard most likely)
+        isSimMode = System.getProperty("os.name").contains("Windows") || ( (macStr != ROBOTMAC) && forceSimMode.get() > 0.0001);
+
+        if(isSimMode){
+            CrashTracker.logAndPrint("Warning: >>>>>>>>---------------------------------<<<<<<<<");
+            CrashTracker.logAndPrint("Warning: >>>>>>>> !!! SIMULATION MODE ENABLED !!! <<<<<<<<");
+            CrashTracker.logAndPrint("Warning: >>>>>>>>---------------------------------<<<<<<<<");
+        }
     }
 
     public boolean isSimMode(){
