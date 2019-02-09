@@ -21,6 +21,7 @@ package frc.robot.auto;
 
 import frc.lib.DataServer.Signal;
 import frc.robot.LoopTiming;
+import frc.robot.RobotConstants;
 
 public class AutoSeqDistToTgtEst {
 
