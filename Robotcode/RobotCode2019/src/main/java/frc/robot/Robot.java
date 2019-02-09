@@ -419,6 +419,7 @@ public class Robot extends TimedRobot {
         CasseroleDriverView.setBoolean("Auto Failed", autonomous.getAutoFailedLEDState());
         CasseroleDriverView.setBoolean("Line Seen", linefollow.isEstLinePosAvailable());
         CasseroleDriverView.setStringBox("Op Mode", superstructure.getOpModeString());
+        CasseroleDriverView.setBoolean("Arm At Limit", arm.getBottomOfMotion() || arm.getTopOfMotion());
     }
         
     /**
@@ -436,6 +437,7 @@ public class Robot extends TimedRobot {
         CasseroleDriverView.newBoolean("Auto Failed", "red");
         CasseroleDriverView.newBoolean("Vision Target Available", "green");
         CasseroleDriverView.newBoolean("Line Seen", "green");
+        CasseroleDriverView.newBoolean("Arm At Limit", "yellow");
         CasseroleDriverView.newStringBox("Op Mode");
     }
 

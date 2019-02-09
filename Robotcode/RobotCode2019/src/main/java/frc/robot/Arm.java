@@ -34,6 +34,9 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
 
+import com.revrobotics.CANDigitalInput;
+import com.revrobotics.CANDigitalInput.LimitSwitchPolarity;
+
 
 public class Arm {
 
@@ -47,6 +50,9 @@ public class Arm {
     /////Know Where The Arm Is(From SparkMax)\\\\\
     CANEncoder armEncoder;
     double curArmAngle;
+    CANDigitalInput upperLimitSwitch;
+    CANDigitalInput lowerLimitSwitch;
+    
     /////The PID StartUps\\\\\
     public double kP;
     public double kI;
@@ -71,8 +77,6 @@ public class Arm {
     /////////Sensors\\\\\\\\\
     double voltageToDegreeMult;
     double zeroOffset;
-    DigitalInput upperLimSwitch;
-    DigitalInput lowLimSwitch;
 
     /////////Input Commands\\\\\\\\\\\
     ArmPos posIn;
@@ -115,6 +119,8 @@ public class Arm {
     Signal armMotorCmdSig;
     Signal armDesPosSig;
     Signal armActPosSig;
+    Signal armLowerLimitSig;
+    Signal armUpperLimitSig;
 
     /////////Physical Mechanism Constants\\\\\\\\\\
     final double MAX_MANUAL_DEG_PER_SEC = 25.0;
@@ -140,13 +146,22 @@ public class Arm {
         armEncoder.setPositionConversionFactor(1/(ARM_GEAR_RATIO*REV_ENCODER_TICKS_PER_REV));
         armPID = sadey.getPIDController();
 
-        //Mechanically reversed direction is forward
+        //Limit switches should be wired to be normally-closed - this way if they come unplugged, 
+        // we go to the safe-state of "no motion"
+        //Assume upper limit of travel is in the forward direction of motion
+        //Assume lower limit of travel is in the reverse direction of motion
+        upperLimitSwitch = sadey.getForwardLimitSwitch(LimitSwitchPolarity.kNormallyClosed); 
+        lowerLimitSwitch = sadey.getReverseLimitSwitch(LimitSwitchPolarity.kNormallyClosed); 
+
+        //Mechanically reversed direction is "forward" in our code
         sadey.setInverted(true);
 
         armMotorCmdSig = new Signal("Arm Motor Command", "cmd");
         armMotorCurrentSig = new Signal("Arm Motor Current", "A");
         armDesPosSig = new Signal("Arm Desired Position", "deg");
         armActPosSig = new Signal("Arm Actual Position", "deg");
+        armLowerLimitSig = new Signal("Arm Lower Position Limit Switch", "bool");
+        armUpperLimitSig = new Signal("Arm Upper Position Limit Switch", "bool");
         
         /////PID Values\\\\\
         kP = 0.1; 
@@ -165,17 +180,12 @@ public class Arm {
         armPID.setFF(kFF);
         armPID.setOutputRange(kMinOutput, kMaxOutput);
         
-            //What is the Slot For
+            //What is the Slot For - it's for 
         int smartMotionSlot = 0;
         armPID.setSmartMotionMaxVelocity(maxVel, smartMotionSlot);
         armPID.setSmartMotionMinOutputVelocity(minVel, smartMotionSlot);
         armPID.setSmartMotionMaxAccel(maxAcc, smartMotionSlot);
         armPID.setSmartMotionAllowedClosedLoopError(allowedErr, smartMotionSlot);
-
-
-        /////Digital Inputs\\\\\\\
-        upperLimSwitch = new DigitalInput(RobotConstants.ARM_UPPER_LIMIT_SWITCH_PORT);
-        lowLimSwitch = new DigitalInput(RobotConstants.ARM_LOWER_LIMIT_SWITCH_PORT);
         
         /////Calibration Things\\\\\
         topCargoHeightCal = new Calibration("Arm Top Cargo Level Pos (Deg)", 180);
@@ -225,8 +235,8 @@ public class Arm {
    
 
     public void sampleSensors() {
-       topOfMotion = upperLimSwitch.get();
-       bottomOfMotion = lowLimSwitch.get();
+       topOfMotion = upperLimitSwitch.get();
+       bottomOfMotion = lowerLimitSwitch.get();
        if (topOfMotion){
            armEncoder.setPosition(topLimitSwitchDegreeCal.get());
        } 
@@ -275,6 +285,8 @@ public class Arm {
         armMotorCurrentSig.addSample(sampleTimeMS, sadey.getOutputCurrent());
         armDesPosSig.addSample(sampleTimeMS, desAngle);
         armActPosSig.addSample(sampleTimeMS, curArmAngle);
+        armLowerLimitSig.addSample(sampleTimeMS, bottomOfMotion);
+        armUpperLimitSig.addSample(sampleTimeMS, topOfMotion);
 
         prevManMoveCmd = curManMoveCmd;
     }

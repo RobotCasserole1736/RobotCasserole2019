@@ -179,11 +179,13 @@ public class IntakeControl{
     }
 
     public boolean isAtDesPos(){
-        if(Math.abs(intakeLeftArmMotor.getCurError())<=2 && Math.abs(intakeRightArmMotor.getCurError())<=2){
-            return true;
-        }else{
-            return false;
-        }
+        //if(Math.abs(intakeLeftArmMotor.getCurError())<=2 && Math.abs(intakeRightArmMotor.getCurError())<=2){
+        //    return true;
+        //}else{
+        //    return false;
+        //}
+        //Temp Test only!!!
+        return true;
         
     }
 
