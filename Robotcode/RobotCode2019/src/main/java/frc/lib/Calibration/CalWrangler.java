@@ -29,6 +29,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import frc.lib.Util.CrashTracker;
@@ -67,9 +69,11 @@ public class CalWrangler {
 
     /** Full set of all registered calibrations on this robot */
     static public ArrayList<Calibration> registeredCals = new ArrayList<Calibration>(0);
-    // final String calFile = "C:\\Users\\Chris Gerth\\Desktop\\cal_setup.csv";
-    static final String calFile = "/U/calibration/present_cal.csv";
 
+    final static String calFilePathLocal = "./";
+	final static String calFilePathRIO = "/U/calibration/";
+    final static String calFname = "present_cal.csv";
+    static String calibrationSaveFile = "";
 
     /**
      * Reads from the calibration .csv file and overwrites present calibration values specified.
@@ -86,9 +90,19 @@ public class CalWrangler {
 
         resetAllCalsToDefault();
 
+        
+        //Check if the path for resources expected on the roboRIO exists. 
+        if(Files.exists(Paths.get(calFilePathRIO))){
+            //If RIO path takes priority (aka we're running on a roborio) this path takes priority
+            calibrationSaveFile = calFilePathRIO + calFname;
+        } else {
+            //Otherwise use a local path, like we're running on a local machine.
+            calibrationSaveFile = calFilePathLocal + calFname;
+        }
+
         /* Load file, checking for errors */
         try {
-            br = new BufferedReader(new FileReader(calFile));
+            br = new BufferedReader(new FileReader(calibrationSaveFile));
 
             // For lines in cal file
             while ((str_line = br.readLine()) != null) {
@@ -170,11 +184,11 @@ public class CalWrangler {
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            CrashTracker.logAndPrint("[CalWrangler] ERROR: Calibration Wrangler: Cal File not found! Cannot open file " + calFile
+            CrashTracker.logAndPrint("[CalWrangler] ERROR: Calibration Wrangler: Cal File not found! Cannot open file " + calibrationSaveFile
                     + " for reading. Leaving all calibrations at default values.");
             errors_present = true;
         } catch (IOException e) {
-            CrashTracker.logAndPrint("[CalWrangler] ERROR: Calibration Wrangler: Cannot open file " + calFile
+            CrashTracker.logAndPrint("[CalWrangler] ERROR: Calibration Wrangler: Cannot open file " + calibrationSaveFile
                     + " for reading. Leaving all calibrations at default values.");
             e.printStackTrace();
             errors_present = true;
@@ -191,10 +205,10 @@ public class CalWrangler {
         // Indicate any errors
         if (errors_present) {
             resetAllCalsToDefault();
-            CrashTracker.logAndPrint("[CalWrangler] ERROR: Calibration: could not load cal file " + calFile + ". All calibrations left at default values.");
+            CrashTracker.logAndPrint("[CalWrangler] ERROR: Calibration: could not load cal file " + calibrationSaveFile + ". All calibrations left at default values.");
             return -1;
         } else {
-            CrashTracker.logAndPrint("[CalWrangler] Calibration: Successfully loaded cal file " + calFile);
+            CrashTracker.logAndPrint("[CalWrangler] Calibration: Successfully loaded cal file " + calibrationSaveFile);
             return 0;
         }
 
@@ -214,12 +228,12 @@ public class CalWrangler {
 
         try {
             // create directories, if they don't exist
-            File tempFobj = new File(calFile);
+            File tempFobj = new File(calibrationSaveFile);
             File tempPathObj = new File(tempFobj.getParent());
             tempPathObj.mkdirs();
 
             // open file with overwriting
-            br = new BufferedWriter(new FileWriter(calFile, false));
+            br = new BufferedWriter(new FileWriter(calibrationSaveFile, false));
 
             // Write all overridden cals to file
             for (Calibration cal : registeredCals) {
@@ -233,11 +247,11 @@ public class CalWrangler {
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            CrashTracker.logAndPrint("[CalWrangler] ERROR: Calibration Wrangler: Cal File not found! Cannot open file " + calFile
+            CrashTracker.logAndPrint("[CalWrangler] ERROR: Calibration Wrangler: Cal File not found! Cannot open file " + calibrationSaveFile
                     + " for reading. Leaving all calibrations at default values.");
             errors_present = true;
         } catch (IOException e) {
-            CrashTracker.logAndPrint("[CalWrangler] ERROR: Calibration Wrangler: Cannot open file " + calFile + " for writing.");
+            CrashTracker.logAndPrint("[CalWrangler] ERROR: Calibration Wrangler: Cannot open file " + calibrationSaveFile + " for writing.");
             e.printStackTrace();
             errors_present = true;
         } finally {
@@ -254,7 +268,7 @@ public class CalWrangler {
         if (errors_present) {
             return -1;
         } else {
-            CrashTracker.logAndPrint("[CalWrangler] Calibration: Cal file " + calFile + " successfully written.");
+            CrashTracker.logAndPrint("[CalWrangler] Calibration: Cal file " + calibrationSaveFile + " successfully written.");
             return 0;
         }
     }
