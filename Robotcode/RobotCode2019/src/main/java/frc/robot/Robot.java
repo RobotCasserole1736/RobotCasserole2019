@@ -100,7 +100,11 @@ public class Robot extends TimedRobot {
 
     //Vision Tracking Camera
     JeVoisInterface jevois;
+    VisionLEDRingControl eyeOfVeganSauron;
+
+    //Auto Aignment Routines
     Autonomous autonomous;
+
 
     public Robot() {
         super(RobotConstants.MAIN_LOOP_SAMPLE_RATE_S);
@@ -138,6 +142,7 @@ public class Robot extends TimedRobot {
             backUltrasonic = BackUltrasonic.getInstance();
             linefollow = LineFollower.getInstance();
             superstructure = Superstructure.getInstance();
+            eyeOfVeganSauron = VisionLEDRingControl.getInstance();
 
             /* Init input from humans */
             operatorController = OperatorController.getInstance();
@@ -189,6 +194,7 @@ public class Robot extends TimedRobot {
             dataServer.logger.startLoggingTeleop();
             matchState.SetPeriod(MatchState.Period.OperatorControl);
             intakeControl.closedLoop();
+            eyeOfVeganSauron.setLEDRingState(true);
         } catch(Throwable t) {
             CrashTracker.logThrowableCrash(t);
             throw t;
@@ -204,6 +210,7 @@ public class Robot extends TimedRobot {
             ledController.setPattern(LEDPatterns.Pattern4);
             matchState.SetPeriod(MatchState.Period.Autonomous);
             intakeControl.closedLoop();
+            eyeOfVeganSauron.setLEDRingState(true);
             if(CasseroleDriverView.getAutoSelectorVal("Starting Gamepiece").compareTo(GamePiece.Cargo.toString()) == 0){
                 superstructure.setInitialOpMode(OpMode.CargoCarry);
             } else {
@@ -325,6 +332,7 @@ public class Robot extends TimedRobot {
             dataServer.logger.stopLogging();
             ledController.setPattern(LEDPatterns.Pattern2);
             matchState.SetPeriod(MatchState.Period.Disabled);
+            eyeOfVeganSauron.setLEDRingState(false);
         } catch(Throwable t) {
             CrashTracker.logThrowableCrash(t);
             throw t;
