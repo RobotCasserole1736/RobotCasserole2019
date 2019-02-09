@@ -91,6 +91,7 @@ public class Robot extends TimedRobot {
 
     //Top level telemetry signals
     Signal rioDSSampLoad;
+    Signal rioDSLogQueueLen;
     Signal rioCurrDrawLoad;
     Signal rioBattVoltLoad;
     Signal onboardAccelX;
@@ -152,12 +153,13 @@ public class Robot extends TimedRobot {
             autonomous = Autonomous.getInstance();
 
             /* Init local telemetry signals */
-            rioDSSampLoad = new Signal("dataserver stored samples", "count"); 
-            rioCurrDrawLoad = new Signal("overall current draw", "A");
-            rioBattVoltLoad = new Signal("battery voltage", "V");
+            rioDSSampLoad = new Signal("Dataserver Stored Samples", "count"); 
+            rioCurrDrawLoad = new Signal("Battery Current Draw", "A");
+            rioBattVoltLoad = new Signal("Battery Voltage", "V");
             onboardAccelX = new Signal("Onboard Accelerometer X Value", "g");
             onboardAccelY = new Signal("Onboard Accelerometer Y Value", "g");
             onboardAccelZ = new Signal("Onboard Accelerometer Z Value", "g");
+            rioDSLogQueueLen = new Signal("Dataserver File Logger Queue Length", "count");
             
             /* Website setup */
             initDriverView();
@@ -406,6 +408,7 @@ public class Robot extends TimedRobot {
         onboardAccelX.addSample(sampleTimeMs, onboardAccel.getX());
         onboardAccelY.addSample(sampleTimeMs, onboardAccel.getY());
         onboardAccelZ.addSample(sampleTimeMs, onboardAccel.getZ());
+        rioDSLogQueueLen.addSample(sampleTimeMs, dataServer.logger.getSampleQueueLength());
     
         CasseroleDriverView.setDialValue("Main System Pressure", pneumaticsControl.getPressure());
         CasseroleDriverView.setDialValue("Speed", Math.abs(poseCalc.getRobotVelocity_ftpersec()));

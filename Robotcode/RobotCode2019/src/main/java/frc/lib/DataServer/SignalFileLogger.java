@@ -101,23 +101,25 @@ public class SignalFileLogger {
 	    Thread monitorThread = new Thread(new Runnable() {
 	        @Override
             public void run() {
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                fileLoggerStateLock.lock();
-                try{
-                    if(loggingActive){
-                        DataSample samp = sampleQueue.poll();
-                        while(samp != null){
-                            writeLogData(samp);
-                            samp = sampleQueue.poll();
-                        }
+                while(true){
+                    try {
+                        Thread.sleep(250);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
-                } finally {
-                    fileLoggerStateLock.unlock();
+    
+                    fileLoggerStateLock.lock();
+                    try{
+                        if(loggingActive){
+                            DataSample samp = sampleQueue.poll();
+                            while(samp != null){
+                                writeLogData(samp);
+                                samp = sampleQueue.poll();
+                            }
+                        }
+                    } finally {
+                        fileLoggerStateLock.unlock();
+                    }
                 }
             }
         });
@@ -181,25 +183,6 @@ public class SignalFileLogger {
     ///////////////////////////////////////////////////////////////////
     // Private logging impelmentation
     ///////////////////////////////////////////////////////////////////
-
-
-    private class dataFileLogTask extends TimerTask {
-        public void run() {
-            fileLoggerStateLock.lock();
-            try{
-                if(loggingActive){
-                    DataSample samp = sampleQueue.poll();
-                    while(samp != null){
-                        writeLogData(samp);
-                        samp = sampleQueue.poll();
-                    }
-                }
-            } finally {
-                fileLoggerStateLock.unlock();
-            }
-        }
-    }
-
 
     private void writeLogData(DataSample samp_in){
         double timestamp_s = samp_in.getSampleTime_ms()/1000.0;
