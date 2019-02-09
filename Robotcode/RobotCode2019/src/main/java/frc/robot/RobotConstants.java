@@ -52,10 +52,12 @@ public class RobotConstants {
     // PDP Ports
     /////////////////////////////////////////////////////////////////////////////////////
 
+
     /////////////////////////////////////////////////////////////////////////////////////
     // Solenoid Ports
     /////////////////////////////////////////////////////////////////////////////////////
-    public static final int PEZ_SOLENOID_PORT = 0;
+    public static final int PEZ_SOLENOID_PORT_CARGO = 0;
+    public static final int PEZ_SOLENOID_PORT_HATCH = 1;
     public static final int INTAKE_ARM_BAR_PORT = 4;
     public static final int ARM_MECH_BRAKE_SOL_PORT = 5;
 

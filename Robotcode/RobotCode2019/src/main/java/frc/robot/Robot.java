@@ -42,6 +42,7 @@ import frc.lib.Util.CrashTracker;
 import frc.robot.Arm.ArmPos;
 import frc.robot.LEDController.LEDPatterns;
 import frc.robot.PEZControl.GamePiece;
+import frc.robot.PEZControl.PEZPos;
 import frc.robot.Superstructure.OpMode;
 import frc.robot.auto.AutoSeqDistToTgtEst;
 import frc.robot.auto.Autonomous;
@@ -195,6 +196,7 @@ public class Robot extends TimedRobot {
             matchState.SetPeriod(MatchState.Period.OperatorControl);
             intakeControl.closedLoop();
             eyeOfVeganSauron.setLEDRingState(true);
+            setMatchInitialCommands();
         } catch(Throwable t) {
             CrashTracker.logThrowableCrash(t);
             throw t;
@@ -211,11 +213,7 @@ public class Robot extends TimedRobot {
             matchState.SetPeriod(MatchState.Period.Autonomous);
             intakeControl.closedLoop();
             eyeOfVeganSauron.setLEDRingState(true);
-            if(CasseroleDriverView.getAutoSelectorVal("Starting Gamepiece").compareTo(GamePiece.Cargo.toString()) == 0){
-                superstructure.setInitialOpMode(OpMode.CargoCarry);
-            } else {
-                superstructure.setInitialOpMode(OpMode.Hatch);
-            }
+            setMatchInitialCommands();
             CrashTracker.logMatchInfo();
 
         } catch(Throwable t) {
@@ -402,8 +400,17 @@ public class Robot extends TimedRobot {
     final String[] gpOptions =    {GamePiece.Cargo.toString(), GamePiece.Hatch.toString(), GamePiece.Nothing.toString()};
 
     private void setMatchInitialCommands(){
-        if(CasseroleDriverView.getAutoSelectorVal("Starting Gamepiece") == gpOptions[0]){
-            
+        String gpStart = CasseroleDriverView.getAutoSelectorVal("Starting Gamepiece");
+
+        if(gpStart.compareTo(GamePiece.Cargo.toString())==0){
+            pezControl.setPositionCmd(PEZPos.CargoGrab);
+            superstructure.setInitialOpMode(OpMode.CargoCarry);
+        } else if(gpStart.compareTo(GamePiece.Hatch.toString())==0){
+            pezControl.setPositionCmd(PEZPos.HatchGrab);
+            superstructure.setInitialOpMode(OpMode.Hatch);
+        } else {
+            pezControl.setPositionCmd(PEZPos.Release);
+            superstructure.setInitialOpMode(OpMode.Hatch);
         }
     }
 

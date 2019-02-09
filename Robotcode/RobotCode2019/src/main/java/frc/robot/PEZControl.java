@@ -1,10 +1,13 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Relay.Value;
+import frc.lib.DataServer.Signal;
 import frc.lib.WebServer.CasseroleDriverView;
 
 /*
@@ -32,8 +35,8 @@ public class PEZControl {
     
     private static PEZControl pezCtrl = null;
 
-    Solenoid pezSolenoid;
-    Relay pezRelay;
+    DoubleSolenoid pezPneumaticCyl;
+    Relay pezMidPosStopper;
 
     DriverController dController;
     OperatorController opController;
@@ -42,10 +45,31 @@ public class PEZControl {
 
     PEZPos posReq;
     PEZPos prevPosReq; 
+    PEZPos posEst;
+    
+    boolean posStable;
+    int posStableCounter;
+    final int POS_STABLE_DEBOUNCE_LOOPS = 5;
+
+    Signal posReqSig;
+    Signal posEstSig;
+    Signal retractedLimSwSig;
+
 
     double retractTimeStart; 
 
     DigitalInput limitSwitch;
+    boolean limitSwitchVal;
+
+    //Physical mechanism conversion contstants
+    final DoubleSolenoid.Value SOL_POS_CARGO = DoubleSolenoid.Value.kForward;
+    final DoubleSolenoid.Value SOL_POS_HATCH = DoubleSolenoid.Value.kReverse;
+    final DoubleSolenoid.Value SOL_POS_RELEASE = SOL_POS_HATCH;
+
+    final Relay.Value REL_POS_EXTEND = Relay.Value.kForward;
+    final Relay.Value REL_POS_RETRACT = Relay.Value.kOff;
+
+    final double MAX_EXTEND_DUR_SEC = 0.500;
 
 
     public static synchronized PEZControl getInstance() {
@@ -55,11 +79,14 @@ public class PEZControl {
     }
 
     public enum PEZPos {
-        CargoGrab(0), Release(1), HatchGrab(2), None(3);
+        CargoGrab(0), Release(1), HatchGrab(2), None(3), InTransit(4);
         public final int value;
 
         private PEZPos(int value) {
             this.value = value;
+        }
+        public int toInt(){
+            return this.value;
         }
     }
 
@@ -70,85 +97,100 @@ public class PEZControl {
         private GamePiece(int value) {
             this.value = value;
         }
+        public int toInt(){
+            return this.value;
+        }
     }
 
     // This is the private constructor that will be called once by getInstance() and it should instantiate anything that will be required by the class
     private  PEZControl() {
-        pezSolenoid = new Solenoid (RobotConstants.PEZ_SOLENOID_PORT);
-        pezRelay = new Relay(RobotConstants.PEZ_RELAY_PORT);
+        pezPneumaticCyl = new DoubleSolenoid(RobotConstants.PEZ_SOLENOID_PORT_CARGO, RobotConstants.PEZ_SOLENOID_PORT_HATCH);
+        pezMidPosStopper = new Relay(RobotConstants.PEZ_RELAY_PORT);
         dController = DriverController.getInstance();
         opController = OperatorController.getInstance();
         limitSwitch = new DigitalInput(RobotConstants.PEZ_SOLENOID_LIMIT_SWITCH_PORT); 
+        posEst = PEZPos.None;
+        limitSwitchVal = false;
+        posReq = PEZPos.None;
+
+        posReqSig =new Signal("Gripper Position Requested", "pos");
+        posEstSig =new Signal("Gripper Position Estimate", "pos");
+        retractedLimSwSig =new Signal("Gripper Retracted Switch", "bool");
     }
 
-    private boolean getPezSolenoidState(){ 
+    private boolean checkExtended(){ 
         boolean  extended = true;
-        if (limitSwitch.get() == true){
+        if (limitSwitchVal == true){
+            //The limit switch was pressed, we are no longer extended
             extended = false;
-        }   else if ((limitSwitch.get() == false) && (Timer.getFPGATimestamp() - retractTimeStart < .250)) {
-            extended = true;
-        }   else if ((limitSwitch.get() == false) && (Timer.getFPGATimestamp() - retractTimeStart >= .250)) {
-            extended = false; 
+        } else if ( (Timer.getFPGATimestamp() - retractTimeStart) > MAX_EXTEND_DUR_SEC) {
+            //The timer expired. We are probably no longer extended.
+            extended = false;
+        } else {
+            //No prior case is true. We must still be extended.
+            extended = true; 
         }
         return extended;
     }
 
     public void update() {
-
-        if(MatchState.getInstance().GetPeriod() != MatchState.Period.OperatorControl &&
-           MatchState.getInstance().GetPeriod() != MatchState.Period.Autonomous){
-            //Update Gripper Control - pull position command from driver view interface.
-            String gripStart = CasseroleDriverView.getAutoSelectorVal("Starting Gamepiece");
-            if(gripStart.compareTo(GamePiece.Cargo.toString())==0){
-                setPositionCmd(PEZPos.CargoGrab);
-            } else if(gripStart.compareTo(GamePiece.Hatch.toString())==0){
-                setPositionCmd(PEZPos.HatchGrab);
-            } else {
-                setPositionCmd(PEZPos.Release);
-            }
-        }
+        limitSwitchVal = limitSwitch.get();
 
         if(posReq == PEZPos.CargoGrab){
-            pezSolenoid.set(false);
-            pezRelay.set(Value.kOff);
-            prevPosReq = PEZPos.CargoGrab;
+            posEst = posReq;
+            pezPneumaticCyl.set(SOL_POS_CARGO);
+            pezMidPosStopper.set(Value.kOff);
+
         } else if(posReq == PEZPos.HatchGrab){
-            pezSolenoid.set(true);
-            pezRelay.set(Value.kOff);
-            prevPosReq = PEZPos.HatchGrab;
+            posEst = posReq;
+            pezPneumaticCyl.set(SOL_POS_HATCH);
+            pezMidPosStopper.set(Value.kOff);
+
         }else if(posReq == PEZPos.Release){
             if (prevPosReq != PEZPos.Release){
                 retractTimeStart = Timer.getFPGATimestamp();
-                pezSolenoid.set (false);
-                pezRelay.set(Value.kOff);
+                pezPneumaticCyl.set(SOL_POS_CARGO);
+                pezMidPosStopper.set(Value.kOff);
             }
-            boolean isExtended = getPezSolenoidState();
+
+            boolean isExtended = checkExtended();
             if (isExtended == false) {
-                pezSolenoid.set (true);
-                pezRelay.set(Value.kForward);
-            } else {} // waiting for cylinder to retract- do nothing //
-            prevPosReq = PEZPos.Release;
+                posEst = posReq;
+                pezPneumaticCyl.set (SOL_POS_RELEASE);
+                pezMidPosStopper.set(Value.kForward); 
+            } else {
+                // waiting for cylinder to retract
+                posEst = PEZPos.InTransit;
+            } 
         }
 
-        if(posReq == PEZPos.HatchGrab){
-            curGamePiece = GamePiece.Hatch;
-        } else if(posReq == PEZPos.CargoGrab) {
-            curGamePiece = GamePiece.Hatch;
-        } else if(posReq == PEZPos.Release) {
-            curGamePiece = GamePiece.Nothing;
+        if(posEst != prevPosReq){
+            posStableCounter = POS_STABLE_DEBOUNCE_LOOPS;
         }
+
+        if(posStableCounter > 0){
+            posStableCounter--;
+        }
+
+        if(posStableCounter == 0 && posEst != PEZPos.InTransit){
+            posStable = true;
+        } else {
+            posStable = false;
+        }
+
+        prevPosReq = posReq;
+
+        double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
+        posReqSig.addSample(sampleTimeMS, posReq.toInt());
+        posEstSig.addSample(sampleTimeMS, posEst.toInt());
+        retractedLimSwSig.addSample(sampleTimeMS, limitSwitchVal);
     }
 
     public void setPositionCmd(PEZPos cmd_in){
         posReq = cmd_in;
     }
 
-    public GamePiece getHeldGamePiece(){
-        return curGamePiece;           
-    }
-
     public boolean isAtDesPos(){
-        //TODO - add logic to determine if the current state of the gripper matches the desired state.
-        return true;
+        return posStable;
     }
 }

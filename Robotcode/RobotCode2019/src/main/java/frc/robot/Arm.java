@@ -173,7 +173,7 @@ public class Arm {
         armPID.setFF(kFF);
         armPID.setOutputRange(kMinOutput, kMaxOutput);
         
-            //What is the Slot For - it's for ummmm slotty things. slotty mc slot face.
+        //What is the Slot For - it's for ummmm slotty things. slotty mc slot face.
         int smartMotionSlot = 0;
         armPID.setSmartMotionMaxVelocity(maxVel, smartMotionSlot);
         armPID.setSmartMotionMinOutputVelocity(minVel, smartMotionSlot);
