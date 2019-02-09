@@ -1,0 +1,96 @@
+[2019-02-09 16:36:52] robot construction - b7908f4a-c0ec-40f4-8ae7-1cf5348ddf5c
+[2019-02-09 16:36:52] robot init
+[2019-02-09 16:36:52] Warning: >>>>>>>>---------------------------------<<<<<<<<
+[2019-02-09 16:36:52] Warning: >>>>>>>> !!! SIMULATION MODE ENABLED !!! <<<<<<<<
+[2019-02-09 16:36:52] Warning: >>>>>>>>---------------------------------<<<<<<<<
+[2019-02-09 16:36:53] [JeVois Interface] Creating JeVois SerialPort...
+[2019-02-09 16:36:53] [JeVois Interface] SUCCESS!!
+[2019-02-09 16:36:53] [JeVois Interface] wrote 0/5 bytes, cmd: ping
+[2019-02-09 16:36:54] ping timed out
+[2019-02-09 16:36:54] [RIO Load Mon] WARNING: cannot get raw CPU load data. Giving up future attempts to read.
+[2019-02-09 16:36:54] [RIO Load Mon] WARNING: cannot parse CPU load. Giving up future attempts to read.
+[2019-02-09 16:36:54] [RIO Load Mon] WARNING: cannot get raw memory load data. Giving up future attempts to read.
+[2019-02-09 16:36:54] [RIO Load Mon] WARNING: cannot parse memory load. Giving up future attempts to read.
+[2019-02-09 16:36:54] [MAC] Current MAC address: F4-96-34-A1-9F-F4
+[2019-02-09 16:36:54] [Data Server]: Starting server
+[2019-02-09 16:36:54] disabled init
+[2019-02-09 16:38:28] robot construction - b365a6ec-9475-4c36-90a8-4a74a03abc43
+[2019-02-09 16:38:28] robot init
+[2019-02-09 16:38:28] Warning: >>>>>>>>---------------------------------<<<<<<<<
+[2019-02-09 16:38:28] Warning: >>>>>>>> !!! SIMULATION MODE ENABLED !!! <<<<<<<<
+[2019-02-09 16:38:28] Warning: >>>>>>>>---------------------------------<<<<<<<<
+[2019-02-09 16:38:28] [JeVois Interface] Creating JeVois SerialPort...
+[2019-02-09 16:38:28] [JeVois Interface] SUCCESS!!
+[2019-02-09 16:38:28] [JeVois Interface] wrote 0/5 bytes, cmd: ping
+[2019-02-09 16:38:29] ping timed out
+[2019-02-09 16:38:30] [RIO Load Mon] WARNING: cannot get raw CPU load data. Giving up future attempts to read.
+[2019-02-09 16:38:30] [RIO Load Mon] WARNING: cannot parse CPU load. Giving up future attempts to read.
+[2019-02-09 16:38:30] [RIO Load Mon] WARNING: cannot get raw memory load data. Giving up future attempts to read.
+[2019-02-09 16:38:30] [MAC] Current MAC address: F4-96-34-A1-9F-F4
+[2019-02-09 16:38:30] [Data Server]: Starting server
+[2019-02-09 16:38:30] [RIO Load Mon] WARNING: cannot parse memory load. Giving up future attempts to read.
+[2019-02-09 16:38:30] disabled init
+[2019-02-09 16:40:09] robot construction - 8b7c6db9-7045-469a-b12f-5d32e541f781
+[2019-02-09 16:40:09] robot init
+[2019-02-09 16:40:09] Warning: >>>>>>>>---------------------------------<<<<<<<<
+[2019-02-09 16:40:09] Warning: >>>>>>>> !!! SIMULATION MODE ENABLED !!! <<<<<<<<
+[2019-02-09 16:40:09] Warning: >>>>>>>>---------------------------------<<<<<<<<
+[2019-02-09 16:40:09] [JeVois Interface] Creating JeVois SerialPort...
+[2019-02-09 16:40:09] [JeVois Interface] SUCCESS!!
+[2019-02-09 16:40:10] [JeVois Interface] wrote 0/5 bytes, cmd: ping
+[2019-02-09 16:40:11] ping timed out
+[2019-02-09 16:40:11] [RIO Load Mon] WARNING: cannot get raw CPU load data. Giving up future attempts to read.
+[2019-02-09 16:40:11] [RIO Load Mon] WARNING: cannot parse CPU load. Giving up future attempts to read.
+[2019-02-09 16:40:11] [RIO Load Mon] WARNING: cannot get raw memory load data. Giving up future attempts to read.
+[2019-02-09 16:40:11] [RIO Load Mon] WARNING: cannot parse memory load. Giving up future attempts to read.
+[2019-02-09 16:40:11] [MAC] Current MAC address: F4-96-34-A1-9F-F4
+[2019-02-09 16:40:11] [Data Server]: Starting server
+[2019-02-09 16:40:11] disabled init
+[2019-02-09 16:42:17] robot construction - 9a8f1f08-5672-4fa0-a0ab-4b9bfa4bc810
+[2019-02-09 16:42:17] robot init
+[2019-02-09 16:42:17] Warning: >>>>>>>>---------------------------------<<<<<<<<
+[2019-02-09 16:42:17] Warning: >>>>>>>> !!! SIMULATION MODE ENABLED !!! <<<<<<<<
+[2019-02-09 16:42:17] Warning: >>>>>>>>---------------------------------<<<<<<<<
+[2019-02-09 16:42:17] [JeVois Interface] Creating JeVois SerialPort...
+[2019-02-09 16:42:17] [JeVois Interface] SUCCESS!!
+[2019-02-09 16:42:17] [JeVois Interface] wrote 0/5 bytes, cmd: ping
+[2019-02-09 16:42:18] ping timed out
+[2019-02-09 16:42:19] [RIO Load Mon] WARNING: cannot get raw CPU load data. Giving up future attempts to read.
+[2019-02-09 16:42:19] [RIO Load Mon] WARNING: cannot parse CPU load. Giving up future attempts to read.
+[2019-02-09 16:42:19] [RIO Load Mon] WARNING: cannot get raw memory load data. Giving up future attempts to read.
+[2019-02-09 16:42:19] [RIO Load Mon] WARNING: cannot parse memory load. Giving up future attempts to read.
+[2019-02-09 16:42:19] [MAC] Current MAC address: F4-96-34-A1-9F-F4
+[2019-02-09 16:42:19] [Data Server]: Starting server
+[2019-02-09 16:42:19] disabled init
+[2019-02-09 16:44:06] robot construction - 43816dda-f545-4ab9-8527-ff5d2f7c63a1
+[2019-02-09 16:44:06] robot init
+[2019-02-09 16:44:06] Warning: >>>>>>>>---------------------------------<<<<<<<<
+[2019-02-09 16:44:06] Warning: >>>>>>>> !!! SIMULATION MODE ENABLED !!! <<<<<<<<
+[2019-02-09 16:44:06] Warning: >>>>>>>>---------------------------------<<<<<<<<
+[2019-02-09 16:44:07] [JeVois Interface] Creating JeVois SerialPort...
+[2019-02-09 16:44:07] [JeVois Interface] SUCCESS!!
+[2019-02-09 16:44:07] [JeVois Interface] wrote 0/5 bytes, cmd: ping
+[2019-02-09 16:44:08] ping timed out
+[2019-02-09 16:44:08] [Data Server]: Starting server
+[2019-02-09 16:44:08] [MAC] Current MAC address: F4-96-34-A1-9F-F4
+[2019-02-09 16:44:09] disabled init
+[2019-02-09 16:44:09] [RIO Load Mon] WARNING: cannot get raw CPU load data. Giving up future attempts to read.
+[2019-02-09 16:44:09] [RIO Load Mon] WARNING: cannot parse CPU load. Giving up future attempts to read.
+[2019-02-09 16:44:09] [RIO Load Mon] WARNING: cannot get raw memory load data. Giving up future attempts to read.
+[2019-02-09 16:44:09] [RIO Load Mon] WARNING: cannot parse memory load. Giving up future attempts to read.
+[2019-02-09 16:45:53] robot construction - 542b878e-fb1e-4177-88cd-c89a60403240
+[2019-02-09 16:45:53] robot init
+[2019-02-09 16:45:53] Warning: >>>>>>>>---------------------------------<<<<<<<<
+[2019-02-09 16:45:53] Warning: >>>>>>>> !!! SIMULATION MODE ENABLED !!! <<<<<<<<
+[2019-02-09 16:45:53] Warning: >>>>>>>>---------------------------------<<<<<<<<
+[2019-02-09 16:45:53] [JeVois Interface] Creating JeVois SerialPort...
+[2019-02-09 16:45:53] [JeVois Interface] SUCCESS!!
+[2019-02-09 16:45:53] [JeVois Interface] wrote 0/5 bytes, cmd: ping
+[2019-02-09 16:45:54] ping timed out
+[2019-02-09 16:45:55] [RIO Load Mon] WARNING: cannot get raw CPU load data. Giving up future attempts to read.
+[2019-02-09 16:45:55] [MAC] Current MAC address: F4-96-34-A1-9F-F4
+[2019-02-09 16:45:55] [Data Server]: Starting server
+[2019-02-09 16:45:55] disabled init
+[2019-02-09 16:45:55] [RIO Load Mon] WARNING: cannot parse CPU load. Giving up future attempts to read.
+[2019-02-09 16:45:56] [RIO Load Mon] WARNING: cannot get raw memory load data. Giving up future attempts to read.
+[2019-02-09 16:45:56] [RIO Load Mon] WARNING: cannot parse memory load. Giving up future attempts to read.
