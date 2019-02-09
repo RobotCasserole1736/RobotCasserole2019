@@ -127,6 +127,8 @@ public class Arm {
     final double ARM_GEAR_RATIO = 150.0/1.0;
     final double REV_ENCODER_TICKS_PER_REV = 42.0;
 
+    boolean runSimMode;
+
     
     /////////Initialization Code\\\\\\\\\\\
     private static Arm singularInstance = null;
@@ -138,6 +140,8 @@ public class Arm {
     }
 
     private Arm() {
+        runSimMode = RioSimMode.getInstance().isSimMode();
+
         /////Movers\\\\\
         armBrake = new Solenoid(RobotConstants.ARM_MECH_BRAKE_SOL_PORT);
         sadey = new CANSparkMax(RobotConstants.ARM_MOTOR_PORT, MotorType.kBrushless);
@@ -250,35 +254,51 @@ public class Arm {
     /////Use Sensor Data in Calculations\\\\\
     public void update() {
 
-        curArmAngle = -1.0*armEncoder.getPosition();
 
-        //sadey.setRampRate(rampRate.get());
 
-        //TEMP - pretend we are always zeroed until the limit switches are installed.
-        isZeroed =true;
-
-        if(!isZeroed) {
-            armPID.setReference(-0.01, ControlType.kVoltage);
-            if(bottomOfMotion) {
-                isZeroed = true;
-                armPID.setReference(0.0, ControlType.kVoltage);
-            }
-        } 
-        else {
-            //Update the position based on what the driver requested
-            
+        if(runSimMode){
+            //Run a simulated arm
             if(curManMoveCmd != 0) {
-                armPID.setReference(curManMoveCmd*6.0, ControlType.kVoltage);
+                curArmAngle += 50*MAX_MANUAL_DEG_PER_SEC*curManMoveCmd;
                 desAngle = curArmAngle;
-            }
-            else {
-                defArmPos();
-                double desRotation = desAngle;
-                double gravComp = gravComp();
-                armPID.setReference(desRotation, ControlType.kPosition, 0, gravComp);
+            } else {
+                double err = (desAngle - curArmAngle);
+                if(Math.abs(err) > 50*RobotConstants.MAIN_LOOP_SAMPLE_RATE_S){
+                    err = Math.copySign(50*RobotConstants.MAIN_LOOP_SAMPLE_RATE_S, err);
+                }
+                curArmAngle += err;
             }
 
-        } 
+        } else {
+            //Control the actual arm
+            curArmAngle = -1.0*armEncoder.getPosition();
+            //TEMP - pretend we are always zeroed until the limit switches are installed and we know exactly how the starting config will look.
+            isZeroed =true;
+            if(!isZeroed) {
+                armPID.setReference(-0.01, ControlType.kVoltage);
+                if(bottomOfMotion) {
+                    isZeroed = true;
+                    armPID.setReference(0.0, ControlType.kVoltage);
+                }
+            } 
+            else {
+                //Update the position based on what the driver requested
+                
+                if(curManMoveCmd != 0) {
+                    armPID.setReference(curManMoveCmd*6.0, ControlType.kVoltage);
+                    desAngle = curArmAngle;
+                }
+                else {
+                    defArmPos();
+                    double desRotation = desAngle;
+                    double gravComp = gravComp();
+                    armPID.setReference(desRotation, ControlType.kPosition, 0, gravComp);
+                }
+
+            } 
+        }
+
+
 
         double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
         armMotorCmdSig.addSample(sampleTimeMS, sadey.getAppliedOutput());
@@ -397,18 +417,6 @@ public class Arm {
      */
     public void setIntakeActualState(IntakePos state_in) {
         curIntakePos = IntakeControl.getInstance().getPositionCmd();   
-    }
-
-    /**
-     * 
-     * @return True if the arm is forcing the intake to extend, false otherwise.
-     */
-    public boolean intakeExtendOverride() {
-        //TODO
-            if(curIntakePos == IntakePos.Retract && curArmAngle < 50) {
-               intakeExtend = true;
-            }
-        return intakeExtend;
     }
     
     public double gravComp() {

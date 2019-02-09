@@ -1,9 +1,5 @@
  package frc.robot;
  
- import java.net.NetworkInterface;
- import java.util.Enumeration;
- import java.net.SocketException;
- 
 /*
  *******************************************************************************************
  * Copyright (C) 2019 FRC Team 1736 Robot Casserole - www.robotcasserole.org
@@ -34,16 +30,10 @@
   *       this switchyard.
   */
 
-import frc.lib.Calibration.Calibration;
-
 public class Drivetrain implements DrivetrainInterface {
 
     private static DrivetrainInterface dTrainIF = null;
     private static Drivetrain dTrain = null;
-
-    Calibration forceDriveTrainSim;
-    final String ROBOTMAC = "00-80-2F-17-F5-E5"; /* The MAC address of the robot RoboRIO */
-    private static String macStr = "MACnotInitialized";
     
     public static synchronized Drivetrain getInstance() {
         if (dTrain == null){
@@ -53,13 +43,9 @@ public class Drivetrain implements DrivetrainInterface {
     }
 
     private Drivetrain(){
-
-        forceDriveTrainSim  = new Calibration("Force Simulated Drivetrain (>0.0001 forces simulation)", 1.0000); //Default to sim, unless we're on the robot
-
-        setMACAddr();
     
-        if(System.getProperty("os.name").contains("Windows") || (macStr != ROBOTMAC && forceDriveTrainSim.get() > 0.0001)){
-            dTrainIF = new DrivetrainSim(); //TODO make this work on linux laptops
+        if(RioSimMode.getInstance().isSimMode()){
+            dTrainIF = new DrivetrainSim(); 
         } else {
             dTrainIF = new DrivetrainReal();
         }
@@ -91,35 +77,6 @@ public class Drivetrain implements DrivetrainInterface {
 
     public double getRightWheelSpeedRPM(){
         return dTrainIF.getRightWheelSpeedRPM();
-    }
-
-    public void setMACAddr(){
-
-        // Get MAC Address
-        try {
-            //Enumeration<NetworkInterface> netInterfaces = NetworkInterface.getNetworkInterfaces();
-            NetworkInterface neti = NetworkInterface.getByName("eth0");
-            byte[] mac = neti.getHardwareAddress();
-
-            if(mac == null){ //happens on windows sometimes
-                throw new SocketException();
-            }
-
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < mac.length; i++) {
-                sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));        
-            }
-            macStr = sb.toString();
-
-        } catch (SocketException e){
-
-            macStr = "SocketException";
-
-        }
-    }
-
-    public String getMACAddr(){
-        return macStr;
     }
 
     @Override

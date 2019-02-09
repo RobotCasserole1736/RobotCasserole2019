@@ -28,6 +28,8 @@ import frc.lib.DataServer.Signal;
 
 public class IntakeControl{
 
+    boolean runSimMode;
+
     DigitalInput ballInIntake;
 
     Spark intakeMotor;
@@ -81,6 +83,8 @@ public class IntakeControl{
     }
     
     private IntakeControl(){
+        runSimMode = RioSimMode.getInstance().isSimMode();
+
         intakeSpeed = new Calibration("Intake Intake Speed (motor cmd)", 0.25, 0, 1);
         ejectSpeed = new Calibration("Intake Eject Speed (motor cmd)", 0.25, 0, 1);
         extendTime = new Calibration("Intake Est Extend Time (sec)", 0.500, 0, 5);
@@ -179,14 +183,15 @@ public class IntakeControl{
     }
 
     public boolean isAtDesPos(){
-        //if(Math.abs(intakeLeftArmMotor.getCurError())<=2 && Math.abs(intakeRightArmMotor.getCurError())<=2){
-        //    return true;
-        //}else{
-        //    return false;
-        //}
-        //Temp Test only!!!
-        return true;
-        
+        if(runSimMode){
+            return true;
+        } else {
+            if(Math.abs(intakeLeftArmMotor.getCurError())<=2 && Math.abs(intakeRightArmMotor.getCurError())<=2){
+                return true;
+            }else{
+                return false;
+            }
+        }
     }
 
 
@@ -194,51 +199,67 @@ public class IntakeControl{
     public void update(){
         double intakeMotorCmd = 0;
 
-        currentLeftPosition= intakeLeftArmMotor.returnPIDInput();
-        currentRightPosition= intakeRightArmMotor.returnPIDInput();
+        if(runSimMode){
+            if(intakePosCmd==IntakePos.Extend){
+                currentLeftPosition = (extendAngle.get());
+                currentRightPosition = (extendAngle.get());
+            }else if(intakePosCmd==IntakePos.Ground){
+                currentLeftPosition = (groundAngle.get());
+                currentRightPosition = (groundAngle.get()); 
+            }else if(intakePosCmd==IntakePos.Retract){
+                currentLeftPosition = (retractAngle.get());
+                currentRightPosition = (retractAngle.get()); 
+            }
 
+            ballDetected = false;
 
-        if(MatchState.getInstance().GetPeriod() != MatchState.Period.OperatorControl &&
-           MatchState.getInstance().GetPeriod() != MatchState.Period.Autonomous) {
-            //Start intake within frame perimiter and in safe state
-            setPositionCmd(IntakePos.Retract);
-            setSpeedCmd(IntakeSpd.Stop);
+        } else {
+            currentLeftPosition= intakeLeftArmMotor.returnPIDInput();
+            currentRightPosition= intakeRightArmMotor.returnPIDInput();
+    
+    
+            if(MatchState.getInstance().GetPeriod() != MatchState.Period.OperatorControl &&
+               MatchState.getInstance().GetPeriod() != MatchState.Period.Autonomous) {
+                //Start intake within frame perimiter and in safe state
+                setPositionCmd(IntakePos.Retract);
+                setSpeedCmd(IntakeSpd.Stop);
+            }
+    
+            //Intake Arm stuffs
+            if(intakePosCmd==IntakePos.Extend){
+                intakeLeftArmMotor.setSetpoint(extendAngle.get());
+                intakeRightArmMotor.setSetpoint(extendAngle.get());
+            }else if(intakePosCmd==IntakePos.Ground){
+                intakeLeftArmMotor.setSetpoint(groundAngle.get());
+                intakeRightArmMotor.setSetpoint(groundAngle.get()); 
+            }else if(intakePosCmd==IntakePos.Retract){
+                intakeLeftArmMotor.setSetpoint(retractAngle.get());
+                intakeRightArmMotor.setSetpoint(retractAngle.get()); 
+            }else{
+                intakeLeftArmMotor.stop();
+                intakeRightArmMotor.stop();
+            }
+            
+    
+            ballDetected = !ballInIntake.get(); //Sensor outputs high for no ball, low for ball 
+    
+            //Intake motor control
+            if((ballDetected) && (intakeSpdCmd == IntakeSpd.Intake)){ //If we got a ball, don't Intake
+                intakeMotorCmd = 0;
+            }else if((!ballDetected) && (intakeSpdCmd == IntakeSpd.Intake)){ //If we don't, Intake
+                intakeMotorCmd = intakeSpeed.get();
+            }else if(intakeSpdCmd == IntakeSpd.Stop){ //Whether we have a ball or not, we can Stop and Eject
+                intakeMotorCmd = 0;
+            }else if(intakeSpdCmd == IntakeSpd.Eject){
+                intakeMotorCmd = -1 * ejectSpeed.get();
+            }else{ //If for some reason it is confused, don't run the intake
+                intakeMotorCmd = 0;
+            }
+    
+            intakeMotor.set(intakeMotorCmd);
+    
         }
 
-        //Intake Arm stuffs
-        if(intakePosCmd==IntakePos.Extend){
-            intakeLeftArmMotor.setSetpoint(extendAngle.get());
-            intakeRightArmMotor.setSetpoint(extendAngle.get());
-        }else if(intakePosCmd==IntakePos.Ground){
-            intakeLeftArmMotor.setSetpoint(groundAngle.get());
-            intakeRightArmMotor.setSetpoint(groundAngle.get()); 
-        }else if(intakePosCmd==IntakePos.Retract){
-            intakeLeftArmMotor.setSetpoint(retractAngle.get());
-            intakeRightArmMotor.setSetpoint(retractAngle.get()); 
-        }else{
-            intakeLeftArmMotor.stop();
-            intakeRightArmMotor.stop();
-        }
-        
-
-        ballDetected = !ballInIntake.get(); //Sensor outputs high for no ball, low for ball 
-
-        //Intake motor control
-        if((ballDetected) && (intakeSpdCmd == IntakeSpd.Intake)){ //If we got a ball, don't Intake
-            intakeMotorCmd = 0;
-        }else if((!ballDetected) && (intakeSpdCmd == IntakeSpd.Intake)){ //If we don't, Intake
-            intakeMotorCmd = intakeSpeed.get();
-        }else if(intakeSpdCmd == IntakeSpd.Stop){ //Whether we have a ball or not, we can Stop and Eject
-            intakeMotorCmd = 0;
-        }else if(intakeSpdCmd == IntakeSpd.Eject){
-            intakeMotorCmd = -1 * ejectSpeed.get();
-        }else{ //If for some reason it is confused, don't run the intake
-            intakeMotorCmd = 0;
-        }
-
-        intakeMotor.set(intakeMotorCmd);
-
-        
         /* Update Telemetry */
         double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
         leftIntakeMotorPosSig.addSample(sampleTimeMS, currentLeftPosition);

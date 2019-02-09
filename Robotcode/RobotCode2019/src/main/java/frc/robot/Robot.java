@@ -151,6 +151,7 @@ public class Robot extends TimedRobot {
             DrivetrainClosedLoopTestVectors.getInstance();
             AutoSeqDistToTgtEst.getInstance();
             autonomous = Autonomous.getInstance();
+            RioSimMode.getInstance();
 
             /* Init local telemetry signals */
             rioDSSampLoad = new Signal("Dataserver Stored Samples", "count"); 
@@ -169,7 +170,7 @@ public class Robot extends TimedRobot {
             dataServer.startServer();
 
             /* print the MAC address to the console for debugging */
-            CrashTracker.logAndPrint("[MAC] Current MAC address: " + drivetrain.getMACAddr());
+            CrashTracker.logAndPrint("[MAC] Current MAC address: " + RioSimMode.getInstance().getMACAddr());
         } catch(Throwable t) {
             CrashTracker.logThrowableCrash(t);
             throw t;
