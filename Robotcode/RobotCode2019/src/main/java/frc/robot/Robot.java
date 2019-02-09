@@ -91,13 +91,16 @@ public class Robot extends TimedRobot {
     Superstructure superstructure;
 
     //Top level telemetry signals
-    Signal rioDSSampLoad;
-    Signal rioDSLogQueueLen;
-    Signal rioCurrDrawLoad;
-    Signal rioBattVoltLoad;
-    Signal dtFwdRevAccel;
-    Signal dtLeftRightAccel;
-    Signal dtUpDownAccel;
+    Signal rioDSSampLoadSig;
+    Signal rioDSLogQueueLenSig;
+    Signal rioCurrDrawLoadSig;
+    Signal rioBattVoltLoadSig;
+    Signal dtFwdRevAccelSig;
+    Signal dtLeftRightAccelSig;
+    Signal dtUpDownAccelSig;
+    Signal intakeLeftCurrentSig;
+    Signal intakeRightCurrentSig;
+    Signal climberReleaseMotorCurrentSig;
 
     //Vision Tracking Camera
     JeVoisInterface jevois;
@@ -160,13 +163,17 @@ public class Robot extends TimedRobot {
             RioSimMode.getInstance();
 
             /* Init local telemetry signals */
-            rioDSSampLoad = new Signal("Dataserver Stored Samples", "count"); 
-            rioCurrDrawLoad = new Signal("Battery Current Draw", "A");
-            rioBattVoltLoad = new Signal("Battery Voltage", "V");
-            rioDSLogQueueLen = new Signal("Dataserver File Logger Queue Length", "count");
-            dtFwdRevAccel = new Signal("Drivetrain Fwd/Rev Acceleration", "g");
-            dtLeftRightAccel = new Signal("Drivetrain Left/Right Acceleration", "g");
-            dtUpDownAccel = new Signal("Drivetrain Up/Down Acceleration", "g");
+            rioDSSampLoadSig = new Signal("Dataserver Stored Samples", "count"); 
+            rioCurrDrawLoadSig = new Signal("Battery Current Draw", "A");
+            rioBattVoltLoadSig = new Signal("Battery Voltage", "V");
+            rioDSLogQueueLenSig = new Signal("Dataserver File Logger Queue Length", "count");
+            dtFwdRevAccelSig = new Signal("Drivetrain Fwd/Rev Acceleration", "g");
+            dtLeftRightAccelSig = new Signal("Drivetrain Left/Right Acceleration", "g");
+            dtUpDownAccelSig = new Signal("Drivetrain Up/Down Acceleration", "g");
+            intakeLeftCurrentSig = new Signal("Intake Left Motor Current", "A");
+            intakeRightCurrentSig = new Signal("Intake Right Motor Current", "A");
+            climberReleaseMotorCurrentSig = new Signal("Climber Release Motor Current", "A");
+
             
             /* Website setup */
             initDriverView();
@@ -418,13 +425,16 @@ public class Robot extends TimedRobot {
         double sampleTimeMs = loopTiming.getLoopStartTimeSec()*1000.0;
 
         /* Update main loop signals */
-        rioDSSampLoad.addSample(sampleTimeMs, dataServer.getTotalStoredSamples());
-        rioCurrDrawLoad.addSample(sampleTimeMs, pdp.getTotalCurrent());
-        rioBattVoltLoad.addSample(sampleTimeMs, pdp.getVoltage());  
-        rioDSLogQueueLen.addSample(sampleTimeMs, dataServer.logger.getSampleQueueLength());
-        dtFwdRevAccel.addSample(sampleTimeMs, onboardAccel.getY());
-        dtLeftRightAccel.addSample(sampleTimeMs, onboardAccel.getZ());
-        dtUpDownAccel.addSample(sampleTimeMs, (onboardAccel.getX()*-1));
+        rioDSSampLoadSig.addSample(sampleTimeMs, dataServer.getTotalStoredSamples());
+        rioCurrDrawLoadSig.addSample(sampleTimeMs, pdp.getTotalCurrent());
+        rioBattVoltLoadSig.addSample(sampleTimeMs, pdp.getVoltage());  
+        rioDSLogQueueLenSig.addSample(sampleTimeMs, dataServer.logger.getSampleQueueLength());
+        dtFwdRevAccelSig.addSample(sampleTimeMs, onboardAccel.getY());
+        dtLeftRightAccelSig.addSample(sampleTimeMs, onboardAccel.getZ());
+        dtUpDownAccelSig.addSample(sampleTimeMs, (onboardAccel.getX()*-1));
+        intakeLeftCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.INTAKE_LEFT_MOTOR_PDP_PORT));
+        intakeRightCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.INTAKE_LEFT_MOTOR_PDP_PORT));
+        climberReleaseMotorCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.CLIMBER_RELEASE_MOTOR_PDP_PORT));
     
         CasseroleDriverView.setDialValue("Main System Pressure", pneumaticsControl.getPressure());
         CasseroleDriverView.setDialValue("Speed", Math.abs(poseCalc.getRobotVelocity_ftpersec()));
