@@ -94,9 +94,9 @@ public class Robot extends TimedRobot {
     Signal rioDSLogQueueLen;
     Signal rioCurrDrawLoad;
     Signal rioBattVoltLoad;
-    Signal onboardAccelX;
-    Signal onboardAccelY;
-    Signal onboardAccelZ;
+    Signal dtFwdRevAccel;
+    Signal dtLeftRightAccel;
+    Signal dtUpDownAccel;
 
     //Vision Tracking Camera
     JeVoisInterface jevois;
@@ -162,10 +162,10 @@ public class Robot extends TimedRobot {
             rioDSSampLoad = new Signal("Dataserver Stored Samples", "count"); 
             rioCurrDrawLoad = new Signal("Battery Current Draw", "A");
             rioBattVoltLoad = new Signal("Battery Voltage", "V");
-            onboardAccelX = new Signal("Onboard Accelerometer X Value", "g");
-            onboardAccelY = new Signal("Onboard Accelerometer Y Value", "g");
-            onboardAccelZ = new Signal("Onboard Accelerometer Z Value", "g");
             rioDSLogQueueLen = new Signal("Dataserver File Logger Queue Length", "count");
+            dtFwdRevAccel = new Signal("Drivetrain Fwd/Rev Acceleration", "g");
+            dtLeftRightAccel = new Signal("Drivetrain Left/Right Acceleration", "g");
+            dtUpDownAccel = new Signal("Drivetrain Up/Down Acceleration", "g");
             
             /* Website setup */
             initDriverView();
@@ -414,10 +414,10 @@ public class Robot extends TimedRobot {
         rioDSSampLoad.addSample(sampleTimeMs, dataServer.getTotalStoredSamples());
         rioCurrDrawLoad.addSample(sampleTimeMs, pdp.getTotalCurrent());
         rioBattVoltLoad.addSample(sampleTimeMs, pdp.getVoltage());  
-        onboardAccelX.addSample(sampleTimeMs, onboardAccel.getX());
-        onboardAccelY.addSample(sampleTimeMs, onboardAccel.getY());
-        onboardAccelZ.addSample(sampleTimeMs, onboardAccel.getZ());
         rioDSLogQueueLen.addSample(sampleTimeMs, dataServer.logger.getSampleQueueLength());
+        dtFwdRevAccel.addSample(sampleTimeMs, onboardAccel.getY());
+        dtLeftRightAccel.addSample(sampleTimeMs, onboardAccel.getZ());
+        dtUpDownAccel.addSample(sampleTimeMs, (onboardAccel.getX()*-1));
     
         CasseroleDriverView.setDialValue("Main System Pressure", pneumaticsControl.getPressure());
         CasseroleDriverView.setDialValue("Speed", Math.abs(poseCalc.getRobotVelocity_ftpersec()));
