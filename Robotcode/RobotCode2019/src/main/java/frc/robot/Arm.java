@@ -57,6 +57,7 @@ public class Arm {
     /////The PID StartUps\\\\\
     public double  kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, maxRPM, maxVel, minVel, maxAcc, allowedErr;
 
+    
     // Smart Motion Coefficients
    
     
@@ -99,6 +100,15 @@ public class Arm {
 
     Calibration bottomLimitSwitchDegreeCal;
     Calibration topLimitSwitchDegreeCal;
+
+    Calibration kMaxOutputCal;
+    Calibration kMinOutputCal;
+    Calibration maxRPMCal;
+    Calibration maxVelCal;
+    Calibration minVelCal;
+    Calibration maxAccCal;
+    Calibration allowedErrCal;
+
 
     /////////Limit Switches\\\\\\\\\\
     boolean topOfMotion;
@@ -162,9 +172,12 @@ public class Arm {
         kD = 0; 
         kIz = 0; 
         kFF = 0; 
-        kMaxOutput = 1; 
-        kMinOutput = -1;
-        maxRPM = 9000;
+        //kMaxOutput = 1; 
+        //kMinOutput = -1;
+        //maxRPM = 9000;
+        //tbd 160deg/sec = 26 2/3 rpms
+        //maxVel = 26;
+
         /////Set PID\\\\\
         armPID.setP(kP);
         armPID.setI(kI);
@@ -175,10 +188,11 @@ public class Arm {
         
         //What is the Slot For - it's for ummmm slotty things. slotty mc slot face.
         int smartMotionSlot = 0;
-        armPID.setSmartMotionMaxVelocity(maxVel, smartMotionSlot);
-        armPID.setSmartMotionMinOutputVelocity(minVel, smartMotionSlot);
-        armPID.setSmartMotionMaxAccel(maxAcc, smartMotionSlot);
-        armPID.setSmartMotionAllowedClosedLoopError(allowedErr, smartMotionSlot);
+        
+        armPID.setSmartMotionMaxVelocity(maxVelCal.get(), smartMotionSlot);
+        armPID.setSmartMotionMinOutputVelocity(minVelCal.get(), smartMotionSlot);
+        armPID.setSmartMotionMaxAccel(maxAccCal.get(), smartMotionSlot);
+        armPID.setSmartMotionAllowedClosedLoopError(allowedErrCal.get(), smartMotionSlot);
         armPID.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, smartMotionSlot);
 
         /////Calibration Things\\\\\
@@ -200,6 +214,17 @@ public class Arm {
         //rampRate = new Calibration("Arm Spark Ramp Rate (Volts)", 0.3);
         bottomLimitSwitchDegreeCal = new Calibration("Angle at bottom limit switch (deg)", -30);
         topLimitSwitchDegreeCal = new Calibration("Angle at bottom limit switch (deg)", 110);
+
+        //Calibration for the Arm Trapezoidal\\
+        kMaxOutputCal = new Calibration("Max Power?", 0);
+        kMinOutputCal = new Calibration("Minimum Power?",0);
+        maxRPMCal = new Calibration("Maximum Speed The Motor Should Spin", 100);
+        maxVelCal = new Calibration("Max Velocity the Arm For The Arm", 1000);
+        minVelCal = new Calibration("Minimum Velocity For The Arm", 0);
+        maxAccCal = new Calibration("Maximum Acceleration on Arm", 10);
+        allowedErrCal = new Calibration("How Much Error Is OK", 10);
+
+        
         //sadey.setRampRate(rampRate.get());
     } 
     
