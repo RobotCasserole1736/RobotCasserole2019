@@ -1,6 +1,7 @@
 package frc.robot.auto;
 
 import frc.lib.DataServer.Signal;
+import frc.robot.JeVoisInterface;
 import frc.robot.OperatorController;
 
 /*
@@ -52,16 +53,22 @@ public class Autonomous {
     StateEnum prevState;
 
     //Define the state you should start in
-    final StateEnum INITAL_STATE = StateEnum.Inactive; 
+    final StateEnum INITAL_STATE = StateEnum.Inactive;
+    double xTargetOffset;
+    double yTargetOffset;
+    boolean stableTargetFound;
+    double targetPositionAngle;
 
     public Autonomous(){
         curState = INITAL_STATE;
         prevState = INITAL_STATE;
 
-        boolean autoMoveRequested = OperatorController.getInstance().getAutoMove();
     }
 
     public void update(){
+
+        boolean autoMoveRequested = OperatorController.getInstance().getAutoMove();
+
         //Main update loop
         StateEnum nextState = curState;
 
@@ -73,23 +80,60 @@ public class Autonomous {
             case Inactive:
                 //Step 1 - Read inputs relevant to this state
                 //TODO - call methods to read inputs as needed
+                if(autoMoveRequested == true){
+                    nextState = StateEnum.SendJevoislatch;
+                } else {
+                    nextState = StateEnum.Inactive;
+                }
 
                 //Step 2 - Set outputs for the current state
                 //TODO - perform actions and set outputs as needed
 
                 //Step 3 - Detremine if we need to transition to a different state, and set nextState to that one.
-                nextState = StateEnum.Inactive; //TODO - create logic to populate nextState with a reasonable value.
+                 //TODO - create logic to populate nextState with a reasonable value.
             break;
 
             case SendJevoislatch:
                 //Step 1 - Read inputs relevant to this state
                 //TODO - call methods to read inputs as needed
+                /*if(sendJevoislatch == true){
+                    if(JeVoisInterface.getInstance().getLatchCounter() > jeVoisPreLatchCount && visionAvailable){
+                        //Jevois latched a new target. Start collecting samples
+        
+                        long frameCounter = JeVoisInterface.getInstance().getFrameRXCount();
+                        if(frameCounter != prevFrameCounter){
+                            //A new sample has come in from the vision camera
+                            tgtXPosBuf.pushFront(JeVoisInterface.getInstance().getTgtPositionX());
+                            tgtYPosBuf.pushFront(JeVoisInterface.getInstance().getTgtPositionY());
+                            tgtAngleBuf.pushFront(JeVoisInterface.getInstance().getTgtAngle());
+                            prevFrameCounter = frameCounter;
+                            jeVoisSampleCounter++;
+                        }
+        
+                        if(jeVoisSampleCounter >= NUM_AVG_JEVOIS_SAMPLES){
+                            //We've got enough vision samples to start evaluating if the target is stable
+                            if( (tgtXPosBuf.getStdDev() < MAX_ALLOWABLE_DISTANCE_STANDARD_DEV) &&
+                                (tgtYPosBuf.getStdDev() < MAX_ALLOWABLE_DISTANCE_STANDARD_DEV) &&
+                                (tgtAngleBuf.getStdDev() < MAX_ALLOWABLE_ANGLE_STANDARD_DEV) 
+                              ){
+                                //Target is declared "Stable"
+                                xTargetOffset = tgtXPosBuf.getAverage();
+                                yTargetOffset = tgtYPosBuf.getAverage();
+                                targetPositionAngle = tgtAngleBuf.getAverage();
+                                stableTargetFound = true; 
+                            }
+                        }
+                    }    
+                    nextState = StateEnum.waitForLatln;
+                } else {
+                    nextState = StateEnum.Inactive;
+                }*/
 
                 //Step 2 - Set outputs for the current state
                 //TODO - perform actions and set outputs as needed
 
                 //Step 3 - Detremine if we need to transition to a different state, and set nextState to that one.
-                nextState = StateEnum.Inactive; //TODO - create logic to populate nextState with a reasonable value.
+                //TODO - create logic to populate nextState with a reasonable value.
             break;
 
             case waitForLatln:
