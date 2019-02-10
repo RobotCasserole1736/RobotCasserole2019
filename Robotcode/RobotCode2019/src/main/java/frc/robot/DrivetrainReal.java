@@ -84,7 +84,8 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
     Signal currentL1Sig;
     Signal currentL2Sig;
     Signal opModeSig;
-    Signal gyroscopeSig;
+    Signal angleActSig;
+    Signal angleDesSig;
     Signal wheelSpdActRightSig;
     Signal wheelSpdActLeftSig;
     Signal wheelSpdDesRightSig;
@@ -159,7 +160,7 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
         rightDtGain_D = new Calibration("Drivetrain Right D Gain", 0.0);
         rightDtGain_F = new Calibration("Drivetrain Right F Gain", 2.0);
 
-        gyroCompGain_P = new Calibration("Drivetrain Gyro Compensation P Gain", 0.001);
+        gyroCompGain_P = new Calibration("Drivetrain Gyro Compensation P Gain", 5.0);
 
         //Telemetry
         currentR1Sig = new Signal("Drivetrain R1 Motor Current", "A");
@@ -167,7 +168,8 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
         currentL1Sig = new Signal("Drivetrain L1 Motor Current", "A");
         currentL2Sig = new Signal("Drivetrain L2 Motor Current", "A");
         opModeSig = new Signal("Drivetrain Operation Mode", "Op Mode Enum");
-        gyroscopeSig = new Signal("Drivetrain Measured Pose Angle", "Deg");
+        angleActSig = new Signal("Drivetrain Actual Pose Angle", "Deg");
+        angleDesSig = new Signal("Drivetrain Desired Pose Angle", "Deg");
         wheelSpdActRightSig = new Signal("Drivetrain Right Wheel Actual Speed", "RPM");
         wheelSpdActLeftSig = new Signal("Drivetrain Left Wheel Actual Speed", "RPM");
         wheelSpdDesRightSig = new Signal("Drivetrain Right Wheel Desired Speed", "RPM");
@@ -341,6 +343,7 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
             double motorSpeedLeftCMD = 0;
             double motorSpeedRightCMD = 0;
 
+            headingCmd_deg = gyroLockRotationCmd;
             motorSpeedLeftCMD = forwardReverseCmd - gyroLockRotationCmd;
             motorSpeedRightCMD = forwardReverseCmd + gyroLockRotationCmd;
 
@@ -355,7 +358,7 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
 
         } else if (opMode == DrivetrainOpMode.ClosedLoopWithGyro){
             /* Drivetrain running in closed loop mode with gyro compensation. */
-            double gyroErr = getGyroAngle() - headingCmd_deg;
+            double gyroErr =  headingCmd_deg - getGyroAngle();
 
             rightTalon1.set(ControlMode.Velocity, RPMtoCTRE_VelUnits(rightSpeedCmd_RPM + gyroErr * gyroCompGain_P.get()));
             leftTalon1.set(ControlMode.Velocity,  RPMtoCTRE_VelUnits(leftSpeedCmd_RPM  - gyroErr * gyroCompGain_P.get()));
@@ -373,7 +376,8 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
         currentL1Sig.addSample(sampleTimeMS, leftTalon1.getOutputCurrent());
         currentL2Sig.addSample(sampleTimeMS, leftTalon2.getOutputCurrent());
         opModeSig.addSample(sampleTimeMS, opMode.toInt());
-        gyroscopeSig.addSample(sampleTimeMS, getGyroAngle());
+        angleActSig.addSample(sampleTimeMS, getGyroAngle());
+        angleDesSig.addSample(sampleTimeMS, headingCmd_deg);
         wheelSpdActRightSig.addSample(sampleTimeMS, getRightWheelSpeedRPM());
         wheelSpdActLeftSig.addSample(sampleTimeMS, getLeftWheelSpeedRPM());
         wheelSpdDesRightSig.addSample(sampleTimeMS, rightSpeedCmd_RPM);
