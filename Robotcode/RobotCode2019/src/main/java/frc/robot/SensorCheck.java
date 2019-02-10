@@ -3,6 +3,7 @@ package frc.robot;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.Compressor;
+import frc.lib.Util.DaBouncer;
 
 /*
  *******************************************************************************************
@@ -166,14 +167,4 @@ public class SensorCheck {
         return description; 
     }
 
-	//This is a dummy variable that you will probably want to delete
-	private boolean testIsEverythingOK = false;
-
-	// This is a dummy method that you will probably want to delete
-	public double TestCommand() {
-		if(testIsEverythingOK)
-			System.out.println("OK");
-		else
-			System.out.println("NOT OK");
-	}
 }

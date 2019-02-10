@@ -114,11 +114,8 @@ public class Robot extends TimedRobot {
     //Auto Aignment Routines
     Autonomous autonomous;
 
-<<<<<<< HEAD
-=======
     //Sensor Cross-Checking
     SensorCheck sensorCheck;
->>>>>>> origin/Zoe_sensor_check
 
     public Robot() {
         super(RobotConstants.MAIN_LOOP_SAMPLE_RATE_S);
@@ -313,16 +310,18 @@ public class Robot extends TimedRobot {
             CrashTracker.logTeleopPeriodic();
             loopTiming.markLoopEnd();
 
+
+            if(autonomous.getAutoFailed() == true){
+                ledController.setPattern(LEDPatterns.Pattern6);
+            } else {
+                ledController.setPattern(LEDPatterns.Pattern3);
+            }
+
         } catch(Throwable t) {
             CrashTracker.logThrowableCrash(t);
             throw t;
         }
 
-        if(autonomous.getAutoFailed() == true){
-            ledController.setPattern(LEDPatterns.Pattern6);
-        } else {
-            ledController.setPattern(LEDPatterns.Pattern3);
-        }
     }
 
     /**
@@ -330,6 +329,8 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void teleopPeriodic() {
+        /*Update CrashTracker*/
+        CrashTracker.logTeleopPeriodic();
         matchPeriodicCommon();
 
     }
@@ -339,6 +340,8 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void autonomousPeriodic() {
+        /*Update CrashTracker*/
+        CrashTracker.logAutoPeriodic();
         matchPeriodicCommon();
     }
 
@@ -371,6 +374,9 @@ public class Robot extends TimedRobot {
         try{
             loopTiming.markLoopStart();
 
+            /*Update CrashTracker*/
+            CrashTracker.logDisabledPeriodic();
+
             /* Sample Sensors */
             frontUltrasonic.update();
             backUltrasonic.update();
@@ -385,9 +391,9 @@ public class Robot extends TimedRobot {
             /* Map subsystem IO */
 
             //Initial Match State - Arm Not Moving
-            arm.setIntakeActualState(intakeControl.getPositionCmd());
             arm.setManualMovementCmd(0);
             arm.setPositionCmd(ArmPos.None);
+            arm.updateCalValues();
             arm.update();
 
             pezControl.update();
@@ -411,8 +417,6 @@ public class Robot extends TimedRobot {
             pneumaticsControl.update();
             climber.update();
             telemetryUpdate();
-            /*Update CrashTracker*/
-            CrashTracker.logDisabledPeriodic();
 
             loopTiming.markLoopEnd();
         } catch(Throwable t) {

@@ -94,3 +94,53 @@
 [2019-02-09 16:45:55] [RIO Load Mon] WARNING: cannot parse CPU load. Giving up future attempts to read.
 [2019-02-09 16:45:56] [RIO Load Mon] WARNING: cannot get raw memory load data. Giving up future attempts to read.
 [2019-02-09 16:45:56] [RIO Load Mon] WARNING: cannot parse memory load. Giving up future attempts to read.
+[2019-02-10 12:42:47] robot construction - 8874673f-63a3-4cc6-be03-4ab4301bf408
+[2019-02-10 12:42:47] robot init
+[2019-02-10 12:42:47] Warning: >>>>>>>>---------------------------------<<<<<<<<
+[2019-02-10 12:42:47] Warning: >>>>>>>> !!! SIMULATION MODE ENABLED !!! <<<<<<<<
+[2019-02-10 12:42:47] Warning: >>>>>>>>---------------------------------<<<<<<<<
+[2019-02-10 12:42:47] [JeVois Interface] Creating JeVois SerialPort...
+[2019-02-10 12:42:47] [JeVois Interface] SUCCESS!!
+[2019-02-10 12:42:47] [JeVois Interface] wrote 0/5 bytes, cmd: ping
+[2019-02-10 12:42:48] ping timed out
+[2019-02-10 12:42:49] Exception, java.lang.NullPointerException
+	at frc.robot.Arm.<init>(Arm.java:192)
+	at frc.robot.Arm.getInstance(Arm.java:137)
+	at frc.robot.Robot.robotInit(Robot.java:148)
+	at edu.wpi.first.wpilibj.TimedRobot.startCompetition(TimedRobot.java:63)
+	at edu.wpi.first.wpilibj.RobotBase.startRobot(RobotBase.java:263)
+	at frc.robot.Main.main(Main.java:27)
+
+[2019-02-10 12:43:54] robot construction - 5ab43941-9804-4672-8762-1e919409c71e
+[2019-02-10 12:43:54] robot init
+[2019-02-10 12:43:54] Warning: >>>>>>>>---------------------------------<<<<<<<<
+[2019-02-10 12:43:54] Warning: >>>>>>>> !!! SIMULATION MODE ENABLED !!! <<<<<<<<
+[2019-02-10 12:43:54] Warning: >>>>>>>>---------------------------------<<<<<<<<
+[2019-02-10 12:43:54] [JeVois Interface] Creating JeVois SerialPort...
+[2019-02-10 12:43:54] [JeVois Interface] SUCCESS!!
+[2019-02-10 12:43:54] [JeVois Interface] wrote 0/5 bytes, cmd: ping
+[2019-02-10 12:43:55] ping timed out
+[2019-02-10 12:43:55] Exception, java.lang.NullPointerException
+	at frc.robot.Arm.<init>(Arm.java:192)
+	at frc.robot.Arm.getInstance(Arm.java:137)
+	at frc.robot.Robot.robotInit(Robot.java:148)
+	at edu.wpi.first.wpilibj.TimedRobot.startCompetition(TimedRobot.java:63)
+	at edu.wpi.first.wpilibj.RobotBase.startRobot(RobotBase.java:263)
+	at frc.robot.Main.main(Main.java:27)
+
+[2019-02-10 13:25:52] robot construction - 73fa1871-aeac-49fd-80ef-22aa47cc2f09
+[2019-02-10 13:25:52] robot init
+[2019-02-10 13:25:52] Warning: >>>>>>>>---------------------------------<<<<<<<<
+[2019-02-10 13:25:52] Warning: >>>>>>>> !!! SIMULATION MODE ENABLED !!! <<<<<<<<
+[2019-02-10 13:25:52] Warning: >>>>>>>>---------------------------------<<<<<<<<
+[2019-02-10 13:25:52] [JeVois Interface] Creating JeVois SerialPort...
+[2019-02-10 13:25:52] [JeVois Interface] SUCCESS!!
+[2019-02-10 13:25:52] [JeVois Interface] wrote 0/5 bytes, cmd: ping
+[2019-02-10 13:25:53] ping timed out
+[2019-02-10 13:25:53] [RIO Load Mon] WARNING: cannot get raw CPU load data. Giving up future attempts to read.
+[2019-02-10 13:25:53] [RIO Load Mon] WARNING: cannot parse CPU load. Giving up future attempts to read.
+[2019-02-10 13:25:53] [RIO Load Mon] WARNING: cannot get raw memory load data. Giving up future attempts to read.
+[2019-02-10 13:25:53] [RIO Load Mon] WARNING: cannot parse memory load. Giving up future attempts to read.
+[2019-02-10 13:25:54] [MAC] Current MAC address: SocketException
+[2019-02-10 13:25:54] [Data Server]: Starting server
+[2019-02-10 13:25:54] disabled init

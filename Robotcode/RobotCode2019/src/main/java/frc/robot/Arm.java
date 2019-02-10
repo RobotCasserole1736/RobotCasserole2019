@@ -22,11 +22,8 @@ package frc.robot;
 
 import frc.lib.Calibration.*;
 import frc.lib.DataServer.Signal;
-import frc.robot.IntakeControl.IntakePos;
-
 
 import edu.wpi.first.wpilibj.Solenoid;
-import edu.wpi.first.wpilibj.DigitalInput;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
@@ -55,18 +52,8 @@ public class Arm {
     CANDigitalInput lowerLimitSwitch;
     
     /////The PID StartUps\\\\\
-    public double  kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput, maxRPM, maxVel, minVel, maxAcc, allowedErr;
-
-    
-    // Smart Motion Coefficients
-   
-    
-
-
-
-    /////////Sensors\\\\\\\\\
-    double voltageToDegreeMult;
-    double zeroOffset;
+    public double kIz, kFF;
+    Calibration kP, kI, kD;
 
     /////////Input Commands\\\\\\\\\\\
     ArmPos posIn;
@@ -78,8 +65,6 @@ public class Arm {
     double   uncompensatedMotorCmd = 0;
     boolean  brakeIn = false;
     boolean  isZeroed = false;
-    IntakePos curIntakePos;
-    boolean  intakeExtend = false;
 
     //Arm State Heights\\
     Calibration topCargoHeightCal;
@@ -94,16 +79,13 @@ public class Arm {
 
     Calibration intakeDangerZoneUpperHeight; //Lowest height allowable in Hatch Mode
 
-    Calibration armAngleOffsetCal;
     Calibration gravOffsetHorz;
-    Calibration rampRate;//But we don't want this\\    
 
     Calibration bottomLimitSwitchDegreeCal;
     Calibration topLimitSwitchDegreeCal;
 
     Calibration kMaxOutputCal;
     Calibration kMinOutputCal;
-    Calibration maxRPMCal;
     Calibration maxVelCal;
     Calibration minVelCal;
     Calibration maxAccCal;
@@ -118,6 +100,7 @@ public class Arm {
     Signal armMotorCmdSig;
     Signal armDesPosSig;
     Signal armActPosSig;
+    Signal armActVelSig;
     Signal armLowerLimitSig;
     Signal armUpperLimitSig;
 
@@ -144,9 +127,17 @@ public class Arm {
         /////Movers\\\\\
         armBrake = new Solenoid(RobotConstants.ARM_MECH_BRAKE_SOL_PORT);
         sadey = new CANSparkMax(RobotConstants.ARM_MOTOR_PORT, MotorType.kBrushless);
+        sadey.restoreFactoryDefaults();//ensure we start from the same config every time.
+
+        //Force a max current limit of 60A to try to help prevent burnout and brownout and such.
         sadey.setSmartCurrentLimit(60);
+
+        //Configure Encoder
         armEncoder = sadey.getEncoder();
-        armEncoder.setPositionConversionFactor(1/(ARM_GEAR_RATIO*REV_ENCODER_TICKS_PER_REV));
+        armEncoder.setPositionConversionFactor(1/(ARM_GEAR_RATIO*REV_ENCODER_TICKS_PER_REV)); //Set up so the distance measurement is in degrees
+        armEncoder.setVelocityConversionFactor(1/(ARM_GEAR_RATIO*REV_ENCODER_TICKS_PER_REV)); //Set up so the velocity measurement is in deg/sec
+
+        //Configure 
         armPID = sadey.getPIDController();
 
         //Limit switches should be wired to be normally-closed - this way if they come unplugged, 
@@ -155,6 +146,10 @@ public class Arm {
         //Assume lower limit of travel is in the reverse direction of motion
         upperLimitSwitch = sadey.getForwardLimitSwitch(LimitSwitchPolarity.kNormallyClosed); 
         lowerLimitSwitch = sadey.getReverseLimitSwitch(LimitSwitchPolarity.kNormallyClosed); 
+        //Ensure limit switches remain enabled. This should bedefault but I don't want to take any chances.
+        upperLimitSwitch.enableLimitSwitch(true);
+        lowerLimitSwitch.enableLimitSwitch(true);
+
 
         //Mechanically reversed direction is "forward" in our code
         sadey.setInverted(true);
@@ -163,28 +158,53 @@ public class Arm {
         armMotorCurrentSig = new Signal("Arm Motor Current", "A");
         armDesPosSig = new Signal("Arm Desired Position", "deg");
         armActPosSig = new Signal("Arm Actual Position", "deg");
+        armActVelSig = new Signal("Arm Actual Position", "deg per sec");
         armLowerLimitSig = new Signal("Arm Lower Position Limit Switch", "bool");
         armUpperLimitSig = new Signal("Arm Upper Position Limit Switch", "bool");
+
+
+        /////Calibration Things\\\\\
+        topCargoHeightCal    = new Calibration("Arm Cargo Level Pos Top (Deg)", 180);
+        midCargoHeightCal    = new Calibration("Arm Cargo Level Pos Mid (Deg)", 50);
+        lowCargoHeightCal    = new Calibration("Arm Cargo Level Pos Bottom (Deg)", 10);
+        intakeCargoHeightCal = new Calibration("Arm Cargo Level Pos Intake (Deg)", 0);
+
+        topHatchHeightCal    = new Calibration("Arm Hatch Level Pos Top (Deg)", 190);
+        midHatchHeightCal    = new Calibration("Arm Hatch Level Pos Mid (Deg)", 45);
+        lowHatchHeightCal    = new Calibration("Arm Hatch Level Pos Bottom (Deg)", 5);
+        intakeHatchHeightCal = new Calibration("Arm Hatch Level Pos Intake (Deg)", 5);
+
+        intakeDangerZoneUpperHeight = new Calibration("Arm Intake Danger Zone Upper Pos (Deg)", 3);
         
-        /////PID Values\\\\\
-        kP = 0.1; 
-        kI = 0;
-        kD = 0; 
+        gravOffsetHorz    = new Calibration("Arm Required Voltage at Horz(Volts)", 0.5);
+        bottomLimitSwitchDegreeCal = new Calibration("Arm Limit Switch Angle Bottom (deg)", -30);
+        topLimitSwitchDegreeCal    = new Calibration("Arm Limit Switch Angle Top (deg)", 110);
+
+        //Calibration for the Arm Trapezoidal\\
+        kMaxOutputCal = new Calibration("Arm SmartMotion Max Power", 1);
+        kMinOutputCal = new Calibration("Arm SmartMotion Min Power",-1);
+        maxVelCal     = new Calibration("Arm SmartMotion Max Velocity For The Arm (Deg per sec)", 20);
+        minVelCal     = new Calibration("Arm SmartMotion Min Velocity For The Arm (Deg per sec)", -20);
+        maxAccCal     = new Calibration("Arm SmartMotion Max Acceleration on Arm (Deg per sec sqrd)", 10);
+        allowedErrCal = new Calibration("Arm SmartMotion Allowable Err (deg)", 0.5);
+
+        kP  = new Calibration("Arm PID Control kP", 0.1); 
+        kI  = new Calibration("Arm PID Control kI", 0);
+        kD  = new Calibration("Arm PID Control kD", 0); 
         kIz = 0; 
         kFF = 0; 
-        //kMaxOutput = 1; 
-        //kMinOutput = -1;
-        //maxRPM = 9000;
-        //tbd 160deg/sec = 26 2/3 rpms
-        //maxVel = 26;
 
+        updateCalValues();
+    } 
+
+    public void updateCalValues(){
         /////Set PID\\\\\
-        armPID.setP(kP);
-        armPID.setI(kI);
-        armPID.setD(kD);
+        armPID.setP(kP.get());
+        armPID.setI(kI.get());
+        armPID.setD(kD.get());
         armPID.setIZone(kIz);
         armPID.setFF(kFF);
-        armPID.setOutputRange(kMinOutput, kMaxOutput);
+        armPID.setOutputRange(kMinOutputCal.get(), kMaxOutputCal.get());
         
         //What is the Slot For - it's for ummmm slotty things. slotty mc slot face.
         int smartMotionSlot = 0;
@@ -194,39 +214,7 @@ public class Arm {
         armPID.setSmartMotionMaxAccel(maxAccCal.get(), smartMotionSlot);
         armPID.setSmartMotionAllowedClosedLoopError(allowedErrCal.get(), smartMotionSlot);
         armPID.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, smartMotionSlot);
-
-        /////Calibration Things\\\\\
-        topCargoHeightCal = new Calibration("Arm Top Cargo Level Pos (Deg)", 180);
-        midCargoHeightCal = new Calibration("Arm Mid Cargo Level Pos (Deg)", 50);
-        lowCargoHeightCal = new Calibration("Arm Bottom Cargo Level Pos (Deg)", 10);
-        intakeCargoHeightCal = new Calibration("Arm Intake Cargo Level Pos (Deg)", 0);
-
-        topHatchHeightCal = new Calibration("Arm Top Hatch Level Pos (Deg)", 190);
-        midHatchHeightCal = new Calibration("Arm Mid Hatch Level Pos (Deg)", 45);
-        lowHatchHeightCal = new Calibration("Arm Bottom Hatch Level Pos (Deg)", 5);
-        intakeHatchHeightCal = new Calibration("Arm Intake Hatch Level Pos (Deg)", 5);
-
-        intakeDangerZoneUpperHeight = new Calibration("Arm Intake Danger Zone Upper Pos (Deg)", 3);
-        
-        armAngleOffsetCal = new Calibration("Arm Is Offset From Flat Ground(Deg)", 20);
-        gravOffsetHorz = new Calibration("Arm Required Voltage at Horz(Volts)", 0.5);
-        //We Don't Want This Here Anymore With Trapezoid\\
-        //rampRate = new Calibration("Arm Spark Ramp Rate (Volts)", 0.3);
-        bottomLimitSwitchDegreeCal = new Calibration("Angle at bottom limit switch (deg)", -30);
-        topLimitSwitchDegreeCal = new Calibration("Angle at bottom limit switch (deg)", 110);
-
-        //Calibration for the Arm Trapezoidal\\
-        kMaxOutputCal = new Calibration("Max Power?", 0);
-        kMinOutputCal = new Calibration("Minimum Power?",0);
-        maxRPMCal = new Calibration("Maximum Speed The Motor Should Spin", 100);
-        maxVelCal = new Calibration("Max Velocity the Arm For The Arm", 1000);
-        minVelCal = new Calibration("Minimum Velocity For The Arm", 0);
-        maxAccCal = new Calibration("Maximum Acceleration on Arm", 10);
-        allowedErrCal = new Calibration("How Much Error Is OK", 10);
-
-        
-        //sadey.setRampRate(rampRate.get());
-    } 
+    }
     
 
     public enum ArmPos {
@@ -319,6 +307,7 @@ public class Arm {
         armMotorCurrentSig.addSample(sampleTimeMS, sadey.getOutputCurrent());
         armDesPosSig.addSample(sampleTimeMS, desAngle);
         armActPosSig.addSample(sampleTimeMS, curArmAngle);
+        armActVelSig.addSample(sampleTimeMS, armEncoder.getVelocity());
         armLowerLimitSig.addSample(sampleTimeMS, bottomOfMotion);
         armUpperLimitSig.addSample(sampleTimeMS, topOfMotion);
 
@@ -423,18 +412,9 @@ public class Arm {
     public boolean atDesiredHeight() {
         return(Math.abs(desAngle - curArmAngle)<2.0); //hardcode to 2 degree desired height
     }
-
-    /**
-     * Set the current state of the intake. If Retracted, and the arm is 
-     * inside the Danger Zone, motion should be stopped.
-     * 
-     */
-    public void setIntakeActualState(IntakePos state_in) {
-        curIntakePos = IntakeControl.getInstance().getPositionCmd();   
-    }
     
     public double gravComp() {
-        double compArmAngle = curArmAngle - armAngleOffsetCal.get();
+        double compArmAngle = curArmAngle;
         double cosAngle = Math.cos(compArmAngle);
         double compVolt = cosAngle * gravOffsetHorz.get();
         return(compVolt);
