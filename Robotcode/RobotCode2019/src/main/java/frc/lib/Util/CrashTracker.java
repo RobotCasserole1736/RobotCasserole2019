@@ -3,6 +3,8 @@ package frc.lib.Util;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -108,9 +110,24 @@ public class CrashTracker {
 	        logMarker(mark, null);
 	}
 
+
+	final static String logFilePathLocal = "./";
+	final static String logFilePathRIO = "/home/lvuser/";
+	final static String crashTrackFname = "crash_tracking.txt";
+	
 	private static void logMarker(String mark, Throwable nullableException) {
-		
-	        try (PrintWriter writer = new PrintWriter(new FileWriter("/home/lvuser/crash_tracking.txt", true))) {
+
+			String crashTrackerFile = "";
+			//Check if the path for resources expected on the roboRIO exists. 
+			if(Files.exists(Paths.get(logFilePathRIO))){
+				//If RIO path takes priority (aka we're running on a roborio) this path takes priority
+				crashTrackerFile = logFilePathRIO + crashTrackFname;
+			} else {
+				//Otherwise use a local path, like we're running on a local machine.
+				crashTrackerFile = logFilePathLocal + crashTrackFname;
+			}
+	
+	        try (PrintWriter writer = new PrintWriter(new FileWriter(crashTrackerFile, true))) {
 	        	writer.print("[" + getDateTimeString() + "]");
 	            writer.print(" ");
 	            writer.print(mark);

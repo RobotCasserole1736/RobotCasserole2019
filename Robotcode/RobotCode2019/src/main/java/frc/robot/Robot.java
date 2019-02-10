@@ -131,6 +131,8 @@ public class Robot extends TimedRobot {
 
             Thread.currentThread().setPriority(10);
 
+            RioSimMode.getInstance();
+
             /* Init website utilties */
             webserver = new CasseroleWebServer();
             wrangler = new CalWrangler();
@@ -165,7 +167,6 @@ public class Robot extends TimedRobot {
             DrivetrainClosedLoopTestVectors.getInstance();
             AutoSeqDistToTgtEst.getInstance();
             autonomous = Autonomous.getInstance();
-            RioSimMode.getInstance();
 
             /* Init local telemetry signals */
             rioDSSampLoadSig = new Signal("Dataserver Stored Samples", "count"); 

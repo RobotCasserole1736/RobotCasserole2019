@@ -22,7 +22,9 @@
             "skipInvalidPlatforms": true,
             "isJar": false,
             "validPlatforms": [
-                "linuxathena"
+                "linuxathena",
+                "windowsx86-64",
+                "linuxx86-64"
             ]
         }
     ],
@@ -36,7 +38,9 @@
             "sharedLibrary": false,
             "skipInvalidPlatforms": true,
             "binaryPlatforms": [
-                "linuxathena"
+                "linuxathena",
+                "windowsx86-64",
+                "linuxx86-64"
             ]
         },
         {
@@ -48,7 +52,9 @@
             "sharedLibrary": false,
             "skipInvalidPlatforms": true,
             "binaryPlatforms": [
-                "linuxathena"
+                "linuxathena",
+                "windowsx86-64",
+                "linuxx86-64" 
             ]
         }
     ]
