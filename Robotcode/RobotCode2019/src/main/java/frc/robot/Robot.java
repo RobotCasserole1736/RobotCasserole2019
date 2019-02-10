@@ -391,6 +391,7 @@ public class Robot extends TimedRobot {
 
             poseCalc.setLeftMotorSpeed(drivetrain.getLeftWheelSpeedRPM());
             poseCalc.setRightMotorSpeed(drivetrain.getRightWheelSpeedRPM());
+            poseCalc.setMeasuredPoseAngle(drivetrain.getGyroAngle(), drivetrain.isGyroOnline());
             poseCalc.update();
 
 

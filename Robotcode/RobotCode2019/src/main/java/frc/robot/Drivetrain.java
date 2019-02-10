@@ -79,6 +79,10 @@ public class Drivetrain implements DrivetrainInterface {
         return dTrainIF.getRightWheelSpeedRPM();
     }
 
+    public double getGyroAngle(){
+        return dTrainIF.getGyroAngle();
+    }
+
     @Override
     public void setClosedLoopSpeedCmd(double leftCmdRPM, double rightCmdRPM) {
         dTrainIF.setClosedLoopSpeedCmd(leftCmdRPM, rightCmdRPM);

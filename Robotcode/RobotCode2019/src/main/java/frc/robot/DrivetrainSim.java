@@ -146,4 +146,9 @@ public class DrivetrainSim implements DrivetrainInterface {
 
     }
 
+    @Override
+    public double getGyroAngle() {
+        return 0; //no gyro implemented
+    }
+
 }

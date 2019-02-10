@@ -28,7 +28,7 @@ public class DrivetrainClosedLoopTestVectors {
     Calibration testSequence;
 
     Calibration testPeriodSec;
-    Calibration testAmpRPM;
+    Calibration testAmpFtPerSec;
 
     double leftSpeedCmd = 0;
     double rightSpeedCmd = 0;
@@ -63,8 +63,8 @@ public class DrivetrainClosedLoopTestVectors {
 
     private DrivetrainClosedLoopTestVectors(){
         testSequence  = new Calibration("Test Vector Drivetrain Test Type", 0, 0, 3); 
-        testAmpRPM = new Calibration("Test Vector Drivetrain Amplititude RPM", 50, 0, 1000); 
-        testPeriodSec = new Calibration("Test Vector Drivetrain Period Sec", 5.0, 0.5, 15); 
+        testAmpFtPerSec = new Calibration("Test Vector Drivetrain Amplititude FtPerSec", 4, 0, 1000); 
+        testPeriodSec = new Calibration("Test Vector Drivetrain Period Sec", 2.0, 0.5, 15); 
         testActive = false;
         speedCmd = 0;
     }
@@ -100,22 +100,22 @@ public class DrivetrainClosedLoopTestVectors {
         if(testActive){
             if(testSeq == 1.0){
                 //Sine wave
-                speedCmd = testAmpRPM.get() * Math.sin(2*Math.PI*Timer.getFPGATimestamp()/testPeriodSec.get());
+                speedCmd = testAmpFtPerSec.get() * Math.sin(2*Math.PI*Timer.getFPGATimestamp()/testPeriodSec.get());
                 leftSpeedCmd = speedCmd;
                 rightSpeedCmd = speedCmd;
                 headingCmd = 0;
             } else if(testSeq == 2.0){
                 // Triangle speed profile
-                if(speedCmd > testAmpRPM.get()){
+                if(speedCmd > testAmpFtPerSec.get()){
                     triangleWaveUp = false;
-                } else if(speedCmd < -1.0*testAmpRPM.get()) {
+                } else if(speedCmd < -1.0*testAmpFtPerSec.get()) {
                     triangleWaveUp = true;
                 }
 
                 if(triangleWaveUp){
-                    speedCmd += testAmpRPM.get() * (RobotConstants.MAIN_LOOP_SAMPLE_RATE_S/testPeriodSec.get()*4);
+                    speedCmd += testAmpFtPerSec.get() * (RobotConstants.MAIN_LOOP_SAMPLE_RATE_S/testPeriodSec.get()*4);
                 } else {
-                    speedCmd -= testAmpRPM.get() * (RobotConstants.MAIN_LOOP_SAMPLE_RATE_S/testPeriodSec.get()*4);
+                    speedCmd -= testAmpFtPerSec.get() * (RobotConstants.MAIN_LOOP_SAMPLE_RATE_S/testPeriodSec.get()*4);
                 }
 
                 leftSpeedCmd = speedCmd;
