@@ -45,9 +45,6 @@ public class RobotConstants {
     public static final int BALL_INTAKE_PORT = 10;
     public static final int VISON_LED_RING_PORT = 11;
 
-    //Relay
-    public static final int PEZ_RELAY_PORT = 0;
-
     /////////////////////////////////////////////////////////////////////////////////////
     // PDP Ports
     /////////////////////////////////////////////////////////////////////////////////////
@@ -60,6 +57,7 @@ public class RobotConstants {
     /////////////////////////////////////////////////////////////////////////////////////
     public static final int PEZ_SOLENOID_PORT_CARGO = 0;
     public static final int PEZ_SOLENOID_PORT_HATCH = 1;
+    public static final int PEZ_SOLENOID_MID_STOPPER = 2;
     public static final int INTAKE_ARM_BAR_PORT = 4;
     public static final int ARM_MECH_BRAKE_SOL_PORT = 5;
 
