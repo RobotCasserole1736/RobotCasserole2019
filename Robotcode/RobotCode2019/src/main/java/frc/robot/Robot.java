@@ -114,6 +114,11 @@ public class Robot extends TimedRobot {
     //Auto Aignment Routines
     Autonomous autonomous;
 
+<<<<<<< HEAD
+=======
+    //Sensor Cross-Checking
+    SensorCheck sensorCheck;
+>>>>>>> origin/Zoe_sensor_check
 
     public Robot() {
         super(RobotConstants.MAIN_LOOP_SAMPLE_RATE_S);
@@ -167,6 +172,7 @@ public class Robot extends TimedRobot {
             DrivetrainClosedLoopTestVectors.getInstance();
             AutoSeqDistToTgtEst.getInstance();
             autonomous = Autonomous.getInstance();
+            sensorCheck = SensorCheck.getInstance();
 
             /* Init local telemetry signals */
             rioDSSampLoadSig = new Signal("Dataserver Stored Samples", "count"); 
@@ -232,6 +238,8 @@ public class Robot extends TimedRobot {
             setMatchInitialCommands();
             CrashTracker.logMatchInfo();
 
+            sensorCheck.update();
+
         } catch(Throwable t) {
             CrashTracker.logThrowableCrash(t);
             throw t;
@@ -264,6 +272,8 @@ public class Robot extends TimedRobot {
             pezControl.update();
 
             intakeControl.update();
+
+            sensorCheck.update();
 
             if(arm.getActualArmHeight() < 90) {
                 AutoSeqDistToTgtEst.getInstance().setVisionDistanceEstimate(jevois.getTgtPositionY(), jevois.isTgtVisible());
@@ -457,8 +467,10 @@ public class Robot extends TimedRobot {
         CasseroleDriverView.setBoolean("Vision Target Available", jevois.isTgtVisible());
         CasseroleDriverView.setBoolean("Auto Failed", autonomous.getAutoFailedLEDState());
         CasseroleDriverView.setBoolean("Line Seen", linefollow.isEstLinePosAvailable());
+        CasseroleDriverView.setBoolean("Fault Detected", sensorCheck.isFaultDetected());
         CasseroleDriverView.setStringBox("Op Mode", superstructure.getOpModeString());
         CasseroleDriverView.setBoolean("Arm At Limit", arm.getBottomOfMotion() || arm.getTopOfMotion());
+        CasseroleDriverView.setStringBox("Fault Description", sensorCheck.getFaultDescription());
     }
         
     /**
@@ -477,7 +489,9 @@ public class Robot extends TimedRobot {
         CasseroleDriverView.newBoolean("Vision Target Available", "green");
         CasseroleDriverView.newBoolean("Line Seen", "green");
         CasseroleDriverView.newBoolean("Arm At Limit", "yellow");
+        CasseroleDriverView.newBoolean("Fault Detected", "red");
         CasseroleDriverView.newStringBox("Op Mode");
+        CasseroleDriverView.newStringBox("Fault Description");
     }
 
     @Override
