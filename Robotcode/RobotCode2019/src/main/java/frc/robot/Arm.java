@@ -108,7 +108,8 @@ public class Arm {
     final double MAX_MANUAL_DEG_PER_SEC = 25.0;
     final double SPROCKET_GEAR_RATIO = 5.0/1.0;
     final double GEARBOX_GEAR_RATIO = 20.0/1.0;
-    final double REV_ENCODER_TICKS_PER_REV = 42.0;
+
+    final double INVERT_FACTOR = -1.0;
 
     boolean runSimMode;
 
@@ -136,8 +137,7 @@ public class Arm {
         //Configure Encoder
         armEncoder = sadey.getEncoder();
         armEncoder.setPositionConversionFactor((1/GEARBOX_GEAR_RATIO)*(1/SPROCKET_GEAR_RATIO)*360); //Set up so the distance measurement is in degrees
-        //armEncoder.setVelocityConversionFactor((1/GEARBOX_GEAR_RATIO)*(1/SPROCKET_GEAR_RATIO)*360*60); //Set up so the velocity measurement is in deg/sec
-        armEncoder.setVelocityConversionFactor(1);
+        armEncoder.setVelocityConversionFactor((1/GEARBOX_GEAR_RATIO)*(1/SPROCKET_GEAR_RATIO)*360*60); //Set up so the velocity measurement is in deg/sec
         //Configure s
         armPID = sadey.getPIDController();
 
@@ -153,6 +153,7 @@ public class Arm {
 
 
         //Mechanically reversed direction is "forward" in our code
+        //This doesn't seem to work as I'd expect in closed loop so we'll invert when going to/from the motor.
         sadey.setInverted(false);
 
         armMotorCmdSig = new Signal("Arm Motor Command", "cmd");
@@ -189,7 +190,7 @@ public class Arm {
         maxAccCal     = new Calibration("Arm SmartMotion Max Acceleration on Arm (Deg per sec sqrd)", 10);
         allowedErrCal = new Calibration("Arm SmartMotion Allowable Err (deg)", 0.5);
 
-        kP  = new Calibration("Arm PID Control kP", 0.1); 
+        kP  = new Calibration("Arm PID Control kP", 0.3); 
         kI  = new Calibration("Arm PID Control kI", 0);
         kD  = new Calibration("Arm PID Control kD", 0); 
         kIz = 0; 
@@ -244,11 +245,15 @@ public class Arm {
        topOfMotion = upperLimitSwitch.get();
        bottomOfMotion = lowerLimitSwitch.get();
        if (topOfMotion){
-           armEncoder.setPosition(topLimitSwitchDegreeCal.get()/3.6);
+           armEncoder.setPosition(convertArmDegToMotorRot(topLimitSwitchDegreeCal.get()));
        } 
        if (bottomOfMotion){
-           armEncoder.setPosition(bottomLimitSwitchDegreeCal.get()/3.6);
+           armEncoder.setPosition(convertArmDegToMotorRot(bottomLimitSwitchDegreeCal.get()));
        }
+    }
+
+    public double convertArmDegToMotorRot(double in){
+        return INVERT_FACTOR*in/((1/GEARBOX_GEAR_RATIO)*(1/SPROCKET_GEAR_RATIO)*360);
     }
 
     
@@ -272,33 +277,22 @@ public class Arm {
         } else {
             //Control the actual arm
             sampleSensors();
-            curArmAngle = armEncoder.getPosition();
-            //TEMP - pretend we are always zeroed until the limit switches are installed and we know exactly how the starting config will look.
-            isZeroed =true;
-            if(!isZeroed) {
-                armPID.setReference(-0.01, ControlType.kVoltage);
-                if(bottomOfMotion) {
-                    isZeroed = true;
-                    armPID.setReference(0.0, ControlType.kVoltage);
-                }
-            } 
+            curArmAngle = INVERT_FACTOR*armEncoder.getPosition();
+            
+            //Update the position based on what the driver requested
+            if(curManMoveCmd != 0) {
+                armPID.setReference(INVERT_FACTOR*curManMoveCmd*6.0, ControlType.kVoltage);
+                desAngle = curArmAngle;
+            }
             else {
-                //Update the position based on what the driver requested
-                if(curManMoveCmd != 0) {
-                    armPID.setReference(curManMoveCmd*6.0, ControlType.kVoltage);
-                    desAngle = curArmAngle;
-                }
-                else {
-                    defArmPos();
-                    double desRotation = desAngle;
-                    double gravComp = gravComp();
-                   // armPID.setReference(curManMoveCmd*6.0, ControlType.kVoltage, 0, 0);
-                    armPID.setReference(desRotation, ControlType.kPosition, 0, 0); //restore gravity TODOS
-                    //armPID.setReference(desRotation, ControlType.kSmartMotion, 0, gravComp);
+                defArmPos();
+                double desRotation = desAngle;
+                double gravComp = gravComp();
+                armPID.setReference(INVERT_FACTOR*desRotation, ControlType.kPosition, 0, gravComp); //restore gravity TODOS
+                //armPID.setReference(INVERT_FACTOR*desRotation, ControlType.kSmartMotion, 0, gravComp);
 
-                }
+            }
 
-            } 
         }
 
 
@@ -308,7 +302,7 @@ public class Arm {
         armMotorCurrentSig.addSample(sampleTimeMS, sadey.getOutputCurrent());
         armDesPosSig.addSample(sampleTimeMS, desAngle);
         armActPosSig.addSample(sampleTimeMS, curArmAngle);
-        armActVelSig.addSample(sampleTimeMS, armEncoder.getVelocity());
+        armActVelSig.addSample(sampleTimeMS, INVERT_FACTOR*armEncoder.getVelocity());
         armLowerLimitSig.addSample(sampleTimeMS, bottomOfMotion);
         armUpperLimitSig.addSample(sampleTimeMS, topOfMotion);
 
@@ -415,8 +409,7 @@ public class Arm {
     }
     
     public double gravComp() {
-        double compArmAngle = curArmAngle;
-        double cosAngle = Math.cos(compArmAngle);
+        double cosAngle = Math.cos(Math.toRadians(curArmAngle));
         double compVolt = cosAngle * gravOffsetHorz.get();
         return(compVolt);
     }
