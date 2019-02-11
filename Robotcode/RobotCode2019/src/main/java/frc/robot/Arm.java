@@ -106,7 +106,8 @@ public class Arm {
 
     /////////Physical Mechanism Constants\\\\\\\\\\
     final double MAX_MANUAL_DEG_PER_SEC = 25.0;
-    final double ARM_GEAR_RATIO = 150.0/1.0;
+    final double SPROCKET_GEAR_RATIO = 5.0/1.0;
+    final double GEARBOX_GEAR_RATIO = 20.0/1.0;
     final double REV_ENCODER_TICKS_PER_REV = 42.0;
 
     boolean runSimMode;
@@ -134,10 +135,10 @@ public class Arm {
 
         //Configure Encoder
         armEncoder = sadey.getEncoder();
-        armEncoder.setPositionConversionFactor(1/(ARM_GEAR_RATIO*REV_ENCODER_TICKS_PER_REV)); //Set up so the distance measurement is in degrees
-        armEncoder.setVelocityConversionFactor(1/(ARM_GEAR_RATIO*REV_ENCODER_TICKS_PER_REV)); //Set up so the velocity measurement is in deg/sec
-
-        //Configure 
+        armEncoder.setPositionConversionFactor((1/GEARBOX_GEAR_RATIO)*(1/SPROCKET_GEAR_RATIO)*360); //Set up so the distance measurement is in degrees
+        //armEncoder.setVelocityConversionFactor((1/GEARBOX_GEAR_RATIO)*(1/SPROCKET_GEAR_RATIO)*360*60); //Set up so the velocity measurement is in deg/sec
+        armEncoder.setVelocityConversionFactor(1);
+        //Configure s
         armPID = sadey.getPIDController();
 
         //Limit switches should be wired to be normally-closed - this way if they come unplugged, 
@@ -152,13 +153,13 @@ public class Arm {
 
 
         //Mechanically reversed direction is "forward" in our code
-        sadey.setInverted(true);
+        sadey.setInverted(false);
 
         armMotorCmdSig = new Signal("Arm Motor Command", "cmd");
         armMotorCurrentSig = new Signal("Arm Motor Current", "A");
         armDesPosSig = new Signal("Arm Desired Position", "deg");
         armActPosSig = new Signal("Arm Actual Position", "deg");
-        armActVelSig = new Signal("Arm Actual Position", "deg per sec");
+        armActVelSig = new Signal("Arm Actual Velocity", "deg per sec");
         armLowerLimitSig = new Signal("Arm Lower Position Limit Switch", "bool");
         armUpperLimitSig = new Signal("Arm Upper Position Limit Switch", "bool");
 
@@ -243,10 +244,10 @@ public class Arm {
        topOfMotion = upperLimitSwitch.get();
        bottomOfMotion = lowerLimitSwitch.get();
        if (topOfMotion){
-           armEncoder.setPosition(topLimitSwitchDegreeCal.get());
+           armEncoder.setPosition(topLimitSwitchDegreeCal.get()/3.6);
        } 
        if (bottomOfMotion){
-           armEncoder.setPosition(bottomLimitSwitchDegreeCal.get());
+           armEncoder.setPosition(bottomLimitSwitchDegreeCal.get()/3.6);
        }
     }
 
@@ -254,6 +255,7 @@ public class Arm {
     /////Use Sensor Data in Calculations\\\\\
     public void update() {
 
+        
         if(runSimMode){
             //Run a simulated arm
             if(curManMoveCmd != 0) {
@@ -269,7 +271,8 @@ public class Arm {
 
         } else {
             //Control the actual arm
-            curArmAngle = -1.0*armEncoder.getPosition();
+            sampleSensors();
+            curArmAngle = armEncoder.getPosition();
             //TEMP - pretend we are always zeroed until the limit switches are installed and we know exactly how the starting config will look.
             isZeroed =true;
             if(!isZeroed) {
@@ -289,7 +292,8 @@ public class Arm {
                     defArmPos();
                     double desRotation = desAngle;
                     double gravComp = gravComp();
-                    armPID.setReference(desRotation, ControlType.kPosition, 0, gravComp);
+                   // armPID.setReference(curManMoveCmd*6.0, ControlType.kVoltage, 0, 0);
+                    armPID.setReference(desRotation, ControlType.kPosition, 0, 0); //restore gravity TODOS
                     //armPID.setReference(desRotation, ControlType.kSmartMotion, 0, gravComp);
 
                 }
