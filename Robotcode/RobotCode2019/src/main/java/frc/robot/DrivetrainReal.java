@@ -335,7 +335,9 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
             motorSpeedRightCMD = Utils.capMotorCmd(forwardReverseCmd - rotationCmd);
 
             rightTalon1.set(ControlMode.PercentOutput, motorSpeedRightCMD);
+            rightTalon2.set(ControlMode.PercentOutput, motorSpeedRightCMD);
             leftTalon1.set(ControlMode.PercentOutput, motorSpeedLeftCMD);
+            leftTalon2.set(ControlMode.PercentOutput, motorSpeedLeftCMD);
 
         } else if (opMode == DrivetrainOpMode.GyroLock){
             /* Drivetrain running in Gyro-lock. Fwd/Rev command comes from driver, but rotation from a closed-loop control algorithm*/
