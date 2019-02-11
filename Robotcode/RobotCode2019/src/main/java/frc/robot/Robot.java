@@ -115,7 +115,7 @@ public class Robot extends TimedRobot {
     Autonomous autonomous;
 
     //Sensor Cross-Checking
-    SensorCheck sensorCheck;
+    //SensorCheck sensorCheck; does not owrk yet
 
     public Robot() {
         super(RobotConstants.MAIN_LOOP_SAMPLE_RATE_S);
@@ -169,7 +169,7 @@ public class Robot extends TimedRobot {
             DrivetrainClosedLoopTestVectors.getInstance();
             AutoSeqDistToTgtEst.getInstance();
             autonomous = Autonomous.getInstance();
-            sensorCheck = SensorCheck.getInstance();
+            //sensorCheck = SensorCheck.getInstance();
 
             /* Init local telemetry signals */
             rioDSSampLoadSig = new Signal("Dataserver Stored Samples", "count"); 
@@ -471,11 +471,11 @@ public class Robot extends TimedRobot {
         CasseroleDriverView.setBoolean("Vision Target Available", jevois.isTgtVisible());
         CasseroleDriverView.setBoolean("Auto Failed", autonomous.getAutoFailedLEDState());
         CasseroleDriverView.setBoolean("Line Seen", linefollow.isEstLinePosAvailable());
-        CasseroleDriverView.setBoolean("Fault Detected", sensorCheck.isFaultDetected());
+       // CasseroleDriverView.setBoolean("Fault Detected", sensorCheck.isFaultDetected());
         CasseroleDriverView.setStringBox("Op Mode", superstructure.getOpModeString());
         CasseroleDriverView.setBoolean("Arm At Limit", arm.getBottomOfMotion() || arm.getTopOfMotion());
         CasseroleDriverView.setBoolean("Ball In Intake", intakeControl.isBallDetected());
-        CasseroleDriverView.setStringBox("Fault Description", sensorCheck.getFaultDescription());
+       // CasseroleDriverView.setStringBox("Fault Description", sensorCheck.getFaultDescription());
     }
         
     /**
