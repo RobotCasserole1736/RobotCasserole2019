@@ -7,13 +7,7 @@ public class RobotConstants {
     // RoboRIO Output Ports
     /////////////////////////////////////////////////////////////////////////////////////
     // PWM Motors
-    public static final int INTAKE_MOTOR_PORT =1;
     public static final int LED_CONTROLLER_PORT = 2;
-    public static final int INTAKE_MOTOR_LEFT_PORT = 31;
-    public static final int INTAKE_MOTOR_RIGHT_PORT = 32;
-
-    public static final int INTAKE_LEFT_POT_PORT = 4;
-    public static final int INTAKE_RIGHT_POT_PORT = 5;
 
     /////////////////////////////////////////////////////////////////////////////////////
     // CAN Device ID's
@@ -22,6 +16,9 @@ public class RobotConstants {
     public static final int DRIVETRAIN_LEFT_2_CANID = 15;
     public static final int DRIVETRAIN_RIGHT_1_CANID = 2;
     public static final int DRIVETRAIN_RIGHT_2_CANID = 14;
+    public static final int INTAKE_MOTOR_CANID = 8;
+    public static final int INTAKE_MOTOR_LEFT_CANID = 31;
+    public static final int INTAKE_MOTOR_RIGHT_CANID = 32;
     public static final int PNEUMATICS_CONTROL_MODULE_CANID = 0;
     public static final int POWER_DISTRIBUTION_PANEL_CANID = 0;
     public static final int ARM_MOTOR_PORT = 0;
@@ -30,8 +27,18 @@ public class RobotConstants {
     /////////////////////////////////////////////////////////////////////////////////////
     // RoboRIO Input Ports
     /////////////////////////////////////////////////////////////////////////////////////
-    public static final int ANALOG_PRESSURE_SENSOR_PORT = 0;
-    public static final int ARM_POS_SENSOR_PORT = 1;
+
+    //Analog
+    public static final int ANALOG_PRESSURE_SENSOR_PORT = 1;
+    public static final int INTAKE_LEFT_POT_PORT = 2;
+    public static final int INTAKE_RIGHT_POT_PORT = 3;
+    public static final int ULTRASONIC_FRONT_PORT = 4;
+    public static final int ULTRASONIC_REAR_PORT = 5;
+    
+
+
+
+    public static final int BALL_INTAKE_PORT = 1;
 
     //Digital
     public static final int ARM_UPPER_LIMIT_SWITCH_PORT  = 2;
@@ -42,8 +49,7 @@ public class RobotConstants {
     public static final int LINE_FOLLOWING_SENSOR_4_PORT = 7;
     public static final int LINE_FOLLOWING_SENSOR_5_PORT = 8;
     public static final int PEZ_SOLENOID_LIMIT_SWITCH_PORT = 9;
-    public static final int BALL_INTAKE_PORT = 10;
-    public static final int VISON_LED_RING_PORT = 11;
+    public static final int VISON_LED_RING_PORT = 10;
 
     //Relay
     public static final int PEZ_RELAY_PORT = 0;

@@ -8,11 +8,13 @@
 package frc.robot;
 
 import frc.lib.CasserolePID.CasserolePID;
+import frc.lib.DataServer.Signal;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
+import edu.wpi.first.wpilibj.Timer;
 
 
 /**
@@ -35,7 +37,6 @@ public class IntakeMotorBase extends CasserolePID{
         intakeArmMotor = new VictorSPX(Motor_id);
         armPot = new AnalogPotentiometer(Pot_id);
         this.threadName = ("IntakePID " + Motor_id);
-        
     }
 
     public void setInverted(boolean isInverted){
@@ -73,18 +74,23 @@ public class IntakeMotorBase extends CasserolePID{
         upperLimitDegrees = degrees;
     }
 
+    public double getSensorRawVoltage(){
+        return armPot.get();
+    }
+
+    double potentiometerReading = 0;
+
     @Override
     protected double returnPIDInput() {
-        double potentiometerReading = armPot.get();
-        double potentiometerOutput = convertVoltsToDeg(potentiometerReading);
-        return potentiometerOutput;
+        potentiometerReading = armPot.get();
+        return convertVoltsToDeg(potentiometerReading);
     }
 
     @Override
     protected void usePIDOutput(double pidOutput) {
-        intakeArmMotor.set(ControlMode.PercentOutput,isInverted?-1*pidOutput:pidOutput);
+        intakeArmMotor.set(ControlMode.PercentOutput,pidOutput);
     }
     public void setManualMotorCommand(double cmd){
-        intakeArmMotor.set(ControlMode.PercentOutput,isInverted?-1*cmd:cmd); 
+        intakeArmMotor.set(ControlMode.PercentOutput,cmd); 
 }
 }

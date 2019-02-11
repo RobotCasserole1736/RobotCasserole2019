@@ -198,7 +198,9 @@ public abstract class CasserolePID {
      * called.
      */
     public void stop() {
-        timerThread.cancel();
+        if(timerThread != null){
+            timerThread.cancel();
+        }
     }
 
 

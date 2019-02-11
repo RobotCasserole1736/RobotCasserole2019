@@ -239,8 +239,6 @@ public class Arm {
         }
     }
 
-   
-
     public void sampleSensors() {
        topOfMotion = upperLimitSwitch.get();
        bottomOfMotion = lowerLimitSwitch.get();
@@ -250,14 +248,11 @@ public class Arm {
        if (bottomOfMotion){
            armEncoder.setPosition(bottomLimitSwitchDegreeCal.get());
        }
-
     }
 
     
     /////Use Sensor Data in Calculations\\\\\
     public void update() {
-
-
 
         if(runSimMode){
             //Run a simulated arm
@@ -294,7 +289,9 @@ public class Arm {
                     defArmPos();
                     double desRotation = desAngle;
                     double gravComp = gravComp();
-                    armPID.setReference(desRotation, ControlType.kSmartMotion, 0, gravComp);
+                    armPID.setReference(desRotation, ControlType.kPosition, 0, gravComp);
+                    //armPID.setReference(desRotation, ControlType.kSmartMotion, 0, gravComp);
+
                 }
 
             } 

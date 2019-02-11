@@ -235,7 +235,7 @@ public class Robot extends TimedRobot {
             setMatchInitialCommands();
             CrashTracker.logMatchInfo();
 
-            sensorCheck.update();
+            //sensorCheck.update();
 
         } catch(Throwable t) {
             CrashTracker.logThrowableCrash(t);
@@ -270,7 +270,7 @@ public class Robot extends TimedRobot {
 
             intakeControl.update();
 
-            sensorCheck.update();
+            //sensorCheck.update();
 
             if(arm.getActualArmHeight() < 90) {
                 AutoSeqDistToTgtEst.getInstance().setVisionDistanceEstimate(jevois.getTgtPositionY(), jevois.isTgtVisible());
@@ -474,6 +474,7 @@ public class Robot extends TimedRobot {
         CasseroleDriverView.setBoolean("Fault Detected", sensorCheck.isFaultDetected());
         CasseroleDriverView.setStringBox("Op Mode", superstructure.getOpModeString());
         CasseroleDriverView.setBoolean("Arm At Limit", arm.getBottomOfMotion() || arm.getTopOfMotion());
+        CasseroleDriverView.setBoolean("Ball In Intake", intakeControl.isBallDetected());
         CasseroleDriverView.setStringBox("Fault Description", sensorCheck.getFaultDescription());
     }
         
@@ -494,6 +495,7 @@ public class Robot extends TimedRobot {
         CasseroleDriverView.newBoolean("Line Seen", "green");
         CasseroleDriverView.newBoolean("Arm At Limit", "yellow");
         CasseroleDriverView.newBoolean("Fault Detected", "red");
+        CasseroleDriverView.newBoolean("Ball In Intake", "green");
         CasseroleDriverView.newStringBox("Op Mode");
         CasseroleDriverView.newStringBox("Fault Description");
     }
@@ -501,14 +503,16 @@ public class Robot extends TimedRobot {
     @Override
     public void testInit(){
         intakeControl.openLoop();
- }
+    }
+
     @Override
     public void testPeriodic(){
+        loopTiming.markLoopStart();
         climber.setManualMotorCommand(operatorController.xb.getY(Hand.kLeft));
         intakeControl.intakeLeftArmMotor.setManualMotorCommand(operatorController.xb.getY(Hand.kRight));
         intakeControl.intakeRightArmMotor.setManualMotorCommand(operatorController.xb.getY(Hand.kRight));
-
-
+        intakeControl.updateTelemetry();
+        loopTiming.markLoopEnd();
     }
  
 

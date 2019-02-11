@@ -51,7 +51,7 @@ public class FrontUltrasonic {
 
     // This is the private constructor that will be called once by getInstance() and it should instantiate anything that will be required by the class
     FrontUltrasonic() {
-        analogIn = new AnalogInput(2); 
+        analogIn = new AnalogInput(RobotConstants.ULTRASONIC_FRONT_PORT); 
 
         filt = new AveragingFilter(3,0);
 
