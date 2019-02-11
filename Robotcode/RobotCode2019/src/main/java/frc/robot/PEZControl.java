@@ -3,10 +3,8 @@ package frc.robot;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
-import edu.wpi.first.wpilibj.Relay;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.Relay.Value;
 import frc.lib.DataServer.Signal;
 import frc.lib.WebServer.CasseroleDriverView;
 
@@ -36,7 +34,7 @@ public class PEZControl {
     private static PEZControl pezCtrl = null;
 
     DoubleSolenoid pezPneumaticCyl;
-    Relay pezMidPosStopper;
+    Solenoid pezMidPosStopper;
 
     DriverController dController;
     OperatorController opController;
@@ -54,6 +52,8 @@ public class PEZControl {
     Signal posReqSig;
     Signal posEstSig;
     Signal retractedLimSwSig;
+    Signal smCylSig;
+    Signal bigCylSig;
 
 
     double retractTimeStart; 
@@ -66,9 +66,7 @@ public class PEZControl {
     final DoubleSolenoid.Value SOL_POS_HATCH = DoubleSolenoid.Value.kReverse;
     final DoubleSolenoid.Value SOL_POS_RELEASE = SOL_POS_HATCH;
 
-    final Relay.Value REL_POS_EXTEND = Relay.Value.kForward;
-    final Relay.Value REL_POS_RETRACT = Relay.Value.kOff;
-
+    
     final double MAX_EXTEND_DUR_SEC = 0.500;
 
 
@@ -105,7 +103,7 @@ public class PEZControl {
     // This is the private constructor that will be called once by getInstance() and it should instantiate anything that will be required by the class
     private  PEZControl() {
         pezPneumaticCyl = new DoubleSolenoid(RobotConstants.PEZ_SOLENOID_PORT_CARGO, RobotConstants.PEZ_SOLENOID_PORT_HATCH);
-        pezMidPosStopper = new Relay(RobotConstants.PEZ_RELAY_PORT);
+        pezMidPosStopper = new Solenoid(RobotConstants.PEZ_SOLENOID_MID_STOPPER);
         dController = DriverController.getInstance();
         opController = OperatorController.getInstance();
         limitSwitch = new DigitalInput(RobotConstants.PEZ_SOLENOID_LIMIT_SWITCH_PORT); 
@@ -116,6 +114,8 @@ public class PEZControl {
         posReqSig =new Signal("Gripper Position Requested", "pos");
         posEstSig =new Signal("Gripper Position Estimate", "pos");
         retractedLimSwSig =new Signal("Gripper Retracted Switch", "bool");
+        bigCylSig = new Signal("Big Cyl Pos","pos");
+        smCylSig = new Signal("Gripper Mid Postition Stopper", "bool");
     }
 
     private boolean checkExtended(){ 
@@ -135,29 +135,29 @@ public class PEZControl {
 
     public void update() {
         limitSwitchVal = limitSwitch.get();
-
+        
         if(posReq == PEZPos.CargoGrab){
             posEst = posReq;
             pezPneumaticCyl.set(SOL_POS_CARGO);
-            pezMidPosStopper.set(Value.kOff);
+            pezMidPosStopper.set(false);
 
         } else if(posReq == PEZPos.HatchGrab){
             posEst = posReq;
             pezPneumaticCyl.set(SOL_POS_HATCH);
-            pezMidPosStopper.set(Value.kOff);
+            pezMidPosStopper.set(false);
 
         }else if(posReq == PEZPos.Release){
             if (prevPosReq != PEZPos.Release){
                 retractTimeStart = Timer.getFPGATimestamp();
                 pezPneumaticCyl.set(SOL_POS_CARGO);
-                pezMidPosStopper.set(Value.kOff);
+                pezMidPosStopper.set(true);
             }
 
             boolean isExtended = checkExtended();
             if (isExtended == false) {
                 posEst = posReq;
                 pezPneumaticCyl.set (SOL_POS_RELEASE);
-                pezMidPosStopper.set(Value.kForward); 
+                pezMidPosStopper.set(false); 
             } else {
                 // waiting for cylinder to retract
                 posEst = PEZPos.InTransit;
@@ -184,6 +184,8 @@ public class PEZControl {
         posReqSig.addSample(sampleTimeMS, posReq.toInt());
         posEstSig.addSample(sampleTimeMS, posEst.toInt());
         retractedLimSwSig.addSample(sampleTimeMS, limitSwitchVal);
+        smCylSig.addSample(sampleTimeMS, pezMidPosStopper.get());
+        //Not sure if also Needed bigCylSig.addSample(sampleTimeMS, );
     }
 
     public void setPositionCmd(PEZPos cmd_in){
