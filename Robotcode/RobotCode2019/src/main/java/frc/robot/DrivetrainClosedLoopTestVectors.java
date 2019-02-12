@@ -20,8 +20,10 @@ package frc.robot;
  */
 
 import edu.wpi.first.wpilibj.Timer;
+import frc.lib.AutoSequencer.AutoSequencer;
 import frc.lib.Calibration.Calibration;
 import frc.lib.PathPlanner.FalconPathPlanner;
+import frc.robot.auto.AutoSeqPathPlan;
 
 public class DrivetrainClosedLoopTestVectors {
 
@@ -51,6 +53,7 @@ public class DrivetrainClosedLoopTestVectors {
     double testSeq = 0;
     double prevTestSeq = 0;
 
+    AutoSequencer seq;
 
     boolean testActive;
 
@@ -83,12 +86,9 @@ public class DrivetrainClosedLoopTestVectors {
             speedCmd = 0;
             triangleWaveUp = true;
             pathPlannerIdx = 0;
-            path = new FalconPathPlanner(testWaypoints);
-            path.setPathBeta(0.2);
-            path.setPathAlpha(0.5);
-            path.setVelocityAlpha(0.001);
-            path.setVelocityBeta(0.9);
-            path.calculate(testPeriodSec.get(), RobotConstants.MAIN_LOOP_SAMPLE_RATE_S, RobotConstants.ROBOT_TRACK_WIDTH_FT);
+            seq = new AutoSequencer();
+            seq.addEvent(new AutoSeqPathPlan(5, 5, Math.toRadians(-40)));
+
         }
 
         if(testSeq > 0){
@@ -104,6 +104,8 @@ public class DrivetrainClosedLoopTestVectors {
                 leftSpeedCmd = speedCmd;
                 rightSpeedCmd = speedCmd;
                 headingCmd = 0;
+                Drivetrain.getInstance().setClosedLoopSpeedCmd(Utils.FT_PER_SEC_TO_RPM(leftSpeedCmd), Utils.FT_PER_SEC_TO_RPM(rightSpeedCmd), headingCmd);
+
             } else if(testSeq == 2.0){
                 // Triangle speed profile
                 if(speedCmd > testAmpFtPerSec.get()){
@@ -121,22 +123,13 @@ public class DrivetrainClosedLoopTestVectors {
                 leftSpeedCmd = speedCmd;
                 rightSpeedCmd = speedCmd;
                 headingCmd = 0;
+                Drivetrain.getInstance().setClosedLoopSpeedCmd(Utils.FT_PER_SEC_TO_RPM(leftSpeedCmd), Utils.FT_PER_SEC_TO_RPM(rightSpeedCmd), headingCmd);
 
             } else if(testSeq == 3.0){
 
-                if(pathPlannerIdx < path.smoothLeftVelocity.length){
-                    leftSpeedCmd  = path.smoothLeftVelocity[pathPlannerIdx][1];
-                    rightSpeedCmd = path.smoothRightVelocity[pathPlannerIdx][1];
-                    headingCmd = path.heading[pathPlannerIdx][1];
-                } else {
-                    leftSpeedCmd  = 0;
-                    rightSpeedCmd = 0;
-                    headingCmd = path.heading[path.heading.length-1][1];
-                }
-                pathPlannerIdx++;
+                seq.update();
             }
 
-            Drivetrain.getInstance().setClosedLoopSpeedCmd(Utils.FT_PER_SEC_TO_RPM(leftSpeedCmd), Utils.FT_PER_SEC_TO_RPM(rightSpeedCmd), headingCmd);
         }
 
     }

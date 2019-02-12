@@ -283,8 +283,12 @@ public class Robot extends TimedRobot {
             }
             AutoSeqDistToTgtEst.getInstance().update();
 
+            DrivetrainClosedLoopTestVectors.getInstance().update();
+
             //Arbitrate driver & auto sequencer inputs to drivetrain
-            if(driverController.getGyroAngleLockReq()){
+            if(autonomous.getAutoSeqActive() || DrivetrainClosedLoopTestVectors.getInstance().isTestActive()){
+                //Do nothing - someone else will be setting drivetrain commands.
+            } else if(driverController.getGyroAngleLockReq()){
                 //Map driver inputs to drivetrain in gyro-lock mode
                 drivetrain.setGyroLockCmd(driverController.getDriverFwdRevCmd());
             } else {
@@ -292,8 +296,6 @@ public class Robot extends TimedRobot {
                 drivetrain.setOpenLoopCmd(driverController.getDriverFwdRevCmd(), driverController.getDriverRotateCmd());
             }
 
-            DrivetrainClosedLoopTestVectors.getInstance().update();
-            
             drivetrain.update();
 
             poseCalc.setLeftMotorSpeed(drivetrain.getLeftWheelSpeedRPM());
