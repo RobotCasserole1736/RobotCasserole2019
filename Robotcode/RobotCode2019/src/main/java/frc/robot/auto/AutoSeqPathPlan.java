@@ -1,12 +1,14 @@
 package frc.robot.auto;
 
 import java.util.ArrayList;
+
+import edu.wpi.first.wpilibj.Timer;
 import frc.lib.AutoSequencer.AutoEvent;
 import frc.lib.PathPlanner.FalconPathPlanner;
 import frc.lib.Util.CrashTracker;
+import frc.robot.Drivetrain;
 import frc.robot.RobotConstants;
 import frc.robot.Utils;
-import frc.robot.JeVoisInterface;
 
 /*
  *******************************************************************************************
@@ -36,12 +38,18 @@ public class AutoSeqPathPlan extends AutoEvent {
 
     FalconPathPlanner path;
 
+    final double PATH_DURATION_FROM_DISTANCE_RATIO = 1/5 ; //untis of seconds per foot, because reasons
+
     /**
      * Creates a new path from the current robot position up to a point in front of the target, pointed straight at it.
      */
     public AutoSeqPathPlan(double tgt_pos_x_ft, double tgt_pos_y_ft, double tgt_pos_angle_rad){
 
         double targetAngle = tgt_pos_angle_rad+(java.lang.Math.PI/2);
+
+        //Use a completely made up formula to calcualte the duration of the path plan event.
+        double psuedoDistance = Math.sqrt(tgt_pos_x_ft*tgt_pos_x_ft + tgt_pos_y_ft*tgt_pos_y_ft); //as-the-bird-flies distance to target
+        pathDurationSec = psuedoDistance*PATH_DURATION_FROM_DISTANCE_RATIO;
 
         waypoints = new ArrayList<double[]>(0);
 
@@ -163,12 +171,13 @@ public class AutoSeqPathPlan extends AutoEvent {
 
     @Override
     public void userUpdate() {
-
+        double thisLoopTime = Timer.getFPGATimestamp();
+        Drivetrain.getInstance().setClosedLoopSpeedCmd(getLeftSpeedCmdRPM(thisLoopTime), getRightSpeedCmdRPM(thisLoopTime),getHeadingCmdRPM(thisLoopTime));
     }
 
     @Override
     public void userForceStop() {
-
+        Drivetrain.getInstance().setOpenLoopCmd(0, 0);
     }
 
     @Override

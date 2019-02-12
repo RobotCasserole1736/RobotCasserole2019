@@ -123,12 +123,14 @@ public class Autonomous {
     double yTargetOffset = 0;
     double targetPositionAngle = 0;
 
+    boolean autoMoveRequested;
+
 
     //Commands called from other parts of the code need to be inputed into the parentheses, I think
     public void update(){
         double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
 
-        boolean autoMoveRequested = OperatorController.getInstance().getAutoMove();
+        autoMoveRequested = OperatorController.getInstance().getAutoMove();
 
         OpMode curOpMode = Superstructure.getInstance().getActualOpMode();
         boolean opModeAllowsAuto = (curOpMode == OpMode.CargoCarry || curOpMode == OpMode.Hatch);
@@ -270,6 +272,10 @@ public class Autonomous {
         autoFailedSig.addSample(sampleTimeMS, autoFailed);
         stableTargetFoundSig.addSample(sampleTimeMS, stableTargetFound);
         autoSeqStepSig.addSample(sampleTimeMS, seq.getEventIndex());
+    }
+
+    public boolean getAutoSeqActive(){
+        return autoMoveRequested;
     }
 
     public boolean getAutoFailed(){
