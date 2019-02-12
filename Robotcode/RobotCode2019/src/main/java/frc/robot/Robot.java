@@ -508,6 +508,7 @@ public class Robot extends TimedRobot {
     @Override
     public void testPeriodic(){
         loopTiming.markLoopStart();
+        intakeControl.sampleSensors();
         climber.setManualMotorCommand(operatorController.xb.getY(Hand.kLeft));
         intakeControl.intakeLeftArmMotor.setManualMotorCommand(operatorController.xb.getY(Hand.kRight));
         intakeControl.intakeRightArmMotor.setManualMotorCommand(operatorController.xb.getY(Hand.kRight));

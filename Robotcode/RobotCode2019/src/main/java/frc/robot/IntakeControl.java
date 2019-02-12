@@ -96,12 +96,12 @@ public class IntakeControl{
         extendAngle = new Calibration("Angle of Extended State deg", 90);
         groundAngle = new Calibration("Angle of Ground State deg", 115);
 
-        lowerLeftPotVoltage = new Calibration("Lowest Value of Left Potentiometer vol", 0, 0, 6);
-        upperLeftPotVoltage = new Calibration("Highest Value of Left Potentiometer vol", 5, 0, 6);
-        lowerRightPotVoltage = new Calibration("Lowest Value of Right Potentiometer vol", 0, 0, 6);
-        upperRightPotVoltage = new Calibration("Highest Value of Right Potentiometer vol", 5, 0, 6);
+        lowerLeftPotVoltage = new Calibration("Lowest Value of Left Potentiometer V", 0.129, 0, 6);
+        upperLeftPotVoltage = new Calibration("Highest Value of Left Potentiometer V", 0.892, 0, 6);
+        lowerRightPotVoltage = new Calibration("Lowest Value of Right Potentiometer V", 0.198, 0, 6);
+        upperRightPotVoltage = new Calibration("Highest Value of Right Potentiometer V", 0.959, 0, 6);
         minIntakeAngle = new Calibration("Minimum Angle of Intake deg", 0) ;
-        maxIntakeAngle = new Calibration("Minimum Angle of Intake deg", 360) ;
+        maxIntakeAngle = new Calibration("Minimum Angle of Intake deg", 180) ;
         
         ballInIntake = new DigitalInput(RobotConstants.BALL_INTAKE_PORT);
         intakeMotor = new WPI_TalonSRX(RobotConstants.INTAKE_MOTOR_CANID);
@@ -109,6 +109,7 @@ public class IntakeControl{
         intakeLeftArmMotor = new IntakeMotorBase(intakeMotorP.get(),intakeMotorI.get(),intakeMotorD.get(),RobotConstants.INTAKE_MOTOR_LEFT_CANID,RobotConstants.INTAKE_LEFT_POT_PORT);
         intakeRightArmMotor = new IntakeMotorBase(intakeMotorP.get(),intakeMotorI.get(),intakeMotorD.get(),RobotConstants.INTAKE_MOTOR_RIGHT_CANID,RobotConstants.INTAKE_RIGHT_POT_PORT);
         intakeLeftArmMotor.setInverted(true);
+        intakeRightArmMotor.setInverted(false);
         intakeLeftArmMotor.setLowerLimitVoltage(lowerLeftPotVoltage.get());
         intakeLeftArmMotor.setUpperLimitVoltage(upperLeftPotVoltage.get());
         intakeLeftArmMotor.setLowerLimitDegrees(minIntakeAngle.get());

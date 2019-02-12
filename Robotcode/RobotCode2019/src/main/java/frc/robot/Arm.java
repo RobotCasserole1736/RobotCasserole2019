@@ -52,8 +52,8 @@ public class Arm {
     CANDigitalInput lowerLimitSwitch;
     
     /////The PID StartUps\\\\\
-    public double kIz, kFF;
-    Calibration kP, kI, kD;
+    public double kIz;
+    Calibration kP, kI, kD, kFF;
 
     /////////Input Commands\\\\\\\\\\\
     ArmPos posIn;
@@ -101,6 +101,7 @@ public class Arm {
     Signal armDesPosSig;
     Signal armActPosSig;
     Signal armActVelSig;
+    Signal armDesVelSig;
     Signal armLowerLimitSig;
     Signal armUpperLimitSig;
 
@@ -137,7 +138,7 @@ public class Arm {
         //Configure Encoder
         armEncoder = sadey.getEncoder();
         armEncoder.setPositionConversionFactor((1/GEARBOX_GEAR_RATIO)*(1/SPROCKET_GEAR_RATIO)*360); //Set up so the distance measurement is in degrees
-        armEncoder.setVelocityConversionFactor((1/GEARBOX_GEAR_RATIO)*(1/SPROCKET_GEAR_RATIO)*360*60); //Set up so the velocity measurement is in deg/sec
+        armEncoder.setVelocityConversionFactor((1/GEARBOX_GEAR_RATIO)*(1/SPROCKET_GEAR_RATIO)*360/60); //Set up so the velocity measurement is in deg/sec
         //Configure s
         armPID = sadey.getPIDController();
 
@@ -161,41 +162,41 @@ public class Arm {
         armDesPosSig = new Signal("Arm Desired Position", "deg");
         armActPosSig = new Signal("Arm Actual Position", "deg");
         armActVelSig = new Signal("Arm Actual Velocity", "deg per sec");
+        armDesVelSig = new Signal("Arm Desired Velocity", "deg per sec");
         armLowerLimitSig = new Signal("Arm Lower Position Limit Switch", "bool");
         armUpperLimitSig = new Signal("Arm Upper Position Limit Switch", "bool");
 
 
         /////Calibration Things\\\\\
-        topCargoHeightCal    = new Calibration("Arm Cargo Level Pos Top (Deg)", 180);
-        midCargoHeightCal    = new Calibration("Arm Cargo Level Pos Mid (Deg)", 50);
-        lowCargoHeightCal    = new Calibration("Arm Cargo Level Pos Bottom (Deg)", 10);
-        intakeCargoHeightCal = new Calibration("Arm Cargo Level Pos Intake (Deg)", 0);
+        topCargoHeightCal    = new Calibration("Arm Cargo Level Pos Top Deg", 180);
+        midCargoHeightCal    = new Calibration("Arm Cargo Level Pos Mid Deg", 50);
+        lowCargoHeightCal    = new Calibration("Arm Cargo Level Pos Bottom Deg", 10);
+        intakeCargoHeightCal = new Calibration("Arm Cargo Level Pos Intake Deg", 0);
 
-        topHatchHeightCal    = new Calibration("Arm Hatch Level Pos Top (Deg)", 190);
-        midHatchHeightCal    = new Calibration("Arm Hatch Level Pos Mid (Deg)", 45);
-        lowHatchHeightCal    = new Calibration("Arm Hatch Level Pos Bottom (Deg)", 5);
-        intakeHatchHeightCal = new Calibration("Arm Hatch Level Pos Intake (Deg)", 5);
+        topHatchHeightCal    = new Calibration("Arm Hatch Level Pos Top Deg", 190);
+        midHatchHeightCal    = new Calibration("Arm Hatch Level Pos Mid Deg", 45);
+        lowHatchHeightCal    = new Calibration("Arm Hatch Level Pos Bottom Deg", 5);
+        intakeHatchHeightCal = new Calibration("Arm Hatch Level Pos Intake Deg", 5);
 
-        intakeDangerZoneUpperHeight = new Calibration("Arm Intake Danger Zone Upper Pos (Deg)", 3);
+        intakeDangerZoneUpperHeight = new Calibration("Arm Intake Danger Zone Upper Pos Deg", 3);
         
-        gravOffsetHorz    = new Calibration("Arm Required Voltage at Horz(Volts)", 0.5);
-        bottomLimitSwitchDegreeCal = new Calibration("Arm Limit Switch Angle Bottom (deg)", -30);
-        topLimitSwitchDegreeCal    = new Calibration("Arm Limit Switch Angle Top (deg)", 110);
+        gravOffsetHorz    = new Calibration("Arm Required Voltage at Horz V", 0.5);
+        bottomLimitSwitchDegreeCal = new Calibration("Arm Limit Switch Angle Bottom Deg", -30);
+        topLimitSwitchDegreeCal    = new Calibration("Arm Limit Switch Angle Top Deg", 110);
 
         //Calibration for the Arm Trapezoidal\\
         kMaxOutputCal = new Calibration("Arm SmartMotion Max Power", 1);
         kMinOutputCal = new Calibration("Arm SmartMotion Min Power",-1);
-        maxVelCal     = new Calibration("Arm SmartMotion Max Velocity For The Arm (Deg per sec)", 20);
-        minVelCal     = new Calibration("Arm SmartMotion Min Velocity For The Arm (Deg per sec)", -20);
-        maxAccCal     = new Calibration("Arm SmartMotion Max Acceleration on Arm (Deg per sec sqrd)", 10);
-        allowedErrCal = new Calibration("Arm SmartMotion Allowable Err (deg)", 0.5);
+        maxVelCal     = new Calibration("Arm SmartMotion Max Velocity For The Arm DegPerSec", 170);
+        minVelCal     = new Calibration("Arm SmartMotion Min Velocity For The Arm DegPerSec", -170);
+        maxAccCal     = new Calibration("Arm SmartMotion Max Acceleration on Arm DegPerSecSqrd", 340);
+        allowedErrCal = new Calibration("Arm SmartMotion Allowable Err Deg", 0.5);
 
-        kP  = new Calibration("Arm PID Control kP", 0.3); 
-        kI  = new Calibration("Arm PID Control kI", 0);
-        kD  = new Calibration("Arm PID Control kD", 0); 
+        kP  = new Calibration("Arm Velocity PID Control kP", 2.0E-5); 
+        kI  = new Calibration("Arm Velocity PID Control kI", 1.0E-7);
+        kD  = new Calibration("Arm Velocity PID Control kD", 0); 
+        kFF  = new Calibration("Arm Velocity PID Control kFF", 0.00015); 
         kIz = 0; 
-        kFF = 0; 
-
         updateCalValues(true);
     } 
 
@@ -208,7 +209,7 @@ public class Arm {
             armPID.setI(kI.get());
             armPID.setD(kD.get());
             armPID.setIZone(kIz);
-            armPID.setFF(kFF);
+            armPID.setFF(kFF.get());
             armPID.setOutputRange(kMinOutputCal.get(), kMaxOutputCal.get());
             
             //What is the Slot For - it's for ummmm slotty things. slotty mc slot face.
@@ -219,12 +220,13 @@ public class Arm {
             armPID.setSmartMotionMaxAccel(maxAccCal.get(), smartMotionSlot);
             armPID.setSmartMotionAllowedClosedLoopError(allowedErrCal.get(), smartMotionSlot);
             armPID.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, smartMotionSlot);
+
             acknowledgeCalsChanged();
         }
     }
 
     private boolean haveCalsChanged() {
-        return kP.isChanged() || kI.isChanged() || kD.isChanged() || kMinOutputCal.isChanged() ||
+        return kP.isChanged() || kI.isChanged() || kD.isChanged() || kFF.isChanged() || kMinOutputCal.isChanged() ||
         kMaxOutputCal.isChanged() || maxVelCal.isChanged() || minVelCal.isChanged() ||
         maxAccCal.isChanged() || allowedErrCal.isChanged();
     }
@@ -233,6 +235,7 @@ public class Arm {
         kP.acknowledgeValUpdate();
         kI.acknowledgeValUpdate();
         kD.acknowledgeValUpdate();
+        kFF.acknowledgeValUpdate();
         kMinOutputCal.acknowledgeValUpdate();
         kMaxOutputCal.acknowledgeValUpdate();
         maxVelCal.acknowledgeValUpdate();
@@ -283,6 +286,8 @@ public class Arm {
     /////Use Sensor Data in Calculations\\\\\
     public void update() {
 
+        double testDesVel = 0;
+
         
         if(runSimMode){
             //Run a simulated arm
@@ -311,8 +316,10 @@ public class Arm {
                 defArmPos();
                 double desRotation = desAngle;
                 double gravComp = gravComp();
-                armPID.setReference(INVERT_FACTOR*desRotation, ControlType.kPosition, 0, gravComp); //restore gravity TODOS
-                //armPID.setReference(INVERT_FACTOR*desRotation, ControlType.kSmartMotion, 0, gravComp);
+                //testDesVel = desRotation; //TEMP - test only
+                //armPID.setReference(INVERT_FACTOR*testDesVel, ControlType.kVelocity, 0, 0); //TEMP - test only
+                //armPID.setReference(INVERT_FACTOR*desRotation, ControlType.kPosition, 0, gravComp); 
+                armPID.setReference(INVERT_FACTOR*desRotation, ControlType.kSmartMotion, 0, 0);
 
             }
 
@@ -326,6 +333,7 @@ public class Arm {
         armDesPosSig.addSample(sampleTimeMS, desAngle);
         armActPosSig.addSample(sampleTimeMS, curArmAngle);
         armActVelSig.addSample(sampleTimeMS, INVERT_FACTOR*armEncoder.getVelocity());
+        armDesVelSig.addSample(sampleTimeMS, testDesVel);
         armLowerLimitSig.addSample(sampleTimeMS, bottomOfMotion);
         armUpperLimitSig.addSample(sampleTimeMS, topOfMotion);
 

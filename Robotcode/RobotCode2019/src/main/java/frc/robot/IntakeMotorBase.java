@@ -32,6 +32,8 @@ public class IntakeMotorBase extends CasserolePID{
     double lowerLimitDegrees=0;
     double upperLimitDegrees=0;
 
+    double potentiometerReading = 0;
+
     public IntakeMotorBase(double Kp_in, double Ki_in, double Kd_in,int Motor_id,int Pot_id){
         super(Kp_in,Ki_in,Kd_in);
         intakeArmMotor = new VictorSPX(Motor_id);
@@ -78,7 +80,6 @@ public class IntakeMotorBase extends CasserolePID{
         return armPot.get();
     }
 
-    double potentiometerReading = 0;
 
     @Override
     protected double returnPIDInput() {
