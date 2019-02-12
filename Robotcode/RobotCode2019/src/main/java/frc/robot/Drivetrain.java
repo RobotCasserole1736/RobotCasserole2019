@@ -83,6 +83,22 @@ public class Drivetrain implements DrivetrainInterface {
         return dTrainIF.getGyroAngle();
     }
 
+    public double getLeftTalon1Current() {
+        return dTrainIF.getLeftTalon1Current();
+    }
+
+    public double getLeftTalon2Current() {
+        return dTrainIF.getLeftTalon2Current();
+    }
+
+    public double getRightTalon1Current() {
+        return dTrainIF.getRightTalon1Current();
+    }
+
+    public double getRightTalon2Current() {
+        return dTrainIF.getRightTalon2Current();
+    }
+
     @Override
     public void setClosedLoopSpeedCmd(double leftCmdRPM, double rightCmdRPM) {
         dTrainIF.setClosedLoopSpeedCmd(leftCmdRPM, rightCmdRPM);

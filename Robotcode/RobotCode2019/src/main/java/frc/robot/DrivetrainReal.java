@@ -259,6 +259,22 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
     private double RPMtoCTRE_VelUnits(double ctreUnits) {
         return ctreUnits / 600.0 * ENCODER_CYCLES_PER_REV * 4.0;
     }
+
+    public double getLeftTalon1Current() {
+        return leftTalon1.getOutputCurrent();
+    }
+
+    public double getLeftTalon2Current() {
+        return leftTalon2.getOutputCurrent();
+    }
+
+    public double getRightTalon1Current() {
+        return rightTalon1.getOutputCurrent();
+    }
+
+    public double getRightTalon2Current() {
+        return rightTalon2.getOutputCurrent();
+    }
     
     public void updateGains(boolean force){
         if(force || gyroGain_P.isChanged() || gyroGain_I.isChanged() || gyroGain_D.isChanged()){

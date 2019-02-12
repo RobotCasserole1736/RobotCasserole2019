@@ -56,5 +56,13 @@ public interface DrivetrainInterface {
 
     public void setClosedLoopSpeedCmd(double leftCmdRPM, double rightCmdRPM, double headingCmdDeg);
 
-	public double getGyroAngle();
+    public double getGyroAngle();
+    
+    public double getLeftTalon1Current();
+
+    public double getLeftTalon2Current();
+
+    public double getRightTalon1Current();
+
+    public double getRightTalon2Current();
 }

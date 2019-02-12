@@ -32,10 +32,6 @@ public class SensorCheck {
 
     DriverController driverController;
     Drivetrain drivetrain;
-    WPI_TalonSRX dtRightTalon1;
-    WPI_TalonSRX dtRightTalon2;
-    WPI_TalonSRX dtLeftTalon1;
-    WPI_TalonSRX dtLeftTalon2;
     Compressor compressor;
     PneumaticsControl pneumatic;
 
@@ -66,11 +62,6 @@ public class SensorCheck {
         driverController = DriverController.getInstance();
         drivetrain = Drivetrain.getInstance();
         pneumatic = PneumaticsControl.getInstance();
-
-        dtRightTalon1 = new WPI_TalonSRX(RobotConstants.DRIVETRAIN_RIGHT_1_CANID);
-        dtRightTalon2 = new WPI_TalonSRX(RobotConstants.DRIVETRAIN_RIGHT_2_CANID);
-        dtLeftTalon1 = new WPI_TalonSRX(RobotConstants.DRIVETRAIN_LEFT_1_CANID);
-        dtLeftTalon2 = new WPI_TalonSRX(RobotConstants.DRIVETRAIN_LEFT_2_CANID);
     }
 
     public void update() {
@@ -105,28 +96,28 @@ public class SensorCheck {
         } 
 
         //Drivetrain motor currents
-        if((driverController.getDriverFwdRevCmd() != 0) && (dtLeftTalon1.getOutputCurrent() != 0)) {
+        if((driverController.getDriverFwdRevCmd() != 0) && (drivetrain.getLeftTalon1Current() != 0)) {
             dtLeftTalon1Fault = false;
             faultDetected = false;
-        }else if((driverController.getDriverFwdRevCmd() != 0) && (dtLeftTalon1.getOutputCurrent() == 0)) {
+        }else if((driverController.getDriverFwdRevCmd() != 0) && (drivetrain.getLeftTalon1Current() == 0)) {
             dtLeftTalon1Fault = true;
             faultDetected = true;
-        }else if((driverController.getDriverFwdRevCmd() != 0) && (dtLeftTalon2.getOutputCurrent() != 0)) {
+        }else if((driverController.getDriverFwdRevCmd() != 0) && (drivetrain.getLeftTalon2Current() != 0)) {
             dtLeftTalon2Fault = false;
             faultDetected = false;
-        }else if((driverController.getDriverFwdRevCmd() != 0) && (dtLeftTalon2.getOutputCurrent() == 0)) {
+        }else if((driverController.getDriverFwdRevCmd() != 0) && (drivetrain.getLeftTalon2Current() == 0)) {
             dtLeftTalon2Fault = true;
             faultDetected = true;
-        }else if((driverController.getDriverFwdRevCmd() != 0) && (dtRightTalon1.getOutputCurrent() != 0)) {
+        }else if((driverController.getDriverFwdRevCmd() != 0) && (drivetrain.getRightTalon1Current() != 0)) {
             dtRightTalon1Fault = false;
             faultDetected = false;
-        }else if((driverController.getDriverFwdRevCmd() != 0) && (dtRightTalon1.getOutputCurrent() == 0)) {
+        }else if((driverController.getDriverFwdRevCmd() != 0) && (drivetrain.getRightTalon1Current() == 0)) {
             dtRightTalon1Fault = true;
             faultDetected = true;
-        }else if((driverController.getDriverFwdRevCmd() != 0) && (dtRightTalon2.getOutputCurrent() != 0)) {
+        }else if((driverController.getDriverFwdRevCmd() != 0) && (drivetrain.getRightTalon2Current() != 0)) {
             dtRightTalon2Fault = false;
             faultDetected = false;
-        }else if((driverController.getDriverFwdRevCmd() != 0) && (dtRightTalon2.getOutputCurrent() == 0)) {
+        }else if((driverController.getDriverFwdRevCmd() != 0) && (drivetrain.getRightTalon2Current() == 0)) {
             dtRightTalon2Fault = true;
             faultDetected = true;
         }
