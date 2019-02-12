@@ -151,4 +151,24 @@ public class DrivetrainSim implements DrivetrainInterface {
         return 0; //no gyro implemented
     }
 
+    @Override
+    public double getLeftTalon1Current() {
+        return 0;
+    }
+
+    @Override
+    public double getLeftTalon2Current() {
+        return 0;
+    }
+
+    @Override
+    public double getRightTalon1Current() {
+        return 0;
+    }
+
+    @Override
+    public double getRightTalon2Current() {
+        return 0;
+    }
+
 }

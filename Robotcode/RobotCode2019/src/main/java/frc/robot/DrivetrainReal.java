@@ -64,6 +64,11 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
     double rightSpeedCmd_RPM;
     double headingCmd_deg;
 
+    double left1Current  = 0;
+    double left2Current  = 0;
+    double right1Current = 0;
+    double right2Current = 0;
+
     Calibration gyroGain_P;
     Calibration gyroGain_I;
     Calibration gyroGain_D;
@@ -261,19 +266,19 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
     }
 
     public double getLeftTalon1Current() {
-        return leftTalon1.getOutputCurrent();
+        return left1Current;
     }
 
     public double getLeftTalon2Current() {
-        return leftTalon2.getOutputCurrent();
+        return left2Current;
     }
 
     public double getRightTalon1Current() {
-        return rightTalon1.getOutputCurrent();
+        return right1Current;
     }
 
     public double getRightTalon2Current() {
-        return rightTalon2.getOutputCurrent();
+        return right2Current;
     }
     
     public void updateGains(boolean force){
@@ -388,11 +393,16 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
         }
 
         /* Update Telemetry */
+        left1Current  = leftTalon1.getOutputCurrent();
+        left2Current  = leftTalon2.getOutputCurrent();
+        right1Current = rightTalon1.getOutputCurrent();
+        right2Current = rightTalon2.getOutputCurrent();
+
         double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
-        currentR1Sig.addSample(sampleTimeMS, rightTalon1.getOutputCurrent());
-        currentR2Sig.addSample(sampleTimeMS, rightTalon2.getOutputCurrent());
-        currentL1Sig.addSample(sampleTimeMS, leftTalon1.getOutputCurrent());
-        currentL2Sig.addSample(sampleTimeMS, leftTalon2.getOutputCurrent());
+        currentL1Sig.addSample(sampleTimeMS, left1Current );
+        currentL2Sig.addSample(sampleTimeMS, left2Current );
+        currentR1Sig.addSample(sampleTimeMS, right1Current);
+        currentR2Sig.addSample(sampleTimeMS, right2Current);
         opModeSig.addSample(sampleTimeMS, opMode.toInt());
         angleActSig.addSample(sampleTimeMS, getGyroAngle());
         angleDesSig.addSample(sampleTimeMS, headingCmd_deg);
