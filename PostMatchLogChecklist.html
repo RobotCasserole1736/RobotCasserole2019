@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<script>
+  function readCheckboxes() {
+  var errorString;
+  errorString = "Fail! ";
+  	if(!(document.getElementById("drivetrainCurrentDraw").checked)) {
+    	errorString = errorString.concat("Drivetrain current does not follow operator commands. ");
+    }
+    if(!(document.getElementById("sameSideCurrents").checked)) {
+    	errorString = errorString.concat("Two motors on one side do not pull the same current. ");
+    }
+    if(!(document.getElementById("overallCurrent").checked)) {
+    	errorString = errorString.concat("Overall current draw got too high. ");
+    }
+    if(!(document.getElementById("encoderReadings").checked)) {
+    	errorString = errorString.concat("Wheel speed readings drop in and out or are not normal. ");
+    }
+    if(errorString == "Fail. ") {
+    	errorString = "Pass!";
+    }
+    alert(errorString);
+  }        
+</script>
+<body>
+
+<h1>Checklist:</h1>
+
+<input type="checkbox" id="drivetrainCurrentDraw" value="followsCommands"> Drivetrain current draw follows operator commands.<br>
+<input type="checkbox" id="sameSideCurrents" value="same"> The two motors on a side of the drivetrain pull about the same amount of current.<br>
+<input type="checkbox" id="overallCurrent" value="normalCurrent"> Overall current draw is normal (It doesn't ever get too high).<br>
+<input type="checkbox" id="encoderReadings" value="normalSpeeds"> Wheel speed readings are normal (Signals aren't dropping in and out).<br>
+<button type="button" onclick="readCheckboxes()"> Check </button>
+  
+</body>
+</html>
