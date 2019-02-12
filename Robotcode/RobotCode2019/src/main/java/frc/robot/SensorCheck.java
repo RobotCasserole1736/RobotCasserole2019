@@ -62,6 +62,7 @@ public class SensorCheck {
         driverController = DriverController.getInstance();
         drivetrain = Drivetrain.getInstance();
         pneumatic = PneumaticsControl.getInstance();
+        compressor = pneumatic.getCompressor();
     }
 
     public void update() {
@@ -123,10 +124,10 @@ public class SensorCheck {
         }
 
         //Compressor cutoff switch
-        if((compressor.getPressureSwitchValue() == true) && (pneumatic.getPressure() > 100)) {
+        if((compressor.getPressureSwitchValue() == false) && (pneumatic.getPressure() > 100)) {
             compressorCutoffFault = false;
             faultDetected = false;
-        }else if((compressor.getPressureSwitchValue() == true) && (pneumatic.getPressure() < 100)) {
+        }else if((compressor.getPressureSwitchValue() == false) && (pneumatic.getPressure() < 100)) {
             compressorCutoffFault = true;
             faultDetected = true;
         }

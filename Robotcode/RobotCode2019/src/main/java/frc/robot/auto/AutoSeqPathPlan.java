@@ -36,9 +36,13 @@ public class AutoSeqPathPlan extends AutoEvent {
 
     double pathDurationSec = 0;
 
+    double startTime = 0;
+
+    double thisLoopTime;
+
     FalconPathPlanner path;
 
-    final double PATH_DURATION_FROM_DISTANCE_RATIO = 1/5 ; //untis of seconds per foot, because reasons
+    final double PATH_DURATION_FROM_DISTANCE_RATIO = 1.0/1.0 ; //untis of seconds per foot, because reasons
 
     /**
      * Creates a new path from the current robot position up to a point in front of the target, pointed straight at it.
@@ -51,7 +55,7 @@ public class AutoSeqPathPlan extends AutoEvent {
         double psuedoDistance = Math.sqrt(tgt_pos_x_ft*tgt_pos_x_ft + tgt_pos_y_ft*tgt_pos_y_ft); //as-the-bird-flies distance to target
         pathDurationSec = psuedoDistance*PATH_DURATION_FROM_DISTANCE_RATIO;
 
-        waypoints = new ArrayList<double[]>(0);
+        waypoints = new ArrayList<double[]>(6);
 
         //This matrix is for the x and y position of the target. It is supposed to be a 2 X 1.
         double [] pointAheadOfEndMatrix = 
@@ -166,12 +170,12 @@ public class AutoSeqPathPlan extends AutoEvent {
 
     @Override
     public void userStart() {
-
+        startTime = Timer.getFPGATimestamp();
     }
 
     @Override
     public void userUpdate() {
-        double thisLoopTime = Timer.getFPGATimestamp();
+        thisLoopTime = Timer.getFPGATimestamp() - startTime;
         Drivetrain.getInstance().setClosedLoopSpeedCmd(getLeftSpeedCmdRPM(thisLoopTime), getRightSpeedCmdRPM(thisLoopTime),getHeadingCmdRPM(thisLoopTime));
     }
 
@@ -182,12 +186,12 @@ public class AutoSeqPathPlan extends AutoEvent {
 
     @Override
     public boolean isTriggered() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isDone() {
-        return false;
+        return thisLoopTime > (pathDurationSec + 0.1);
     }
 
     public static double[] multiplyMatrices(double[][] firstMatrix, double[] secondMatrix) {

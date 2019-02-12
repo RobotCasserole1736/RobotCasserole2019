@@ -32,6 +32,8 @@ public class DrivetrainClosedLoopTestVectors {
     Calibration testPeriodSec;
     Calibration testAmpFtPerSec;
 
+    boolean autoSeqNeedsStart = false;
+
     double leftSpeedCmd = 0;
     double rightSpeedCmd = 0;
     double headingCmd = 0;
@@ -39,14 +41,6 @@ public class DrivetrainClosedLoopTestVectors {
     double speedCmd = 0;
     boolean triangleWaveUp = true;
 
-    //In units of feet
-    double[][] testWaypoints = {
-                                {0,0},
-                                {0,5},
-                                {2,7},
-                                {4,9},
-                                {4,12}
-                               };
     FalconPathPlanner path;
     int pathPlannerIdx = 0;
     
@@ -70,6 +64,7 @@ public class DrivetrainClosedLoopTestVectors {
         testPeriodSec = new Calibration("Test Vector Drivetrain Period Sec", 2.0, 0.5, 15); 
         testActive = false;
         speedCmd = 0;
+        seq = new AutoSequencer();
     }
 
     public boolean isTestActive(){
@@ -86,9 +81,12 @@ public class DrivetrainClosedLoopTestVectors {
             speedCmd = 0;
             triangleWaveUp = true;
             pathPlannerIdx = 0;
-            seq = new AutoSequencer();
-            seq.addEvent(new AutoSeqPathPlan(5, 5, Math.toRadians(-40)));
+        }
 
+        if(prevTestSeq != 3.0 && testSeq == 3.0){
+            autoSeqNeedsStart = true;
+            seq.clearAllEvents();
+            seq.addEvent(new AutoSeqPathPlan(5, 5, Math.toRadians(-40)));
         }
 
         if(testSeq > 0){
@@ -105,6 +103,7 @@ public class DrivetrainClosedLoopTestVectors {
                 rightSpeedCmd = speedCmd;
                 headingCmd = 0;
                 Drivetrain.getInstance().setClosedLoopSpeedCmd(Utils.FT_PER_SEC_TO_RPM(leftSpeedCmd), Utils.FT_PER_SEC_TO_RPM(rightSpeedCmd), headingCmd);
+                seq.stop();
 
             } else if(testSeq == 2.0){
                 // Triangle speed profile
@@ -124,12 +123,18 @@ public class DrivetrainClosedLoopTestVectors {
                 rightSpeedCmd = speedCmd;
                 headingCmd = 0;
                 Drivetrain.getInstance().setClosedLoopSpeedCmd(Utils.FT_PER_SEC_TO_RPM(leftSpeedCmd), Utils.FT_PER_SEC_TO_RPM(rightSpeedCmd), headingCmd);
+                seq.stop();
 
             } else if(testSeq == 3.0){
-
+                if(autoSeqNeedsStart){
+                    seq.start();
+                    autoSeqNeedsStart = false;
+                }
                 seq.update();
             }
 
+        } else {
+            seq.stop();
         }
 
     }

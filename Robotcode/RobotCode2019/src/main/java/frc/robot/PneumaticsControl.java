@@ -51,6 +51,10 @@ public class PneumaticsControl {
         compCurrent = new Signal("Pneumatics Compressor Current", "A");
     }
 
+    public Compressor getCompressor(){
+        return compressor;
+    }
+
     public void update(){
         double voltage = pressureSensor.getVoltage();
         curPressurePSI = ((voltage/5.0)-0.1)*(150/0.8); /*Equation derived from datasheet */
