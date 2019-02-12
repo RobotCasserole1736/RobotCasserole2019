@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import frc.lib.DataServer.Signal;
 import frc.lib.WebServer.CasseroleDriverView;
 
@@ -34,7 +35,7 @@ public class PEZControl {
     private static PEZControl pezCtrl = null;
 
     DoubleSolenoid pezPneumaticCyl;
-    Solenoid pezMidPosStopper;
+    DoubleSolenoid pezMidPosStopper;
 
     DriverController dController;
     OperatorController opController;
@@ -44,6 +45,7 @@ public class PEZControl {
     PEZPos posReq;
     PEZPos prevPosReq; 
     PEZPos posEst;
+    double smallSolePos;
     
     boolean posStable;
     int posStableCounter;
@@ -102,7 +104,7 @@ public class PEZControl {
     // This is the private constructor that will be called once by getInstance() and it should instantiate anything that will be required by the class
     private  PEZControl() {
         pezPneumaticCyl = new DoubleSolenoid(RobotConstants.PEZ_SOLENOID_PORT_CARGO, RobotConstants.PEZ_SOLENOID_PORT_HATCH);
-        pezMidPosStopper = new Solenoid(RobotConstants.PEZ_SOLENOID_MID_STOPPER);
+        pezMidPosStopper = new DoubleSolenoid(RobotConstants.PEZ_DUB_SOLENOID_MID_STOPPER, RobotConstants.PEZ_DUB_SOLENOID_MID_STOPPER2);
         dController = DriverController.getInstance();
         opController = OperatorController.getInstance();
         limitSwitch = new DigitalInput(RobotConstants.PEZ_SOLENOID_LIMIT_SWITCH_PORT); 
@@ -113,7 +115,7 @@ public class PEZControl {
         posReqSig =new Signal("Gripper Position Requested", "pos");
         posEstSig =new Signal("Gripper Position Estimate", "pos");
         retractedLimSwSig =new Signal("Gripper Retracted Switch", "bool");
-        smCylSig = new Signal("Gripper Mid Postition Stopper", "bool");
+        smCylSig = new Signal("Gripper Mid Stopper Extended Switch", "bool");
     }
 
     private boolean checkExtended(){ 
@@ -137,25 +139,29 @@ public class PEZControl {
         if(posReq == PEZPos.CargoGrab){
             posEst = posReq;
             pezPneumaticCyl.set(SOL_POS_CARGO);
-            pezMidPosStopper.set(false);
+            pezMidPosStopper.set(Value.kForward);
+            smallSolePos = 0;
 
         } else if(posReq == PEZPos.HatchGrab){
             posEst = posReq;
             pezPneumaticCyl.set(SOL_POS_HATCH);
-            pezMidPosStopper.set(false);
+            pezMidPosStopper.set(Value.kReverse);
+            smallSolePos = 0;
 
         }else if(posReq == PEZPos.Release){
             if (prevPosReq != PEZPos.Release){
                 retractTimeStart = Timer.getFPGATimestamp();
                 pezPneumaticCyl.set(SOL_POS_CARGO);
-                pezMidPosStopper.set(true);
+                pezMidPosStopper.set(Value.kForward);
+                smallSolePos = 1;
             }
 
             boolean isExtended = checkExtended();
             if (isExtended == false) {
                 posEst = posReq;
                 pezPneumaticCyl.set (SOL_POS_RELEASE);
-                pezMidPosStopper.set(false); 
+                pezMidPosStopper.set(Value.kReverse); 
+                smallSolePos = 0;
             } else {
                 // waiting for cylinder to retract
                 posEst = PEZPos.InTransit;
@@ -182,7 +188,7 @@ public class PEZControl {
         posReqSig.addSample(sampleTimeMS, posReq.toInt());
         posEstSig.addSample(sampleTimeMS, posEst.toInt());
         retractedLimSwSig.addSample(sampleTimeMS, limitSwitchVal);
-        smCylSig.addSample(sampleTimeMS, pezMidPosStopper.get());
+        smCylSig.addSample(sampleTimeMS, smallSolePos);
     }
 
     public void setPositionCmd(PEZPos cmd_in){

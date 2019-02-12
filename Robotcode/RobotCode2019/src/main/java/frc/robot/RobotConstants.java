@@ -60,7 +60,9 @@ public class RobotConstants {
     public static final int PEZ_SOLENOID_PORT_HATCH = 1;
     public static final int INTAKE_ARM_BAR_PORT = 4;
     public static final int ARM_MECH_BRAKE_SOL_PORT = 5;
-    public static final int PEZ_SOLENOID_MID_STOPPER = 2;
+    public static final int PEZ_DUB_SOLENOID_MID_STOPPER = 2;
+    public static final int PEZ_DUB_SOLENOID_MID_STOPPER2 = 3;
+
 
     /////////////////////////////////////////////////////////////////////////////////////
     // Other Constants
