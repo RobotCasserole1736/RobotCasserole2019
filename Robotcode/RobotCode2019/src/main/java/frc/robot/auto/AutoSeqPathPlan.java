@@ -99,7 +99,7 @@ public class AutoSeqPathPlan extends AutoEvent {
      * Returns True if a path could be calculated, false if no valid path was found.
      */
     public boolean getPathAvailable(){
-        return ( path.smoothLeftVelocity.length > 1);
+        return (path.smoothLeftVelocity.length > 1);
     }
 
     /**
