@@ -53,7 +53,6 @@ public class PEZControl {
     Signal posEstSig;
     Signal retractedLimSwSig;
     Signal smCylSig;
-    Signal bigCylSig;
 
 
     double retractTimeStart; 
@@ -114,7 +113,6 @@ public class PEZControl {
         posReqSig =new Signal("Gripper Position Requested", "pos");
         posEstSig =new Signal("Gripper Position Estimate", "pos");
         retractedLimSwSig =new Signal("Gripper Retracted Switch", "bool");
-        bigCylSig = new Signal("Big Cyl Pos","pos");
         smCylSig = new Signal("Gripper Mid Postition Stopper", "bool");
     }
 
@@ -185,7 +183,6 @@ public class PEZControl {
         posEstSig.addSample(sampleTimeMS, posEst.toInt());
         retractedLimSwSig.addSample(sampleTimeMS, limitSwitchVal);
         smCylSig.addSample(sampleTimeMS, pezMidPosStopper.get());
-        //Not sure if also Needed bigCylSig.addSample(sampleTimeMS, );
     }
 
     public void setPositionCmd(PEZPos cmd_in){
