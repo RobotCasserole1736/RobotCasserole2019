@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>Checklist:</h1>
+
+<input type="checkbox" name="drivetrainCurrentDraw" value="followsCommands"> Drivetrain current draw follows operator commands.<br>
+<input type="checkbox" name="sameSideCurrents" value="same"> The two motors on a side of the drivetrain pull about the same amount of current.<br>
+<input type="checkbox" name="overallCurrent" value="normalCurrent"> Overall current draw is normal (It doesn't ever get too high).<br>
+<input type="checkbox" name="encoderReadings" value="normalSpeeds"> Wheel speed readings are normal (Signals aren't dropping in and out).<br>
+
+</body>
+</html>
