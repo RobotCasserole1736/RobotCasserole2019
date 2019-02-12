@@ -196,26 +196,49 @@ public class Arm {
         kIz = 0; 
         kFF = 0; 
 
-        updateCalValues();
+        updateCalValues(true);
     } 
 
-    public void updateCalValues(){
+    public void updateCalValues(boolean forceUpdate){
         /////Set PID\\\\\
-        armPID.setP(kP.get());
-        armPID.setI(kI.get());
-        armPID.setD(kD.get());
-        armPID.setIZone(kIz);
-        armPID.setFF(kFF);
-        armPID.setOutputRange(kMinOutputCal.get(), kMaxOutputCal.get());
-        
-        //What is the Slot For - it's for ummmm slotty things. slotty mc slot face.
-        int smartMotionSlot = 0;
-        
-        armPID.setSmartMotionMaxVelocity(maxVelCal.get(), smartMotionSlot);
-        armPID.setSmartMotionMinOutputVelocity(minVelCal.get(), smartMotionSlot);
-        armPID.setSmartMotionMaxAccel(maxAccCal.get(), smartMotionSlot);
-        armPID.setSmartMotionAllowedClosedLoopError(allowedErrCal.get(), smartMotionSlot);
-        armPID.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, smartMotionSlot);
+        if(haveCalsChanged() || forceUpdate)
+        {
+            //We don't want to update these every single loop because it significantly impacts performance
+            armPID.setP(kP.get());
+            armPID.setI(kI.get());
+            armPID.setD(kD.get());
+            armPID.setIZone(kIz);
+            armPID.setFF(kFF);
+            armPID.setOutputRange(kMinOutputCal.get(), kMaxOutputCal.get());
+            
+            //What is the Slot For - it's for ummmm slotty things. slotty mc slot face.
+            int smartMotionSlot = 0;
+            
+            armPID.setSmartMotionMaxVelocity(maxVelCal.get(), smartMotionSlot);
+            armPID.setSmartMotionMinOutputVelocity(minVelCal.get(), smartMotionSlot);
+            armPID.setSmartMotionMaxAccel(maxAccCal.get(), smartMotionSlot);
+            armPID.setSmartMotionAllowedClosedLoopError(allowedErrCal.get(), smartMotionSlot);
+            armPID.setSmartMotionAccelStrategy(AccelStrategy.kTrapezoidal, smartMotionSlot);
+            acknowledgeCalsChanged();
+        }
+    }
+
+    private boolean haveCalsChanged() {
+        return kP.isChanged() || kI.isChanged() || kD.isChanged() || kMinOutputCal.isChanged() ||
+        kMaxOutputCal.isChanged() || maxVelCal.isChanged() || minVelCal.isChanged() ||
+        maxAccCal.isChanged() || allowedErrCal.isChanged();
+    }
+
+    private void acknowledgeCalsChanged() {
+        kP.acknowledgeValUpdate();
+        kI.acknowledgeValUpdate();
+        kD.acknowledgeValUpdate();
+        kMinOutputCal.acknowledgeValUpdate();
+        kMaxOutputCal.acknowledgeValUpdate();
+        maxVelCal.acknowledgeValUpdate();
+        minVelCal.acknowledgeValUpdate();
+        maxAccCal.acknowledgeValUpdate();
+        allowedErrCal.acknowledgeValUpdate();
     }
     
 

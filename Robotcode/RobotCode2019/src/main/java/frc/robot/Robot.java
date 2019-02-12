@@ -359,6 +359,7 @@ public class Robot extends TimedRobot {
             ledController.setPattern(LEDPatterns.Pattern2);
             matchState.SetPeriod(MatchState.Period.Disabled);
             eyeOfVeganSauron.setLEDRingState(false);
+            intakeControl.forceStop();
         } catch(Throwable t) {
             CrashTracker.logThrowableCrash(t);
             throw t;
@@ -392,7 +393,7 @@ public class Robot extends TimedRobot {
             //Initial Match State - Arm Not Moving
             arm.setManualMovementCmd(0);
             arm.setPositionCmd(ArmPos.None);
-            arm.updateCalValues();
+            arm.updateCalValues(false);
             arm.update();
 
             pezControl.update();
