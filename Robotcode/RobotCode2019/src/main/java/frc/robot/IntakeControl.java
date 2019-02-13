@@ -65,6 +65,8 @@ public class IntakeControl{
     Calibration minIntakeAngle;
     Calibration maxIntakeAngle;
 
+    Calibration positionOverride;
+
     double currentLeftPosition;
     double currentRightPosition;
 
@@ -89,27 +91,29 @@ public class IntakeControl{
         intakeSpeed = new Calibration("Intake Intake Speed motor cmd", 0.5, 0, 1);
         ejectSpeed = new Calibration("Intake Eject Speed motor cmd", 0.5, 0, 1);
         extendTime = new Calibration("Intake Est Extend Time sec", 0.500, 0, 5);
-        intakeMotorP = new Calibration("Intake Motor P", 0);
+        intakeMotorP = new Calibration("Intake Motor P", 0.1);
         intakeMotorI = new Calibration("Intake Motor I", 0);
         intakeMotorD = new Calibration("Intake Motor D", 0);
-        retractAngle = new Calibration("Angle of Retracted State deg", 0);
-        extendAngle = new Calibration("Angle of Extended State deg", 90);
-        groundAngle = new Calibration("Angle of Ground State deg", 115);
+        retractAngle = new Calibration("Intake Angle of Retracted State deg", 5);
+        extendAngle = new Calibration("Intake Angle of Extended State deg", 130);
+        groundAngle = new Calibration("Intake Angle of Ground State deg", 170);
 
-        lowerLeftPotVoltage = new Calibration("Lowest Value of Left Potentiometer V", 0.129, 0, 6);
-        upperLeftPotVoltage = new Calibration("Highest Value of Left Potentiometer V", 0.892, 0, 6);
-        lowerRightPotVoltage = new Calibration("Lowest Value of Right Potentiometer V", 0.198, 0, 6);
-        upperRightPotVoltage = new Calibration("Highest Value of Right Potentiometer V", 0.959, 0, 6);
-        minIntakeAngle = new Calibration("Minimum Angle of Intake deg", 0) ;
-        maxIntakeAngle = new Calibration("Minimum Angle of Intake deg", 180) ;
+        lowerLeftPotVoltage = new Calibration("Intake Lowest Value of Left Potentiometer V", 0.292, 0, 6);
+        upperLeftPotVoltage = new Calibration("Intake Highest Value of Left Potentiometer V", 0.982, 0, 6);
+        lowerRightPotVoltage = new Calibration("Intake Lowest Value of Right Potentiometer V", 0.0573, 0, 6);
+        upperRightPotVoltage = new Calibration("Intake Highest Value of Right Potentiometer V", 0.750, 0, 6);
+        minIntakeAngle = new Calibration("Intake Minimum Angle deg", 0) ;
+        maxIntakeAngle = new Calibration("Intake Maximum Angle deg", 180) ;
+        
+        positionOverride = new Calibration("Intake Position Override Enable", 0, 0, 5);
         
         ballInIntake = new DigitalInput(RobotConstants.BALL_INTAKE_PORT);
         intakeMotor = new WPI_TalonSRX(RobotConstants.INTAKE_MOTOR_CANID);
         //TODO figure out which one is inverted
         intakeLeftArmMotor = new IntakeMotorBase(intakeMotorP.get(),intakeMotorI.get(),intakeMotorD.get(),RobotConstants.INTAKE_MOTOR_LEFT_CANID,RobotConstants.INTAKE_LEFT_POT_PORT);
         intakeRightArmMotor = new IntakeMotorBase(intakeMotorP.get(),intakeMotorI.get(),intakeMotorD.get(),RobotConstants.INTAKE_MOTOR_RIGHT_CANID,RobotConstants.INTAKE_RIGHT_POT_PORT);
-        intakeLeftArmMotor.setInverted(true);
-        intakeRightArmMotor.setInverted(false);
+        intakeLeftArmMotor.setInverted(false);
+        intakeRightArmMotor.setInverted(true);
         intakeLeftArmMotor.setLowerLimitVoltage(lowerLeftPotVoltage.get());
         intakeLeftArmMotor.setUpperLimitVoltage(upperLeftPotVoltage.get());
         intakeLeftArmMotor.setLowerLimitDegrees(minIntakeAngle.get());
@@ -129,6 +133,7 @@ public class IntakeControl{
         retractStateCmdSig = new Signal("Intake Commanded Position", "Intake Pos Enum");
         motorSpeedCmdSig = new Signal("Intake Roller Motor Command", "cmd");
         ballInIntakeSig = new Signal("Intake Ball Present", "bool");
+
     }
 
     //Intake positions that can be requested
@@ -167,7 +172,22 @@ public class IntakeControl{
     private IntakeSpd intakeSpdCmd = IntakeSpd.Stop;
 
     public void setPositionCmd(IntakePos posIn){
-        intakePosCmd = posIn;
+
+        //Test only - enable manual control from driver controller when override is active
+        if(positionOverride.get() == 1.0){
+            int dpadPos = DriverController.getInstance().xb.getPOV();
+
+            if(dpadPos == 0){
+                intakePosCmd = IntakePos.Ground;
+            } else if(dpadPos == 90 || dpadPos == 270){
+                intakePosCmd = IntakePos.Extend;
+            } else if(dpadPos == 180){
+                intakePosCmd = IntakePos.Retract;
+            }
+        } else {
+            intakePosCmd = posIn;
+        }
+
     }
 
     public IntakePos getPositionCmd(){
@@ -209,7 +229,17 @@ public class IntakeControl{
 
     public void update(){
         double intakeMotorCmd = 0;
+        
+        //Temp - do this elsewhere
+        intakeLeftArmMotor.setKp(intakeMotorP.get());
+        intakeLeftArmMotor.setKi(intakeMotorI.get());
+        intakeLeftArmMotor.setKd(intakeMotorD.get());
 
+        intakeRightArmMotor.setKp(intakeMotorP.get());
+        intakeRightArmMotor.setKi(intakeMotorI.get());
+        intakeRightArmMotor.setKd(intakeMotorD.get());
+
+        
         sampleSensors();
 
         if(runSimMode){
@@ -246,8 +276,8 @@ public class IntakeControl{
                 intakeLeftArmMotor.setSetpoint(retractAngle.get());
                 intakeRightArmMotor.setSetpoint(retractAngle.get()); 
             }else{
-                intakeLeftArmMotor.stop();
-                intakeRightArmMotor.stop();
+                //intakeLeftArmMotor.stop();
+                //intakeRightArmMotor.stop();
             }
             
 

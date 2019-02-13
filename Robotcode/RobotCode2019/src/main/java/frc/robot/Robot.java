@@ -511,8 +511,12 @@ public class Robot extends TimedRobot {
         loopTiming.markLoopStart();
         intakeControl.sampleSensors();
         climber.setManualMotorCommand(operatorController.xb.getY(Hand.kLeft));
-        intakeControl.intakeLeftArmMotor.setManualMotorCommand(operatorController.xb.getY(Hand.kRight));
-        intakeControl.intakeRightArmMotor.setManualMotorCommand(operatorController.xb.getY(Hand.kRight));
+        double intakeCmd =-1.0*operatorController.xb.getY(Hand.kRight);
+        if(Math.abs(intakeCmd) < 0.15){
+            intakeCmd = 0;
+        }
+        intakeControl.intakeLeftArmMotor.setManualMotorCommand(intakeCmd);
+        intakeControl.intakeRightArmMotor.setManualMotorCommand(intakeCmd);
         intakeControl.updateTelemetry();
         loopTiming.markLoopEnd();
     }

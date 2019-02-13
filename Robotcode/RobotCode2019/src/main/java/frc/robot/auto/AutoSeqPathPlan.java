@@ -42,6 +42,8 @@ public class AutoSeqPathPlan extends AutoEvent {
 
     FalconPathPlanner path;
 
+    double initialHeading = 0;
+
     final double PATH_DURATION_FROM_DISTANCE_RATIO = 1.0/1.0 ; //untis of seconds per foot, because reasons
 
     /**

@@ -29,7 +29,7 @@ import frc.robot.IntakeControl.IntakeSpd;
 
 public class DriverController {
 
-    XboxController xb;
+    public XboxController xb;
 
     /* Driver input command state */
     double driverFwdRevCmd;
