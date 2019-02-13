@@ -108,7 +108,7 @@ public class JeVoisInterface {
      * then fires up the user's program and begins listening for target info packets in the background.
      * Pass TRUE to additionaly enable a USB camera stream of what the vision camera is seeing.
      */
-    public JeVoisInterface(boolean useUSBStream) {
+    private JeVoisInterface(boolean useUSBStream) {
         int retry_counter = 0;
 
         // Configure telemetry signals

@@ -20,17 +20,21 @@ package frc.robot.auto;
  */
 
 import edu.wpi.first.wpilibj.PIDController;
+import edu.wpi.first.wpilibj.PIDSource;
+import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.PIDSourceType;
 import frc.lib.AutoSequencer.AutoEvent;
 import frc.robot.JeVoisInterface;
+import frc.robot.Utils;
 import frc.robot.Drivetrain;
 
 public class AutoSeqFinalAlign extends AutoEvent {
 
-    private JeVoisInterface camera;
+    JeVoisInterface camera;
 
-    //most likely will need to change the name. It is just a placeholder.
-    PIDController motorMove;
+    Drivetrain dt;
+
+    final double ALIGNMENT_SPEED_FTPERSEC = 2;
 
     double motorRotationCmd;
     double desiredAngle;
@@ -40,26 +44,17 @@ public class AutoSeqFinalAlign extends AutoEvent {
     public AutoSeqFinalAlign(){
         motorRotationCmd = 0;
         angleOffset = 0;
+        camera = JeVoisInterface.getInstance();
+        dt = Drivetrain.getInstance();
     }
 
     public double getJeVoisAngle() {
-        return angleOffset - camera.getTgtAngle();
-    }
+        if(camera.isVisionOnline() || camera.isTgtVisible()){
+            return angleOffset - camera.getTgtAngle();
+        } else {
+            return angleOffset;
+        }
 
-    public double pidGet() {
-        return getJeVoisAngle();
-    }
-
-    public void pidWrite(double output) {
-        motorRotationCmd = output;
-    }
-
-    public void setPIDSourceType(PIDSourceType pidSource) {
-        
-    }
-
-    public PIDSourceType getPIDSourceType() {
-        return PIDSourceType.kDisplacement;
     }
 
     @Override
@@ -69,7 +64,8 @@ public class AutoSeqFinalAlign extends AutoEvent {
 
     @Override
     public void userUpdate() {
-        Drivetrain.getInstance().setOpenLoopCmd(0.2,motorRotationCmd);
+        double motorSpeed = Utils.FT_PER_SEC_TO_RPM(ALIGNMENT_SPEED_FTPERSEC);
+        dt.setClosedLoopSpeedCmd(motorSpeed, motorSpeed, dt.getGyroAngle() - getJeVoisAngle());
     }
 
     @Override
@@ -85,7 +81,7 @@ public class AutoSeqFinalAlign extends AutoEvent {
     @Override
     public boolean isDone() {
         // 1/12 is to say 1 inch instead of 1 foot.
-        return AutoSeqDistToTgtEst.getInstance().getEstDistanceFt() < 1/12;
+        return AutoSeqDistToTgtEst.getInstance().getEstDistanceFt() < 1.0/12.0;
     }
 
 }

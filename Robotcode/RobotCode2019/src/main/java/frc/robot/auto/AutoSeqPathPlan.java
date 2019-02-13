@@ -37,6 +37,8 @@ public class AutoSeqPathPlan extends AutoEvent {
 
     double pathDurationSec = 0;
 
+    Drivetrain dt;
+
     double startTime = 0;
 
     double thisLoopTime;
@@ -51,6 +53,7 @@ public class AutoSeqPathPlan extends AutoEvent {
      * Creates a new path from the current robot position up to a point in front of the target, pointed straight at it.
      */
     public AutoSeqPathPlan(double tgt_pos_x_ft, double tgt_pos_y_ft, double tgt_pos_angle_rad){
+        dt = Drivetrain.getInstance();
 
         double targetAngle = tgt_pos_angle_rad+(java.lang.Math.PI/2);
 
@@ -173,19 +176,19 @@ public class AutoSeqPathPlan extends AutoEvent {
 
     @Override
     public void userStart() {
-        initialHeading = Drivetrain.getInstance().getGyroAngle();
+        initialHeading = dt.getGyroAngle();
         startTime = Timer.getFPGATimestamp();
     }
 
     @Override
     public void userUpdate() {
         thisLoopTime = Timer.getFPGATimestamp() - startTime;
-        Drivetrain.getInstance().setClosedLoopSpeedCmd(getLeftSpeedCmdRPM(thisLoopTime), getRightSpeedCmdRPM(thisLoopTime),getHeadingCmdRPM(thisLoopTime));
+        dt.setClosedLoopSpeedCmd(getLeftSpeedCmdRPM(thisLoopTime), getRightSpeedCmdRPM(thisLoopTime),getHeadingCmdRPM(thisLoopTime));
     }
 
     @Override
     public void userForceStop() {
-        Drivetrain.getInstance().setOpenLoopCmd(0, 0);
+        dt.setOpenLoopCmd(0, 0);
     }
 
     @Override
