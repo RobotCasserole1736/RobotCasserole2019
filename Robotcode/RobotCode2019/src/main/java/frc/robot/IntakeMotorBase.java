@@ -46,18 +46,17 @@ public class IntakeMotorBase extends CasserolePID{
     }
 
     public void stop(){
-        super.stop();
-        outputCmd = 0;
+        this.setSetpoint(this.returnPIDInput()); //set setpoint to present position.
     }
     
     double convertVoltsToDeg(double voltage_in){
-        //DEFINE THE STUFF IN HERE
         double lowerLimitConversionVoltage=lowerLimitVoltage;
         double upperLimitConversionVoltage=upperLimitVoltage;
         if(isInverted){
             lowerLimitConversionVoltage=upperLimitVoltage;
             upperLimitConversionVoltage=lowerLimitVoltage;
         }
+        //Thanks Arduino!
         return (voltage_in - lowerLimitConversionVoltage) * (upperLimitDegrees - lowerLimitDegrees) / (upperLimitConversionVoltage - lowerLimitConversionVoltage) + lowerLimitDegrees;
     }
     public void setLowerLimitVoltage(double voltage){
@@ -93,5 +92,5 @@ public class IntakeMotorBase extends CasserolePID{
     }
     public void setManualMotorCommand(double cmd){
         intakeArmMotor.set(ControlMode.PercentOutput,cmd); 
-}
+    }
 }

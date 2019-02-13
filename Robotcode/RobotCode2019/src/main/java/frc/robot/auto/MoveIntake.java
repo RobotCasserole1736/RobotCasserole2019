@@ -46,7 +46,7 @@ public class MoveIntake extends AutoEvent {
 
     @Override
     public void userForceStop() {
-        IntakeControl.getInstance().forceStop();
+        //don't do anything - we need intake to continue moving to its desired position to keep the robot moving normally.
     }
 
     @Override

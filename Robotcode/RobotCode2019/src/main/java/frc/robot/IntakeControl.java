@@ -70,6 +70,8 @@ public class IntakeControl{
     double currentLeftPosition;
     double currentRightPosition;
 
+    final double MAX_ALLOWABLE_ERR_DEG = 5.0;
+
 
     DriverController dController;
     OperatorController opController;
@@ -198,7 +200,7 @@ public class IntakeControl{
         intakeSpdCmd=speedIn;
     }
 
-    public void forceStop(){
+    public void emergencyStop(){
         intakeLeftArmMotor.stop();
         intakeRightArmMotor.stop();
         intakePosCmd=IntakePos.Stop;
@@ -210,7 +212,7 @@ public class IntakeControl{
         if(runSimMode){
             return true;
         } else {
-            if(Math.abs(intakeLeftArmMotor.getCurError())<=2 && Math.abs(intakeRightArmMotor.getCurError())<=2){
+            if(Math.abs(intakeLeftArmMotor.getCurError())<=MAX_ALLOWABLE_ERR_DEG && Math.abs(intakeRightArmMotor.getCurError())<=MAX_ALLOWABLE_ERR_DEG){
                 return true;
             }else{
                 return false;
@@ -276,8 +278,7 @@ public class IntakeControl{
                 intakeLeftArmMotor.setSetpoint(retractAngle.get());
                 intakeRightArmMotor.setSetpoint(retractAngle.get()); 
             }else{
-                //intakeLeftArmMotor.stop();
-                //intakeRightArmMotor.stop();
+                //Don't change the setpoint otherwise.
             }
             
 
