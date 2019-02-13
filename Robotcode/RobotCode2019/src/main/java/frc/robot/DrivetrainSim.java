@@ -1,5 +1,6 @@
 package frc.robot;
 
+import frc.lib.Calibration.Calibration;
 import frc.lib.DataServer.Signal;
 
 /*
@@ -37,6 +38,8 @@ public class DrivetrainSim implements DrivetrainInterface {
     Signal ActualRightSimRPM;
     Signal ActualLeftSimRPM;
 
+    Calibration slowMoveThresh;
+
     final double DT_MAX_SPEED_FT_PER_SEC = 15.0;
     final double DT_MAX_ACCEL_FT_PER_SEC_PER_SEC = 8.0;
 
@@ -44,6 +47,8 @@ public class DrivetrainSim implements DrivetrainInterface {
     public DrivetrainSim() {
         ActualRightSimRPM = new Signal("Drivetrain Sim Right Speed", "RPM");
         ActualLeftSimRPM = new Signal("Drivetrain Sim Left Speed", "RPM");
+
+        slowMoveThresh = new Calibration("Arm Force Slow Move Threshold Angle", 90);
     }
 
     public void setOpenLoopCmd(double forwardReverseCmd, double rotationCmd) {
@@ -171,4 +176,13 @@ public class DrivetrainSim implements DrivetrainInterface {
         return 0;
     }
 
+    public boolean getForceSlowMove(double angle) {
+        boolean forceSlowMove;
+        if(angle > slowMoveThresh.get()){
+            forceSlowMove = true;
+        }else{
+            forceSlowMove = false;
+        }
+        return forceSlowMove;
+    }
 }
