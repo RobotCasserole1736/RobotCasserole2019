@@ -84,6 +84,8 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
 
     Calibration gyroCompGain_P;
 
+    Calibration slowMoveThresh;
+
     Signal currentR1Sig;
     Signal currentR2Sig;
     Signal currentL1Sig;
@@ -166,6 +168,8 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
         rightDtGain_F = new Calibration("Drivetrain Right F Gain", 2.0);
 
         gyroCompGain_P = new Calibration("Drivetrain Gyro Compensation P Gain", 5.0);
+
+        slowMoveThresh = new Calibration("Arm Force Slow Move Threshold Angle", 90);
 
         //Telemetry
         currentR1Sig = new Signal("Drivetrain R1 Motor Current", "A");
@@ -280,6 +284,16 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
     public double getRightTalon2Current() {
         return right2Current;
     }
+
+    public boolean getForceSlowMove(double angle) {
+        boolean forceSlowMove;
+        if(angle > slowMoveThresh.get()){
+            forceSlowMove = true;
+        }else{
+            forceSlowMove = false;
+        }
+        return forceSlowMove;
+    }
     
     public void updateGains(boolean force){
         if(force || gyroGain_P.isChanged() || gyroGain_I.isChanged() || gyroGain_D.isChanged()){
@@ -330,7 +344,6 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
 
         prevOpMode = opMode;
         opMode = opModeCmd;
-
 
         // Handle mode transition changes
         if(prevOpMode != DrivetrainOpMode.GyroLock && opMode == DrivetrainOpMode.GyroLock){

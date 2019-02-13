@@ -278,6 +278,13 @@ public class Robot extends TimedRobot {
                 AutoSeqDistToTgtEst.getInstance().setUltrasonicDistanceEstimate(backUltrasonic.getdistance_ft(), true);
                 AutoSeqDistToTgtEst.getInstance().setRobotLinearVelocity(-1 * poseCalc.getRobotVelocity_ftpersec());
             }
+
+            if((drivetrain.getForceSlowMove(arm.getActualArmHeight())) == true){
+                driverController.setSlowMoveReq(true);
+            }else if((drivetrain.getForceSlowMove(arm.getActualArmHeight())) == false){
+                driverController.setSlowMoveReq(false);
+            } 
+
             AutoSeqDistToTgtEst.getInstance().update();
 
             DrivetrainClosedLoopTestVectors.getInstance().update();

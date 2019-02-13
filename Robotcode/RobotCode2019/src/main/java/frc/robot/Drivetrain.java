@@ -99,6 +99,10 @@ public class Drivetrain implements DrivetrainInterface {
         return dTrainIF.getRightTalon2Current();
     }
 
+    public boolean getForceSlowMove(double angle) {
+        return dTrainIF.getForceSlowMove(angle);
+    }
+
     @Override
     public void setClosedLoopSpeedCmd(double leftCmdRPM, double rightCmdRPM) {
         dTrainIF.setClosedLoopSpeedCmd(leftCmdRPM, rightCmdRPM);

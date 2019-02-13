@@ -162,6 +162,10 @@ public class DriverController {
         intakePosReqSig.addSample(sample_time_ms, intakePosReq.toInt());
     }
 
+	public void setSlowMoveReq(boolean cmd) {
+        slowMoveReq = cmd;
+	}
+
     /* Getters for getting driver commands */
 
     public IntakePos getIntakePosReq() {
