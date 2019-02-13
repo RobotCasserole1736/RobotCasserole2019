@@ -65,4 +65,6 @@ public interface DrivetrainInterface {
     public double getRightTalon1Current();
 
     public double getRightTalon2Current();
+
+    public boolean getForceSlowMove(double angle);
 }
