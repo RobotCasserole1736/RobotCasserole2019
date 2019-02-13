@@ -87,6 +87,8 @@ public class IntakeControl{
     OperatorController opController;
     Arm arm;
 
+    DaBouncer ballDetectedDbnc;
+
     boolean ballDetected = false;
 
     private static IntakeControl iControl = null;
@@ -121,6 +123,7 @@ public class IntakeControl{
 
         rightOnTargetDbnc = new DaBouncer(MAX_ALLOWABLE_ERR_DEG, ALLOWABLE_ERR_DBNC_LOOPS);
         leftOnTargetDbnc = new DaBouncer(MAX_ALLOWABLE_ERR_DEG, ALLOWABLE_ERR_DBNC_LOOPS);
+        ballDetectedDbnc = new DaBouncer(0,ALLOWABLE_ERR_DBNC_LOOPS);
         
         ballInIntake = new DigitalInput(RobotConstants.BALL_INTAKE_PORT);
         intakeMotor = new WPI_TalonSRX(RobotConstants.INTAKE_MOTOR_CANID);
@@ -234,7 +237,7 @@ public class IntakeControl{
 
     public void sampleSensors(){
         if(!runSimMode){
-            ballDetected = !ballInIntake.get(); //Sensor outputs high for no ball, low for ball 
+            ballDetected = ballDetectedDbnc.BelowDebounce(!ballInIntake.get()); //Sensor outputs high for no ball, low for ball 
             currentLeftPosition= intakeLeftArmMotor.returnPIDInput();
             currentRightPosition= intakeRightArmMotor.returnPIDInput();
         }

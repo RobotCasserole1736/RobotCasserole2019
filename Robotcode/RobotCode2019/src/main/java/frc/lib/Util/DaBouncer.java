@@ -120,7 +120,7 @@ public class DaBouncer {
         }
     }
 
-    public boolean BelowDebounceBoo(boolean b) {
+    public boolean BelowDebounce(boolean b) {
     	if (b = true){
     		belowDebounceCounter++;	
     	}

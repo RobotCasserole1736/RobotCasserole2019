@@ -22,7 +22,7 @@ package frc.robot;
 
 import frc.lib.Calibration.*;
 import frc.lib.DataServer.Signal;
-
+import frc.lib.Util.DaBouncer;
 import edu.wpi.first.wpilibj.Solenoid;
 
 import com.revrobotics.CANSparkMax;
@@ -91,6 +91,11 @@ public class Arm {
     Calibration maxAccCal;
     Calibration allowedErrCal;
 
+    DaBouncer atDesAngleDbnc;
+    boolean atDesAngle;
+    final double MIN_ALLOWABLE_ANGLE_ERR_DEG = 2.0;
+    final int AT_DES_ANGLE_DBNC_LOOPS = 7;
+
 
     /////////Limit Switches\\\\\\\\\\
     boolean topOfMotion;
@@ -104,6 +109,7 @@ public class Arm {
     Signal armDesVelSig;
     Signal armLowerLimitSig;
     Signal armUpperLimitSig;
+    Signal atDesAngleSig;
 
     /////////Physical Mechanism Constants\\\\\\\\\\
     final double MAX_MANUAL_DEG_PER_SEC = 25.0;
@@ -157,6 +163,9 @@ public class Arm {
         //This doesn't seem to work as I'd expect in closed loop so we'll invert when going to/from the motor.
         sadey.setInverted(false);
 
+        atDesAngle = false;
+        atDesAngleDbnc = new DaBouncer(MIN_ALLOWABLE_ANGLE_ERR_DEG, AT_DES_ANGLE_DBNC_LOOPS);
+
         armMotorCmdSig = new Signal("Arm Motor Command", "cmd");
         armMotorCurrentSig = new Signal("Arm Motor Current", "A");
         armDesPosSig = new Signal("Arm Desired Position", "deg");
@@ -165,6 +174,7 @@ public class Arm {
         armDesVelSig = new Signal("Arm Desired Velocity", "deg per sec");
         armLowerLimitSig = new Signal("Arm Lower Position Limit Switch", "bool");
         armUpperLimitSig = new Signal("Arm Upper Position Limit Switch", "bool");
+        atDesAngleSig = new Signal("Arm At Desired Angle", "bool");
 
 
         /////Calibration Things\\\\\
@@ -325,7 +335,7 @@ public class Arm {
 
         }
 
-
+        atDesAngle = atDesAngleDbnc.BelowDebounce(Math.abs(desAngle - curArmAngle));
 
         double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
         armMotorCmdSig.addSample(sampleTimeMS, sadey.getAppliedOutput());
@@ -336,6 +346,7 @@ public class Arm {
         armDesVelSig.addSample(sampleTimeMS, testDesVel);
         armLowerLimitSig.addSample(sampleTimeMS, bottomOfMotion);
         armUpperLimitSig.addSample(sampleTimeMS, topOfMotion);
+        atDesAngleSig.addSample(sampleTimeMS, atDesAngle);
 
         prevManMoveCmd = curManMoveCmd;
     }
@@ -436,7 +447,7 @@ public class Arm {
     
     }
     public boolean atDesiredHeight() {
-        return(Math.abs(desAngle - curArmAngle)<2.0); //hardcode to 2 degree desired height
+        return(atDesAngle); 
     }
     
     public double gravComp() {
