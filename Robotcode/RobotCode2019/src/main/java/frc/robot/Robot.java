@@ -233,6 +233,7 @@ public class Robot extends TimedRobot {
             intakeControl.closedLoop();
             eyeOfVeganSauron.setLEDRingState(true);
             setMatchInitialCommands();
+            pneumaticsControl.start();
             CrashTracker.logMatchInfo();
         } catch(Throwable t) {
             CrashTracker.logThrowableCrash(t);

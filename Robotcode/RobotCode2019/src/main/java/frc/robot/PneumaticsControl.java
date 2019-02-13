@@ -59,6 +59,12 @@ public class PneumaticsControl {
         double voltage = pressureSensor.getVoltage();
         curPressurePSI = ((voltage/5.0)-0.1)*(150/0.8); /*Equation derived from datasheet */
 
+        if(DriverController.getInstance().getCompressorDisableReq()){
+            this.stop();
+        } else if(DriverController.getInstance().getCompressorDisableReq()){
+            this.start();
+        }
+
         double sample_time_ms = LoopTiming.getInstance().getLoopStartTimeSec()*1000.0;
         pressSig.addSample(sample_time_ms,curPressurePSI);
         pressSwVallSig.addSample(sample_time_ms,compressor.getPressureSwitchValue());
