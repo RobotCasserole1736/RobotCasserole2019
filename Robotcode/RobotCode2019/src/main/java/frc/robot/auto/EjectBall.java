@@ -49,7 +49,7 @@ public class EjectBall extends AutoEvent {
 
     @Override
     public void userForceStop() {
-        IntakeControl.getInstance().forceStop();
+        IntakeControl.getInstance().setSpeedCmd(IntakeSpd.Stop);
     }
 
     @Override

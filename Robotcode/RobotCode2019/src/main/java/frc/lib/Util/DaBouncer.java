@@ -45,12 +45,18 @@ public class DaBouncer {
 
 
     /**
-     * Constsructor. Set the threshold and debounce by setting the "threshold" and "dbnc" class
-     * variables
+     * Constsructor, where you provide the threshold and debounce count intputs.
      */
     public DaBouncer() {
         aboveDebounceCounter = 0;
         belowDebounceCounter = 0;
+    }
+
+    public DaBouncer(double thresh_in, int debounceLimit_in ){
+        dbnc = debounceLimit_in;
+        threshold = thresh_in;
+        aboveDebounceCounter = 0;
+        belowDebounceCounter = 0; 
     }
 
 

@@ -360,7 +360,7 @@ public class Robot extends TimedRobot {
             ledController.setPattern(LEDPatterns.Pattern2);
             matchState.SetPeriod(MatchState.Period.Disabled);
             eyeOfVeganSauron.setLEDRingState(false);
-            intakeControl.forceStop();
+
         } catch(Throwable t) {
             CrashTracker.logThrowableCrash(t);
             throw t;

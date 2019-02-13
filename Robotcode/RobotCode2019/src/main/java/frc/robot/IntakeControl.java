@@ -28,6 +28,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import frc.lib.Calibration.Calibration;
 import frc.lib.DataServer.Signal;
+import frc.lib.Util.DaBouncer;
 
 public class IntakeControl{
 
@@ -71,7 +72,16 @@ public class IntakeControl{
     double currentRightPosition;
 
     final double MAX_ALLOWABLE_ERR_DEG = 5.0;
+    final int ALLOWABLE_ERR_DBNC_LOOPS = 5;
 
+    DaBouncer rightOnTargetDbnc;
+    DaBouncer leftOnTargetDbnc;
+
+    boolean leftOnTarget = false;
+    boolean rightOnTarget = false;
+
+    Signal rightOnTargetSig; 
+    Signal leftOnTargetSig;
 
     DriverController dController;
     OperatorController opController;
@@ -108,6 +118,9 @@ public class IntakeControl{
         maxIntakeAngle = new Calibration("Intake Maximum Angle deg", 180) ;
         
         positionOverride = new Calibration("Intake Position Override Enable", 0, 0, 5);
+
+        rightOnTargetDbnc = new DaBouncer(MAX_ALLOWABLE_ERR_DEG, ALLOWABLE_ERR_DBNC_LOOPS);
+        leftOnTargetDbnc = new DaBouncer(MAX_ALLOWABLE_ERR_DEG, ALLOWABLE_ERR_DBNC_LOOPS);
         
         ballInIntake = new DigitalInput(RobotConstants.BALL_INTAKE_PORT);
         intakeMotor = new WPI_TalonSRX(RobotConstants.INTAKE_MOTOR_CANID);
@@ -135,6 +148,8 @@ public class IntakeControl{
         retractStateCmdSig = new Signal("Intake Commanded Position", "Intake Pos Enum");
         motorSpeedCmdSig = new Signal("Intake Roller Motor Command", "cmd");
         ballInIntakeSig = new Signal("Intake Ball Present", "bool");
+        rightOnTargetSig = new Signal("Intake Right Arm Position On Target", "bool");
+        leftOnTargetSig  = new Signal("Intake Left Arm Position On Target", "bool");
 
     }
 
@@ -212,11 +227,7 @@ public class IntakeControl{
         if(runSimMode){
             return true;
         } else {
-            if(Math.abs(intakeLeftArmMotor.getCurError())<=MAX_ALLOWABLE_ERR_DEG && Math.abs(intakeRightArmMotor.getCurError())<=MAX_ALLOWABLE_ERR_DEG){
-                return true;
-            }else{
-                return false;
-            }
+            return rightOnTarget && leftOnTarget;
         }
     }
 
@@ -280,6 +291,10 @@ public class IntakeControl{
             }else{
                 //Don't change the setpoint otherwise.
             }
+
+            //Debounce whether we're at the correct position or not.
+            rightOnTarget = rightOnTargetDbnc.BelowDebounce(Math.abs(intakeRightArmMotor.getCurError()));
+            leftOnTarget  = leftOnTargetDbnc.BelowDebounce(Math.abs(intakeLeftArmMotor.getCurError()));
             
 
             //Intake motor control
@@ -314,6 +329,8 @@ public class IntakeControl{
         rightIntakePosSensorVoltageSig.addSample(sampleTimeMS, intakeRightArmMotor.getSensorRawVoltage());
         retractStateCmdSig.addSample(sampleTimeMS, intakePosCmd.toInt());
         ballInIntakeSig.addSample(sampleTimeMS, ballDetected);
+        rightOnTargetSig.addSample(sampleTimeMS, rightOnTarget); 
+        leftOnTargetSig.addSample(sampleTimeMS, leftOnTarget);  
     }
 
     public double getLeftArmPosition() {
