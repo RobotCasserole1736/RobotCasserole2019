@@ -60,7 +60,7 @@ public class AutonomousOld {
     //Blinky auto failed constants
     final double BLINK_RATE_MSEC = 250;
     double nextBlinkTransitionTime = 0;
-    boolean blinkState =false;
+    boolean blinkState = false;
 
     //Jevois & auto startup state
     int jeVoisSampleCounter = 0;
