@@ -119,7 +119,7 @@ public class IntakeControl{
         minIntakeAngle = new Calibration("Intake Minimum Angle deg", 0) ;
         maxIntakeAngle = new Calibration("Intake Maximum Angle deg", 180) ;
         
-        positionOverride = new Calibration("Intake Position Override Enable", 0, 0, 5);
+        positionOverride = new Calibration("Intake Position Override Enable", 0, 0, 1);
 
         rightOnTargetDbnc = new DaBouncer(MAX_ALLOWABLE_ERR_DEG, ALLOWABLE_ERR_DBNC_LOOPS);
         leftOnTargetDbnc = new DaBouncer(MAX_ALLOWABLE_ERR_DEG, ALLOWABLE_ERR_DBNC_LOOPS);

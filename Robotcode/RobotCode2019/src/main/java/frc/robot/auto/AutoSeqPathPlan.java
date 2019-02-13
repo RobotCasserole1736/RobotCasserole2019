@@ -3,6 +3,7 @@ package frc.robot.auto;
 import java.util.ArrayList;
 
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.interfaces.Gyro;
 import frc.lib.AutoSequencer.AutoEvent;
 import frc.lib.PathPlanner.FalconPathPlanner;
 import frc.lib.Util.CrashTracker;
@@ -167,11 +168,12 @@ public class AutoSeqPathPlan extends AutoEvent {
             cmdHeading = path.heading[path.heading.length-1][1];
         }
 
-        return cmdHeading - 90;
+        return cmdHeading - 90 + initialHeading;
     }
 
     @Override
     public void userStart() {
+        initialHeading = Drivetrain.getInstance().getGyroAngle();
         startTime = Timer.getFPGATimestamp();
     }
 

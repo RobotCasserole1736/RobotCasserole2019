@@ -90,7 +90,7 @@ public class Superstructure {
         intake = IntakeControl.getInstance();
         arm = Arm.getInstance();
 
-        seq = new AutoSequencer("Default");
+        seq = new AutoSequencer("Superstructure");
 
         cmdModeSig = new Signal("Superstructure Commanded Mode", "OpMode");
         actModeSig = new Signal("Superstructure Actual Mode", "OpMode");
@@ -136,7 +136,7 @@ public class Superstructure {
             if(cmdOpMode == OpMode.CargoIntake){
                 //Start transition from hatch mode to cargo mode.
                 actualOpMode = OpMode.TransitionToCargoIntake;
-                seq = new AutoSequencer("HatchToCargoIntake");
+                seq.clearAllEvents();
                 //TODO: Combine the events which can happen in parallel
                 seq.addEvent(new EjectBall()); //Eject any ball that is presently in the intake
                 seq.addEvent(new MoveGripper(PEZPos.Release)); //Drop any gamepiece we may currently have
@@ -157,7 +157,7 @@ public class Superstructure {
             if(cmdOpMode == OpMode.Hatch){
                 //Start transition from Cargo Intake mode to Hatch mode.
                 actualOpMode = OpMode.TransitionToHatch;
-                seq = new AutoSequencer("CargoCarryToHatch");
+                seq.clearAllEvents();
                 //TODO: Combine the envents which can happen in parallel
                 seq.addEvent(new EjectBall()); //Eject any ball that is presently in the intake
                 seq.addEvent(new MoveGripper(PEZPos.Release)); //Drop any gamepiece we may have
@@ -167,7 +167,7 @@ public class Superstructure {
             } else if(cmdOpMode == OpMode.CargoIntake){
                 //Start transition from Cargo Intake mode to Cargo Carry.
                 actualOpMode = OpMode.TransitionToCargoIntake;
-                seq = new AutoSequencer("CargoCarryToCargoIntake");
+                seq.clearAllEvents();
                 //TODO: Combine the envents which can happen in parallel
                 seq.addEvent(new EjectBall()); //Eject any ball that is presently in the intake
                 seq.addEvent(new MoveGripper(PEZPos.Release)); //Drop any gamepiece we may have
@@ -184,7 +184,7 @@ public class Superstructure {
             if(cmdOpMode == OpMode.CargoCarry){
                 //Start transition from Cargo Intake mode to Cargo Carry.
                 actualOpMode = OpMode.TransitoinToCargoCarry;
-                seq = new AutoSequencer("CargoIntakeToCarryCargo");
+                seq.clearAllEvents();
                 seq.addEvent(new MoveGripper(PEZPos.CargoGrab)); //Ensure we're grabbing the ball
                 seq.addEvent(new MoveIntake(IntakePos.Ground)); //Put the intake all the way out, out of the way of the the arm and ball as they come up
                 seq.addEvent(new MoveArmLowPos(OpMode.CargoCarry)); //Move arm to the lower position by default.
@@ -193,7 +193,7 @@ public class Superstructure {
             } else if(cmdOpMode == OpMode.Hatch) {
                 //Start transition from Cargo Intake mode to Cargo Carry.
                 actualOpMode = OpMode.TransitionToHatch;
-                seq = new AutoSequencer("CargoIntakeToHatch");
+                seq.clearAllEvents();
                 seq.addEvent(new MoveGripper(PEZPos.CargoGrab)); //Ensure we're grabbing to stay out of the way of the frame as we raise up
                 seq.addEvent(new MoveIntake(IntakePos.Ground)); //Put the intake all the way out, out of the way of the the arm and ball as they come up
                 seq.addEvent(new MoveArmLowPos(OpMode.Hatch)); //Move arm to the lower position by default.
