@@ -42,8 +42,8 @@ import frc.lib.WebServer.CasseroleDriverView;
 import frc.lib.WebServer.CasseroleWebServer;
 import frc.lib.Util.CrashTracker;
 import frc.robot.Arm.ArmPos;
+import frc.robot.IntakeControl.IntakePos;
 import frc.robot.LEDController.LEDPatterns;
-import frc.robot.PEZControl.GamePiece;
 import frc.robot.PEZControl.PEZPos;
 import frc.robot.Superstructure.OpMode;
 import frc.robot.auto.AutoSeqDistToTgtEst;
@@ -429,20 +429,32 @@ public class Robot extends TimedRobot {
 //////////////////////////////////////////////////////////////////////////
 // Utilties
 //////////////////////////////////////////////////////////////////////////
-    final String[] gpOptions =    {GamePiece.Cargo.toString(), GamePiece.Hatch.toString(), GamePiece.Nothing.toString()};
+    public enum GamePiece {
+        Nothing, Cargo, Hatch;
+    }
+    final String[] gpOptions =    {GamePiece.Hatch.toString(), GamePiece.Cargo.toString(), GamePiece.Nothing.toString()};
 
     private void setMatchInitialCommands(){
         String gpStart = CasseroleDriverView.getAutoSelectorVal("Starting Gamepiece");
 
         if(gpStart.compareTo(GamePiece.Cargo.toString())==0){
+            intakeControl.setPositionCmd(IntakePos.Retract); //TODO -what should this be?
             pezControl.setPositionCmd(PEZPos.CargoGrab);
             superstructure.setInitialOpMode(OpMode.CargoCarry);
+            arm.setPositionCmd(ArmPos.LowerCargo);
+            pezControl.setInitCargo();
         } else if(gpStart.compareTo(GamePiece.Hatch.toString())==0){
+            intakeControl.setPositionCmd(IntakePos.Retract);
             pezControl.setPositionCmd(PEZPos.HatchGrab);
             superstructure.setInitialOpMode(OpMode.Hatch);
+            arm.setPositionCmd(ArmPos.LowerHatch);
+            pezControl.setInitHatch();
         } else {
-            pezControl.setPositionCmd(PEZPos.HatchRelease);
+            intakeControl.setPositionCmd(IntakePos.Retract);
+            pezControl.setPositionCmd(PEZPos.HatchGrab);
             superstructure.setInitialOpMode(OpMode.Hatch);
+            arm.setPositionCmd(ArmPos.LowerHatch);
+            pezControl.setInitHatch();
         }
     }
 

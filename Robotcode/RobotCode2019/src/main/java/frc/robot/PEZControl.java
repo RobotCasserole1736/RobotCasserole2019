@@ -41,38 +41,41 @@ public class PEZControl {
     DriverController dController;
     OperatorController opController;
 
-    GamePiece curGamePiece;
-
     PEZPos posReq;
-    PEZPos prevPosReq; 
-    PEZPos posEst;
-    double smallSolePos;
+
+    TopLevelState opState;
     
     boolean posStable;
     int posStableCounter;
     final int POS_STABLE_DEBOUNCE_LOOPS = 5;
 
     Signal posReqSig;
-    Signal posEstSig;
+    Signal posStableSig;
     Signal retractedLimSwSig;
-    Signal smCylSig;
+    Signal stopperCylCmdSig;
+    Signal gripperCylCmdSig;
 
     Calibration manualOvrdCal;
 
-    double retractTimeStart; 
+    double transitionTimeStart; 
 
     DigitalInput limitSwitch;
     boolean limitSwitchVal;
 
     //Physical mechanism conversion contstants
-    final DoubleSolenoid.Value SOL_POS_CARGO = DoubleSolenoid.Value.kReverse;
-    final DoubleSolenoid.Value SOL_POS_HATCH = DoubleSolenoid.Value.kForward;
-    final DoubleSolenoid.Value SOL_POS_RELEASE = SOL_POS_HATCH;
+    final DoubleSolenoid.Value SOL_GRIPPER_EXTEND = DoubleSolenoid.Value.kForward;
+    final DoubleSolenoid.Value SOL_GRIPPER_RETRACT = DoubleSolenoid.Value.kReverse;
+    final DoubleSolenoid.Value SOL_POS_CARGO_GRAB = SOL_GRIPPER_RETRACT;
+    final DoubleSolenoid.Value SOL_POS_CARGO_RELEASE = SOL_GRIPPER_EXTEND;
+    final DoubleSolenoid.Value SOL_POS_HATCH_GRAB = SOL_GRIPPER_EXTEND;
+    final DoubleSolenoid.Value SOL_POS_HATCH_RELEASE = SOL_GRIPPER_RETRACT;
     final DoubleSolenoid.Value SOL_POS_STOPPER_ENGAGE = DoubleSolenoid.Value.kForward;
     final DoubleSolenoid.Value SOL_POS_STOPPER_RELEASE = DoubleSolenoid.Value.kReverse;
 
-    
-    final double MAX_EXTEND_DUR_SEC = 0.500;
+    //Timing constants - related to how fast the piston-attached mechanisms actuate
+    // Tune to taste.
+    final double MAX_GRIPPER_SOL_TRANSITION_TIME = 0.500;
+    final double MAX_STOPPER_SOL_TRANSITION_TIME = 0.200;
 
 
     public static synchronized PEZControl getInstance() {
@@ -82,7 +85,7 @@ public class PEZControl {
     }
 
     public enum PEZPos {
-        CargoGrab(0), HatchGrab(1), CargoRelease(2), HatchRelease(3), BallToHatch(4), HatchToBall(5), None(6);
+        CargoGrab(0), HatchGrab(1), CargoRelease(2), HatchRelease(3), None(6);
         public final int value;
 
         private PEZPos(int value) {
@@ -93,11 +96,12 @@ public class PEZControl {
         }
     }
 
-    public enum GamePiece {
-        Nothing(0), Cargo(1), Hatch(2);
+    private enum TopLevelState {
+        Cargo(0), CargoToHatch1(1), CargoToHatch2(2), HatchToCargo1(3), HatchToCargo2(4), Hatch(5), Init(6);
+
         public final int value;
 
-        private GamePiece(int value) {
+        private TopLevelState(int value) {
             this.value = value;
         }
         public int toInt(){
@@ -112,100 +116,162 @@ public class PEZControl {
         dController = DriverController.getInstance();
         opController = OperatorController.getInstance();
         limitSwitch = new DigitalInput(RobotConstants.PEZ_SOLENOID_LIMIT_SWITCH_PORT); 
-        posEst = PEZPos.None;
         limitSwitchVal = false;
         posReq = PEZPos.None;
+
+        opState = TopLevelState.Init;
+
+        transitionTimeStart = 0;
         
         manualOvrdCal = new Calibration("Gripper Position Manual Override", 0, 0, 1);
 
         posReqSig =new Signal("Gripper Position Requested", "pos");
-        posEstSig =new Signal("Gripper Position Estimate", "pos");
+        posStableSig =new Signal("Gripper Position Estimate", "pos");
         retractedLimSwSig =new Signal("Gripper Retracted Switch", "bool");
-        smCylSig = new Signal("Gripper Mid Stopper Extended Switch", "bool");
+        stopperCylCmdSig = new Signal("Gripper Stopper Cylinder Command", "bool");
+        gripperCylCmdSig = new Signal("Gripper Main Cylinder Command", "bool");
     }
 
-    private boolean checkExtended(){ 
-        boolean  extended = true;
-        if (limitSwitchVal == true){
-            //The limit switch was pressed, we are no longer extended
-            extended = false;
-        } else if ( (Timer.getFPGATimestamp() - retractTimeStart) > MAX_EXTEND_DUR_SEC) {
-            //The timer expired. We are probably no longer extended.
-            extended = false;
-        } else {
-            //No prior case is true. We must still be extended.
-            extended = true; 
-        }
-        return extended;
+    public void setInitCargo(){
+        opState = TopLevelState.Cargo;
+        posReq = PEZPos.CargoGrab;
+    }
+
+    public void setInitHatch(){
+        opState = TopLevelState.Hatch;
+        posReq = PEZPos.HatchRelease;
     }
 
     public void update() {
-        limitSwitchVal = limitSwitch.get();
-        
-        if(posReq == PEZPos.CargoGrab){
-            posEst = posReq;
-            pezPneumaticCyl.set(SOL_POS_CARGO);
-            pezMidPosStopper.set(SOL_POS_STOPPER_RELEASE);
-            smallSolePos = 0;
 
-        } else if(posReq == PEZPos.HatchGrab){
-            posEst = posReq;
-            pezPneumaticCyl.set(SOL_POS_HATCH);
-            pezMidPosStopper.set(SOL_POS_STOPPER_RELEASE);
-            smallSolePos = 0;
+        TopLevelState nextOpState = opState;
 
-        }else if(posReq == PEZPos.Release){
-            if (prevPosReq != PEZPos.Release){
-                retractTimeStart = Timer.getFPGATimestamp();
-                pezPneumaticCyl.set(SOL_POS_CARGO);
+        //TODO - switch is mounted in the wrong side. Uncomment this when it's remounted.
+        //limitSwitchVal = limitSwitch.get(); 
+        limitSwitchVal = false;
+
+        switch(opState){
+            case Cargo:
                 pezMidPosStopper.set(SOL_POS_STOPPER_RELEASE);
-                smallSolePos = 1;
-            }
+                if(posReq == PEZPos.CargoGrab){
+                    pezPneumaticCyl.set(SOL_POS_CARGO_GRAB);
+                } else if (posReq == PEZPos.CargoRelease){
+                    pezPneumaticCyl.set(SOL_POS_CARGO_RELEASE);
+                } else if(posReq == PEZPos.HatchGrab || posReq == PEZPos.HatchRelease){
+                    transitionTimeStart = Timer.getFPGATimestamp();
+                    nextOpState = TopLevelState.CargoToHatch1;
+                }
+            break;
 
-            boolean isExtended = checkExtended();
-            if (isExtended == false) {
-                posEst = posReq;
-                pezPneumaticCyl.set (SOL_POS_RELEASE);
-                pezMidPosStopper.set(SOL_POS_STOPPER_RELEASE); 
-                smallSolePos = 0;
-            } else {
-                // waiting for cylinder to retract
-                posEst = PEZPos.InTransit;
-            } 
+            case CargoToHatch1:
+                pezPneumaticCyl.set(SOL_GRIPPER_EXTEND);
+                if(limitSwitchVal == true || (Timer.getFPGATimestamp() - transitionTimeStart) > MAX_GRIPPER_SOL_TRANSITION_TIME){
+                    transitionTimeStart = Timer.getFPGATimestamp();
+                    nextOpState = TopLevelState.CargoToHatch2;
+                }
+            break;
+
+            case CargoToHatch2:
+                pezMidPosStopper.set(SOL_POS_STOPPER_ENGAGE);
+                if((Timer.getFPGATimestamp() - transitionTimeStart) > MAX_STOPPER_SOL_TRANSITION_TIME){
+                    nextOpState = TopLevelState.Hatch;
+                }
+            break;
+
+            case Hatch:
+                pezMidPosStopper.set(SOL_POS_STOPPER_ENGAGE);
+                if(posReq == PEZPos.HatchGrab){
+                    pezPneumaticCyl.set(SOL_POS_HATCH_GRAB);
+                } else if (posReq == PEZPos.HatchRelease){
+                    pezPneumaticCyl.set(SOL_POS_HATCH_RELEASE);
+                } else if(posReq == PEZPos.CargoGrab || posReq == PEZPos.CargoRelease){
+                    transitionTimeStart = Timer.getFPGATimestamp();
+                    nextOpState = TopLevelState.HatchToCargo1;
+                }
+            break;
+
+            case HatchToCargo1:
+                pezPneumaticCyl.set(SOL_GRIPPER_EXTEND);
+                if(limitSwitchVal == true || (Timer.getFPGATimestamp() - transitionTimeStart) > MAX_GRIPPER_SOL_TRANSITION_TIME){
+                    transitionTimeStart = Timer.getFPGATimestamp();
+                    nextOpState = TopLevelState.HatchToCargo2;
+                }
+            break;
+
+            case HatchToCargo2:
+                pezMidPosStopper.set(SOL_POS_STOPPER_RELEASE);
+                if((Timer.getFPGATimestamp() - transitionTimeStart) > MAX_STOPPER_SOL_TRANSITION_TIME){
+                    nextOpState = TopLevelState.Cargo;
+                }
+            break;
+
+            case Init:
+                //Do nothing till we're actually init'ed into the desired state.
+            break;
+
+            default:
+                System.out.println("ERROR: Software Team made an oppsie whoopsie.");
+            break;
         }
 
-        if(posEst != prevPosReq){
+        //Handle calculation of whether we've settled in a final state or not.
+        posStable = false;
+        boolean opModeTransitioning = (opState != TopLevelState.Hatch && opState != TopLevelState.Cargo) || (opState != nextOpState);
+        if(opModeTransitioning){
             posStableCounter = POS_STABLE_DEBOUNCE_LOOPS;
-        }
-
-        if(posStableCounter > 0){
-            posStableCounter--;
-        }
-
-        if(posStableCounter == 0 && posEst != PEZPos.InTransit){
-            posStable = true;
         } else {
-            posStable = false;
+            if(posStableCounter > 0){
+                posStableCounter--;
+            } else {
+                if(opState == TopLevelState.Hatch){
+                    posStable = true;
+                }
+            }
         }
 
-        prevPosReq = posReq;
+        
 
         double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
         posReqSig.addSample(sampleTimeMS, posReq.toInt());
-        posEstSig.addSample(sampleTimeMS, posEst.toInt());
+        posStableSig.addSample(sampleTimeMS, posStable);
         retractedLimSwSig.addSample(sampleTimeMS, limitSwitchVal);
-        smCylSig.addSample(sampleTimeMS, smallSolePos);
+        stopperCylCmdSig.addSample(sampleTimeMS, convStopperSolPos(pezMidPosStopper.get()));
+        gripperCylCmdSig.addSample(sampleTimeMS, convGripperSolPos(pezPneumaticCyl.get()));
+
+        opState = nextOpState;
+    }
+
+    double convGripperSolPos(DoubleSolenoid.Value in){
+        if(in == SOL_GRIPPER_EXTEND){
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    double convStopperSolPos(DoubleSolenoid.Value in){
+        if(in == SOL_POS_STOPPER_ENGAGE){
+            return 1;
+        } else {
+            return 0;
+        }
     }
 
     public void setPositionCmd(PEZPos cmd_in){
         if(manualOvrdCal.get() != 1.0){
-            posReq = cmd_in;
+            //Use external command
+            if(cmd_in != PEZPos.None){
+                posReq = cmd_in;
+            }// otherwise keep posReq unchanged.
         } else {
+            //Use override command straight from driver controller
             int cmd = DriverController.getInstance().xb.getPOV();
             if(cmd == 0){
                 posReq = PEZPos.CargoGrab;
-            } else if(cmd == 90 || cmd == 270){
-                posReq = PEZPos.Release;
+            } else if(cmd == 90){
+                posReq = PEZPos.CargoRelease;
+            } else if(cmd == 270){
+                posReq = PEZPos.HatchRelease;
             } else if(cmd == 180){
                 posReq =PEZPos.HatchGrab;
             }

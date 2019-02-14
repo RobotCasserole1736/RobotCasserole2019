@@ -219,17 +219,22 @@ public class Autonomous {
                     parent = new AutoSeqFinalAlign();
                 }
 
+                //Add events for moving the arm to the correct position
                 if(OperatorController.getInstance().getAutoAlignLowReq()){
                     parent.addChildEvent(new MoveArmLowPos(curOpMode));
-                    parent.addChildEvent(new MoveGripper(PEZPos.Release));
                 } else if(OperatorController.getInstance().getAutoAlignMidReq()){
                     parent.addChildEvent(new MoveArmMidPos(curOpMode));
-                    parent.addChildEvent(new MoveGripper(PEZPos.Release));
                 } else if(OperatorController.getInstance().getAutoAlignHighReq()){
                     parent.addChildEvent(new MoveArmTopPos(curOpMode));
-                    parent.addChildEvent(new MoveGripper(PEZPos.Release));
                 } else {
                     CrashTracker.logAndPrint("[Autonomous] Error invalid Autostate.");
+                }
+
+                //Add events for releasing the gamepiece
+                if(curOpMode == OpMode.CargoCarry){
+                    parent.addChildEvent(new MoveGripper(PEZPos.CargoRelease));
+                } else {
+                    parent.addChildEvent(new MoveGripper(PEZPos.HatchRelease));
                 }
 
                 seq.addEvent(parent);

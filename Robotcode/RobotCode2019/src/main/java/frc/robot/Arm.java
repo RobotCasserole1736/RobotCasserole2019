@@ -134,7 +134,7 @@ public class Arm {
         runSimMode = RioSimMode.getInstance().isSimMode();
 
         /////Movers\\\\\
-        armBrake = new Solenoid(RobotConstants.ARM_MECH_BRAKE_SOL_PORT);
+        //armBrake = new Solenoid(RobotConstants.ARM_MECH_BRAKE_SOL_PORT);
         sadey = new CANSparkMax(RobotConstants.ARM_MOTOR_PORT, MotorType.kBrushless);
         sadey.restoreFactoryDefaults();//ensure we start from the same config every time.
 
@@ -414,10 +414,10 @@ public class Arm {
 
     public void setSolBrake(boolean brakeIn) {
         if(brakeIn) {
-            armBrake.set(true); 
+            //armBrake.set(true); 
         }
         else {
-            armBrake.set(false);
+            //armBrake.set(false);
         }
     }
         
