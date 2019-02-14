@@ -53,7 +53,8 @@ public class PneumaticsControl {
 
     public void update(){
         double voltage = pressureSensor.getVoltage();
-        curPressurePSI = ((voltage/5.0)-0.1)*(150/0.8); /*Equation derived from datasheet */
+      //  curPressurePSI = ((voltage/5.0)-0.1)*(150/0.8); /*Equation derived from datasheet old sensor */
+        curPressurePSI = (250*(voltage/4.62)-25);
 
         double sample_time_ms = LoopTiming.getInstance().getLoopStartTimeSec()*1000.0;
         pressSig.addSample(sample_time_ms,curPressurePSI);
