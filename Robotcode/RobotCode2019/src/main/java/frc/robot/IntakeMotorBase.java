@@ -32,6 +32,8 @@ public class IntakeMotorBase extends CasserolePID{
     double upperLimitVoltage=0;
     double lowerLimitDegrees=0;
     double upperLimitDegrees=0;
+    double direction =0;
+    double curMotorCmd=0;
 
 
     public IntakeMotorBase(double Kp_in, double Ki_in, double Kd_in,int Motor_id,int Hall_Sensor_id){
@@ -80,20 +82,32 @@ public class IntakeMotorBase extends CasserolePID{
         upperLimitDegrees = degrees;
     }
 
-    public double getSensorRawVoltage(){
-        //TODO FIX THIS MILES
+    public void resetPosition(){
+        curPosDeg=0;
+    }
+
+
+    public void setIntakeCmd(){
+        if(curMotorCmd>1){
+            direction=1;
+        }else if (curMotorCmd<1){
+            direction=-1;
+        }else{
+            direction=0;
+        }
     }
 
 
     @Override
-    protected double returnPIDInput(double intakeCmd) {
+    protected double returnPIDInput() {
         //TODO FIX THIS MILES
+        double hallConversionFactor=1;
         double hallSensorDifference = intakeArmHallSensor.get();
-        double deltaDeg = //conversionfactor*hallSensorDifference 
-        if(intakeCmd>0){
+        double deltaDeg = hallConversionFactor*hallSensorDifference; 
+        if(direction>0){
             curPosDeg = curPosDeg+deltaDeg; 
-        }else if(intakeCmd<0){
-            curPosDeg = curPosDegdeltaDeg; 
+        }else if(direction<0){
+            curPosDeg = curPosDeg-deltaDeg; 
         }
         return curPosDeg;
     }
@@ -101,6 +115,7 @@ public class IntakeMotorBase extends CasserolePID{
     @Override
     protected void usePIDOutput(double pidOutput) {
         intakeArmMotor.set(ControlMode.PercentOutput,pidOutput);
+        curMotorCmd=pidOutput;
     }
     public void setManualMotorCommand(double cmd){
         intakeArmMotor.set(ControlMode.PercentOutput,cmd); 

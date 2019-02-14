@@ -106,8 +106,8 @@ public class IntakeControl{
         ballInIntake = new DigitalInput(RobotConstants.BALL_INTAKE_PORT);
         intakeMotor = new WPI_TalonSRX(RobotConstants.INTAKE_MOTOR_CANID);
         //TODO figure out which one is inverted
-        intakeLeftArmMotor = new IntakeMotorBase(intakeMotorP.get(),intakeMotorI.get(),intakeMotorD.get(),RobotConstants.INTAKE_MOTOR_LEFT_CANID);
-        intakeRightArmMotor = new IntakeMotorBase(intakeMotorP.get(),intakeMotorI.get(),intakeMotorD.get(),RobotConstants.INTAKE_MOTOR_RIGHT_CANID);
+        intakeLeftArmMotor = new IntakeMotorBase(intakeMotorP.get(),intakeMotorI.get(),intakeMotorD.get(),RobotConstants.INTAKE_MOTOR_LEFT_CANID,RobotConstants.LEFT_INTAKE_COUNTER);
+        intakeRightArmMotor = new IntakeMotorBase(intakeMotorP.get(),intakeMotorI.get(),intakeMotorD.get(),RobotConstants.INTAKE_MOTOR_RIGHT_CANID,RobotConstants.RIGHT_INTAKE_COUNTER);
         intakeLeftArmMotor.setInverted(true);
         intakeRightArmMotor.setInverted(false);
         intakeLeftArmMotor.setLowerLimitVoltage(lowerLeftPotVoltage.get());
@@ -190,7 +190,7 @@ public class IntakeControl{
         if(runSimMode){
             return true;
         } else {
-            if(Math.abs(intakeLeftArmMotor.getCurError())<=2 && Math.abs(intakeRightArmMotor.getCurError())<=2){
+            if(Math.abs(intakeLeftArmMotor.getCurError())<=5 && Math.abs(intakeRightArmMotor.getCurError())<=5){
                 return true;
             }else{
                 return false;
@@ -236,6 +236,7 @@ public class IntakeControl{
             }
     
             //Intake Arm stuffs
+
             if(intakePosCmd==IntakePos.Extend){
                 intakeLeftArmMotor.setSetpoint(extendAngle.get());
                 intakeRightArmMotor.setSetpoint(extendAngle.get());
@@ -279,8 +280,6 @@ public class IntakeControl{
         double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
         leftIntakeMotorPosSig.addSample(sampleTimeMS, currentLeftPosition);
         rightIntakeMotorPosSig.addSample(sampleTimeMS, currentRightPosition);
-        leftIntakePosSensorVoltageSig.addSample(sampleTimeMS, intakeLeftArmMotor.getSensorRawVoltage());
-        rightIntakePosSensorVoltageSig.addSample(sampleTimeMS, intakeRightArmMotor.getSensorRawVoltage());
         retractStateCmdSig.addSample(sampleTimeMS, intakePosCmd.toInt());
         ballInIntakeSig.addSample(sampleTimeMS, ballDetected);
     }
@@ -296,6 +295,12 @@ public class IntakeControl{
     public boolean isBallDetected(){
         return ballDetected;
     }
+
+    public void resetIntakePos(){
+        intakeLeftArmMotor.resetPosition();
+        intakeRightArmMotor.resetPosition();
+    }
+
     public void openLoop(){
         intakeLeftArmMotor.stop();
         intakeRightArmMotor.stop();
