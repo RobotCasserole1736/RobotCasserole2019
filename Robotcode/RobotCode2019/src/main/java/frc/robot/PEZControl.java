@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import frc.lib.Calibration.Calibration;
 import frc.lib.DataServer.Signal;
 import frc.lib.WebServer.CasseroleDriverView;
 
@@ -56,6 +57,7 @@ public class PEZControl {
     Signal retractedLimSwSig;
     Signal smCylSig;
 
+    Calibration manualOvrdCal;
 
     double retractTimeStart; 
 
@@ -66,6 +68,8 @@ public class PEZControl {
     final DoubleSolenoid.Value SOL_POS_CARGO = DoubleSolenoid.Value.kForward;
     final DoubleSolenoid.Value SOL_POS_HATCH = DoubleSolenoid.Value.kReverse;
     final DoubleSolenoid.Value SOL_POS_RELEASE = SOL_POS_HATCH;
+    final DoubleSolenoid.Value SOL_POS_STOPPER_ENGAGE = DoubleSolenoid.Value.kForward;
+    final DoubleSolenoid.Value SOL_POS_STOPPER_RELEASE = DoubleSolenoid.Value.kReverse;
 
     
     final double MAX_EXTEND_DUR_SEC = 0.500;
@@ -111,6 +115,8 @@ public class PEZControl {
         posEst = PEZPos.None;
         limitSwitchVal = false;
         posReq = PEZPos.None;
+        
+        manualOvrdCal = new Calibration("Gripper Position Manual Override", 0, 0, 1);
 
         posReqSig =new Signal("Gripper Position Requested", "pos");
         posEstSig =new Signal("Gripper Position Estimate", "pos");
@@ -139,20 +145,20 @@ public class PEZControl {
         if(posReq == PEZPos.CargoGrab){
             posEst = posReq;
             pezPneumaticCyl.set(SOL_POS_CARGO);
-            pezMidPosStopper.set(Value.kForward);
+            pezMidPosStopper.set(SOL_POS_STOPPER_RELEASE);
             smallSolePos = 0;
 
         } else if(posReq == PEZPos.HatchGrab){
             posEst = posReq;
             pezPneumaticCyl.set(SOL_POS_HATCH);
-            pezMidPosStopper.set(Value.kReverse);
+            pezMidPosStopper.set(SOL_POS_STOPPER_RELEASE);
             smallSolePos = 0;
 
         }else if(posReq == PEZPos.Release){
             if (prevPosReq != PEZPos.Release){
                 retractTimeStart = Timer.getFPGATimestamp();
                 pezPneumaticCyl.set(SOL_POS_CARGO);
-                pezMidPosStopper.set(Value.kForward);
+                pezMidPosStopper.set(SOL_POS_STOPPER_RELEASE);
                 smallSolePos = 1;
             }
 
@@ -160,7 +166,7 @@ public class PEZControl {
             if (isExtended == false) {
                 posEst = posReq;
                 pezPneumaticCyl.set (SOL_POS_RELEASE);
-                pezMidPosStopper.set(Value.kReverse); 
+                pezMidPosStopper.set(SOL_POS_STOPPER_RELEASE); 
                 smallSolePos = 0;
             } else {
                 // waiting for cylinder to retract
@@ -192,7 +198,19 @@ public class PEZControl {
     }
 
     public void setPositionCmd(PEZPos cmd_in){
-        posReq = cmd_in;
+        if(manualOvrdCal.get() != 1.0){
+            posReq = cmd_in;
+        } else {
+            int cmd = DriverController.getInstance().xb.getPOV();
+            if(cmd == 0){
+                posReq = PEZPos.CargoGrab;
+            } else if(cmd == 90 || cmd == 270){
+                posReq = PEZPos.Release;
+            } else if(cmd == 180){
+                posReq =PEZPos.HatchGrab;
+            }
+        }
+
     }
 
     public boolean isAtDesPos(){

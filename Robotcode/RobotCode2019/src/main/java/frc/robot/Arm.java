@@ -113,8 +113,8 @@ public class Arm {
 
     /////////Physical Mechanism Constants\\\\\\\\\\
     final double MAX_MANUAL_DEG_PER_SEC = 25.0;
-    final double SPROCKET_GEAR_RATIO = 5.0/1.0;
-    final double GEARBOX_GEAR_RATIO = 20.0/1.0;
+    final double SPROCKET_GEAR_RATIO = 5.0/1.0; //*17.0/12.0 we removed it so heres the value
+    final double GEARBOX_GEAR_RATIO = 30.0/1.0;
 
     final double INVERT_FACTOR = -1.0;
 
@@ -152,8 +152,8 @@ public class Arm {
         // we go to the safe-state of "no motion"
         //Assume upper limit of travel is in the forward direction of motion
         //Assume lower limit of travel is in the reverse direction of motion
-        upperLimitSwitch = sadey.getForwardLimitSwitch(LimitSwitchPolarity.kNormallyClosed); 
-        lowerLimitSwitch = sadey.getReverseLimitSwitch(LimitSwitchPolarity.kNormallyClosed); 
+        lowerLimitSwitch = sadey.getForwardLimitSwitch(LimitSwitchPolarity.kNormallyClosed); 
+        upperLimitSwitch = sadey.getReverseLimitSwitch(LimitSwitchPolarity.kNormallyClosed); 
         //Ensure limit switches remain enabled. This should bedefault but I don't want to take any chances.
         upperLimitSwitch.enableLimitSwitch(true);
         lowerLimitSwitch.enableLimitSwitch(true);
@@ -178,21 +178,21 @@ public class Arm {
 
 
         /////Calibration Things\\\\\
-        topCargoHeightCal    = new Calibration("Arm Cargo Level Pos Top Deg", 180);
+        topCargoHeightCal    = new Calibration("Arm Cargo Level Pos Top Deg", 100);
         midCargoHeightCal    = new Calibration("Arm Cargo Level Pos Mid Deg", 50);
-        lowCargoHeightCal    = new Calibration("Arm Cargo Level Pos Bottom Deg", 10);
-        intakeCargoHeightCal = new Calibration("Arm Cargo Level Pos Intake Deg", 0);
+        lowCargoHeightCal    = new Calibration("Arm Cargo Level Pos Bottom Deg", -15);
+        intakeCargoHeightCal = new Calibration("Arm Cargo Level Pos Intake Deg", -60);
 
-        topHatchHeightCal    = new Calibration("Arm Hatch Level Pos Top Deg", 190);
+        topHatchHeightCal    = new Calibration("Arm Hatch Level Pos Top Deg", 100);
         midHatchHeightCal    = new Calibration("Arm Hatch Level Pos Mid Deg", 45);
-        lowHatchHeightCal    = new Calibration("Arm Hatch Level Pos Bottom Deg", 5);
-        intakeHatchHeightCal = new Calibration("Arm Hatch Level Pos Intake Deg", 5);
+        lowHatchHeightCal    = new Calibration("Arm Hatch Level Pos Bottom Deg", -15);
+        intakeHatchHeightCal = new Calibration("Arm Hatch Level Pos Intake Deg", -15);
 
-        intakeDangerZoneUpperHeight = new Calibration("Arm Intake Danger Zone Upper Pos Deg", 3);
+        intakeDangerZoneUpperHeight = new Calibration("Arm Intake Danger Zone Upper Pos Deg", -20);
         
         gravOffsetHorz    = new Calibration("Arm Required Voltage at Horz V", 0.5);
-        bottomLimitSwitchDegreeCal = new Calibration("Arm Limit Switch Angle Bottom Deg", -30);
-        topLimitSwitchDegreeCal    = new Calibration("Arm Limit Switch Angle Top Deg", 110);
+        bottomLimitSwitchDegreeCal = new Calibration("Arm Limit Switch Angle Bottom Deg", -60);
+        topLimitSwitchDegreeCal    = new Calibration("Arm Limit Switch Angle Top Deg", 109);
 
         //Calibration for the Arm Trapezoidal\\
         kMaxOutputCal = new Calibration("Arm SmartMotion Max Power", 1);
