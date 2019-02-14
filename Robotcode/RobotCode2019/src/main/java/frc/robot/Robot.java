@@ -441,7 +441,7 @@ public class Robot extends TimedRobot {
             pezControl.setPositionCmd(PEZPos.HatchGrab);
             superstructure.setInitialOpMode(OpMode.Hatch);
         } else {
-            pezControl.setPositionCmd(PEZPos.Release);
+            pezControl.setPositionCmd(PEZPos.HatchRelease);
             superstructure.setInitialOpMode(OpMode.Hatch);
         }
     }

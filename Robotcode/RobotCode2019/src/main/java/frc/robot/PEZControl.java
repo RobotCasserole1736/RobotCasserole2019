@@ -65,8 +65,8 @@ public class PEZControl {
     boolean limitSwitchVal;
 
     //Physical mechanism conversion contstants
-    final DoubleSolenoid.Value SOL_POS_CARGO = DoubleSolenoid.Value.kForward;
-    final DoubleSolenoid.Value SOL_POS_HATCH = DoubleSolenoid.Value.kReverse;
+    final DoubleSolenoid.Value SOL_POS_CARGO = DoubleSolenoid.Value.kReverse;
+    final DoubleSolenoid.Value SOL_POS_HATCH = DoubleSolenoid.Value.kForward;
     final DoubleSolenoid.Value SOL_POS_RELEASE = SOL_POS_HATCH;
     final DoubleSolenoid.Value SOL_POS_STOPPER_ENGAGE = DoubleSolenoid.Value.kForward;
     final DoubleSolenoid.Value SOL_POS_STOPPER_RELEASE = DoubleSolenoid.Value.kReverse;
@@ -82,7 +82,7 @@ public class PEZControl {
     }
 
     public enum PEZPos {
-        CargoGrab(0), Release(1), HatchGrab(2), None(3), InTransit(4);
+        CargoGrab(0), HatchGrab(1), CargoRelease(2), HatchRelease(3), BallToHatch(4), HatchToBall(5), None(6);
         public final int value;
 
         private PEZPos(int value) {

@@ -139,12 +139,12 @@ public class Superstructure {
                 seq.clearAllEvents();
                 //TODO: Combine the events which can happen in parallel
                 seq.addEvent(new EjectBall()); //Eject any ball that is presently in the intake
-                seq.addEvent(new MoveGripper(PEZPos.Release)); //Drop any gamepiece we may currently have
+                seq.addEvent(new MoveGripper(PEZPos.HatchRelease)); //Drop any gamepiece we may currently have
                 seq.addEvent(new MoveArmLowPos(OpMode.CargoCarry)); //Move arm toward intake position
                 seq.addEvent(new MoveIntake(IntakePos.Extend)); //Extend the intake so it's out of the way of the arm
                 seq.addEvent(new MoveGripper(PEZPos.CargoGrab)); //Move gripper to be cargo grab so it's out of the way of the frame
                 seq.addEvent(new MoveArmIntakePos(OpMode.CargoCarry)); //Lower the arm into the frame
-                seq.addEvent(new MoveGripper(PEZPos.Release)); //Return gripper to the neutral position in prep for recieving a ball.
+                seq.addEvent(new MoveGripper(PEZPos.CargoRelease)); //Return gripper to the neutral position in prep for recieving a ball.
                 seq.start();
             } else if(cmdOpMode == OpMode.CargoCarry){
                 //Invalid, this transition should not occurr
@@ -160,7 +160,7 @@ public class Superstructure {
                 seq.clearAllEvents();
                 //TODO: Combine the envents which can happen in parallel
                 seq.addEvent(new EjectBall()); //Eject any ball that is presently in the intake
-                seq.addEvent(new MoveGripper(PEZPos.Release)); //Drop any gamepiece we may have
+                seq.addEvent(new MoveGripper(PEZPos.HatchRelease)); //Drop any gamepiece we may have
                 seq.addEvent(new Delay(0.2)); //Wait for gamepiece to actually drop.
                 seq.addEvent(new MoveArmIntakePos(OpMode.Hatch)); // Move the arm to the hatch intake position in prep for grabbing a hatch
                 seq.start();
@@ -170,13 +170,13 @@ public class Superstructure {
                 seq.clearAllEvents();
                 //TODO: Combine the envents which can happen in parallel
                 seq.addEvent(new EjectBall()); //Eject any ball that is presently in the intake
-                seq.addEvent(new MoveGripper(PEZPos.Release)); //Drop any gamepiece we may have
+                seq.addEvent(new MoveGripper(PEZPos.CargoRelease)); //Drop any gamepiece we may have
                 seq.addEvent(new Delay(0.2)); //Wait for gamepiece to actually drop.
                 seq.addEvent(new MoveGripper(PEZPos.CargoGrab)); //Move grabber to cargo grab position
                 seq.addEvent(new MoveArmLowPos(OpMode.CargoCarry)); //Move arm out of the way of the intake
                 seq.addEvent(new MoveIntake(IntakePos.Extend)); //Pull the intake back within the robot
                 seq.addEvent(new MoveArmIntakePos(OpMode.CargoIntake)); // Move the arm to the hatch intake position in prep for grabbing a hatch
-                seq.addEvent(new MoveGripper(PEZPos.Release)); //Move the gripper to the neutral position in prep for grabbing a hatch
+                seq.addEvent(new MoveGripper(PEZPos.CargoRelease)); //Move the gripper to the neutral position in prep for grabbing a hatch
                 seq.start();
             }
         } else if(prevCmdOpMode == OpMode.CargoIntake){
@@ -198,7 +198,7 @@ public class Superstructure {
                 seq.addEvent(new MoveIntake(IntakePos.Ground)); //Put the intake all the way out, out of the way of the the arm and ball as they come up
                 seq.addEvent(new MoveArmLowPos(OpMode.Hatch)); //Move arm to the lower position by default.
                 seq.addEvent(new MoveIntake(IntakePos.Retract));
-                seq.addEvent(new MoveGripper(PEZPos.Release)); //Drop any gamepiece we may have
+                seq.addEvent(new MoveGripper(PEZPos.HatchRelease)); //Drop any gamepiece we may have
                 seq.addEvent(new Delay(0.2)); //Wait for gamepiece to actually drop.
                 seq.start();
             }
@@ -236,7 +236,7 @@ public class Superstructure {
             if(opCtrl.getGampieceGrabRequest() || intake.isBallDetected()){
                 gripperPosCmd = PEZPos.CargoGrab;
             } else if(opCtrl.getGampieceReleaseRequest()){
-                gripperPosCmd = PEZPos.Release;
+                gripperPosCmd = PEZPos.CargoRelease;
             } else {
                 gripperPosCmd = PEZPos.None;
             }
@@ -256,7 +256,7 @@ public class Superstructure {
             if(opCtrl.getGampieceGrabRequest()){
                 gripperPosCmd = PEZPos.CargoGrab;
             } else if(opCtrl.getGampieceReleaseRequest()){
-                gripperPosCmd = PEZPos.Release;
+                gripperPosCmd = PEZPos.CargoRelease;
             } else {
                 gripperPosCmd = PEZPos.None;
             }
@@ -292,7 +292,7 @@ public class Superstructure {
             if(opCtrl.getGampieceGrabRequest()){
                 gripperPosCmd = PEZPos.HatchGrab;
             } else if(opCtrl.getGampieceReleaseRequest()){
-                gripperPosCmd = PEZPos.Release;
+                gripperPosCmd = PEZPos.HatchRelease;
             } else {
                 gripperPosCmd = PEZPos.None;
             }
