@@ -1,5 +1,6 @@
 package frc.robot;
 
+import frc.lib.AutoSequencer.AutoEvent;
 import frc.lib.AutoSequencer.AutoSequencer;
 import frc.lib.DataServer.Signal;
 import frc.lib.Util.CrashTracker;
@@ -137,10 +138,10 @@ public class Superstructure {
                 //Start transition from hatch mode to cargo mode.
                 actualOpMode = OpMode.TransitionToCargoIntake;
                 seq.clearAllEvents();
-                //TODO: Combine the events which can happen in parallel
-                seq.addEvent(new EjectBall()); //Eject any ball that is presently in the intake
-                seq.addEvent(new MoveGripper(PEZPos.HatchRelease)); //Drop any gamepiece we may currently have
-                seq.addEvent(new MoveArmLowPos(OpMode.CargoCarry)); //Move arm toward intake position
+                AutoEvent parent = new EjectBall(); //Eject any ball that is presently in the intake
+                parent.addChildEvent(new MoveGripper(PEZPos.HatchRelease)); //Drop any gamepiece we may currently have
+                parent.addChildEvent(new MoveArmLowPos(OpMode.CargoCarry)); //Move arm toward intake position
+                seq.addEvent(parent); 
                 seq.addEvent(new MoveIntake(IntakePos.Ground)); //Extend the intake so it's out of the way of the arm
                 seq.addEvent(new MoveGripper(PEZPos.CargoGrab)); //Move gripper to be cargo grab so it's out of the way of the frame
                 seq.addEvent(new MoveArmIntakePos(OpMode.CargoIntake)); //Lower the arm into the frame
@@ -158,7 +159,6 @@ public class Superstructure {
                 //Start transition from Cargo Intake mode to Hatch mode.
                 actualOpMode = OpMode.TransitionToHatch;
                 seq.clearAllEvents();
-                //TODO: Combine the envents which can happen in parallel
                 seq.addEvent(new EjectBall()); //Eject any ball that is presently in the intake
                 seq.addEvent(new MoveGripper(PEZPos.HatchRelease)); //Drop any gamepiece we may have
                 seq.addEvent(new Delay(0.2)); //Wait for gamepiece to actually drop.
@@ -168,12 +168,12 @@ public class Superstructure {
                 //Start transition from Cargo Intake mode to Cargo Carry.
                 actualOpMode = OpMode.TransitionToCargoIntake;
                 seq.clearAllEvents();
-                //TODO: Combine the envents which can happen in parallel
                 seq.addEvent(new EjectBall()); //Eject any ball that is presently in the intake
                 seq.addEvent(new MoveGripper(PEZPos.CargoRelease)); //Drop any gamepiece we may have
                 seq.addEvent(new Delay(0.2)); //Wait for gamepiece to actually drop.
-                seq.addEvent(new MoveGripper(PEZPos.CargoGrab)); //Move grabber to cargo grab position
-                seq.addEvent(new MoveArmLowPos(OpMode.CargoCarry)); //Move arm out of the way of the intake
+                AutoEvent parent = new MoveGripper(PEZPos.CargoGrab); //Move grabber to cargo grab position
+                parent.addChildEvent(new MoveArmLowPos(OpMode.CargoCarry)); //Move arm out of the way of the intake
+                seq.addEvent(parent); 
                 seq.addEvent(new MoveIntake(IntakePos.Ground)); //Pull the intake back within the robot
                 seq.addEvent(new MoveArmIntakePos(OpMode.CargoIntake)); // Move the arm to the hatch intake position in prep for grabbing a hatch
                 seq.addEvent(new MoveGripper(PEZPos.CargoRelease)); //Move the gripper to the neutral position in prep for grabbing a hatch
@@ -197,8 +197,9 @@ public class Superstructure {
                 seq.addEvent(new MoveGripper(PEZPos.CargoGrab)); //Ensure we're grabbing to stay out of the way of the frame as we raise up
                 seq.addEvent(new MoveIntake(IntakePos.Ground)); //Put the intake all the way out, out of the way of the the arm and ball as they come up
                 seq.addEvent(new MoveArmLowPos(OpMode.Hatch)); //Move arm to the lower position by default.
-                seq.addEvent(new MoveIntake(IntakePos.Retract));
-                seq.addEvent(new MoveGripper(PEZPos.HatchRelease)); //Drop any gamepiece we may have
+                AutoEvent parent = new MoveIntake(IntakePos.Retract);
+                parent.addChildEvent(new MoveGripper(PEZPos.HatchRelease));//Drop any gamepiece we may have
+                seq.addEvent(parent);
                 seq.addEvent(new Delay(0.2)); //Wait for gamepiece to actually drop.
                 seq.start();
             }
