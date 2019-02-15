@@ -174,7 +174,7 @@ public class Superstructure {
                 seq.addEvent(new Delay(0.2)); //Wait for gamepiece to actually drop.
                 seq.addEvent(new MoveGripper(PEZPos.CargoGrab)); //Move grabber to cargo grab position
                 seq.addEvent(new MoveArmLowPos(OpMode.CargoCarry)); //Move arm out of the way of the intake
-                seq.addEvent(new MoveIntake(IntakePos.Extend)); //Pull the intake back within the robot
+                seq.addEvent(new MoveIntake(IntakePos.Ground)); //Pull the intake back within the robot
                 seq.addEvent(new MoveArmIntakePos(OpMode.CargoIntake)); // Move the arm to the hatch intake position in prep for grabbing a hatch
                 seq.addEvent(new MoveGripper(PEZPos.CargoRelease)); //Move the gripper to the neutral position in prep for grabbing a hatch
                 seq.start();

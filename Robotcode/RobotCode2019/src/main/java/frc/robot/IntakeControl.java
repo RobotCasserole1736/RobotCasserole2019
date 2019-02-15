@@ -21,11 +21,7 @@ package frc.robot;
  */
 
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.Spark;
-
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-
-import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import frc.lib.Calibration.Calibration;
 import frc.lib.DataServer.Signal;
 import frc.lib.Util.DaBouncer;
@@ -238,7 +234,7 @@ public class IntakeControl{
     public void sampleSensors(){
         if(!runSimMode){
             //System.out.println(ballInIntake.get());
-            ballDetected = ballDetectedDbnc.BelowDebounce(!ballInIntake.get()); //Sensor outputs high for no ball, low for ball 
+            ballDetected = !ballInIntake.get(); //Sensor outputs high for no ball, low for ball 
             currentLeftPosition= intakeLeftArmMotor.returnPIDInput();
             currentRightPosition= intakeRightArmMotor.returnPIDInput();
         }
