@@ -360,6 +360,7 @@ public class Robot extends TimedRobot {
             ledController.setPattern(LEDPatterns.Pattern2);
             matchState.SetPeriod(MatchState.Period.Disabled);
             eyeOfVeganSauron.setLEDRingState(false);
+            arm.forceArmStop();
 
         } catch(Throwable t) {
             CrashTracker.logThrowableCrash(t);
@@ -393,7 +394,7 @@ public class Robot extends TimedRobot {
 
             //Initial Match State - Arm Not Moving
             arm.setManualMovementCmd(0);
-            arm.setPositionCmd(ArmPos.None);
+            arm.setPositionCmd(ArmPos.Disabled);
             arm.updateCalValues(false);
             arm.update();
 
@@ -516,10 +517,12 @@ public class Robot extends TimedRobot {
     @Override
     public void testInit(){
         intakeControl.openLoop();
+        arm.forceArmStop();
     }
 
     @Override
     public void testPeriodic(){
+        arm.setManualMovementCmd(0);
         loopTiming.markLoopStart();
         intakeControl.sampleSensors();
         climber.setManualMotorCommand(operatorController.xb.getY(Hand.kLeft));

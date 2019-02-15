@@ -256,6 +256,7 @@ public class Arm {
     
 
     public enum ArmPos {
+        Disabled(9),
         TopCargo(8), 
         TopHatch(7), 
         MiddleCargo(6), 
@@ -318,7 +319,7 @@ public class Arm {
             curArmAngle = INVERT_FACTOR*armEncoder.getPosition();
             
             //Update the position based on what the driver requested
-            if(curManMoveCmd != 0) {
+            if(curManMoveCmd != 0 || posIn == ArmPos.Disabled) {
                 armPID.setReference(INVERT_FACTOR*curManMoveCmd*6.0, ControlType.kVoltage);
                 desAngle = curArmAngle;
             }
@@ -392,6 +393,8 @@ public class Arm {
 
             case None:
                 // Don't change desiredArmAngle
+            case Disabled:
+                curManMoveCmd = 0;
             break;
             
         }
@@ -457,8 +460,10 @@ public class Arm {
     }
 
     public void forceArmStop() {
-        setPositionCmd(ArmPos.None);
+        setPositionCmd(ArmPos.Disabled);
         setManualMovementCmd(0.0);
-        desAngle = curArmAngle;
+        desAngle = 0;
+        curManMoveCmd = 0;
+        armPID.setReference(0, ControlType.kVoltage);
     }
 }
