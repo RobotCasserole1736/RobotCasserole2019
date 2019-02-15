@@ -68,7 +68,7 @@ public class IntakeControl{
     double currentRightPosition;
 
     final double MAX_ALLOWABLE_ERR_DEG = 5.0;
-    final int ALLOWABLE_ERR_DBNC_LOOPS = 5;
+    final int ALLOWABLE_ERR_DBNC_LOOPS = 10;
 
     DaBouncer rightOnTargetDbnc;
     DaBouncer leftOnTargetDbnc;

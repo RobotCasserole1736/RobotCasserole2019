@@ -165,18 +165,18 @@ public class Superstructure {
                 seq.addEvent(new MoveArmIntakePos(OpMode.Hatch)); // Move the arm to the hatch intake position in prep for grabbing a hatch
                 seq.start();
             } else if(cmdOpMode == OpMode.CargoIntake){
-                //Start transition from Cargo Intake mode to Cargo Carry.
+                //Start transition from Cargo Carry to Cargo Intake
                 actualOpMode = OpMode.TransitionToCargoIntake;
                 seq.clearAllEvents();
                 seq.addEvent(new EjectBall()); //Eject any ball that is presently in the intake
                 seq.addEvent(new MoveGripper(PEZPos.CargoRelease)); //Drop any gamepiece we may have
                 seq.addEvent(new Delay(0.2)); //Wait for gamepiece to actually drop.
-                AutoEvent parent = new MoveGripper(PEZPos.CargoGrab); //Move grabber to cargo grab position
-                parent.addChildEvent(new MoveArmLowPos(OpMode.CargoCarry)); //Move arm out of the way of the intake
-                seq.addEvent(parent); 
-                seq.addEvent(new MoveIntake(IntakePos.Ground)); //Pull the intake back within the robot
+                seq.addEvent(new MoveGripper(PEZPos.CargoGrab)); //Move grabber to cargo grab position
+                seq.addEvent(new MoveArmLowPos(OpMode.CargoCarry)); //Move arm out of the way of the intake
+                seq.addEvent(new MoveIntake(IntakePos.Ground)); //put the intake out of the way
                 seq.addEvent(new MoveArmIntakePos(OpMode.CargoIntake)); // Move the arm to the hatch intake position in prep for grabbing a hatch
                 seq.addEvent(new MoveGripper(PEZPos.CargoRelease)); //Move the gripper to the neutral position in prep for grabbing a hatch
+                seq.addEvent(new MoveIntake(IntakePos.Extend)); //Move the intake in prep for picking up stuff
                 seq.start();
             }
         } else if(prevCmdOpMode == OpMode.CargoIntake){
