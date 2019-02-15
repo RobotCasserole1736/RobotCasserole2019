@@ -201,6 +201,7 @@ public abstract class CasserolePID {
         if(timerThread != null){
             timerThread.cancel();
         }
+        usePIDOutput(0);
     }
 
 
