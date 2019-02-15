@@ -57,7 +57,8 @@ public class PneumaticsControl {
 
     public void update(){
         double voltage = pressureSensor.getVoltage();
-        curPressurePSI = ((voltage/5.0)-0.1)*(150/0.8); /*Equation derived from datasheet */
+        //  curPressurePSI = ((voltage/5.0)-0.1)*(150/0.8); /*Equation derived from datasheet old sensor */
+        curPressurePSI = (250*(voltage/4.62)-25);
 
         if(DriverController.getInstance().getCompressorDisableReq()){
             this.stop();
