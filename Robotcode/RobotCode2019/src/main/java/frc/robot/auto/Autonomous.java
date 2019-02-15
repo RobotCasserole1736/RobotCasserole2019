@@ -7,6 +7,7 @@ import frc.lib.DataServer.Signal;
 import frc.lib.SignalMath.MathyCircularBuffer;
 import frc.lib.Util.CrashTracker;
 import frc.robot.JeVoisInterface;
+import frc.robot.LoopTiming;
 import frc.robot.OperatorController;
 import frc.robot.PEZControl.PEZPos;
 import frc.robot.Superstructure.OpMode;
@@ -44,7 +45,7 @@ public class Autonomous {
         pathPlanner(4),   /* Path-Planner*/
         addLineFollower(5),   /* add Line follower*/
         addAllAutoEvents(6),   /* Add all auto events*/
-        autoSeqUpdate(7);   /* AutoSeq .update()*/
+        autoSeqUpdate(7),  /* AutoSeq .update()*/
         autoError(8); /*EEEERRRROOORRRRR*/
 
         public final int value;
@@ -63,10 +64,13 @@ public class Autonomous {
 
     //Define the state you should start in
     final StateEnum INITAL_STATE = StateEnum.Inactive;
+
     double xTargetOffset;
     double yTargetOffset;
     double targetPositionAngle;
     double autoStartTimestamp;
+    double nextBlinkTransitionTime = 0;
+    final double BLINK_RATE_MSEC = 250;
 
     boolean stableTargetFound;
     boolean sendJevoislatch;
@@ -300,9 +304,19 @@ public class Autonomous {
 
             case autoError:
                 
+            double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
+
+                if(autoFailed){
+                    double curTime = sampleTimeMS;
+                    //Blink a driver station LED while failed
+                    if(curTime >= nextBlinkTransitionTime){
+                        nextBlinkTransitionTime = curTime + BLINK_RATE_MSEC;
+                        blinkState = !blinkState;
+                    }
+                    seq.stop();
 
 
-            break;
+                break;}
 
             default:
                 System.out.println("ERROR: unhandled CurState. Tell SW team they wrote bad code!");

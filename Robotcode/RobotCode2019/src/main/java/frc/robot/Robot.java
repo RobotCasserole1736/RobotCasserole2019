@@ -284,7 +284,7 @@ public class Robot extends TimedRobot {
             throw t;
         }
 
-        if(Autonomous.getAutoFailed() == true){
+        if(autonomous.getAutoFailed() == true){
             ledController.setPattern(LEDPatterns.Pattern6);
         } else {
             ledController.setPattern(LEDPatterns.Pattern3);
@@ -413,7 +413,7 @@ public class Robot extends TimedRobot {
         CasseroleDriverView.setBoolean("Gyro Offline", !drivetrain.isGyroOnline());
         CasseroleDriverView.setBoolean("Vision Camera Offline", !jevois.isVisionOnline());
         CasseroleDriverView.setBoolean("Vision Target Available", jevois.isTgtVisible());
-        CasseroleDriverView.setBoolean("Auto Failed", Autonomous.getAutoFailedLEDState());
+        CasseroleDriverView.setBoolean("Auto Failed", autonomous.getAutoFailedLEDState());
         CasseroleDriverView.setBoolean("Line Seen", linefollow.isEstLinePosAvailable());
         CasseroleDriverView.setStringBox("Op Mode", superstructure.getOpModeString());
     }
