@@ -22,6 +22,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import frc.lib.Calibration.Calibration;
 import frc.lib.DataServer.Signal;
 import frc.robot.IntakeControl.IntakePos;
@@ -191,5 +192,12 @@ public class DriverController {
     public boolean getGyroAngleLockReq() {
         return this.gyroAngleLockReq;
     }
+    public void setRumbleCmd(int rumbleCmd){
+        xb.setRumble(RumbleType.kLeftRumble, rumbleCmd);
+        xb.setRumble(RumbleType.kRightRumble, rumbleCmd);
 
-}
+    }
+
+    }
+    
+
