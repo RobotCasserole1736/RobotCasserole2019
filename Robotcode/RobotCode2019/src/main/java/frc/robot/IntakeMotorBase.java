@@ -24,6 +24,8 @@ public class IntakeMotorBase extends CasserolePID{
     VictorSPX intakeArmMotor;
     AnalogPotentiometer armPot;
 
+    boolean isOpenLoop = false;
+
     boolean isInverted = false;
     double outputCmd = 0;
 
@@ -46,14 +48,15 @@ public class IntakeMotorBase extends CasserolePID{
     }
 
     public void killPID(){
+        isOpenLoop = true;
         super.stop();
     }
 
-
-    public void stop(){
-        this.setSetpoint(this.returnPIDInput()); //set setpoint to present position.
+    public void start(){
+        isOpenLoop = false;
+        super.start();
     }
-    
+
     double convertVoltsToDeg(double voltage_in){
         double lowerLimitConversionVoltage=lowerLimitVoltage;
         double upperLimitConversionVoltage=upperLimitVoltage;
@@ -93,9 +96,14 @@ public class IntakeMotorBase extends CasserolePID{
 
     @Override
     protected void usePIDOutput(double pidOutput) {
-        intakeArmMotor.set(ControlMode.PercentOutput,pidOutput);
+        if(isOpenLoop == false){
+            intakeArmMotor.set(ControlMode.PercentOutput,pidOutput);
+        }
     }
+
     public void setManualMotorCommand(double cmd){
-        intakeArmMotor.set(ControlMode.PercentOutput,cmd); 
+        if(isOpenLoop == true){
+            intakeArmMotor.set(ControlMode.PercentOutput,cmd); 
+        }
     }
 }

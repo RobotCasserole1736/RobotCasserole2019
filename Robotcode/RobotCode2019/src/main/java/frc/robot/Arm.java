@@ -324,7 +324,6 @@ public class Arm {
                 desAngle = curArmAngle;
             }
             else {
-                defArmPos();
                 double desRotation = desAngle;
                 double gravComp = gravComp();
                 //testDesVel = desRotation; //TEMP - test only
@@ -354,6 +353,7 @@ public class Arm {
 
     public void setPositionCmd(ArmPos posIn) {
         this.posIn = posIn;
+        defArmPos();
     }
     
     /////Movement Settings\\\\\
@@ -393,6 +393,8 @@ public class Arm {
 
             case None:
                 // Don't change desiredArmAngle
+            break;
+
             case Disabled:
                 curManMoveCmd = 0;
             break;
