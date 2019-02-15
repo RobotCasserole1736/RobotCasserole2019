@@ -462,7 +462,7 @@ public class Arm {
     public void forceArmStop() {
         setPositionCmd(ArmPos.Disabled);
         setManualMovementCmd(0.0);
-        desAngle = 0;
+        desAngle = intakeCargoHeightCal.get();
         curManMoveCmd = 0;
         armPID.setReference(0, ControlType.kVoltage);
     }
