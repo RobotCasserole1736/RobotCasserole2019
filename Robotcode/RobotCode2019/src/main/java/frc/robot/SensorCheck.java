@@ -42,6 +42,7 @@ public class SensorCheck {
     boolean dtLeftTalon1Fault;
     boolean dtLeftTalon2Fault;
     boolean compressorCutoffFault;
+    boolean compressorPresenceFault;
 
     boolean faultDetected;
 
@@ -131,6 +132,15 @@ public class SensorCheck {
             compressorCutoffFault = true;
             faultDetected = true;
         }
+
+        //Compressor plugged in?
+        if(pneumatic.getPressure() > -5) {
+            compressorPresenceFault = false;
+            faultDetected = false;
+        }else if(pneumatic.getPressure() <= -5) {
+            compressorPresenceFault = true;
+            faultDetected = true;
+        }
     }
 
     public boolean isFaultDetected() {
@@ -153,6 +163,8 @@ public class SensorCheck {
             description = "DT Right Motor 2 Electrical Fault";
         }else if(compressorCutoffFault == true) {
             description = "Compressor Cutoff Switch Fault";
+        }else if(compressorPresenceFault == true) {
+            description = "Compressor Unplugged or Faulty";
         }else{
             description = "No Fault";
         } 
