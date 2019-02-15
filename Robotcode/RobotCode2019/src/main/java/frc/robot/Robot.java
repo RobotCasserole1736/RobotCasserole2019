@@ -117,6 +117,9 @@ public class Robot extends TimedRobot {
     //Sensor Cross-Checking
     SensorCheck sensorCheck; 
 
+    //Safety check for robot state
+    boolean wasAutoRun = false;
+
     public Robot() {
         super(RobotConstants.MAIN_LOOP_SAMPLE_RATE_S);
         CrashTracker.logRobotConstruction();
@@ -211,6 +214,12 @@ public class Robot extends TimedRobot {
             /*Update CrashTracker*/
             CrashTracker.logTeleopInit();
 
+            //Intake check - if it's not at the correct location, kill the robot!
+            if((intakeControl.getLeftArmPosition() > 15 && intakeControl.getRightArmPosition() > 15) && !wasAutoRun) {
+                System.out.println("UNSAFE STATE!!!");
+                throw new Error("Error!!! Robot started in unsafe state");
+            }
+
             dataServer.logger.startLoggingTeleop();
             matchState.SetPeriod(MatchState.Period.OperatorControl);
             intakeControl.closedLoop();
@@ -227,6 +236,14 @@ public class Robot extends TimedRobot {
         try{
             /*Update CrashTracker*/
             CrashTracker.logAutoInit();
+            wasAutoRun = true;
+
+            //Intake check - if it's not at the correct location, kill the robot!
+            if(intakeControl.getLeftArmPosition() > 15 && intakeControl.getRightArmPosition() > 15) {
+                System.out.println("UNSAFE STATE!!!");
+                throw new Error("Error!!! Robot started in unsafe state");
+            }
+
             dataServer.logger.startLoggingAuto();
             ledController.setPattern(LEDPatterns.Pattern4);
             matchState.SetPeriod(MatchState.Period.Autonomous);
