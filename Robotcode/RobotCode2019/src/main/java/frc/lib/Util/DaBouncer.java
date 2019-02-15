@@ -83,7 +83,7 @@ public class DaBouncer {
     }
     
     public boolean AboveDebounceBoo(boolean b) {
-    	if (b = true){
+    	if (b == true){
     		aboveDebounceCounter++;	
     	}
     	else {
@@ -121,7 +121,7 @@ public class DaBouncer {
     }
 
     public boolean BelowDebounce(boolean b) {
-    	if (b = true){
+    	if (b == true){
     		belowDebounceCounter++;	
     	}
     	else {

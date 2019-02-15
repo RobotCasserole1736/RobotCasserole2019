@@ -126,7 +126,7 @@ public class PEZControl {
         manualOvrdCal = new Calibration("Gripper Position Manual Override", 0, 0, 1);
 
         posReqSig =new Signal("Gripper Position Requested", "pos");
-        posStableSig =new Signal("Gripper Position Estimate", "pos");
+        posStableSig =new Signal("Gripper Position Stable", "bool");
         retractedLimSwSig =new Signal("Gripper Retracted Switch", "bool");
         stopperCylCmdSig = new Signal("Gripper Stopper Cylinder Command", "bool");
         gripperCylCmdSig = new Signal("Gripper Main Cylinder Command", "bool");
@@ -223,7 +223,7 @@ public class PEZControl {
             if(posStableCounter > 0){
                 posStableCounter--;
             } else {
-                if(opState == TopLevelState.Hatch){
+                if(opState == TopLevelState.Hatch || opState == TopLevelState.Cargo){
                     posStable = true;
                 }
             }

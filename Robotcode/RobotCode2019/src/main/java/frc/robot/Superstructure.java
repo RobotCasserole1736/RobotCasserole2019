@@ -141,9 +141,9 @@ public class Superstructure {
                 seq.addEvent(new EjectBall()); //Eject any ball that is presently in the intake
                 seq.addEvent(new MoveGripper(PEZPos.HatchRelease)); //Drop any gamepiece we may currently have
                 seq.addEvent(new MoveArmLowPos(OpMode.CargoCarry)); //Move arm toward intake position
-                seq.addEvent(new MoveIntake(IntakePos.Extend)); //Extend the intake so it's out of the way of the arm
+                seq.addEvent(new MoveIntake(IntakePos.Ground)); //Extend the intake so it's out of the way of the arm
                 seq.addEvent(new MoveGripper(PEZPos.CargoGrab)); //Move gripper to be cargo grab so it's out of the way of the frame
-                seq.addEvent(new MoveArmIntakePos(OpMode.CargoCarry)); //Lower the arm into the frame
+                seq.addEvent(new MoveArmIntakePos(OpMode.CargoIntake)); //Lower the arm into the frame
                 seq.addEvent(new MoveGripper(PEZPos.CargoRelease)); //Return gripper to the neutral position in prep for recieving a ball.
                 seq.start();
             } else if(cmdOpMode == OpMode.CargoCarry){

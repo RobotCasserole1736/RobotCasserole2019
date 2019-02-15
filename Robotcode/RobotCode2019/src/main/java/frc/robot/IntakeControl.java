@@ -237,6 +237,7 @@ public class IntakeControl{
 
     public void sampleSensors(){
         if(!runSimMode){
+            //System.out.println(ballInIntake.get());
             ballDetected = ballDetectedDbnc.BelowDebounce(!ballInIntake.get()); //Sensor outputs high for no ball, low for ball 
             currentLeftPosition= intakeLeftArmMotor.returnPIDInput();
             currentRightPosition= intakeRightArmMotor.returnPIDInput();
@@ -348,8 +349,8 @@ public class IntakeControl{
         return ballDetected;
     }
     public void openLoop(){
-        intakeLeftArmMotor.stop();
-        intakeRightArmMotor.stop();
+        intakeLeftArmMotor.killPID();
+        intakeRightArmMotor.killPID();
     }
     public void closedLoop(){
         intakeLeftArmMotor.start();

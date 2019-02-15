@@ -45,6 +45,11 @@ public class IntakeMotorBase extends CasserolePID{
         this.isInverted=isInverted;
     }
 
+    public void killPID(){
+        super.stop();
+    }
+
+
     public void stop(){
         this.setSetpoint(this.returnPIDInput()); //set setpoint to present position.
     }
