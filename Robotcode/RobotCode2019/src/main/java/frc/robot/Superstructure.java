@@ -265,7 +265,7 @@ public class Superstructure {
 
             //Operator can command intake speed, but position is fixed
             intake.setSpeedCmd(opCtrl.getIntakeSpdReq());
-            intake.setPositionCmd(IntakePos.Ground);
+            intake.setPositionCmd(IntakePos.Retract);
 
             //Allow all hatch-related arm position commands
             if(opCtrl.getArmPosReq() == ArmPosCmd.Lower){
