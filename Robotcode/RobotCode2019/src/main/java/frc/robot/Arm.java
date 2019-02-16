@@ -278,6 +278,10 @@ public class Arm {
         }
     }
 
+    public void setMatchStartPosition(){
+        armEncoder.setPosition(bottomLimitSwitchDegreeCal.get() + 2.0); //fudge
+    }
+
     public void sampleSensors() {
        topOfMotion = upperLimitSwitch.get();
        bottomOfMotion = lowerLimitSwitch.get();

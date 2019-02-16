@@ -224,7 +224,6 @@ public class Robot extends TimedRobot {
             matchState.SetPeriod(MatchState.Period.OperatorControl);
             intakeControl.closedLoop();
             eyeOfVeganSauron.setLEDRingState(true);
-            setMatchInitialCommands();
         } catch(Throwable t) {
             CrashTracker.logThrowableCrash(t);
             throw t;
@@ -460,18 +459,21 @@ public class Robot extends TimedRobot {
             pezControl.setPositionCmd(PEZPos.CargoGrab);
             superstructure.setInitialOpMode(OpMode.CargoCarry);
             arm.setPositionCmd(ArmPos.LowerCargo);
+            //arm.setMatchStartPosition(); //todo, this should be something else
             pezControl.setInitCargo();
         } else if(gpStart.compareTo(GamePiece.Hatch.toString())==0){
             intakeControl.setPositionCmd(IntakePos.Retract);
             pezControl.setPositionCmd(PEZPos.HatchGrab);
             superstructure.setInitialOpMode(OpMode.Hatch);
             arm.setPositionCmd(ArmPos.LowerHatch);
+            arm.setMatchStartPosition();
             pezControl.setInitHatch();
         } else {
             intakeControl.setPositionCmd(IntakePos.Retract);
             pezControl.setPositionCmd(PEZPos.HatchGrab);
             superstructure.setInitialOpMode(OpMode.Hatch);
             arm.setPositionCmd(ArmPos.LowerHatch);
+            arm.setMatchStartPosition();
             pezControl.setInitHatch();
         }
     }

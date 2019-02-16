@@ -235,6 +235,11 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
     public void sampleSensors() {
         motorSpeedRPMRight = CTRE_VelUnitsToRPM(rightTalon1.getSelectedSensorVelocity(0));
         motorSpeedRPMLeft = CTRE_VelUnitsToRPM(leftTalon1.getSelectedSensorVelocity(0));
+        left1Current  = leftTalon1.getOutputCurrent();
+        left2Current  = leftTalon2.getOutputCurrent();
+        right1Current = rightTalon1.getOutputCurrent();
+        right2Current = rightTalon2.getOutputCurrent();
+
     }
 
     public double getRightWheelSpeedRPM() {
@@ -356,9 +361,9 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
             motorSpeedRightCMD = Utils.capMotorCmd(forwardReverseCmd - rotationCmd);
 
             rightTalon1.set(ControlMode.PercentOutput, motorSpeedRightCMD);
-            rightTalon2.set(ControlMode.PercentOutput, motorSpeedRightCMD);
+            //rightTalon2.set(ControlMode.PercentOutput, motorSpeedRightCMD);
             leftTalon1.set(ControlMode.PercentOutput, motorSpeedLeftCMD);
-            leftTalon2.set(ControlMode.PercentOutput, motorSpeedLeftCMD);
+            //leftTalon2.set(ControlMode.PercentOutput, motorSpeedLeftCMD);
 
         } else if (opMode == DrivetrainOpMode.GyroLock){
             /* Drivetrain running in Gyro-lock. Fwd/Rev command comes from driver, but rotation from a closed-loop control algorithm*/
@@ -393,11 +398,6 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
         }
 
         /* Update Telemetry */
-        left1Current  = leftTalon1.getOutputCurrent();
-        left2Current  = leftTalon2.getOutputCurrent();
-        right1Current = rightTalon1.getOutputCurrent();
-        right2Current = rightTalon2.getOutputCurrent();
-
         double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
         currentL1Sig.addSample(sampleTimeMS, left1Current );
         currentL2Sig.addSample(sampleTimeMS, left2Current );
