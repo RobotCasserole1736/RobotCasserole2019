@@ -449,10 +449,10 @@ public class Robot extends TimedRobot {
     public enum GamePiece {
         Nothing, Cargo, Hatch;
     }
-    final String[] gpOptions =    {GamePiece.Hatch.toString(), GamePiece.Cargo.toString(), GamePiece.Nothing.toString()};
+    //final String[] gpOptions =    {GamePiece.Hatch.toString(), GamePiece.Cargo.toString(), GamePiece.Nothing.toString()};
 
     private void setMatchInitialCommands(){
-        String gpStart = CasseroleDriverView.getAutoSelectorVal("Starting Gamepiece");
+        String gpStart = GamePiece.Hatch.toString();
 
         if(gpStart.compareTo(GamePiece.Cargo.toString())==0){
             intakeControl.setPositionCmd(IntakePos.Retract); //TODO -what should this be?
@@ -515,7 +515,7 @@ public class Robot extends TimedRobot {
      * This function sets up the driver view website
      */
     private void initDriverView(){
-        CasseroleDriverView.newAutoSelector("Starting Gamepiece", gpOptions);
+        //CasseroleDriverView.newAutoSelector("Starting Gamepiece", gpOptions);
         CasseroleDriverView.newDial("Main System Pressure", 0, 140, 10, 80, 125);
         CasseroleDriverView.newWebcam("cam1", RobotConstants.CAM_1_STREAM_URL, 0, 0, 0);
         CasseroleDriverView.newWebcam("cam2", RobotConstants.CAM_2_STREAM_URL, 0, 0, 0);
