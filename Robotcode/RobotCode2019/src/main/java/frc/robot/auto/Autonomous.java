@@ -245,6 +245,7 @@ public class Autonomous {
 
             case addAllAutoEvents:
 
+                //By Default, go to update
                 nextState = StateEnum.autoSeqUpdate;
                 
                 if(OperatorController.getInstance().getAutoAlignLowReq()){
