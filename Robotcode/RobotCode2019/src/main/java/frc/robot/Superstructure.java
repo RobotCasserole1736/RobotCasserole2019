@@ -245,8 +245,12 @@ public class Superstructure {
 
             //Operator can command intake speed, but position is fixed
             intake.setSpeedCmd(opCtrl.getIntakeSpdReq());
-            intake.setPositionCmd(IntakePos.Extend);
 
+            if(intake.isBallDetected() == true){
+                intake.setPositionCmd(IntakePos.Ground);
+            } else if (opCtrl.getGampieceReleaseRequest()){
+                intake.setPositionCmd(IntakePos.Extend);
+            }
             //Ignore all arm commands
 
 
