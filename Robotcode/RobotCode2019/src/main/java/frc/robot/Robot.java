@@ -541,9 +541,15 @@ public class Robot extends TimedRobot {
 
     @Override
     public void testPeriodic(){
+        
+        //Cause arm to stop
         arm.setManualMovementCmd(0);
+        
         loopTiming.markLoopStart();
         intakeControl.sampleSensors();
+        pneumaticsControl.start();//ensure compressor is running
+
+        //Manual overrides for motors we can't turn by hand
         climber.setManualMotorCommand(operatorController.xb.getY(Hand.kLeft));
         double intakeCmd =-1.0*operatorController.xb.getY(Hand.kRight);
         if(Math.abs(intakeCmd) < 0.15){
@@ -552,6 +558,8 @@ public class Robot extends TimedRobot {
         intakeControl.intakeLeftArmMotor.setManualMotorCommand(intakeCmd);
         intakeControl.intakeRightArmMotor.setManualMotorCommand(intakeCmd);
         intakeControl.updateTelemetry();
+        
+        
         loopTiming.markLoopEnd();
     }
  
