@@ -97,7 +97,7 @@ public class OperatorController {
         xb = new XboxController(RobotConstants.OPERATOR_CONTROLLER_USB_IDX);
 
         joystickExpScaleFactor = new Calibration("Operator Joystick Exponential Scale Factor", 3.0 , 1, 10);
-        joystickDeadzone = new Calibration("Operator Joystick Deadzone ", 0.15, 0, 1);
+        joystickDeadzone = new Calibration("Operator Joystick Deadzone ", 0.23, 0, 1); //oy this joystick stinks
 
         gamepieceGrabReqSig = new Signal("Operator Gamepiece Grab Command", "bool");
         gamepieceReleaseReqSig = new Signal("Operator Gamepiece Release Command", "bool");
