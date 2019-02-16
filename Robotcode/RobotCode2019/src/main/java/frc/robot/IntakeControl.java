@@ -37,6 +37,7 @@ public class IntakeControl{
     IntakeMotorBase intakeRightArmMotor;
     
     int loopCounter = 0;
+    int posChangedCounter=0;
 
     Signal leftIntakeMotorPosSig;
     Signal rightIntakeMotorPosSig;
@@ -188,7 +189,7 @@ public class IntakeControl{
     private IntakeSpd intakeSpdCmd = IntakeSpd.Stop;
 
     public void setPositionCmd(IntakePos posIn){
-
+        posChangedCounter=0;
         //Test only - enable manual control from driver controller when override is active
         if(positionOverride.get() == 1.0){
             int dpadPos = DriverController.getInstance().xb.getPOV();
@@ -226,7 +227,11 @@ public class IntakeControl{
         if(runSimMode){
             return true;
         } else {
-            return rightOnTarget && leftOnTarget;
+            if(posChangedCounter==3){
+                return rightOnTarget && leftOnTarget;
+            }else{
+                return false;
+            }
         }
     }
 
@@ -295,6 +300,9 @@ public class IntakeControl{
             //Debounce whether we're at the correct position or not.
             rightOnTarget = rightOnTargetDbnc.BelowDebounce(Math.abs(intakeRightArmMotor.getCurError()));
             leftOnTarget  = leftOnTargetDbnc.BelowDebounce(Math.abs(intakeLeftArmMotor.getCurError()));
+
+
+            
             
 
             //Intake motor control
@@ -311,6 +319,11 @@ public class IntakeControl{
             }
     
             intakeMotor.set(-1*intakeMotorCmd); //motor is mechanically inverted
+
+            if(posChangedCounter<3){
+                posChangedCounter++;
+            }
+
     
             double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
             motorSpeedCmdSig.addSample(sampleTimeMS, intakeMotorCmd);
