@@ -405,6 +405,7 @@ public class Robot extends TimedRobot {
             operatorController.update();
 
             superstructure.update();
+            sensorCheck.update();
 
             /* Map subsystem IO */
 
