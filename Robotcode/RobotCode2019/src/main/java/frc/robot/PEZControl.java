@@ -139,7 +139,7 @@ public class PEZControl {
 
     public void setInitHatch(){
         opState = TopLevelState.Hatch;
-        posReq = PEZPos.HatchRelease;
+        posReq = PEZPos.HatchGrab;
     }
 
     public void update() {
