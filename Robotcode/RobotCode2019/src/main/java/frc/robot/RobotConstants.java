@@ -41,6 +41,7 @@ public class RobotConstants {
     public static final int BALL_INTAKE_PORT = 1;
 
     //Digital
+    public static final int VISON_LED_RING_PORT = 0;
     public static final int ARM_UPPER_LIMIT_SWITCH_PORT  = 2;
     public static final int ARM_LOWER_LIMIT_SWITCH_PORT  = 3;
     public static final int LINE_FOLLOWING_SENSOR_1_PORT = 4;
@@ -49,7 +50,7 @@ public class RobotConstants {
     public static final int LINE_FOLLOWING_SENSOR_4_PORT = 7;
     public static final int LINE_FOLLOWING_SENSOR_5_PORT = 8;
     public static final int PEZ_SOLENOID_LIMIT_SWITCH_PORT = 9;
-    public static final int VISON_LED_RING_PORT = 10;
+  
 
     //Relay
     public static final int PEZ_RELAY_PORT = 0;
