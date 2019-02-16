@@ -164,7 +164,7 @@ public class SensorCheck {
         }else if(compressorCutoffFault == true) {
             description = "Compressor Cutoff Switch Fault";
         }else if(compressorPresenceFault == true) {
-            description = "Compressor Unplugged or Faulty";
+            description = "Pressure Sensor Unplugged or Faulty";
         }else{
             description = "No Fault";
         } 
