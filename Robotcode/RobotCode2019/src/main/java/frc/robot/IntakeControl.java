@@ -299,6 +299,7 @@ public class IntakeControl{
 
             //Intake motor control
             if((ballDetected) && (intakeSpdCmd == IntakeSpd.Intake)){ //If we got a ball, don't Intake
+                intakePosCmd = IntakePos.Ground;
                 intakeMotorCmd = 0;
             }else if((!ballDetected) && (intakeSpdCmd == IntakeSpd.Intake)){ //If we don't, Intake
                 intakeMotorCmd = intakeSpeed.get();
@@ -352,4 +353,5 @@ public class IntakeControl{
         intakeLeftArmMotor.start();
         intakeRightArmMotor.start();
     }
+
 }
