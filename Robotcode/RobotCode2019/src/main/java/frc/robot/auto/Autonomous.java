@@ -157,12 +157,15 @@ public class Autonomous {
             break;
 
             case waitForLatch:
-
-                if(JeVoisInterface.getInstance().getLatchCounter() > jeVoisPreLatchCount && visionAvailable){
-                    //Jevois latched a new target. Start collecting samples
-                    nextState = StateEnum.sampleFromJEV;
-                } else if(!visionAvailable){                 
-                    nextState = StateEnum.autoError;
+                if(autoMoveRequested == true){
+                    if(JeVoisInterface.getInstance().getLatchCounter() > jeVoisPreLatchCount && visionAvailable){
+                        //Jevois latched a new target. Start collecting samples
+                        nextState = StateEnum.sampleFromJEV;
+                    } else if(!visionAvailable){                 
+                        nextState = StateEnum.autoError;
+                    }
+                } else {
+                    nextState = StateEnum.Inactive;
                 }
 
             break;
@@ -170,38 +173,36 @@ public class Autonomous {
             case sampleFromJEV:
                 
                 if(autoMoveRequested == true){
-                    if(visionAvailable){
-
-                        long frameCounter = JeVoisInterface.getInstance().getFrameRXCount();
-                        
-                        if(frameCounter != prevFrameCounter){
-                            //A new sample has come in from the vision camera
-                            tgtXPosBuf.pushFront(JeVoisInterface.getInstance().getTgtPositionX());
-                            tgtYPosBuf.pushFront(JeVoisInterface.getInstance().getTgtPositionY());
-                            tgtAngleBuf.pushFront(JeVoisInterface.getInstance().getTgtAngle());
-                            prevFrameCounter = frameCounter;
-                            jeVoisSampleCounter++;
-
-                            if(jeVoisSampleCounter >= NUM_AVG_JEVOIS_SAMPLES){
-                                //We've got enough vision samples to start evaluating if the target is stable
-                                if( (tgtXPosBuf.getStdDev() < MAX_ALLOWABLE_DISTANCE_STANDARD_DEV) &&
-                                    (tgtYPosBuf.getStdDev() < MAX_ALLOWABLE_DISTANCE_STANDARD_DEV) &&
-                                    (tgtAngleBuf.getStdDev() < MAX_ALLOWABLE_ANGLE_STANDARD_DEV) 
-                                ){
-                                    //Target is declared "Stable"
-                                    xTargetOffset = tgtXPosBuf.getAverage();
-                                    yTargetOffset = tgtYPosBuf.getAverage();
-                                    targetPositionAngle = tgtAngleBuf.getAverage(); 
-                                    nextState = StateEnum.pathPlanner; 
-                                } 
-                            }                    
-            
-                        }
-                    } else if(Timer.getFPGATimestamp() > (autoStartTimestamp + VISION_TIMEOUT_SEC) ){
+                    if(Timer.getFPGATimestamp() > (autoStartTimestamp + VISION_TIMEOUT_SEC) ){
                         //took too long to get stable results from the Jevois. Fail.
                         nextState = StateEnum.autoError;
                     } else {
-                        //keep state the same.
+                        if(visionAvailable){
+                            long frameCounter = JeVoisInterface.getInstance().getFrameRXCount();
+                            
+                            if(frameCounter != prevFrameCounter){
+                                //A new sample has come in from the vision camera
+                                tgtXPosBuf.pushFront(JeVoisInterface.getInstance().getTgtPositionX());
+                                tgtYPosBuf.pushFront(JeVoisInterface.getInstance().getTgtPositionY());
+                                tgtAngleBuf.pushFront(JeVoisInterface.getInstance().getTgtAngle());
+                                prevFrameCounter = frameCounter;
+                                jeVoisSampleCounter++;
+    
+                                if(jeVoisSampleCounter >= NUM_AVG_JEVOIS_SAMPLES){
+                                    //We've got enough vision samples to start evaluating if the target is stable
+                                    if( (tgtXPosBuf.getStdDev() < MAX_ALLOWABLE_DISTANCE_STANDARD_DEV) &&
+                                        (tgtYPosBuf.getStdDev() < MAX_ALLOWABLE_DISTANCE_STANDARD_DEV) &&
+                                        (tgtAngleBuf.getStdDev() < MAX_ALLOWABLE_ANGLE_STANDARD_DEV) 
+                                    ){
+                                        //Target is declared "Stable"
+                                        xTargetOffset = tgtXPosBuf.getAverage();
+                                        yTargetOffset = tgtYPosBuf.getAverage();
+                                        targetPositionAngle = tgtAngleBuf.getAverage(); 
+                                        nextState = StateEnum.pathPlanner; 
+                                    } 
+                                }                    
+                            }
+                        }
                     }
                 } else {
                     nextState = StateEnum.Inactive;
@@ -291,18 +292,17 @@ public class Autonomous {
 
             case autoError:
                 
-            double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
+                double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
+                double curTime = sampleTimeMS;
+                //Blink a driver station LED while failed
+                if(curTime >= nextBlinkTransitionTime){
+                    nextBlinkTransitionTime = curTime + BLINK_RATE_MSEC;
+                    blinkState = !blinkState;
+                }
+                seq.stop();
 
-                if(autoFailed){
-                    double curTime = sampleTimeMS;
-                    //Blink a driver station LED while failed
-                    if(curTime >= nextBlinkTransitionTime){
-                        nextBlinkTransitionTime = curTime + BLINK_RATE_MSEC;
-                        blinkState = !blinkState;
-                    }
-                    seq.stop();
-
-                break;}
+                autoFailed = true;
+            break;
 
             default:
                 System.out.println("ERROR: unhandled CurState. Tell SW team they wrote bad code!");
@@ -323,6 +323,10 @@ public class Autonomous {
 
     public boolean getAutoFailedLEDState(){
         return blinkState;
+    }
+
+    public boolean getAutoSeqActive(){
+        return curState != StateEnum.Inactive;
     }
 
 }
