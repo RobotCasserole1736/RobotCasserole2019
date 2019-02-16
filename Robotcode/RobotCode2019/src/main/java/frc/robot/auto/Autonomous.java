@@ -114,8 +114,12 @@ public class Autonomous {
 
     public void update(){
 
+        //Sample Inputs
         boolean autoMoveRequested = OperatorController.getInstance().getAutoMove();
         boolean visionAvailable = JeVoisInterface.getInstance().isTgtVisible() && JeVoisInterface.getInstance().isVisionOnline();
+
+        OpMode curOpMode = Superstructure.getInstance().getActualOpMode();
+        boolean opModeAllowsAuto = (curOpMode == OpMode.CargoCarry || curOpMode == OpMode.Hatch);
 
         //Main update loop
         StateEnum nextState = curState;
@@ -127,8 +131,12 @@ public class Autonomous {
         switch(curState){
             case Inactive:
                 if(autoMoveRequested == true){
-                    nextState = StateEnum.SendJevoislatch;
-                    sendJevoislatch = true;
+                    if(opModeAllowsAuto && visionAvailable){
+                        nextState = StateEnum.SendJevoislatch;
+                        sendJevoislatch = true;
+                    } else {
+                        nextState = StateEnum.autoError;
+                    }
                 } else {
                     nextState = StateEnum.Inactive;
                 }
@@ -236,25 +244,26 @@ public class Autonomous {
             break;
 
             case addAllAutoEvents:
+
+                nextState = StateEnum.autoSeqUpdate;
                 
                 if(OperatorController.getInstance().getAutoAlignLowReq()){
                     parent.addChildEvent(new MoveArmLowPos(curOpMode));
-                    parent.addChildEvent(new MoveGripper(PEZPos.Release));
-                    nextState = StateEnum.autoSeqUpdate;
                 } else if(OperatorController.getInstance().getAutoAlignMidReq()){
                     parent.addChildEvent(new MoveArmMidPos(curOpMode));
-                    parent.addChildEvent(new MoveGripper(PEZPos.Release));
-                    nextState = StateEnum.autoSeqUpdate;
-                
                 } else if(OperatorController.getInstance().getAutoAlignHighReq()){
                     parent.addChildEvent(new MoveArmTopPos(curOpMode));
-                    parent.addChildEvent(new MoveGripper(PEZPos.Release));
-                    nextState = StateEnum.autoSeqUpdate;
                 } else {
                     CrashTracker.logAndPrint("[Autonomous] Error invalid Autostate.");
                     nextState = StateEnum.Inactive;
                 }
 
+                if(curOpMode == OpMode.CargoCarry){
+                    parent.addChildEvent(new MoveGripper(PEZPos.CargoRelease));
+                } else {
+                    parent.addChildEvent(new MoveGripper(PEZPos.HatchRelease));
+                }
+                
                 seq.addEvent(parent);
 
                 if(isForward){
