@@ -63,6 +63,7 @@ public class JeVoisInterface {
     // Most recently seen target information
     private boolean tgtVisible = false;   //True if a target is seen, false otherwise
     private double  tgtAngle_rad = 0;     //Angle from center that the target appears in the camera. Shows if the robot is pointed at the target, or off to the side.
+    private double tgtGeneralAngle_deg=0;
     private double  tgtXPos_ft = 0;       //Position of the target relative to the robot in Ft
     private double  tgtYPos_ft = 0;       //Position of the target relative to the robot in Ft
     private int     latchCounter = 0;  //Skew of the target - if it's pointed at the robot, or away from the robot. AKA normal vector away from the wall.
@@ -84,6 +85,7 @@ public class JeVoisInterface {
     private Signal jevoisCpuTempSig;
     private Signal jevoisCpuLoadSig;
     private Signal jevoisFramerateSig;
+    private Signal tgtGeneralAngleSig;
     private Signal jevoisPacketsPerSecSig;
     private Signal framecounterSig;
 
@@ -242,6 +244,13 @@ public class JeVoisInterface {
      */
     public double getTgtPositionY() {
         return tgtYPos_ft;
+    }
+
+
+
+
+    public double getTgtGeneralAngle(){
+        return tgtGeneralAngle_deg;
     }
 
     /**
@@ -626,7 +635,8 @@ public class JeVoisInterface {
         final int JV_CPULOAD_TOKEN_IDX = 6;
         final int JV_CPUTEMP_TOKEN_IDX = 7;
         final int JV_PIPLINE_DELAY_TOKEN_IDX = 8;
-        final int NUM_EXPECTED_TOKENS = 9;
+        final int TGT_ANGLE_TOKEN_IDX = 9;
+        final int NUM_EXPECTED_TOKENS = 10;
 
         //Split string into many substrings, presuming those strings are separated by commas
         String[] tokens = pkt.split(",");
@@ -659,6 +669,7 @@ public class JeVoisInterface {
             tgtTime  = rx_Time - Double.parseDouble(tokens[JV_PIPLINE_DELAY_TOKEN_IDX])/1000000.0;
             jeVoisCpuTempC   = Double.parseDouble(tokens[JV_CPUTEMP_TOKEN_IDX]);
             jeVoisCpuLoadPct = Double.parseDouble(tokens[JV_CPULOAD_TOKEN_IDX]);
+            tgtGeneralAngle_deg = Double.parseDouble(tokens[TGT_ANGLE_TOKEN_IDX]);
             frameCounter++;
 
         } catch (Exception e) {
@@ -678,6 +689,7 @@ public class JeVoisInterface {
         jevoisFramerateSig.addSample(sample_time_ms, jeVoisFramerateFPS);
         jevoisPacketsPerSecSig.addSample(sample_time_ms, packetRxRatePPS);
         framecounterSig.addSample(sample_time_ms, frameCounter);
+        tgtGeneralAngleSig.addSample(sample_time_ms, tgtGeneralAngle_deg);
 
         return 0;
     }
