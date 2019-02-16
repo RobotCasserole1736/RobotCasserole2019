@@ -88,9 +88,9 @@ public class LineFollower {
 
     public void update() {
         sensorStatesPrev = sensorStates;
-        sensorStates[0] = digitalInputLeft.get();
-        sensorStates[1] = digitalInputCenter.get();
-        sensorStates[2] = digitalInputRight.get();
+        sensorStates[0] = !digitalInputLeft.get();
+        sensorStates[1] = !digitalInputCenter.get();
+        sensorStates[2] = !digitalInputRight.get();
      
 
         //Based on line position sensors, genreate a "measurement" of where we think the line is
@@ -136,6 +136,5 @@ public class LineFollower {
         } else {
             rotationCmd = 0;
         }
-    }
-    
+    }    
 }
