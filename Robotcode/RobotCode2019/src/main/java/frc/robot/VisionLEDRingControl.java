@@ -41,7 +41,7 @@ import edu.wpi.first.wpilibj.DigitalOutput;
     }
 
     public void setLEDRingState(boolean enabled){
-        ringRelayOutput.set(enabled);
+        ringRelayOutput.set(!enabled); //electrically inverted
     }
 
 }
