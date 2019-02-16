@@ -179,16 +179,16 @@ public class Arm {
 
         /////Calibration Things\\\\\
         topCargoHeightCal    = new Calibration("Arm Cargo Level Pos Top Deg", 100);
-        midCargoHeightCal    = new Calibration("Arm Cargo Level Pos Mid Deg", 50);
-        lowCargoHeightCal    = new Calibration("Arm Cargo Level Pos Bottom Deg", -15);
+        midCargoHeightCal    = new Calibration("Arm Cargo Level Pos Mid Deg", 12);
+        lowCargoHeightCal    = new Calibration("Arm Cargo Level Pos Bottom Deg", -25);
         intakeCargoHeightCal = new Calibration("Arm Cargo Level Pos Intake Deg", -60);
 
         topHatchHeightCal    = new Calibration("Arm Hatch Level Pos Top Deg", 100);
-        midHatchHeightCal    = new Calibration("Arm Hatch Level Pos Mid Deg", 45);
-        lowHatchHeightCal    = new Calibration("Arm Hatch Level Pos Bottom Deg", -15);
-        intakeHatchHeightCal = new Calibration("Arm Hatch Level Pos Intake Deg", -15);
+        midHatchHeightCal    = new Calibration("Arm Hatch Level Pos Mid Deg", 5);
+        lowHatchHeightCal    = new Calibration("Arm Hatch Level Pos Bottom Deg", -38);
+        intakeHatchHeightCal = new Calibration("Arm Hatch Level Pos Intake Deg", -38);
 
-        intakeDangerZoneUpperHeight = new Calibration("Arm Intake Danger Zone Upper Pos Deg", -20);
+        intakeDangerZoneUpperHeight = new Calibration("Arm Intake Danger Zone Upper Pos Deg", -30);
         
         gravOffsetHorz    = new Calibration("Arm Required Voltage at Horz V", 0.5);
         bottomLimitSwitchDegreeCal = new Calibration("Arm Limit Switch Angle Bottom Deg", -60);
