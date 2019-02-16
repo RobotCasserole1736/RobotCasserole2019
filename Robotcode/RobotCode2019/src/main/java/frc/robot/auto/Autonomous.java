@@ -3,7 +3,6 @@ package frc.robot.auto;
 import edu.wpi.first.wpilibj.Timer;
 import frc.lib.AutoSequencer.AutoEvent;
 import frc.lib.AutoSequencer.AutoSequencer;
-import frc.lib.DataServer.Signal;
 import frc.lib.SignalMath.MathyCircularBuffer;
 import frc.lib.Util.CrashTracker;
 import frc.robot.JeVoisInterface;
@@ -111,7 +110,6 @@ public class Autonomous {
     public Autonomous(){
         curState = INITAL_STATE;
         prevState = INITAL_STATE;
-
     }
 
     public void update(){
@@ -148,17 +146,14 @@ public class Autonomous {
                     nextState = StateEnum.Inactive;
                 }    
                 
-
             break;
 
             case waitForLatch:
 
                 if(JeVoisInterface.getInstance().getLatchCounter() > jeVoisPreLatchCount && visionAvailable){
                     //Jevois latched a new target. Start collecting samples
-
                     nextState = StateEnum.sampleFromJEV;
-                } else if(!visionAvailable){
-                    
+                } else if(!visionAvailable){                 
                     nextState = StateEnum.autoError;
                 }
 
@@ -166,47 +161,44 @@ public class Autonomous {
 
             case sampleFromJEV:
                 
-            if(autoMoveRequested == true){
-                if(visionAvailable){   
-            
-                    long frameCounter = JeVoisInterface.getInstance().getFrameRXCount();
-                
-                    if(frameCounter != prevFrameCounter){
-                        //A new sample has come in from the vision camera
-                        tgtXPosBuf.pushFront(JeVoisInterface.getInstance().getTgtPositionX());
-                        tgtYPosBuf.pushFront(JeVoisInterface.getInstance().getTgtPositionY());
-                        tgtAngleBuf.pushFront(JeVoisInterface.getInstance().getTgtAngle());
-                        prevFrameCounter = frameCounter;
-                        jeVoisSampleCounter++;
-    
-                        if(jeVoisSampleCounter >= NUM_AVG_JEVOIS_SAMPLES){
-                            //We've got enough vision samples to start evaluating if the target is stable
-                            if( (tgtXPosBuf.getStdDev() < MAX_ALLOWABLE_DISTANCE_STANDARD_DEV) &&
-                                (tgtYPosBuf.getStdDev() < MAX_ALLOWABLE_DISTANCE_STANDARD_DEV) &&
-                                (tgtAngleBuf.getStdDev() < MAX_ALLOWABLE_ANGLE_STANDARD_DEV) 
-                            ){
-                                //Target is declared "Stable"
-                                xTargetOffset = tgtXPosBuf.getAverage();
-                                yTargetOffset = tgtYPosBuf.getAverage();
-                                targetPositionAngle = tgtAngleBuf.getAverage(); 
-    
-                                nextState = StateEnum.pathPlanner; 
-                            } 
-                        }                    
-        
-                    }
-                } else if(Timer.getFPGATimestamp() > (autoStartTimestamp + VISION_TIMEOUT_SEC) ){
-                    //took too long to get stable results from the Jevois. Fail.
-                    nextState = StateEnum.autoError;
-                } else {
-                    //keep state the same.
-                }
-            } else {
-                nextState = StateEnum.Inactive;
-            }
+                if(autoMoveRequested == true){
+                    if(visionAvailable){
 
-               
+                        long frameCounter = JeVoisInterface.getInstance().getFrameRXCount();
+                        
+                        if(frameCounter != prevFrameCounter){
+                            //A new sample has come in from the vision camera
+                            tgtXPosBuf.pushFront(JeVoisInterface.getInstance().getTgtPositionX());
+                            tgtYPosBuf.pushFront(JeVoisInterface.getInstance().getTgtPositionY());
+                            tgtAngleBuf.pushFront(JeVoisInterface.getInstance().getTgtAngle());
+                            prevFrameCounter = frameCounter;
+                            jeVoisSampleCounter++;
+
+                            if(jeVoisSampleCounter >= NUM_AVG_JEVOIS_SAMPLES){
+                                //We've got enough vision samples to start evaluating if the target is stable
+                                if( (tgtXPosBuf.getStdDev() < MAX_ALLOWABLE_DISTANCE_STANDARD_DEV) &&
+                                    (tgtYPosBuf.getStdDev() < MAX_ALLOWABLE_DISTANCE_STANDARD_DEV) &&
+                                    (tgtAngleBuf.getStdDev() < MAX_ALLOWABLE_ANGLE_STANDARD_DEV) 
+                                ){
+                                    //Target is declared "Stable"
+                                    xTargetOffset = tgtXPosBuf.getAverage();
+                                    yTargetOffset = tgtYPosBuf.getAverage();
+                                    targetPositionAngle = tgtAngleBuf.getAverage(); 
+                                    nextState = StateEnum.pathPlanner; 
+                                } 
+                            }                    
             
+                        }
+                    } else if(Timer.getFPGATimestamp() > (autoStartTimestamp + VISION_TIMEOUT_SEC) ){
+                        //took too long to get stable results from the Jevois. Fail.
+                        nextState = StateEnum.autoError;
+                    } else {
+                        //keep state the same.
+                    }
+                } else {
+                    nextState = StateEnum.Inactive;
+                }
+
             break;
 
             case pathPlanner:
@@ -214,22 +206,16 @@ public class Autonomous {
                 if(autoMoveRequested == true){
                     if(OperatorController.getInstance().getAutoAlignHighReq()){
                         //If we're placing top, we can only start at the final alignment step going backward
-                        
                         nextState = StateEnum.addLineFollower;
-
                     } else {
                         //If we're placing mid/low, we use Jevois to path plan up to the target location
-                        
                         AutoSeqPathPlan pp = new AutoSeqPathPlan(xTargetOffset, yTargetOffset, targetPositionAngle); //TODO - handle the case where the path planner can't create a path based on current angle constraints with "getPathAvailable()"
-
                         if(pp.getPathAvailable()){
                             nextState = StateEnum.autoError;
                         }
-
                         parent = pp;
                         seq.addEvent(parent);
                         parent = new AutoSeqFinalAlign();
-                        
                         nextState = StateEnum.addAllAutoEvents;
                     }
                 } else {
@@ -240,11 +226,8 @@ public class Autonomous {
 
             case addLineFollower:
                 
-           
-            
                 if(OperatorController.getInstance().getAutoAlignHighReq()){
                     parent = new TopPlaceFinalAlign();
-
                     nextState = StateEnum.addAllAutoEvents;
                 } else {
                     nextState = StateEnum.pathPlanner;
@@ -257,24 +240,18 @@ public class Autonomous {
                 if(OperatorController.getInstance().getAutoAlignLowReq()){
                     parent.addChildEvent(new MoveArmLowPos(curOpMode));
                     parent.addChildEvent(new MoveGripper(PEZPos.Release));
-
                     nextState = StateEnum.autoSeqUpdate;
-
                 } else if(OperatorController.getInstance().getAutoAlignMidReq()){
                     parent.addChildEvent(new MoveArmMidPos(curOpMode));
                     parent.addChildEvent(new MoveGripper(PEZPos.Release));
-
                     nextState = StateEnum.autoSeqUpdate;
                 
                 } else if(OperatorController.getInstance().getAutoAlignHighReq()){
                     parent.addChildEvent(new MoveArmTopPos(curOpMode));
                     parent.addChildEvent(new MoveGripper(PEZPos.Release));
-
                     nextState = StateEnum.autoSeqUpdate;
-                
                 } else {
                     CrashTracker.logAndPrint("[Autonomous] Error invalid Autostate.");
-
                     nextState = StateEnum.Inactive;
                 }
 
@@ -314,7 +291,6 @@ public class Autonomous {
                         blinkState = !blinkState;
                     }
                     seq.stop();
-
 
                 break;}
 
