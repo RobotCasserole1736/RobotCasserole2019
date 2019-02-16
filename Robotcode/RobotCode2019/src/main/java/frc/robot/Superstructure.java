@@ -13,6 +13,7 @@ import frc.robot.auto.Delay;
 import frc.robot.auto.EjectBall;
 import frc.robot.auto.MoveArmIntakePos;
 import frc.robot.auto.MoveArmLowPos;
+import frc.robot.auto.MoveArmMidPos;
 import frc.robot.auto.MoveGripper;
 import frc.robot.auto.MoveIntake;
 
@@ -140,7 +141,7 @@ public class Superstructure {
                 seq.clearAllEvents();
                 AutoEvent parent = new EjectBall(); //Eject any ball that is presently in the intake
                 parent.addChildEvent(new MoveGripper(PEZPos.HatchRelease)); //Drop any gamepiece we may currently have
-                parent.addChildEvent(new MoveArmLowPos(OpMode.CargoCarry)); //Move arm toward intake position
+                parent.addChildEvent(new MoveArmMidPos(OpMode.CargoCarry)); //Move arm toward intake position
                 seq.addEvent(parent); 
                 seq.addEvent(new MoveIntake(IntakePos.Ground)); //Extend the intake so it's out of the way of the arm
                 seq.addEvent(new MoveGripper(PEZPos.CargoGrab)); //Move gripper to be cargo grab so it's out of the way of the frame
@@ -162,6 +163,8 @@ public class Superstructure {
                 seq.addEvent(new EjectBall()); //Eject any ball that is presently in the intake
                 seq.addEvent(new MoveGripper(PEZPos.HatchRelease)); //Drop any gamepiece we may have
                 seq.addEvent(new Delay(0.2)); //Wait for gamepiece to actually drop.
+                seq.addEvent(new MoveArmMidPos(OpMode.CargoCarry)); //move the arm up and out of the way of the intake
+                seq.addEvent(new MoveIntake(IntakePos.Retract)); //pull the intake back in
                 seq.addEvent(new MoveArmIntakePos(OpMode.Hatch)); // Move the arm to the hatch intake position in prep for grabbing a hatch
                 seq.start();
             } else if(cmdOpMode == OpMode.CargoIntake){
@@ -172,7 +175,7 @@ public class Superstructure {
                 seq.addEvent(new MoveGripper(PEZPos.CargoRelease)); //Drop any gamepiece we may have
                 seq.addEvent(new Delay(0.2)); //Wait for gamepiece to actually drop.
                 seq.addEvent(new MoveGripper(PEZPos.CargoGrab)); //Move grabber to cargo grab position
-                seq.addEvent(new MoveArmLowPos(OpMode.CargoCarry)); //Move arm out of the way of the intake
+                seq.addEvent(new MoveArmMidPos(OpMode.CargoCarry)); //Move arm out of the way of the intake
                 seq.addEvent(new MoveIntake(IntakePos.Ground)); //put the intake out of the way
                 seq.addEvent(new MoveArmIntakePos(OpMode.CargoIntake)); // Move the arm to the hatch intake position in prep for grabbing a hatch
                 seq.addEvent(new MoveGripper(PEZPos.CargoRelease)); //Move the gripper to the neutral position in prep for grabbing a hatch
@@ -187,7 +190,7 @@ public class Superstructure {
                 seq.clearAllEvents();
                 seq.addEvent(new MoveGripper(PEZPos.CargoGrab)); //Ensure we're grabbing the ball
                 seq.addEvent(new MoveIntake(IntakePos.Ground)); //Put the intake all the way out, out of the way of the the arm and ball as they come up
-                seq.addEvent(new MoveArmLowPos(OpMode.CargoCarry)); //Move arm to the lower position by default.
+                seq.addEvent(new MoveArmMidPos(OpMode.CargoCarry)); //Move arm to the lower position by default.
                 seq.addEvent(new MoveIntake(IntakePos.Retract)); //Ensure the intake is all the way back in the robot
                 seq.start();
             } else if(cmdOpMode == OpMode.Hatch) {
@@ -196,7 +199,7 @@ public class Superstructure {
                 seq.clearAllEvents();
                 seq.addEvent(new MoveGripper(PEZPos.CargoGrab)); //Ensure we're grabbing to stay out of the way of the frame as we raise up
                 seq.addEvent(new MoveIntake(IntakePos.Ground)); //Put the intake all the way out, out of the way of the the arm and ball as they come up
-                seq.addEvent(new MoveArmLowPos(OpMode.Hatch)); //Move arm to the lower position by default.
+                seq.addEvent(new MoveArmMidPos(OpMode.Hatch)); //Move arm to the lower position by default.
                 AutoEvent parent = new MoveIntake(IntakePos.Retract);
                 parent.addChildEvent(new MoveGripper(PEZPos.HatchRelease));//Drop any gamepiece we may have
                 seq.addEvent(parent);

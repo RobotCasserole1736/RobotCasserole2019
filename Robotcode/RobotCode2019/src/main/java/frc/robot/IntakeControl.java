@@ -185,6 +185,7 @@ public class IntakeControl{
 
     //Start with intake retracted and stopped
     private IntakePos intakePosCmd = IntakePos.Retract;
+    private IntakePos prevIntakePosCmd = IntakePos.Retract;
     private IntakeSpd intakeSpdCmd = IntakeSpd.Stop;
 
     public void setPositionCmd(IntakePos posIn){
@@ -270,7 +271,7 @@ public class IntakeControl{
             ballDetected = false;
 
         } else {
-    
+
             if(MatchState.getInstance().GetPeriod() != MatchState.Period.OperatorControl &&
                MatchState.getInstance().GetPeriod() != MatchState.Period.Autonomous) {
                 //Start intake within frame perimiter and in safe state
@@ -290,6 +291,11 @@ public class IntakeControl{
                 intakeRightArmMotor.setSetpoint(retractAngle.get()); 
             }else{
                 //Don't change the setpoint otherwise.
+            }
+
+            if(intakePosCmd != prevIntakePosCmd){
+                rightOnTargetDbnc.resetCounters();
+                leftOnTargetDbnc.resetCounters();
             }
 
             //Debounce whether we're at the correct position or not.
@@ -312,6 +318,8 @@ public class IntakeControl{
             }
     
             intakeMotor.set(-1*intakeMotorCmd); //motor is mechanically inverted
+
+            prevIntakePosCmd = intakePosCmd;
     
             double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
             motorSpeedCmdSig.addSample(sampleTimeMS, intakeMotorCmd);

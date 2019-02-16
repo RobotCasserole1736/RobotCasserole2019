@@ -519,8 +519,8 @@ public class Robot extends TimedRobot {
     private void initDriverView(){
         //CasseroleDriverView.newAutoSelector("Starting Gamepiece", gpOptions);
         CasseroleDriverView.newDial("Main System Pressure", 0, 140, 10, 80, 125);
-        CasseroleDriverView.newWebcam("cam1", RobotConstants.CAM_1_STREAM_URL, 0, 0, 0);
-        CasseroleDriverView.newWebcam("cam2", RobotConstants.CAM_2_STREAM_URL, 0, 0, 0);
+        CasseroleDriverView.newWebcam("cam1", RobotConstants.CAM_1_STREAM_URL, 0, 90, 0);
+        CasseroleDriverView.newWebcam("cam2", RobotConstants.CAM_2_STREAM_URL, 0, 90, 0);
         CasseroleDriverView.newDial("Speed", 0, 20, 2,  1, 15);
         CasseroleDriverView.newDial("Arm Angle", -45, 225, 15,  -45, 110);
         CasseroleDriverView.newDial("Angle To Target", -90, 90, 15, -10, 10);
@@ -544,9 +544,15 @@ public class Robot extends TimedRobot {
 
     @Override
     public void testPeriodic(){
+        
+        //Cause arm to stop
         arm.setManualMovementCmd(0);
+        
         loopTiming.markLoopStart();
         intakeControl.sampleSensors();
+        pneumaticsControl.start();//ensure compressor is running
+
+        //Manual overrides for motors we can't turn by hand
         climber.setManualMotorCommand(operatorController.xb.getY(Hand.kLeft));
         double intakeCmd =-1.0*operatorController.xb.getY(Hand.kRight);
         if(Math.abs(intakeCmd) < 0.15){
@@ -555,6 +561,8 @@ public class Robot extends TimedRobot {
         intakeControl.intakeLeftArmMotor.setManualMotorCommand(intakeCmd);
         intakeControl.intakeRightArmMotor.setManualMotorCommand(intakeCmd);
         intakeControl.updateTelemetry();
+        
+        
         loopTiming.markLoopEnd();
     }
  

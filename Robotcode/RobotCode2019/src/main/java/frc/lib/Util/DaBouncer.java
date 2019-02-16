@@ -120,6 +120,11 @@ public class DaBouncer {
         }
     }
 
+    public void resetCounters(){
+        belowDebounceCounter = 0;
+        aboveDebounceCounter = 0;
+    }
+
     public boolean BelowDebounce(boolean b) {
     	if (b == true){
     		belowDebounceCounter++;	
