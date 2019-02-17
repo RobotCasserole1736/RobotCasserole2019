@@ -118,8 +118,12 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
         //Set up master/slave configuration per side of drivetrain
         //NOTE - electrical dislikes the usage of "master/slave" terminology, 
         //       so henceforth we shall refer to it as "master/intern".
-        rightTalon2.follow(rightTalon1);
-        leftTalon2.follow(leftTalon1);
+        //We've noticed that sometimes this configuration somethimes doesn't seem to take, and
+        // we have no clue why. As a maybe-this-might-work-mitgation, set the config multiple times.
+        for(int i =0; i < 10; i++){
+            rightTalon2.follow(rightTalon1);
+            leftTalon2.follow(leftTalon1);
+        }
 
         //Invert the motor direction on one side of the drivetrain.
         rightTalon1.setInverted(true);
