@@ -3,13 +3,16 @@ var global_chart;
 
 //this set of presets is specific to 2017 - update as needed!
 var presets = [
-    ["PDP_Voltage (V)", "PDP_Total_Current (A)"],
-    ["PDP_Total_Current (A)", "DT_Motor_L1_Current (A)", " (A)", "DT_Motor_L2_Current (A)", "DT_Motor_L3_Current (A)", " (A)", "DT_Motor_R1_Current (A)", "DT_Motor_R2_Current (A)", "DT_Motor_R3_Current (A)", "PDP_Current_Intake_Left (A)", "PDP_Current_Intake_Right (A)", "PDP_Current_Climber_Left_One (A)", "PDP_Current_Climber_Left_Two (A)", "PDP_Current_Climber_Right_One (A)", "PDP_Current_Climber_Right_Two (A)", "PDP_Current_Elbow (A)"],
-    ["DT_Pose_Angle (deg)", "DT_Right_Wheel_Speed_Act_RPM (RPM)", "DT_Right_Wheel_Speed_Des_RPM (RPM)", "Net_Speed (fps)"],
-    ["RIO_Main_Loop_Exec_Time (ms)", "RIO_Cpu_Load (%)", "RIO_RAM_Usage (%)"],
-    ["DT_Right_Wheel_Speed_Act_RPM (RPM)", "DT_Right_Wheel_Speed_Des_RPM (RPM)", "DT_Left_Wheel_Speed_Act_RPM (RPM)", "DT_Left_Wheel_Speed_Des_RPM (RPM)"],
-    ["DT_FwdRev_Cmd (cmd)", "DT_Rotate_Cmd (cmd)", "DT_Left_Motor_Cmd (cmd)", "DT_Right_Motor_Cmd (cmd)"],
-    ["Elev_Motor_Cmd (cmd)", "Elev_Des_Height (in)", "Elev_Act_Height (in)", "PDP_Current_Elevator_one (A)"]];
+    /*Input Power*/["BatteryCurrentDraw (A)", "BatteryVoltage (V)", "RobotBrownout (bool)"],
+    /*All Currents*/["DrivetrainL1MotorCurrent (A)", "DrivetrainL2MotorCurrent (A)", "DrivetrainR1MotorCurrent (A)", "DrivetrainR2MotorCurrent (A)", "PneumaticsCompressorCurrent(A)", "ArmMotorCurrent (A)", "IntakeLeftMotorCurrent (A)", "IntakeRightMotorCurrent (A)", "ClimberReleaseMotorCurrent (A)"],
+	/*RIO Stats*/["roboRIOSysMemoryLoad (Pct)", "roboRIOJVMMemoryLoad (Pct)", "roboRIOCPULoad (Pct)", "MainLoopProcessDuration (sec)", "MainLoopCallPeriod (sec)"],
+	/*DT Closed Loop*/["DrivetrainLeftWheelActualSpeed (RPM)", "DrivetrainRightWheelActualSpeed (RPM)", "DrivetrainDesiredPoseAngle (Deg)", "DrivetrainActualPoseAngle (Deg)", "DrivetrainLeftWheelDesiredSpeed (RPM)", "DrivetrainRightWheelDesiredSpeed (RPM)"],
+	/*DT Open Loop*/["DriverFwd-RevCommand (cmd)", "DrivetrainRightMotorCommand (cmd)", "DrivetrainGyro-LockRotationCommand (cmd)", "DrivetrainLeftMotorCommand (cmd)", "DrivetrainLeftWheelActualSpeed (RPM)", "DrivetrainRightWheelActualSpeed (RPM)"],
+    /*Gripper*/["GripperStopperCylinderCommand (bool)", "GripperMainCylinderCommand (bool)", "GripperRetractedSwitch (bool)", "GripperPositionRequested (pos)", "GripperPositionStable (bool)", " ()"],
+    /*Arm*/["ArmDesiredVelocity (deg per sec)", "ArmAtDesiredAngle (bool)", "ArmLowerPositionLimitSwitch (bool)", "ArmMotorCurrent (A)", "ArmUpperPositionLimitSwitch (bool)", "ArmActualPosition (deg)", "ArmActualVelocity (deg per sec)", "ArmMotorCommand (cmd)", "ArmDesiredPosition (deg)"],
+	/*Intake*/["IntakeLeftMotorCurrent (A)", "IntakeRightMotorCurrent (A)", "IntakeRightMotorActualPosition (deg)", "IntakeLeftMotorActualPosition (deg)", "IntakeLeftArmPositionOnTarget (bool)", "IntakeRollerMotorCommand (cmd)", "DriverIntakeSpeedCommand (speed enum)", "IntakeRightArmPositionOnTarget (bool)", "IntakeBallPresent (bool)", "IntakeLeftSensorRawVoltage (V)"],
+	/*JeVois Status Information*/["JevoisImageCaptureTime (sec)", "JevoisTargetVisible (bool)", "JevoisFrameCount (count)", "JevoisFramerate (fps)", "JevoisPacketsPerSec (pps)", "JevoisCPULoad (pct)", "JevoisCPUTemp (C)"],
+	/*JeVois Target Information*/["JevoisTargetRotationAngle (deg)", "JevoisTargetAngle (rad)", "JevoisTargetXPosition (ft)", "JevoisTargetYPosition (ft)" ]];
 
 var numSignals = 0;
 
@@ -259,7 +262,7 @@ function handleFileSelect(files_in) {
         $.each(lines, function (lineNo, line) {
             var items = line.split(',');
 
-            // first line containes signal names. Ignore Time column.
+            // first line contains signal names. Ignore Time column.
             if (lineNo == 0) {
                 plotter_index = 0;
                 $.each(items, function (itemNo, item) {
@@ -284,7 +287,7 @@ function handleFileSelect(files_in) {
                 numSignals = plotter_index;
             }
 
-            // second line containes units. Ignore Time column.
+            // second line contains units. Ignore Time column.
             else if (lineNo == 1) {
                 plotter_index = 0;
                 $.each(items, function (itemNo, item) {
