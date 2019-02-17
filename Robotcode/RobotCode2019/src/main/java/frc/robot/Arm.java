@@ -96,10 +96,14 @@ public class Arm {
     final double MIN_ALLOWABLE_ANGLE_ERR_DEG = 2.0;
     final int AT_DES_ANGLE_DBNC_LOOPS = 7;
 
+    double desRotationPrev = -10000;
+
 
     /////////Limit Switches\\\\\\\\\\
-    boolean topOfMotion;
-    boolean bottomOfMotion; 
+    boolean topOfMotion = false;
+    boolean bottomOfMotion = false; 
+    boolean topOfMotionPrev = false;
+    boolean bottomOfMotionPrev = false; 
 
     Signal armMotorCurrentSig;
     Signal armMotorCmdSig;
@@ -283,14 +287,20 @@ public class Arm {
     }
 
     public void sampleSensors() {
+       topOfMotionPrev = topOfMotion;
+       bottomOfMotionPrev = bottomOfMotion;
        topOfMotion = upperLimitSwitch.get();
        bottomOfMotion = lowerLimitSwitch.get();
-       if (topOfMotion){
+
+       if (topOfMotion == true && topOfMotionPrev == false){
            //armEncoder.setPosition(convertArmDegToMotorRot(topLimitSwitchDegreeCal.get())); I guess we don't want to do this
        } 
-       if (bottomOfMotion){
+
+       if (bottomOfMotion == true && bottomOfMotionPrev == false){
            armEncoder.setPosition(convertArmDegToMotorRot(bottomLimitSwitchDegreeCal.get()));
        }
+
+       curArmAngle = INVERT_FACTOR*armEncoder.getPosition();
     }
 
     public double convertArmDegToMotorRot(double in){
@@ -320,21 +330,26 @@ public class Arm {
         } else {
             //Control the actual arm
             sampleSensors();
-            curArmAngle = INVERT_FACTOR*armEncoder.getPosition();
             
             //Update the position based on what the driver requested
             if(curManMoveCmd != 0 || posIn == ArmPos.Disabled) {
                 armPID.setReference(INVERT_FACTOR*curManMoveCmd*6.0, ControlType.kVoltage);
                 desAngle = curArmAngle;
-            }
-            else {
+            } else {
                 double desRotation = desAngle;
-                double gravComp = gravComp();
+                
+                //double gravComp = gravComp(); //Turns out, controls wise I guess we don't need this
+
                 //testDesVel = desRotation; //TEMP - test only
                 //armPID.setReference(INVERT_FACTOR*testDesVel, ControlType.kVelocity, 0, 0); //TEMP - test only
-                //armPID.setReference(INVERT_FACTOR*desRotation, ControlType.kPosition, 0, gravComp); 
-                armPID.setReference(INVERT_FACTOR*desRotation, ControlType.kSmartMotion, 0, 0);
+                //armPID.setReference(INVERT_FACTOR*desRotation, ControlType.kPosition, 0, gravComp); // AKA not-smart motion
 
+                //we've gotten reports that this is an expensive funciton call to make, so don't make it unless you need to?
+                if(desRotation != desRotationPrev){
+                    armPID.setReference(INVERT_FACTOR*desRotation, ControlType.kSmartMotion, 0, 0);
+                }
+                
+                desRotationPrev = desRotation;
             }
 
         }
