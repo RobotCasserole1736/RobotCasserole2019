@@ -150,68 +150,74 @@ public class PEZControl {
         //limitSwitchVal = limitSwitch.get(); 
         limitSwitchVal = false;
 
-        switch(opState){
-            case Cargo:
-                pezMidPosStopper.set(SOL_POS_STOPPER_RELEASE);
-                if(posReq == PEZPos.CargoGrab){
-                    pezPneumaticCyl.set(SOL_POS_CARGO_GRAB);
-                } else if (posReq == PEZPos.CargoRelease){
-                    pezPneumaticCyl.set(SOL_POS_CARGO_RELEASE);
-                } else if(posReq == PEZPos.HatchGrab || posReq == PEZPos.HatchRelease){
-                    transitionTimeStart = Timer.getFPGATimestamp();
-                    nextOpState = TopLevelState.CargoToHatch1;
-                }
-            break;
+        if(posReq == PEZPos.Neutralize){
+            pezMidPosStopper.set(DoubleSolenoid.Value.kOff);
+            pezPneumaticCyl.set(DoubleSolenoid.Value.kOff);
+        } else {
+            switch(opState){
+                case Cargo:
+                    pezMidPosStopper.set(SOL_POS_STOPPER_RELEASE);
+                    if(posReq == PEZPos.CargoGrab){
+                        pezPneumaticCyl.set(SOL_POS_CARGO_GRAB);
+                    } else if (posReq == PEZPos.CargoRelease){
+                        pezPneumaticCyl.set(SOL_POS_CARGO_RELEASE);
+                    } else if(posReq == PEZPos.HatchGrab || posReq == PEZPos.HatchRelease){
+                        transitionTimeStart = Timer.getFPGATimestamp();
+                        nextOpState = TopLevelState.CargoToHatch1;
+                    }
+                break;
+    
+                case CargoToHatch1:
+                    pezPneumaticCyl.set(SOL_GRIPPER_EXTEND);
+                    if(limitSwitchVal == true || (Timer.getFPGATimestamp() - transitionTimeStart) > MAX_GRIPPER_SOL_TRANSITION_TIME){
+                        transitionTimeStart = Timer.getFPGATimestamp();
+                        nextOpState = TopLevelState.CargoToHatch2;
+                    }
+                break;
+    
+                case CargoToHatch2:
+                    pezMidPosStopper.set(SOL_POS_STOPPER_ENGAGE);
+                    if((Timer.getFPGATimestamp() - transitionTimeStart) > MAX_STOPPER_SOL_TRANSITION_TIME){
+                        nextOpState = TopLevelState.Hatch;
+                    }
+                break;
+    
+                case Hatch:
+                    pezMidPosStopper.set(SOL_POS_STOPPER_ENGAGE);
+                    if(posReq == PEZPos.HatchGrab){
+                        pezPneumaticCyl.set(SOL_POS_HATCH_GRAB);
+                    } else if (posReq == PEZPos.HatchRelease){
+                        pezPneumaticCyl.set(SOL_POS_HATCH_RELEASE);
+                    } else if(posReq == PEZPos.CargoGrab || posReq == PEZPos.CargoRelease){
+                        transitionTimeStart = Timer.getFPGATimestamp();
+                        nextOpState = TopLevelState.HatchToCargo1;
+                    }
+                break;
+    
+                case HatchToCargo1:
+                    pezPneumaticCyl.set(SOL_GRIPPER_EXTEND);
+                    if(limitSwitchVal == true || (Timer.getFPGATimestamp() - transitionTimeStart) > MAX_GRIPPER_SOL_TRANSITION_TIME){
+                        transitionTimeStart = Timer.getFPGATimestamp();
+                        nextOpState = TopLevelState.HatchToCargo2;
+                    }
+                break;
+    
+                case HatchToCargo2:
+                    pezMidPosStopper.set(SOL_POS_STOPPER_RELEASE);
+                    if((Timer.getFPGATimestamp() - transitionTimeStart) > MAX_STOPPER_SOL_TRANSITION_TIME){
+                        nextOpState = TopLevelState.Cargo;
+                    }
+                break;
+    
+                case Init:
+                    //Do nothing till we're actually init'ed into the desired state.
+                break;
+    
+                default:
+                    System.out.println("ERROR: Software Team made an oppsie whoopsie.");
+                break;
+            }
 
-            case CargoToHatch1:
-                pezPneumaticCyl.set(SOL_GRIPPER_EXTEND);
-                if(limitSwitchVal == true || (Timer.getFPGATimestamp() - transitionTimeStart) > MAX_GRIPPER_SOL_TRANSITION_TIME){
-                    transitionTimeStart = Timer.getFPGATimestamp();
-                    nextOpState = TopLevelState.CargoToHatch2;
-                }
-            break;
-
-            case CargoToHatch2:
-                pezMidPosStopper.set(SOL_POS_STOPPER_ENGAGE);
-                if((Timer.getFPGATimestamp() - transitionTimeStart) > MAX_STOPPER_SOL_TRANSITION_TIME){
-                    nextOpState = TopLevelState.Hatch;
-                }
-            break;
-
-            case Hatch:
-                pezMidPosStopper.set(SOL_POS_STOPPER_ENGAGE);
-                if(posReq == PEZPos.HatchGrab){
-                    pezPneumaticCyl.set(SOL_POS_HATCH_GRAB);
-                } else if (posReq == PEZPos.HatchRelease){
-                    pezPneumaticCyl.set(SOL_POS_HATCH_RELEASE);
-                } else if(posReq == PEZPos.CargoGrab || posReq == PEZPos.CargoRelease){
-                    transitionTimeStart = Timer.getFPGATimestamp();
-                    nextOpState = TopLevelState.HatchToCargo1;
-                }
-            break;
-
-            case HatchToCargo1:
-                pezPneumaticCyl.set(SOL_GRIPPER_EXTEND);
-                if(limitSwitchVal == true || (Timer.getFPGATimestamp() - transitionTimeStart) > MAX_GRIPPER_SOL_TRANSITION_TIME){
-                    transitionTimeStart = Timer.getFPGATimestamp();
-                    nextOpState = TopLevelState.HatchToCargo2;
-                }
-            break;
-
-            case HatchToCargo2:
-                pezMidPosStopper.set(SOL_POS_STOPPER_RELEASE);
-                if((Timer.getFPGATimestamp() - transitionTimeStart) > MAX_STOPPER_SOL_TRANSITION_TIME){
-                    nextOpState = TopLevelState.Cargo;
-                }
-            break;
-
-            case Init:
-                //Do nothing till we're actually init'ed into the desired state.
-            break;
-
-            default:
-                System.out.println("ERROR: Software Team made an oppsie whoopsie.");
-            break;
         }
 
         //Handle calculation of whether we've settled in a final state or not.

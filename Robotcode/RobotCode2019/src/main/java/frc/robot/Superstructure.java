@@ -238,10 +238,12 @@ public class Superstructure {
 
             //Map grab/release requests to gripper positions
             //Additionally, autmoatically go to grab when we detect a ball
-            if(opCtrl.getGampieceReleaseRequest()){
+            if(opCtrl.getGampieceReleaseRequest() || opCtrl.getIntakeSpdReq() == IntakeSpd.Eject){
                 gripperPosCmd = PEZPos.CargoRelease;
+                intake.setPositionCmd(IntakePos.Extend);
             } else if(opCtrl.getGampieceGrabRequest() || intake.isBallDetected()){
                 gripperPosCmd = PEZPos.CargoGrab;
+                intake.setPositionCmd(IntakePos.Ground);
             } else {
                 gripperPosCmd = PEZPos.None;
             }
@@ -250,11 +252,6 @@ public class Superstructure {
             //Operator can command intake speed, but position is fixed
             intake.setSpeedCmd(opCtrl.getIntakeSpdReq());
 
-             if (opCtrl.getGampieceReleaseRequest() || opCtrl.getIntakeSpdReq() == IntakeSpd.Eject){
-                intake.setPositionCmd(IntakePos.Extend);
-            } else if(intake.isBallDetected() == true){
-                intake.setPositionCmd(IntakePos.Ground);
-            } 
             //Ignore all arm commands
 
 

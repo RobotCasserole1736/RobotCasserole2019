@@ -554,6 +554,8 @@ public class Robot extends TimedRobot {
         intakeControl.sampleSensors();
         pneumaticsControl.start();//ensure compressor is running
 
+        pezControl.setPositionCmd(PEZPos.Neutralize);
+
         //Manual overrides for motors we can't turn by hand
         climber.setManualMotorCommand(operatorController.xb.getY(Hand.kLeft));
         double intakeCmd =-1.0*operatorController.xb.getY(Hand.kRight);
