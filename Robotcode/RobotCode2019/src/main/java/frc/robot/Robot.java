@@ -502,7 +502,7 @@ public class Robot extends TimedRobot {
         CasseroleDriverView.setDialValue("Main System Pressure", pneumaticsControl.getPressure());
         CasseroleDriverView.setDialValue("Speed", Math.abs(poseCalc.getRobotVelocity_ftpersec()));
         CasseroleDriverView.setDialValue("Arm Angle", arm.getActualArmHeight());
-        CasseroleDriverView.setDialValue("Angle To Target", 0); //todo, populate with jevois angle
+        CasseroleDriverView.setDialValue("Angle To Target", jevois.getTgtGeneralAngle()); 
         CasseroleDriverView.setBoolean("Gyro Offline", !drivetrain.isGyroOnline());
         CasseroleDriverView.setBoolean("Vision Camera Offline", !jevois.isVisionOnline());
         CasseroleDriverView.setBoolean("Vision Target Available", jevois.isTgtVisible());
@@ -521,8 +521,8 @@ public class Robot extends TimedRobot {
     private void initDriverView(){
         //CasseroleDriverView.newAutoSelector("Starting Gamepiece", gpOptions);
         CasseroleDriverView.newDial("Main System Pressure", 0, 140, 10, 80, 125);
-        CasseroleDriverView.newWebcam("cam1", RobotConstants.CAM_1_STREAM_URL, 0, 0, 90);
-        CasseroleDriverView.newWebcam("cam2", RobotConstants.CAM_2_STREAM_URL, 95, 50, 90);
+        CasseroleDriverView.newWebcam("cam1", RobotConstants.CAM_1_STREAM_URL, 50, 75, 90);
+        CasseroleDriverView.newWebcam("cam2", RobotConstants.CAM_2_STREAM_URL, 25, 50, 90);
         CasseroleDriverView.newDial("Speed", 0, 20, 2,  1, 15);
         CasseroleDriverView.newDial("Arm Angle", -45, 225, 15,  -45, 110);
         CasseroleDriverView.newDial("Angle To Target", -90, 90, 15, -10, 10);

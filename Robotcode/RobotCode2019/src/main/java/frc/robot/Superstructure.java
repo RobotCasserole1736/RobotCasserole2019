@@ -147,6 +147,7 @@ public class Superstructure {
                 seq.addEvent(new MoveGripper(PEZPos.CargoGrab)); //Move gripper to be cargo grab so it's out of the way of the frame
                 seq.addEvent(new MoveArmIntakePos(OpMode.CargoIntake)); //Lower the arm into the frame
                 seq.addEvent(new MoveGripper(PEZPos.CargoRelease)); //Return gripper to the neutral position in prep for recieving a ball.
+                seq.addEvent(new MoveIntake(IntakePos.Extend)); //Pull the intake to the proper position for intake
                 seq.start();
             } else if(cmdOpMode == OpMode.CargoCarry){
                 //Invalid, this transition should not occurr
@@ -203,7 +204,7 @@ public class Superstructure {
                 AutoEvent parent = new MoveIntake(IntakePos.Retract);
                 parent.addChildEvent(new MoveGripper(PEZPos.HatchRelease));//Drop any gamepiece we may have
                 seq.addEvent(parent);
-                seq.addEvent(new Delay(0.2)); //Wait for gamepiece to actually drop.
+                seq.addEvent(new MoveArmIntakePos(OpMode.Hatch)); //Move arm to the lower position by default.
                 seq.start();
             }
 
@@ -237,10 +238,10 @@ public class Superstructure {
 
             //Map grab/release requests to gripper positions
             //Additionally, autmoatically go to grab when we detect a ball
-            if(opCtrl.getGampieceGrabRequest() || intake.isBallDetected()){
-                gripperPosCmd = PEZPos.CargoGrab;
-            } else if(opCtrl.getGampieceReleaseRequest()){
+            if(opCtrl.getGampieceReleaseRequest()){
                 gripperPosCmd = PEZPos.CargoRelease;
+            } else if(opCtrl.getGampieceGrabRequest() || intake.isBallDetected()){
+                gripperPosCmd = PEZPos.CargoGrab;
             } else {
                 gripperPosCmd = PEZPos.None;
             }
@@ -249,11 +250,11 @@ public class Superstructure {
             //Operator can command intake speed, but position is fixed
             intake.setSpeedCmd(opCtrl.getIntakeSpdReq());
 
-            if(intake.isBallDetected() == true){
-                intake.setPositionCmd(IntakePos.Ground);
-            } else if (opCtrl.getGampieceReleaseRequest()){
+             if (opCtrl.getGampieceReleaseRequest() || opCtrl.getIntakeSpdReq() == IntakeSpd.Eject){
                 intake.setPositionCmd(IntakePos.Extend);
-            }
+            } else if(intake.isBallDetected() == true){
+                intake.setPositionCmd(IntakePos.Ground);
+            } 
             //Ignore all arm commands
 
 

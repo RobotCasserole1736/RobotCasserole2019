@@ -63,7 +63,7 @@ public class JeVoisInterface {
     // Most recently seen target information
     private boolean tgtVisible = false;   //True if a target is seen, false otherwise
     private double  tgtAngle_rad = 0;     //Angle from center that the target appears in the camera. Shows if the robot is pointed at the target, or off to the side.
-    private double tgtGeneralAngle_deg=0;
+    private double  tgtGeneralAngle_deg=0;
     private double  tgtXPos_ft = 0;       //Position of the target relative to the robot in Ft
     private double  tgtYPos_ft = 0;       //Position of the target relative to the robot in Ft
     private int     latchCounter = 0;  //Skew of the target - if it's pointed at the robot, or away from the robot. AKA normal vector away from the wall.
@@ -125,7 +125,8 @@ public class JeVoisInterface {
         jevoisFramerateSig = new Signal("Jevois Framerate", "fps");
         jevoisPacketsPerSecSig = new Signal("Jevois Packets Per Sec", "pps");
         framecounterSig = new Signal("Jevois Frame Count", "count");
-        
+        tgtGeneralAngleSig = new Signal("Jevois General Angle", "deg");
+
         //Retry strategy to get this serial port open.
         //I have yet to see a single retry used assuming the camera is plugged in
         // but you never know.
@@ -248,7 +249,7 @@ public class JeVoisInterface {
 
 
 
-
+    /* Returns the angle from the camera to the robot in degrees*/
     public double getTgtGeneralAngle(){
         return tgtGeneralAngle_deg;
     }
@@ -565,7 +566,7 @@ public class JeVoisInterface {
                                 packetBuffer.delete(0, startIdx);
                             } else {
                                 // Buffer contains a full packet. Extract it and clean up buffer
-                                retval = packetBuffer.substring(startIdx+1, endIdx-1);
+                                retval = packetBuffer.substring(startIdx+1, endIdx);
                                 packetBuffer.delete(0, endIdx+1);
                                 break;
                             } 

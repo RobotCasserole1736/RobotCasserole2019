@@ -152,9 +152,9 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
         prevOpMode = DrivetrainOpMode.OpenLoop;
 
         // Configure closed-loop gain calibrations
-        gyroGain_P = new Calibration("Drivetrain Gyro Lock P Gain", 0.03); 
+        gyroGain_P = new Calibration("Drivetrain Gyro Lock P Gain", 0.06); 
         gyroGain_I = new Calibration("Drivetrain Gyro Lock I Gain", 0.0); 
-        gyroGain_D = new Calibration("Drivetrain Gyro Lock D Gain", 0.006); 
+        gyroGain_D = new Calibration("Drivetrain Gyro Lock D Gain", 0.012); 
 
         leftDtGain_P  = new Calibration("Drivetrain Left P Gain", 14.0); 
         leftDtGain_I  = new Calibration("Drivetrain Left I Gain", 0.014); 

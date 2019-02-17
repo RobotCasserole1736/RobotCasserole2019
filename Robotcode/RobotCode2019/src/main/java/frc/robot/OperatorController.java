@@ -24,10 +24,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import frc.lib.Calibration.Calibration;
 import frc.lib.DataServer.Signal;
-import frc.robot.Arm.ArmPos;
-import frc.robot.IntakeControl.IntakePos;
 import frc.robot.IntakeControl.IntakeSpd;
-import frc.robot.Superstructure.OpMode;
 
 public class OperatorController {
 
