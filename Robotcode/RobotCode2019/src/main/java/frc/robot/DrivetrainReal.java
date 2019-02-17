@@ -55,9 +55,9 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
     WPI_TalonSRX leftTalon1;
     WPI_TalonSRX leftTalon2;
 
-    PIDController gyroLockPID;
+    PIDController slopeAssistPID;
 
-    double gyroLockRotationCmd;
+    double slopeAssistRotationCmd;
     double desiredAngle;
 
     double leftSpeedCmd_RPM;
@@ -97,7 +97,7 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
     Signal wheelSpdDesLeftSig;
     Signal leftMotorCmdSig;
     Signal rightMotorCmdSig;
-    Signal gyroLockRotationCmdSig;
+    Signal slopeAssistRotationCmdSig;
 
     public DrivetrainReal() {
         gyro = new ADXRS453_Gyro();
@@ -181,9 +181,9 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
         wheelSpdDesLeftSig = new Signal("Drivetrain Left Wheel Desired Speed", "RPM");
         leftMotorCmdSig = new Signal("Drivetrain Left Motor Command", "cmd");
         rightMotorCmdSig = new Signal("Drivetrain Right Motor Command", "cmd");
-        gyroLockRotationCmdSig = new Signal("Drivetrain Gyro-Lock Rotation Command", "cmd");
+        slopeAssistRotationCmdSig = new Signal("Drivetrain Gyro-Lock Rotation Command", "cmd");
 
-        gyroLockPID = new PIDController(gyroGain_P.get(), gyroGain_I.get(), gyroGain_D.get(), this, this);
+        slopeAssistPID = new PIDController(gyroGain_P.get(), gyroGain_I.get(), gyroGain_D.get(), this, this);
 
         updateGains(true);
     }
@@ -194,8 +194,8 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
         this.rotationCmd = rotationCmd;
     }
 
-    public void setGyroLockCmd(double forwardReverseCmd) {
-        opModeCmd = DrivetrainOpMode.GyroLock;
+    public void setSlopeAssistCmd(double forwardReverseCmd) {
+        opModeCmd = DrivetrainOpMode.SlopeAssist;
         this.forwardReverseCmd = forwardReverseCmd;
     }
 
@@ -258,8 +258,8 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
         return rightTalon1.getMotorOutputPercent();
     }
 
-    public double getGyroLockRotationCmd(){
-        return gyroLockRotationCmd;
+    public double getSlopeAssistRotationCmd(){
+        return slopeAssistRotationCmd;
     }
 
     private double CTRE_VelUnitsToRPM(double ctreUnits) {
@@ -288,7 +288,7 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
     
     public void updateGains(boolean force){
         if(force || gyroGain_P.isChanged() || gyroGain_I.isChanged() || gyroGain_D.isChanged()){
-            gyroLockPID.setPID(gyroGain_P.get(), gyroGain_I.get(), gyroGain_D.get());
+            slopeAssistPID.setPID(gyroGain_P.get(), gyroGain_I.get(), gyroGain_D.get());
             gyroGain_P.acknowledgeValUpdate();
             gyroGain_I.acknowledgeValUpdate();
             gyroGain_D.acknowledgeValUpdate();
@@ -338,14 +338,14 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
 
 
         // Handle mode transition changes
-        if(prevOpMode != DrivetrainOpMode.GyroLock && opMode == DrivetrainOpMode.GyroLock){
-            //Going into GyroLock
+        if(prevOpMode != DrivetrainOpMode.SlopeAssist && opMode == DrivetrainOpMode.SlopeAssist){
+            //Going into slopeAssist
             desiredAngle = getGyroAngle();
-            gyroLockPID.setSetpoint(desiredAngle);
-            gyroLockPID.enable();
+            slopeAssistPID.setSetpoint(desiredAngle);
+            slopeAssistPID.enable();
         } else if(prevOpMode != DrivetrainOpMode.OpenLoop && opMode == DrivetrainOpMode.OpenLoop) {
             //Going into OpenLoop
-            gyroLockPID.disable();
+            slopeAssistPID.disable();
         } else if(prevOpMode != DrivetrainOpMode.ClosedLoop && opMode == DrivetrainOpMode.ClosedLoop) {
             //I term Accumulator should be auto-cleared
         } else if(prevOpMode != DrivetrainOpMode.ClosedLoopWithGyro && opMode == DrivetrainOpMode.ClosedLoopWithGyro) {
@@ -365,15 +365,15 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
             leftTalon1.set(ControlMode.PercentOutput, motorSpeedLeftCMD);
             //leftTalon2.set(ControlMode.PercentOutput, motorSpeedLeftCMD);
 
-        } else if (opMode == DrivetrainOpMode.GyroLock){
+        } else if (opMode == DrivetrainOpMode.SlopeAssist){
             /* Drivetrain running in Gyro-lock. Fwd/Rev command comes from driver, but rotation from a closed-loop control algorithm*/
 
             double motorSpeedLeftCMD = 0;
             double motorSpeedRightCMD = 0;
 
-            headingCmd_deg = gyroLockRotationCmd;
-            motorSpeedLeftCMD = forwardReverseCmd - gyroLockRotationCmd;
-            motorSpeedRightCMD = forwardReverseCmd + gyroLockRotationCmd;
+            headingCmd_deg = slopeAssistRotationCmd;
+            motorSpeedLeftCMD = forwardReverseCmd - slopeAssistRotationCmd;
+            motorSpeedRightCMD = forwardReverseCmd + slopeAssistRotationCmd;
 
             rightTalon1.set(ControlMode.PercentOutput, motorSpeedRightCMD);
             leftTalon1.set(ControlMode.PercentOutput, motorSpeedLeftCMD);
@@ -412,15 +412,15 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
         wheelSpdDesLeftSig.addSample(sampleTimeMS, leftSpeedCmd_RPM);
         leftMotorCmdSig.addSample(sampleTimeMS, getLeftMotorCmd());
         rightMotorCmdSig.addSample(sampleTimeMS, getRightMotorCmd());
-        gyroLockRotationCmdSig.addSample(sampleTimeMS, getGyroLockRotationCmd());
+        slopeAssistRotationCmdSig.addSample(sampleTimeMS, getSlopeAssistRotationCmd());
     }
 
     @Override
     public void pidWrite(double output) {
         if(gyro.isOnline()){
-            gyroLockRotationCmd = output;
+            slopeAssistRotationCmd = output;
         } else {
-            gyroLockRotationCmd = 0; //If gyro is faulted, don't attempt to rotate.
+            slopeAssistRotationCmd = 0; //If gyro is faulted, don't attempt to rotate.
         }
 
     }

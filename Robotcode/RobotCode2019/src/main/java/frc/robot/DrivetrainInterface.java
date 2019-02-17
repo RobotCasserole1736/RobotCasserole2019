@@ -23,7 +23,7 @@ public interface DrivetrainInterface {
 
     public enum DrivetrainOpMode {
         OpenLoop(0),   /* A command for fwd/rev and rotation in units of motor-command comes from the outside world */ 
-        GyroLock(1),   /* A fwd/rev command from the outside world is used, but rotation command is servoed by a PID to keep the pose angle locked */
+        SlopeAssist(1),   /* A fwd/rev command from the outside world is used, but rotation command is servoed by a PID to keep the pose angle locked */
         ClosedLoop(2), /* Wheel speed commands (in RPM) are commanded from the outside world. Gyro is not used. */
         ClosedLoopWithGyro(3); /* Both wheel speed commands (in RPM) and a desird gyro heading are commanded from the outside world. */
 
