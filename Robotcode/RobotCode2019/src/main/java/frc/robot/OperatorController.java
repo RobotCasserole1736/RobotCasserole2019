@@ -52,6 +52,7 @@ public class OperatorController {
     /* Behavior/feel calibrations */
     Calibration joystickExpScaleFactor;
     Calibration joystickDeadzone;
+    Calibration joystickUpperDeadzone;
 
     /* Telemetry */
     Signal gamepieceGrabReqSig;
@@ -97,7 +98,8 @@ public class OperatorController {
         xb = new XboxController(RobotConstants.OPERATOR_CONTROLLER_USB_IDX);
 
         joystickExpScaleFactor = new Calibration("Operator Joystick Exponential Scale Factor", 3.0 , 1, 10);
-        joystickDeadzone = new Calibration("Operator Joystick Deadzone ", 0.23, 0, 1); //oy this joystick stinks
+        joystickDeadzone = new Calibration("Operator Joystick Deadzone ", 0.15, 0, 1);
+        joystickUpperDeadzone = new Calibration("Upper Deadzone of Joystick",0.95);
 
         gamepieceGrabReqSig = new Signal("Operator Gamepiece Grab Command", "bool");
         gamepieceReleaseReqSig = new Signal("Operator Gamepiece Release Command", "bool");
@@ -151,7 +153,15 @@ public class OperatorController {
             }
         }
 
-        armManualPosCmd = Utils.ctrlAxisScale(-1*xb.getY(Hand.kLeft), joystickExpScaleFactor.get(), joystickDeadzone.get());
+        //UpperDeadzone Logic
+        double aCmd=xb.getY(Hand.kLeft)/joystickUpperDeadzone.get();
+        if(aCmd>1){
+            aCmd=1;
+        }else if(aCmd<-1){
+            aCmd=-1;
+        }
+
+        armManualPosCmd = Utils.ctrlAxisScale(-1*aCmd, joystickExpScaleFactor.get(), joystickDeadzone.get());
 
         if(xb.getTriggerAxis(Hand.kRight) > 0.5){
             intakeSpdReq = IntakeSpd.Intake;

@@ -47,6 +47,7 @@ public class DriverController {
     Calibration slowMoveRotateScaleFactor;
     Calibration joystickExpScaleFactor;
     Calibration joystickDeadzone;
+    Calibration joystickUpperDeadzone;
   
     /* Telemetry */
     Signal driverFwdRevCmdSig;
@@ -72,6 +73,7 @@ public class DriverController {
         slowMoveRotateScaleFactor = new Calibration("Driver Rotation Slow Move Scale Factor", 0.25, 0, 1);
         joystickExpScaleFactor = new Calibration("Driver Joystick Exponential Scale Factor", 3.0 , 1, 10);
         joystickDeadzone = new Calibration("Driver Joystick Deadzone ", 0.15, 0, 1);
+        joystickUpperDeadzone = new Calibration("Upper Deadzone of Joystick",0.95);
 
         driverFwdRevCmdSig = new Signal("Driver Fwd-Rev Command", "cmd");
         driverRotateCmdSig = new Signal("Driver Rotate Command", "cmd");
@@ -120,8 +122,24 @@ public class DriverController {
             compressorDisableReq = false;
         }
 
-        driverFwdRevCmd = Utils.ctrlAxisScale(-1*xb.getY(Hand.kLeft),  joystickExpScaleFactor.get(), joystickDeadzone.get());
-        driverRotateCmd = Utils.ctrlAxisScale(   xb.getX(Hand.kRight), joystickExpScaleFactor.get(), joystickDeadzone.get());
+        //UpperDeadzone logic
+        double frCmd=xb.getY(Hand.kLeft)/joystickUpperDeadzone.get();
+        double rCmd=xb.getX(Hand.kRight)/joystickUpperDeadzone.get();
+
+        if(frCmd>1){
+            frCmd=1;
+        }else if(frCmd<-1){
+            frCmd=-1;
+        }
+
+        if(rCmd>1){
+            rCmd=1;
+        }else if(rCmd<-1){
+            rCmd=-1;
+        }
+        
+        driverFwdRevCmd = Utils.ctrlAxisScale(-1*frCmd,  joystickExpScaleFactor.get(), joystickDeadzone.get());
+        driverRotateCmd = Utils.ctrlAxisScale(   rCmd, joystickExpScaleFactor.get(), joystickDeadzone.get());
 
         if(xb.getBumper(Hand.kRight)){
             slowMoveReq = true;
