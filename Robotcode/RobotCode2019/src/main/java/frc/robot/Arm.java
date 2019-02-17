@@ -185,10 +185,10 @@ public class Arm {
 
         topHatchHeightCal    = new Calibration("Arm Hatch Level Pos Top Deg", 100);
         midHatchHeightCal    = new Calibration("Arm Hatch Level Pos Mid Deg", 5);
-        lowHatchHeightCal    = new Calibration("Arm Hatch Level Pos Bottom Deg", -38);
-        intakeHatchHeightCal = new Calibration("Arm Hatch Level Pos Intake Deg", -38);
+        lowHatchHeightCal    = new Calibration("Arm Hatch Level Pos Bottom Deg", -40);
+        intakeHatchHeightCal = new Calibration("Arm Hatch Level Pos Intake Deg", -40);
 
-        intakeDangerZoneUpperHeight = new Calibration("Arm Intake Danger Zone Upper Pos Deg", -30);
+        intakeDangerZoneUpperHeight = new Calibration("Arm Intake Danger Zone Upper Pos Deg", -45);
         
         gravOffsetHorz    = new Calibration("Arm Required Voltage at Horz V", 0.5);
         bottomLimitSwitchDegreeCal = new Calibration("Arm Limit Switch Angle Bottom Deg", -60);
@@ -286,7 +286,7 @@ public class Arm {
        topOfMotion = upperLimitSwitch.get();
        bottomOfMotion = lowerLimitSwitch.get();
        if (topOfMotion){
-           armEncoder.setPosition(convertArmDegToMotorRot(topLimitSwitchDegreeCal.get()));
+           //armEncoder.setPosition(convertArmDegToMotorRot(topLimitSwitchDegreeCal.get())); I guess we don't want to do this
        } 
        if (bottomOfMotion){
            armEncoder.setPosition(convertArmDegToMotorRot(bottomLimitSwitchDegreeCal.get()));

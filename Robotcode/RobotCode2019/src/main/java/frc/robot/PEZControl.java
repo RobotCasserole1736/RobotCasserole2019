@@ -85,7 +85,7 @@ public class PEZControl {
     }
 
     public enum PEZPos {
-        CargoGrab(0), HatchGrab(1), CargoRelease(2), HatchRelease(3), None(6);
+        CargoGrab(0), HatchGrab(1), CargoRelease(2), HatchRelease(3), Neutralize(4), None(6);
         public final int value;
 
         private PEZPos(int value) {
