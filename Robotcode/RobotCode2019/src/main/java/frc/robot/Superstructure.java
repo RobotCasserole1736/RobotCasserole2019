@@ -304,7 +304,7 @@ public class Superstructure {
             } else {
                 gripperPosCmd = PEZPos.None;
             }
-            gripper.setPositionCmd(gripperPosCmd);
+
 
             //Keep intake at inside position at all times.
             intake.setSpeedCmd(IntakeSpd.Stop);
@@ -322,6 +322,8 @@ public class Superstructure {
             } else {
                 arm.setPositionCmd(ArmPos.None);
             }
+            
+            gripper.setPositionCmd(gripperPosCmd);
 
             //Limit manual motion command if we're on the highway to the danger zone.
             if(!arm.isAboveDangerZone() && opCtrl.getArmManualPosCmd() < 0.0 ){
