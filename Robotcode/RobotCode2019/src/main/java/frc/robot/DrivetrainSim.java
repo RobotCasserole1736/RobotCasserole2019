@@ -60,8 +60,8 @@ public class DrivetrainSim implements DrivetrainInterface {
         return false;
     }
 
-    public void setGyroLockCmd(double forwardReverseCmd) {
-        opModeCmd = DrivetrainOpMode.GyroLock;
+    public void setSlopeAssistCmd(double forwardReverseCmd) {
+        opModeCmd = DrivetrainOpMode.SlopeAssist;
     }
 
     public void update() {

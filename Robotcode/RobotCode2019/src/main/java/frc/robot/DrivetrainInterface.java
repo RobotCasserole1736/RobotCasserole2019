@@ -40,7 +40,7 @@ public interface DrivetrainInterface {
 
     public void setOpenLoopCmd(double forwardReverseCmd, double rotaionCmd);
 
-    public void setGyroLockCmd(double forwardReverseCmd);
+    public void setSlopeAssistCmd(double forwardReverseCmd);
 
     public void update();
 

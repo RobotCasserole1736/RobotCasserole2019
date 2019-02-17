@@ -56,7 +56,7 @@ public class Drivetrain implements DrivetrainInterface {
     }
 
     public void setSlopeAssistCmd(double forwardReverseCmd){
-        dTrainIF.setGyroLockCmd(forwardReverseCmd);
+        dTrainIF.setSlopeAssistCmd(forwardReverseCmd);
     }
 
     public boolean isGyroOnline(){
