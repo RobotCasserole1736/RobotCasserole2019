@@ -97,6 +97,7 @@ public class Arm {
     final int AT_DES_ANGLE_DBNC_LOOPS = 7;
 
     double desRotationPrev = -10000;
+    boolean forceUpdate = true;
 
 
     /////////Limit Switches\\\\\\\\\\
@@ -114,6 +115,7 @@ public class Arm {
     Signal armLowerLimitSig;
     Signal armUpperLimitSig;
     Signal atDesAngleSig;
+    Signal armGearSkipCounterSig;
 
     /////////Physical Mechanism Constants\\\\\\\\\\
     final double MAX_MANUAL_DEG_PER_SEC = 25.0;
@@ -124,6 +126,7 @@ public class Arm {
 
     boolean runSimMode;
 
+    int gearSkipCounter = 0;
     
     /////////Initialization Code\\\\\\\\\\\
     private static Arm singularInstance = null;
@@ -179,24 +182,25 @@ public class Arm {
         armLowerLimitSig = new Signal("Arm Lower Position Limit Switch", "bool");
         armUpperLimitSig = new Signal("Arm Upper Position Limit Switch", "bool");
         atDesAngleSig = new Signal("Arm At Desired Angle", "bool");
+        armGearSkipCounterSig = new Signal("Arm Gear Skip Count", "count");
 
 
         /////Calibration Things\\\\\
-        topCargoHeightCal    = new Calibration("Arm Cargo Level Pos Top Deg", 100);
-        midCargoHeightCal    = new Calibration("Arm Cargo Level Pos Mid Deg", 12);
-        lowCargoHeightCal    = new Calibration("Arm Cargo Level Pos Bottom Deg", -25);
-        intakeCargoHeightCal = new Calibration("Arm Cargo Level Pos Intake Deg", -60);
+        topCargoHeightCal    = new Calibration("Arm Cargo Level Pos Top Deg", 103);
+        midCargoHeightCal    = new Calibration("Arm Cargo Level Pos Mid Deg", 15);
+        lowCargoHeightCal    = new Calibration("Arm Cargo Level Pos Bottom Deg", -22);
+        intakeCargoHeightCal = new Calibration("Arm Cargo Level Pos Intake Deg", -57);
 
         topHatchHeightCal    = new Calibration("Arm Hatch Level Pos Top Deg", 100);
         midHatchHeightCal    = new Calibration("Arm Hatch Level Pos Mid Deg", 5);
         lowHatchHeightCal    = new Calibration("Arm Hatch Level Pos Bottom Deg", -40);
         intakeHatchHeightCal = new Calibration("Arm Hatch Level Pos Intake Deg", -40);
 
-        intakeDangerZoneUpperHeight = new Calibration("Arm Intake Danger Zone Upper Pos Deg", -45);
+        intakeDangerZoneUpperHeight = new Calibration("Arm Intake Danger Zone Upper Pos Deg", -40);
         
         gravOffsetHorz    = new Calibration("Arm Required Voltage at Horz V", 0.5);
         bottomLimitSwitchDegreeCal = new Calibration("Arm Limit Switch Angle Bottom Deg", -60);
-        topLimitSwitchDegreeCal    = new Calibration("Arm Limit Switch Angle Top Deg", 109);
+        topLimitSwitchDegreeCal    = new Calibration("Arm Limit Switch Angle Top Deg", 129.0);
 
         //Calibration for the Arm Trapezoidal\\
         kMaxOutputCal = new Calibration("Arm SmartMotion Max Power", 1);
@@ -284,6 +288,7 @@ public class Arm {
 
     public void setMatchStartPosition(){
         armEncoder.setPosition(convertArmDegToMotorRot(bottomLimitSwitchDegreeCal.get() + 2.0)); //fudge
+        forceUpdate = true;
     }
 
     public void sampleSensors() {
@@ -292,15 +297,25 @@ public class Arm {
        topOfMotion = upperLimitSwitch.get();
        bottomOfMotion = lowerLimitSwitch.get();
 
+
+       curArmAngle = INVERT_FACTOR*armEncoder.getPosition();
+
        if (topOfMotion == true && topOfMotionPrev == false){
-           //armEncoder.setPosition(convertArmDegToMotorRot(topLimitSwitchDegreeCal.get())); I guess we don't want to do this
+           double expectedAngle = topLimitSwitchDegreeCal.get();
+           if(Math.abs(expectedAngle - curArmAngle) > 5.0){
+                //We just hit the top limit switch, and the error was bigger than one tooth at the bottom gear - we probably slipped a tooth.
+                //Reset encoder position at top
+                armEncoder.setPosition(convertArmDegToMotorRot(topLimitSwitchDegreeCal.get())); 
+                forceUpdate = true;
+                gearSkipCounter++;
+           }
        } 
 
        if (bottomOfMotion == true && bottomOfMotionPrev == false){
            armEncoder.setPosition(convertArmDegToMotorRot(bottomLimitSwitchDegreeCal.get()));
+           forceUpdate = true;
        }
 
-       curArmAngle = INVERT_FACTOR*armEncoder.getPosition();
     }
 
     public double convertArmDegToMotorRot(double in){
@@ -345,8 +360,9 @@ public class Arm {
                 //armPID.setReference(INVERT_FACTOR*desRotation, ControlType.kPosition, 0, gravComp); // AKA not-smart motion
 
                 //we've gotten reports that this is an expensive funciton call to make, so don't make it unless you need to?
-                if(desRotation != desRotationPrev){
+                if(desRotation != desRotationPrev || forceUpdate || true){ //Turns out we can't do this without new firmware
                     armPID.setReference(INVERT_FACTOR*desRotation, ControlType.kSmartMotion, 0, 0);
+                    forceUpdate = false;
                 }
                 
                 desRotationPrev = desRotation;
@@ -366,6 +382,7 @@ public class Arm {
         armLowerLimitSig.addSample(sampleTimeMS, bottomOfMotion);
         armUpperLimitSig.addSample(sampleTimeMS, topOfMotion);
         atDesAngleSig.addSample(sampleTimeMS, atDesAngle);
+        armGearSkipCounterSig.addSample(sampleTimeMS, gearSkipCounter);
 
         prevManMoveCmd = curManMoveCmd;
     }
