@@ -306,7 +306,7 @@ public class Robot extends TimedRobot {
                 //Do nothing - someone else will be setting drivetrain commands.
             } else if(driverController.getGyroAngleLockReq()){
                 //Map driver inputs to drivetrain in gyro-lock mode
-                drivetrain.setGyroLockCmd(driverController.getDriverFwdRevCmd());
+                drivetrain.setSlopeAssistCmd(driverController.getDriverFwdRevCmd());
             } else {
                 // Map driver inputs to drivetrain open loop
                 drivetrain.setOpenLoopCmd(driverController.getDriverFwdRevCmd(), driverController.getDriverRotateCmd());
