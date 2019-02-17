@@ -116,6 +116,8 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
         leftTalon2.configFactoryDefault(); 
 
         //Set up master/slave configuration per side of drivetrain
+        //NOTE - electrical dislikes the usage of "master/slave" terminology, 
+        //       so henceforth we shall refer to it as "master/intern".
         rightTalon2.follow(rightTalon1);
         leftTalon2.follow(leftTalon1);
 
