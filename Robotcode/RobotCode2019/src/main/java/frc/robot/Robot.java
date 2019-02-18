@@ -432,6 +432,13 @@ public class Robot extends TimedRobot {
             poseCalc.setMeasuredPoseAngle(drivetrain.getGyroAngle(), drivetrain.isGyroOnline());
             poseCalc.update();
 
+            if(RobotController.getUserButton()) {
+                arm.setCoastMode();
+            }
+            else {
+                arm.setBrakeMode();
+            }
+
 
             /* Update Other subsytems */
             ledController.update();

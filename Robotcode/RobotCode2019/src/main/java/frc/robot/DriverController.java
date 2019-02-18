@@ -70,7 +70,7 @@ public class DriverController {
     private DriverController(){
         xb = new XboxController(RobotConstants.DRIVER_CONTROLLER_USB_IDX);
         slowMoveFwdRevScaleFactor = new Calibration("Driver Fwd-Rev Slow Move Scale Factor",  0.30, 0, 1);
-        slowMoveRotateScaleFactor = new Calibration("Driver Rotation Slow Move Scale Factor", 0.65, 0, 1);
+        slowMoveRotateScaleFactor = new Calibration("Driver Rotation Slow Move Scale Factor", 0.5, 0, 1);
         joystickExpScaleFactor = new Calibration("Driver Joystick Exponential Scale Factor", 3.0 , 1, 10);
         joystickDeadzone = new Calibration("Driver Joystick Deadzone ", 0.15, 0, 1);
         joystickUpperDeadzone = new Calibration("Upper Deadzone of Joystick",0.95);
