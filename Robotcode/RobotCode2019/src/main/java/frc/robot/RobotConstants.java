@@ -53,7 +53,8 @@ public class RobotConstants {
 
     //PWM/Motor
     public static final int VISON_LED_RING_PORT = 0;
-    public static final int CLIMBER_SERVO = 7;
+    public static final int CLIMBER_SERVO1 = 6;
+    public static final int CLIMBER_SERVO2 = 7;
   
 
     //Relay
