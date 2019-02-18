@@ -21,7 +21,7 @@ public class RobotConstants {
     public static final int INTAKE_MOTOR_RIGHT_CANID = 32;
     public static final int PNEUMATICS_CONTROL_MODULE_CANID = 0;
     public static final int POWER_DISTRIBUTION_PANEL_CANID = 0;
-    public static final int ARM_MOTOR_PORT = 0;
+    public static final int ARM_MOTOR_CANID = 0;
 
 
     /////////////////////////////////////////////////////////////////////////////////////
@@ -38,10 +38,10 @@ public class RobotConstants {
 
 
 
-    public static final int BALL_INTAKE_PORT = 1;
+
 
     //Digital
-    public static final int VISON_LED_RING_PORT = 0;
+    public static final int BALL_INTAKE_PORT = 1;
     public static final int ARM_UPPER_LIMIT_SWITCH_PORT  = 2;
     public static final int ARM_LOWER_LIMIT_SWITCH_PORT  = 3;
     public static final int LINE_FOLLOWING_SENSOR_1_PORT = 4;
@@ -50,10 +50,15 @@ public class RobotConstants {
     public static final int LINE_FOLLOWING_SENSOR_4_PORT = 7;
     public static final int LINE_FOLLOWING_SENSOR_5_PORT = 8;
     public static final int PEZ_SOLENOID_LIMIT_SWITCH_PORT = 9;
+
+    //PWM/Motor
+    public static final int VISON_LED_RING_PORT = 0;
+    public static final int CLIMBER_SERVO = 7;
   
 
     //Relay
-    public static final int PEZ_RELAY_PORT = 0;
+
+    //No one here but us chickens
 
     /////////////////////////////////////////////////////////////////////////////////////
     // PDP Ports
@@ -69,6 +74,7 @@ public class RobotConstants {
     public static final int PEZ_SOLENOID_PORT_HATCH = 1;
     public static final int PEZ_DUB_SOLENOID_MID_STOPPER = 2;
     public static final int PEZ_DUB_SOLENOID_MID_STOPPER2 = 3;
+    public static final int CLIMBER_EJECT_SOL = 4;
 
 
     /////////////////////////////////////////////////////////////////////////////////////
@@ -82,8 +88,7 @@ public class RobotConstants {
     public static final double MAIN_LOOP_SAMPLE_RATE_S = 0.02; // 20ms update rate
     public static final double ROBOT_TRACK_WIDTH_FT = 22.0/12; // 22 inch  effective track width
     public static final double WHEEL_RADIUS_FT = 8.75/2/12.0; //8.75 inch diameter wheels
-    public static final int CLIMBER_SERVO = 7;
-    public static final int ClIMBER_WINDOW_MOTOR = 8;
+
 
     
 
