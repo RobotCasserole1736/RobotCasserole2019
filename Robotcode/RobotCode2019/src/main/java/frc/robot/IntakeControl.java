@@ -317,7 +317,7 @@ public class IntakeControl{
                 intakeMotorCmd = 0;
             }
     
-            intakeMotor.set(-1*intakeMotorCmd); //motor is mechanically inverted
+            intakeMotor.set(intakeMotorCmd); //motor is no longer
 
             prevIntakePosCmd = intakePosCmd;
     
