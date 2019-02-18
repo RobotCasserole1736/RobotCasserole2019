@@ -30,11 +30,13 @@ import frc.lib.Calibration.Calibration;
 
 public class Climber {
 
-    Servo climbServo;   
+    Servo climbServoL;
+    Servo climbServoR;   
     Solenoid climbEjectSol;
 
     Calibration servoLockedCal;
-    Calibration servoUnLockedCal;
+    Calibration servoLUnLockedCal;
+    Calibration servoRUnLockedCal;
 
     /* Singleton stuff */
     private static Climber climbCtrl = null;
@@ -45,10 +47,12 @@ public class Climber {
     }
 
     private Climber(){
-        climbServo = new Servo(RobotConstants.CLIMBER_SERVO);
+        climbServoL = new Servo(RobotConstants.CLIMBER_SERVO_L);
+        climbServoR = new Servo(RobotConstants.CLIMBER_SERVO_R);
         climbEjectSol = new Solenoid(RobotConstants.CLIMBER_EJECT_SOL);
         servoLockedCal = new Calibration("Servo Locked Angle (DEG)", 180);
-        servoUnLockedCal = new Calibration("Servo Unlocked Angle (DEG)", 0);
+        servoLUnLockedCal = new Calibration("Servo Unlocked Angle (DEG)", 0);
+        servoRUnLockedCal = new Calibration("Servo Unlocked Angle (DEG)", 360);
 
     }
 
@@ -57,14 +61,16 @@ public class Climber {
         boolean release = OperatorController.getInstance().getClimberReleace();
 
         if(enable){
-            climbServo.set(servoUnLockedCal.get());
+            climbServoL.set(servoLUnLockedCal.get());
+            climbServoR.set(servoRUnLockedCal.get());
             if(release){
                 climbEjectSol.set(true);
             } else {
                 climbEjectSol.set(false);
             }
         } else {
-            climbServo.set(servoLockedCal.get());
+            climbServoL.set(servoLockedCal.get());
+            climbServoR.set(servoLockedCal.get());
             climbEjectSol.set(false);
         }
        
