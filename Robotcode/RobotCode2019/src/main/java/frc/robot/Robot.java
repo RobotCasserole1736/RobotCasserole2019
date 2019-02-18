@@ -358,6 +358,7 @@ public class Robot extends TimedRobot {
      */
     @Override
     public void autonomousPeriodic() {
+        
         /*Update CrashTracker*/
         CrashTracker.logAutoPeriodic();
         matchPeriodicCommon();
@@ -564,7 +565,8 @@ public class Robot extends TimedRobot {
         pezControl.setPositionCmd(PEZPos.Neutralize);
 
         //Manual overrides for motors we can't turn by hand
-        climber.setManualMotorCommand(operatorController.xb.getY(Hand.kLeft));
+        //What is it??
+        //climber.setManualMotorCommand(operatorController.xb.getY(Hand.kLeft));
         double intakeCmd =-1.0*operatorController.xb.getY(Hand.kRight);
         if(Math.abs(intakeCmd) < 0.15){
             intakeCmd = 0;

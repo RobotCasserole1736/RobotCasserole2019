@@ -67,8 +67,8 @@ public class PEZControl {
     final DoubleSolenoid.Value SOL_GRIPPER_RETRACT = DoubleSolenoid.Value.kReverse;
     final DoubleSolenoid.Value SOL_POS_CARGO_GRAB = SOL_GRIPPER_RETRACT;
     final DoubleSolenoid.Value SOL_POS_CARGO_RELEASE = SOL_GRIPPER_EXTEND;
-    final DoubleSolenoid.Value SOL_POS_HATCH_GRAB = SOL_GRIPPER_EXTEND;
-    final DoubleSolenoid.Value SOL_POS_HATCH_RELEASE = SOL_GRIPPER_RETRACT;
+    final DoubleSolenoid.Value SOL_POS_HATCH_GRAB = SOL_GRIPPER_RETRACT;
+    final DoubleSolenoid.Value SOL_POS_HATCH_RELEASE = SOL_GRIPPER_EXTEND;
     final DoubleSolenoid.Value SOL_POS_STOPPER_ENGAGE = DoubleSolenoid.Value.kForward;
     final DoubleSolenoid.Value SOL_POS_STOPPER_RELEASE = DoubleSolenoid.Value.kReverse;
 
@@ -183,7 +183,7 @@ public class PEZControl {
                 break;
     
                 case Hatch:
-                    pezMidPosStopper.set(SOL_POS_STOPPER_ENGAGE);
+                   // pezMidPosStopper.set(SOL_POS_STOPPER_ENGAGE);
                     if(posReq == PEZPos.HatchGrab){
                         pezPneumaticCyl.set(SOL_POS_HATCH_GRAB);
                     } else if (posReq == PEZPos.HatchRelease){
