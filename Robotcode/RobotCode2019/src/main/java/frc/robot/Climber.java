@@ -2,6 +2,7 @@ package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
+import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.VictorSP;
@@ -51,10 +52,10 @@ public class Climber {
         climbServo1 = new Servo(RobotConstants.CLIMBER_SERVO1);
         climbServo2 = new Servo(RobotConstants.CLIMBER_SERVO2);
         climbEjectSol = new Solenoid(RobotConstants.CLIMBER_EJECT_SOL);
-        servo1LockedCal = new Calibration("Servo Locked Angle (DEG)", 180);
-        servo1UnLockedCal = new Calibration("Servo Unlocked Angle (DEG)", 0);
-        servo2LockedCal = new Calibration("Servo Locked Angle (DEG)", 180);
-        servo2UnLockedCal = new Calibration("Servo Unlocked Angle (DEG)", 0);
+        servo1LockedCal = new Calibration("Servo 1 Locked Angle DEG", 0.5);
+        servo1UnLockedCal = new Calibration("Servo 1 Unlocked Angle DEG", 0.2);
+        servo2LockedCal = new Calibration("Servo 2 Locked Angle DEG", 0.5);
+        servo2UnLockedCal = new Calibration("Servo 2 Unlocked Angle DEG", 0.8);
 
     }
 
