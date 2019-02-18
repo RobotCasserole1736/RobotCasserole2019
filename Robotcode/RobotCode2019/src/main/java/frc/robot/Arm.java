@@ -142,7 +142,7 @@ public class Arm {
 
         /////Movers\\\\\
         //armBrake = new Solenoid(RobotConstants.ARM_MECH_BRAKE_SOL_PORT);
-        sadey = new CANSparkMax(RobotConstants.ARM_MOTOR_PORT, MotorType.kBrushless);
+        sadey = new CANSparkMax(RobotConstants.ARM_MOTOR_CANID, MotorType.kBrushless);
         sadey.restoreFactoryDefaults();//ensure we start from the same config every time.
 
         //Force a max current limit of 60A to try to help prevent burnout and brownout and such.

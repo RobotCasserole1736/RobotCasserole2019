@@ -3,6 +3,7 @@ package frc.robot;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.Servo;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.VictorSP;
 import frc.lib.Calibration.Calibration;
 
@@ -29,8 +30,8 @@ import frc.lib.Calibration.Calibration;
 
 public class Climber {
 
-    Servo climbServo;
-    VictorSP windowTalon;
+    Servo climbServo;   
+    Solenoid climbEjectSol;
 
     Calibration servoLockedCal;
     Calibration servoUnLockedCal;
@@ -45,7 +46,7 @@ public class Climber {
 
     private Climber(){
         climbServo = new Servo(RobotConstants.CLIMBER_SERVO);
-        windowTalon = new VictorSP(RobotConstants.ClIMBER_WINDOW_MOTOR);
+        climbEjectSol = new Solenoid(RobotConstants.CLIMBER_EJECT_SOL);
         servoLockedCal = new Calibration("Servo Locked Angle (DEG)", 180);
         servoUnLockedCal = new Calibration("Servo Unlocked Angle (DEG)", 0);
 
@@ -58,20 +59,15 @@ public class Climber {
         if(enable){
             climbServo.set(servoUnLockedCal.get());
             if(release){
-                windowTalon.set(0.5);
+                climbEjectSol.set(true);
             } else {
-                windowTalon.set(0);
+                climbEjectSol.set(false);
             }
         } else {
             climbServo.set(servoLockedCal.get());
-            windowTalon.set(0);
+            climbEjectSol.set(false);
         }
        
-    }
-
-
-    public void setManualMotorCommand(double cmd){
-        windowTalon.set(cmd);
     }
 
 }
