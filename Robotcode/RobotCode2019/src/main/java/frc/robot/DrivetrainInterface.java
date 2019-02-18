@@ -25,7 +25,8 @@ public interface DrivetrainInterface {
         OpenLoop(0),   /* A command for fwd/rev and rotation in units of motor-command comes from the outside world */ 
         GyroLock(1),   /* A fwd/rev command from the outside world is used, but rotation command is servoed by a PID to keep the pose angle locked */
         ClosedLoop(2), /* Wheel speed commands (in RPM) are commanded from the outside world. Gyro is not used. */
-        ClosedLoopWithGyro(3); /* Both wheel speed commands (in RPM) and a desird gyro heading are commanded from the outside world. */
+        ClosedLoopWithGyro(3), /* Both wheel speed commands (in RPM) and a desird gyro heading are commanded from the outside world. */
+        TargetAngleLock(4); /* Sets the drivetrain's angle to be locked to what the Jevois says*/
 
         public final int value;
 
@@ -41,6 +42,8 @@ public interface DrivetrainInterface {
     public void setOpenLoopCmd(double forwardReverseCmd, double rotaionCmd);
 
     public void setGyroLockCmd(double forwardReverseCmd);
+
+    public void setPositionCmd(double forwardReverseCmd, double angleError);
 
     public void update();
 

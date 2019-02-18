@@ -307,6 +307,8 @@ public class Robot extends TimedRobot {
             } else if(driverController.getGyroAngleLockReq()){
                 //Map driver inputs to drivetrain in gyro-lock mode
                 drivetrain.setGyroLockCmd(driverController.getDriverFwdRevCmd());
+            } else if(driverController.getLockDrivetrainAngle()){
+                drivetrain.setPositionCmd(driverController.getDriverFwdRevCmd(), JeVoisInterface.getInstance().getTgtGeneralAngle());
             } else {
                 // Map driver inputs to drivetrain open loop
                 drivetrain.setOpenLoopCmd(driverController.getDriverFwdRevCmd(), driverController.getDriverRotateCmd());
@@ -564,7 +566,7 @@ public class Robot extends TimedRobot {
         pezControl.setPositionCmd(PEZPos.Neutralize);
 
         //Manual overrides for motors we can't turn by hand
-        climber.setManualMotorCommand(operatorController.xb.getY(Hand.kLeft));
+        //climber.setManualMotorCommand(operatorController.xb.getY(Hand.kLeft));
         double intakeCmd =-1.0*operatorController.xb.getY(Hand.kRight);
         if(Math.abs(intakeCmd) < 0.15){
             intakeCmd = 0;

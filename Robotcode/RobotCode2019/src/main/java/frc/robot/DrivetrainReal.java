@@ -40,6 +40,7 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
     private int angleOffset;
     public double forwardReverseCmd;
     public double rotationCmd;
+    public double targetAngleLockDesiredAngle;
 
     private static final int TIMEOUT_MS = 0;
     private static final double ENCODER_CYCLES_PER_REV = 360;
@@ -192,6 +193,12 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
         gyroLockPID = new PIDController(gyroGain_P.get(), gyroGain_I.get(), gyroGain_D.get(), this, this);
 
         updateGains(true);
+    }
+
+    public void setPositionCmd(double forwardReverseCmd, double angleError){
+        opModeCmd = DrivetrainOpMode.TargetAngleLock;
+        this.forwardReverseCmd = forwardReverseCmd;
+        desiredAngle = Drivetrain.getInstance().getGyroAngle() + angleError;
     }
 
     public void setOpenLoopCmd(double forwardReverseCmd, double rotationCmd) {
@@ -371,7 +378,7 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
             leftTalon1.set(ControlMode.PercentOutput, motorSpeedLeftCMD);
             //leftTalon2.set(ControlMode.PercentOutput, motorSpeedLeftCMD);
 
-        } else if (opMode == DrivetrainOpMode.GyroLock){
+        } else if (opMode == DrivetrainOpMode.GyroLock || opMode == DrivetrainOpMode.TargetAngleLock){
             /* Drivetrain running in Gyro-lock. Fwd/Rev command comes from driver, but rotation from a closed-loop control algorithm*/
 
             double motorSpeedLeftCMD = 0;

@@ -171,4 +171,9 @@ public class DrivetrainSim implements DrivetrainInterface {
         return 0;
     }
 
+    @Override
+    public void setPositionCmd(double forwardReverseCmd, double angleError) {
+
+    }
+
 }

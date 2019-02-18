@@ -39,6 +39,7 @@ public class DriverController {
     boolean gyroAngleLockReq;
     boolean compressorDisableReq;
     boolean compressorEnableReq;
+    boolean LockDrivetrainAngle = false;
     IntakeSpd intakeSpdReq;
     IntakePos intakePosReq;
 
@@ -164,6 +165,12 @@ public class DriverController {
             invertFactor = 1;
         } 
 
+        if(xb.getBButton()){
+            LockDrivetrainAngle = true;
+        } else {
+            LockDrivetrainAngle = false;
+        }
+
         //If we want to drive backward, invert the command.
         driverFwdRevCmd *= invertFactor;
         driverRotateCmd *= invertFactor;
@@ -208,6 +215,10 @@ public class DriverController {
 
     public boolean getGyroAngleLockReq() {
         return this.gyroAngleLockReq;
+    }
+
+    public boolean getLockDrivetrainAngle() {
+        return this.LockDrivetrainAngle;
     }
 
 }

@@ -108,4 +108,9 @@ public class Drivetrain implements DrivetrainInterface {
     public void setClosedLoopSpeedCmd(double leftCmdRPM, double rightCmdRPM, double headingCmdDeg) {
         dTrainIF.setClosedLoopSpeedCmd(leftCmdRPM, rightCmdRPM, headingCmdDeg);
     }
+
+    @Override
+    public void setPositionCmd(double forwardReverseCmd, double angleError) {
+        dTrainIF.setPositionCmd(forwardReverseCmd, angleError);
+    }
 }

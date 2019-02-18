@@ -41,7 +41,7 @@ public class OperatorController {
     boolean climberRelEnable;
 
     /* Auto Alignment Related Variables */
-    boolean   autoMove;
+    boolean autoMove;
     boolean autoAlignHighReq;
     boolean autoAlignMidReq;
     boolean autoAlignLowReq;
