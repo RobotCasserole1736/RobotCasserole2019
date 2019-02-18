@@ -68,6 +68,36 @@ sq.e.addEventListener('mousemove', ChartMouseMoveHandler, false);
 // End Main Code
 ///////////////////////////////////////////////////////////////////////////////////
 
+var filterSpec = "";
+var idToName = {};
+filterChangeHandler = function(filterspec_in){
+  filterSpec = filterspec_in.toLowerCase();
+  var inputBoxes = document.getElementById("id02").querySelectorAll("input");
+  for(var i = 0; i < inputBoxes.length; i++){
+    if(checkName(inputBoxes[i].name.toLowerCase())){
+      document.getElementsByName(inputBoxes[i].name)[0].parentElement.parentElement.style.visibility = "visible";
+    } else {
+      document.getElementsByName(inputBoxes[i].name)[0].parentElement.parentElement.style.visibility  = "collapse";
+    }
+  }
+}
+
+function checkName(name){
+    if(filterSpec.length == 0){
+      return true;
+    } else {
+      if(name.toLowerCase().includes(filterSpec)){
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
+
+
+
+
+
 
 //sets mouse_cursor_center to an X value if possible, otherwise null
 // This is used by the zoom function to determine where the zoom center should be.
