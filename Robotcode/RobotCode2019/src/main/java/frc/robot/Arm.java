@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj.Solenoid;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
 import com.revrobotics.CANPIDController.AccelStrategy;
+import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
@@ -189,14 +190,14 @@ public class Arm {
         topCargoHeightCal    = new Calibration("Arm Cargo Level Pos Top Deg", 103);
         midCargoHeightCal    = new Calibration("Arm Cargo Level Pos Mid Deg", 15);
         lowCargoHeightCal    = new Calibration("Arm Cargo Level Pos Bottom Deg", -22);
-        intakeCargoHeightCal = new Calibration("Arm Cargo Level Pos Intake Deg", -57);
+        intakeCargoHeightCal = new Calibration("Arm Cargo Level Pos Intake Deg", -55);
 
         topHatchHeightCal    = new Calibration("Arm Hatch Level Pos Top Deg", 100);
         midHatchHeightCal    = new Calibration("Arm Hatch Level Pos Mid Deg", 5);
-        lowHatchHeightCal    = new Calibration("Arm Hatch Level Pos Bottom Deg", -40);
-        intakeHatchHeightCal = new Calibration("Arm Hatch Level Pos Intake Deg", -40);
+        lowHatchHeightCal    = new Calibration("Arm Hatch Level Pos Bottom Deg", -42);
+        intakeHatchHeightCal = new Calibration("Arm Hatch Level Pos Intake Deg", -42);
 
-        intakeDangerZoneUpperHeight = new Calibration("Arm Intake Danger Zone Upper Pos Deg", -40);
+        intakeDangerZoneUpperHeight = new Calibration("Arm Intake Danger Zone Upper Pos Deg", -42);
         
         gravOffsetHorz    = new Calibration("Arm Required Voltage at Horz V", 0.5);
         bottomLimitSwitchDegreeCal = new Calibration("Arm Limit Switch Angle Bottom Deg", -60);
@@ -287,7 +288,7 @@ public class Arm {
     }
 
     public void setMatchStartPosition(){
-        armEncoder.setPosition(convertArmDegToMotorRot(bottomLimitSwitchDegreeCal.get() + 3.0)); //fudge
+        armEncoder.setPosition(convertArmDegToMotorRot(bottomLimitSwitchDegreeCal.get() + 5.0)); //fudge
         forceUpdate = true;
     }
 
@@ -503,5 +504,15 @@ public class Arm {
         desAngle = intakeCargoHeightCal.get();
         curManMoveCmd = 0;
         armPID.setReference(0, ControlType.kVoltage);
+    }
+
+    public void setCoastMode()
+    {
+        sadey.setIdleMode(IdleMode.kCoast);
+    }
+
+    public void setBrakeMode()
+    {
+        sadey.setIdleMode(IdleMode.kBrake);
     }
 }
