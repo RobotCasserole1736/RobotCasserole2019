@@ -86,7 +86,7 @@ public class DrivetrainClosedLoopTestVectors {
         if(prevTestSeq != 3.0 && testSeq == 3.0){
             autoSeqNeedsStart = true;
             seq.clearAllEvents();
-            seq.addEvent(new AutoSeqPathPlan(5, 5, Math.toRadians(-40)));
+            seq.addEvent(new AutoSeqPathPlan(0, 5, Math.toRadians(0)));
         }
 
         if(testSeq > 0){
