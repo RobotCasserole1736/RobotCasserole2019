@@ -192,7 +192,7 @@ public class Arm {
         lowCargoHeightCal    = new Calibration("Arm Cargo Level Pos Bottom Deg", -22);
         intakeCargoHeightCal = new Calibration("Arm Cargo Level Pos Intake Deg", -55);
 
-        topHatchHeightCal    = new Calibration("Arm Hatch Level Pos Top Deg", 100);
+        topHatchHeightCal    = new Calibration("Arm Hatch Level Pos Top Deg", 110);
         midHatchHeightCal    = new Calibration("Arm Hatch Level Pos Mid Deg", 5);
         lowHatchHeightCal    = new Calibration("Arm Hatch Level Pos Bottom Deg", -42);
         intakeHatchHeightCal = new Calibration("Arm Hatch Level Pos Intake Deg", -42);
