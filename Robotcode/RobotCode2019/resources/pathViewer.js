@@ -1128,6 +1128,4 @@ function drawArrowhead(context_in, from_x, from_y, to_x, to_y, radius) {
     context_in.closePath();
 
     context_in.fill();
-}
-
-     
+}     
