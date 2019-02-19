@@ -39,6 +39,7 @@ public class RobotConstants {
 
 
     public static final int BALL_INTAKE_PORT = 1;
+    public static final int INTAKE_LIMIT_SWITCH_PORT = 2;
 
     //Digital
     public static final int ARM_UPPER_LIMIT_SWITCH_PORT  = 2;

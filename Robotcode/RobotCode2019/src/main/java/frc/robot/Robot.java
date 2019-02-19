@@ -518,9 +518,6 @@ public class Robot extends TimedRobot {
         intakeControl.intakeLeftArmMotor.setManualMotorCommand(operatorController.xb.getY(Hand.kRight));
         intakeControl.intakeRightArmMotor.setManualMotorCommand(operatorController.xb.getY(Hand.kRight));
         intakeControl.updateTelemetry();
-        if(RobotController.getUserButton()){
-            intakeControl.resetIntakePos();
-        }
         loopTiming.markLoopEnd();
     }
  
