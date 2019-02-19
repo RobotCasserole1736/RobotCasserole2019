@@ -108,8 +108,8 @@ public class IntakeControl{
         extendAngle = new Calibration("Intake Angle of Extended State deg", 130);
         groundAngle = new Calibration("Intake Angle of Ground State deg", 170);
 
-        lowerLeftPotVoltage = new Calibration("Intake Lowest Value of Left Potentiometer V", 0.26, 0, 6);
-        upperLeftPotVoltage = new Calibration("Intake Highest Value of Left Potentiometer V", 0.88, 0, 6);
+        lowerLeftPotVoltage = new Calibration("Intake Lowest Value of Left Potentiometer V", 0.01, 0, 6);
+        upperLeftPotVoltage = new Calibration("Intake Highest Value of Left Potentiometer V", 0.68, 0, 6);
         lowerRightPotVoltage = new Calibration("Intake Lowest Value of Right Potentiometer V", 0.26, 0, 6);
         upperRightPotVoltage = new Calibration("Intake Highest Value of Right Potentiometer V", 0.88, 0, 6);
         minIntakeAngle = new Calibration("Intake Minimum Angle deg", 0) ;
