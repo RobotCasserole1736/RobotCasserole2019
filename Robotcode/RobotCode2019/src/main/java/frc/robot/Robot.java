@@ -580,10 +580,6 @@ public class Robot extends TimedRobot {
 
         climber.update();
         
-        
-        if(RobotController.getUserButton()){
-            intakeControl.resetIntakePos();
-        }
         loopTiming.markLoopEnd();
     }
  

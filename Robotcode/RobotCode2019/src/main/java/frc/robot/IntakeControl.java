@@ -31,6 +31,7 @@ public class IntakeControl{
     boolean runSimMode;
 
     DigitalInput ballInIntake;
+    DigitalInput lowerIntakeSwitch;
 
     WPI_TalonSRX intakeMotor;
     IntakeMotorBase intakeLeftArmMotor;
@@ -122,6 +123,9 @@ public class IntakeControl{
         ballDetectedDbnc = new DaBouncer(0,ALLOWABLE_ERR_DBNC_LOOPS);
         
         ballInIntake = new DigitalInput(RobotConstants.BALL_INTAKE_PORT);
+
+        lowerIntakeSwitch = new DigitalInput(RobotConstants.INTAKE_LIMIT_SWITCH_PORT);
+
         intakeMotor = new WPI_TalonSRX(RobotConstants.INTAKE_MOTOR_CANID);
         //TODO figure out which one is inverted
         intakeLeftArmMotor = new IntakeMotorBase(intakeMotorP.get(),intakeMotorI.get(),intakeMotorD.get(),RobotConstants.INTAKE_MOTOR_LEFT_CANID,RobotConstants.LEFT_INTAKE_COUNTER);
@@ -280,6 +284,10 @@ public class IntakeControl{
             }
     
             //Intake Arm stuffs
+
+            if(lowerIntakeSwitch.get()){
+                resetIntakePos();
+            }
 
             if(intakePosCmd==IntakePos.Extend){
                 intakeLeftArmMotor.setSetpoint(extendAngle.get());
