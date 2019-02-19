@@ -38,7 +38,7 @@ public class IntakeMotorBase extends CasserolePID{
         intakeArmHallSensor.setUpDownCounterMode();
         intakeArmHallSensor.setUpSource(Hall_Sensor_id);
         intakeArmHallSensor.setSemiPeriodMode(true); //Count both risnig and falling edges
-        intakeArmHallSensor.setSamplesToAverage(4);
+        intakeArmHallSensor.setSamplesToAverage(127);
         this.threadName = ("IntakePID " + Motor_id);
     }
 
@@ -62,26 +62,30 @@ public class IntakeMotorBase extends CasserolePID{
 
 
     public void checkDirection(){
-        if(curMotorCmd>1){
-            direction=1;
-        }else if (curMotorCmd<1){
-            direction=-1;
-        }else{
-            direction=0;
-        }
+
     }
 
     double prevHallSensorCount = 0;
 
-    @Override
-    protected double returnPIDInput() {
+    public double getRawSensorCount(){
+        return prevHallSensorCount;
+    }
 
-        final double HALL_CONVERSION_FACTOR_DEG_PER_EDGE=1.0/(174.9*2); //From spec sheet, 
+    public double samplePosition(){ //must be called externally fast enough
+
+        final double HALL_CONVERSION_FACTOR_DEG_PER_EDGE=360.0/(174.9*2); //From spec sheet, 174.9 pulses per output revolution. 360 degrees/rev, and we are watching every edge (two edge per pulse)
         double curHallSensorCount = intakeArmHallSensor.get();
         double hallSensorDifference = curHallSensorCount - prevHallSensorCount;
         double deltaDeg = HALL_CONVERSION_FACTOR_DEG_PER_EDGE*hallSensorDifference; 
-        
-        checkDirection();
+
+        if(curMotorCmd>0){
+            direction=1;
+        }else if (curMotorCmd<0){
+            direction=-1;
+        }else{
+            direction=0;
+        }
+
         if(direction>0){
             curPosDeg = curPosDeg+deltaDeg; 
         }else if(direction<0){
@@ -90,6 +94,11 @@ public class IntakeMotorBase extends CasserolePID{
 
         prevHallSensorCount = curHallSensorCount;
 
+        return curPosDeg;
+    }
+
+    @Override
+    protected double returnPIDInput() {
         return curPosDeg;
     }
 

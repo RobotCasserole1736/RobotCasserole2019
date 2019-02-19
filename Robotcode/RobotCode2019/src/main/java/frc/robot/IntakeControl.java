@@ -41,6 +41,8 @@ public class IntakeControl{
 
     Signal leftIntakeMotorPosSig;
     Signal rightIntakeMotorPosSig;
+    Signal leftIntakeMotorPosRawCountSig;
+    Signal rightIntakeMotorPosRawCountSig;
     Signal retractStateCmdSig;
     Signal motorSpeedCmdSig;
     Signal ballInIntakeSig;
@@ -71,6 +73,7 @@ public class IntakeControl{
 
     Signal rightOnTargetSig; 
     Signal leftOnTargetSig;
+    Signal intakeAtBackLimit;
 
     DriverController dController;
     OperatorController opController;
@@ -79,6 +82,8 @@ public class IntakeControl{
     DaBouncer ballDetectedDbnc;
 
     boolean ballDetected = false;
+
+    boolean backLimitSwitchPressed = false;
 
     private static IntakeControl iControl = null;
 
@@ -122,11 +127,14 @@ public class IntakeControl{
         arm = Arm.getInstance();
         leftIntakeMotorPosSig = new Signal("Intake Left Motor Actual Position","deg");
         rightIntakeMotorPosSig = new Signal("Intake Right Motor Actual Position","deg");
+        leftIntakeMotorPosRawCountSig = new Signal("Intake Left Motor Raw Count","count");
+        rightIntakeMotorPosRawCountSig = new Signal("Intake Right Motor Raw Count","count");
         retractStateCmdSig = new Signal("Intake Commanded Position", "Intake Pos Enum");
         motorSpeedCmdSig = new Signal("Intake Roller Motor Command", "cmd");
         ballInIntakeSig = new Signal("Intake Ball Present", "bool");
         rightOnTargetSig = new Signal("Intake Right Arm Position On Target", "bool");
         leftOnTargetSig  = new Signal("Intake Left Arm Position On Target", "bool");
+        intakeAtBackLimit  = new Signal("Intake Arms at Back Limit", "bool");
 
     }
 
@@ -214,13 +222,28 @@ public class IntakeControl{
         if(!runSimMode){
             //System.out.println(ballInIntake.get());
             ballDetected = !ballInIntake.get(); //Sensor outputs high for no ball, low for ball 
-            currentLeftPosition= intakeLeftArmMotor.returnPIDInput();
-            currentRightPosition= intakeRightArmMotor.returnPIDInput();
+            currentLeftPosition= intakeLeftArmMotor.samplePosition();
+            currentRightPosition= intakeRightArmMotor.samplePosition();
+            backLimitSwitchPressed = lowerIntakeSwitch.get();
+
+            if(backLimitSwitchPressed){
+                resetIntakePos();
+                intakeLeftArmMotor.setLimitSwitchPressed(true);
+                intakeRightArmMotor.setLimitSwitchPressed(true);
+            } else {
+                intakeLeftArmMotor.setLimitSwitchPressed(false);
+                intakeRightArmMotor.setLimitSwitchPressed(false);           
+            }
         }
+    }
+
+    public boolean getBackLimitSwitchPressed(){
+        return backLimitSwitchPressed;
     }
 
     public void update(){
         double intakeMotorCmd = 0;
+
         
         //Temp - do this elsewhere
         intakeLeftArmMotor.setKp(intakeMotorP.get());
@@ -258,15 +281,6 @@ public class IntakeControl{
             }
     
             //Intake Arm stuffs
-
-            if(lowerIntakeSwitch.get()){
-                resetIntakePos();
-                intakeLeftArmMotor.setLimitSwitchPressed(true);
-                intakeRightArmMotor.setLimitSwitchPressed(true);
-            } else {
-                intakeLeftArmMotor.setLimitSwitchPressed(false);
-                intakeRightArmMotor.setLimitSwitchPressed(false);           
-            }
 
             if(intakePosCmd==IntakePos.Extend){
                 intakeLeftArmMotor.setSetpoint(extendAngle.get());
@@ -322,10 +336,13 @@ public class IntakeControl{
         double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
         leftIntakeMotorPosSig.addSample(sampleTimeMS, currentLeftPosition);
         rightIntakeMotorPosSig.addSample(sampleTimeMS, currentRightPosition);
+        leftIntakeMotorPosRawCountSig.addSample(sampleTimeMS, intakeLeftArmMotor.getRawSensorCount());
+        rightIntakeMotorPosRawCountSig.addSample(sampleTimeMS,  intakeRightArmMotor.getRawSensorCount());
         retractStateCmdSig.addSample(sampleTimeMS, intakePosCmd.toInt());
         ballInIntakeSig.addSample(sampleTimeMS, ballDetected);
         rightOnTargetSig.addSample(sampleTimeMS, rightOnTarget); 
         leftOnTargetSig.addSample(sampleTimeMS, leftOnTarget);  
+        intakeAtBackLimit.addSample(sampleTimeMS, backLimitSwitchPressed);  
     }
 
     public double getLeftArmPosition() {
