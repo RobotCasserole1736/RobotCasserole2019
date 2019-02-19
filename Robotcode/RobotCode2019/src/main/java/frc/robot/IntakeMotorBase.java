@@ -8,13 +8,9 @@
 package frc.robot;
 
 import frc.lib.CasserolePID.CasserolePID;
-import frc.lib.DataServer.Signal;
-
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import edu.wpi.first.wpilibj.Counter;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 
 
 /**
@@ -26,31 +22,28 @@ public class IntakeMotorBase extends CasserolePID{
 
     boolean isOpenLoop = false;
 
-    boolean isInverted = false;
     double outputCmd = 0;
     double curPosDeg=0;
 
-    double lowerLimitVoltage=0;
-    double upperLimitVoltage=0;
-    double lowerLimitDegrees=0;
-    double upperLimitDegrees=0;
     double direction =0;
     double curMotorCmd=0;
+
+    boolean limitSwitchPressed = false;
 
 
     public IntakeMotorBase(double Kp_in, double Ki_in, double Kd_in,int Motor_id,int Hall_Sensor_id){
         super(Kp_in,Ki_in,Kd_in);
         intakeArmMotor = new VictorSPX(Motor_id);
         intakeArmHallSensor = new Counter();
-        intakeArmHallSensor.setUpSource(Hall_Sensor_id);
         intakeArmHallSensor.setUpDownCounterMode();
-        intakeArmHallSensor.setSemiPeriodMode(true);
+        intakeArmHallSensor.setUpSource(Hall_Sensor_id);
+        intakeArmHallSensor.setSemiPeriodMode(true); //Count both risnig and falling edges
         intakeArmHallSensor.setSamplesToAverage(4);
         this.threadName = ("IntakePID " + Motor_id);
     }
 
-    public void setInverted(boolean isInverted){
-        this.isInverted=isInverted;
+    public void setLimitSwitchPressed(boolean pressed){
+        limitSwitchPressed =pressed;
     }
 
     public void killPID(){
@@ -63,38 +56,12 @@ public class IntakeMotorBase extends CasserolePID{
         super.start();
     }
 
-    double convertVoltsToDeg(double voltage_in){
-        double lowerLimitConversionVoltage=lowerLimitVoltage;
-        double upperLimitConversionVoltage=upperLimitVoltage;
-        if(isInverted){
-            lowerLimitConversionVoltage=upperLimitVoltage;
-            upperLimitConversionVoltage=lowerLimitVoltage;
-        }
-        //Thanks Arduino!
-        return (voltage_in - lowerLimitConversionVoltage) * (upperLimitDegrees - lowerLimitDegrees) / (upperLimitConversionVoltage - lowerLimitConversionVoltage) + lowerLimitDegrees;
-    }
-    public void setLowerLimitVoltage(double voltage){
-        lowerLimitVoltage = voltage;
-    }
-
-    public void setUpperLimitVoltage(double voltage){
-        upperLimitVoltage = voltage;
-    }
-
-    public void setLowerLimitDegrees(double degrees){
-        lowerLimitDegrees = degrees;
-    }
-
-    public void setUpperLimitDegrees(double degrees){
-        upperLimitDegrees = degrees;
-    }
-
     public void resetPosition(){
         curPosDeg=0;
     }
 
 
-    public void setIntakeCmd(){
+    public void checkDirection(){
         if(curMotorCmd>1){
             direction=1;
         }else if (curMotorCmd<1){
@@ -104,23 +71,35 @@ public class IntakeMotorBase extends CasserolePID{
         }
     }
 
+    double prevHallSensorCount = 0;
 
     @Override
     protected double returnPIDInput() {
-        //TODO FIX THIS MILES
-        double hallConversionFactor=1;
-        double hallSensorDifference = intakeArmHallSensor.get();
-        double deltaDeg = hallConversionFactor*hallSensorDifference; 
+
+        final double HALL_CONVERSION_FACTOR_DEG_PER_EDGE=1.0/(174.9*2); //From spec sheet, 
+        double curHallSensorCount = intakeArmHallSensor.get();
+        double hallSensorDifference = curHallSensorCount - prevHallSensorCount;
+        double deltaDeg = HALL_CONVERSION_FACTOR_DEG_PER_EDGE*hallSensorDifference; 
+        
+        checkDirection();
         if(direction>0){
             curPosDeg = curPosDeg+deltaDeg; 
         }else if(direction<0){
             curPosDeg = curPosDeg-deltaDeg; 
         }
+
+        prevHallSensorCount = curHallSensorCount;
+
         return curPosDeg;
     }
 
     @Override
     protected void usePIDOutput(double pidOutput) {
+        //Safety - do not run motor further past limit switch
+        if(pidOutput < 0 && limitSwitchPressed){
+            pidOutput = 0;
+        }
+
         if(isOpenLoop == false){
             intakeArmMotor.set(ControlMode.PercentOutput,pidOutput);
             curMotorCmd=pidOutput;
@@ -128,6 +107,11 @@ public class IntakeMotorBase extends CasserolePID{
     }
 
     public void setManualMotorCommand(double cmd){
+        //Safety - do not run motor further past limit switch
+        if(cmd < 0 && limitSwitchPressed){
+            cmd = 0;
+        }
+
         if(isOpenLoop == true){
             intakeArmMotor.set(ControlMode.PercentOutput,cmd); 
             curMotorCmd=cmd;

@@ -44,8 +44,6 @@ public class IntakeControl{
     Signal retractStateCmdSig;
     Signal motorSpeedCmdSig;
     Signal ballInIntakeSig;
-    Signal leftIntakePosSensorVoltageSig;
-    Signal rightIntakePosSensorVoltageSig;
 
     Calibration intakeSpeed;
     Calibration ejectSpeed;
@@ -56,12 +54,6 @@ public class IntakeControl{
     Calibration intakeMotorP;
     Calibration intakeMotorI;
     Calibration intakeMotorD;
-    Calibration lowerLeftPotVoltage;
-    Calibration upperLeftPotVoltage;
-    Calibration lowerRightPotVoltage;
-    Calibration upperRightPotVoltage;
-    Calibration minIntakeAngle;
-    Calibration maxIntakeAngle;
 
     Calibration positionOverride;
 
@@ -108,13 +100,6 @@ public class IntakeControl{
         retractAngle = new Calibration("Intake Angle of Retracted State deg", 5);
         extendAngle = new Calibration("Intake Angle of Extended State deg", 130);
         groundAngle = new Calibration("Intake Angle of Ground State deg", 170);
-
-        lowerLeftPotVoltage = new Calibration("Intake Lowest Value of Left Potentiometer V", 0.01, 0, 6);
-        upperLeftPotVoltage = new Calibration("Intake Highest Value of Left Potentiometer V", 0.68, 0, 6);
-        lowerRightPotVoltage = new Calibration("Intake Lowest Value of Right Potentiometer V", 0.26, 0, 6);
-        upperRightPotVoltage = new Calibration("Intake Highest Value of Right Potentiometer V", 0.88, 0, 6);
-        minIntakeAngle = new Calibration("Intake Minimum Angle deg", 0) ;
-        maxIntakeAngle = new Calibration("Intake Maximum Angle deg", 180) ;
         
         positionOverride = new Calibration("Intake Position Override Enable", 0, 0, 1);
 
@@ -130,24 +115,13 @@ public class IntakeControl{
         //TODO figure out which one is inverted
         intakeLeftArmMotor = new IntakeMotorBase(intakeMotorP.get(),intakeMotorI.get(),intakeMotorD.get(),RobotConstants.INTAKE_MOTOR_LEFT_CANID,RobotConstants.LEFT_INTAKE_COUNTER);
         intakeRightArmMotor = new IntakeMotorBase(intakeMotorP.get(),intakeMotorI.get(),intakeMotorD.get(),RobotConstants.INTAKE_MOTOR_RIGHT_CANID,RobotConstants.RIGHT_INTAKE_COUNTER);
-        intakeLeftArmMotor.setInverted(true);
-        intakeRightArmMotor.setInverted(false);
-        intakeLeftArmMotor.setLowerLimitVoltage(lowerLeftPotVoltage.get());
-        intakeLeftArmMotor.setUpperLimitVoltage(upperLeftPotVoltage.get());
-        intakeLeftArmMotor.setLowerLimitDegrees(minIntakeAngle.get());
-        intakeLeftArmMotor.setUpperLimitDegrees(maxIntakeAngle.get());
-        intakeRightArmMotor.setLowerLimitVoltage(lowerRightPotVoltage.get());
-        intakeRightArmMotor.setUpperLimitVoltage(upperRightPotVoltage.get());
-        intakeRightArmMotor.setLowerLimitDegrees(minIntakeAngle.get());
-        intakeRightArmMotor.setUpperLimitDegrees(maxIntakeAngle.get());
+
 
         dController = DriverController.getInstance();
         opController = OperatorController.getInstance();
         arm = Arm.getInstance();
         leftIntakeMotorPosSig = new Signal("Intake Left Motor Actual Position","deg");
         rightIntakeMotorPosSig = new Signal("Intake Right Motor Actual Position","deg");
-        leftIntakePosSensorVoltageSig = new Signal("Intake Left Sensor Raw Voltage","V");
-        rightIntakePosSensorVoltageSig = new Signal("Intake Right Sensor Raw Voltage","V");
         retractStateCmdSig = new Signal("Intake Commanded Position", "Intake Pos Enum");
         motorSpeedCmdSig = new Signal("Intake Roller Motor Command", "cmd");
         ballInIntakeSig = new Signal("Intake Ball Present", "bool");
@@ -287,6 +261,11 @@ public class IntakeControl{
 
             if(lowerIntakeSwitch.get()){
                 resetIntakePos();
+                intakeLeftArmMotor.setLimitSwitchPressed(true);
+                intakeRightArmMotor.setLimitSwitchPressed(true);
+            } else {
+                intakeLeftArmMotor.setLimitSwitchPressed(false);
+                intakeRightArmMotor.setLimitSwitchPressed(false);           
             }
 
             if(intakePosCmd==IntakePos.Extend){

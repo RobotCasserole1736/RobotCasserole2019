@@ -175,9 +175,6 @@ public class Robot extends TimedRobot {
             autonomous = Autonomous.getInstance();
             sensorCheck = SensorCheck.getInstance();
 
-            /* Init intake position */
-            intakeControl.resetIntakePos();
-
 
             /* Init local telemetry signals */
             rioDSSampLoadSig = new Signal("Dataserver Stored Samples", "count"); 
@@ -571,7 +568,7 @@ public class Robot extends TimedRobot {
         //Manual overrides for motors we can't turn by hand
         //climber.setManualMotorCommand(operatorController.xb.getY(Hand.kLeft));
         double intakeCmd =-1.0*operatorController.xb.getY(Hand.kRight);
-        if(Math.abs(intakeCmd) < 0.15){
+        if(Math.abs(intakeCmd) < 0.20){
             intakeCmd = 0;
         }
         intakeControl.intakeLeftArmMotor.setManualMotorCommand(intakeCmd);
