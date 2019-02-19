@@ -51,11 +51,14 @@ public class RobotConstants {
     public static final int LINE_FOLLOWING_SENSOR_5_PORT = 8;
     public static final int PEZ_SOLENOID_LIMIT_SWITCH_PORT = 9;
 
+    public static final int LEFT_INTAKE_COUNTER = 11;
+    public static final int RIGHT_INTAKE_COUNTER = 11;
+
     //PWM/Motor
     public static final int VISON_LED_RING_PORT = 0;
     public static final int CLIMBER_SERVO1 = 6;
     public static final int CLIMBER_SERVO2 = 7;
-  
+
 
     //Relay
 

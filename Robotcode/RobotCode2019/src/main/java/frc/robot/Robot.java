@@ -152,6 +152,7 @@ public class Robot extends TimedRobot {
             drivetrain = Drivetrain.getInstance();
             climber = Climber.getInstance();
             intakeControl = IntakeControl.getInstance();
+            
             pezControl = PEZControl.getInstance();
             onboardAccel = new BuiltInAccelerometer();
             frontUltrasonic = FrontUltrasonic.getInstance();
@@ -173,6 +174,10 @@ public class Robot extends TimedRobot {
             AutoSeqDistToTgtEst.getInstance();
             autonomous = Autonomous.getInstance();
             sensorCheck = SensorCheck.getInstance();
+
+            /* Init intake position */
+            intakeControl.resetIntakePos();
+
 
             /* Init local telemetry signals */
             rioDSSampLoadSig = new Signal("Dataserver Stored Samples", "count"); 
@@ -576,6 +581,9 @@ public class Robot extends TimedRobot {
         climber.update();
         
         
+        if(RobotController.getUserButton()){
+            intakeControl.resetIntakePos();
+        }
         loopTiming.markLoopEnd();
     }
  

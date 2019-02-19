@@ -12,9 +12,9 @@ import frc.lib.DataServer.Signal;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
-
-import edu.wpi.first.wpilibj.AnalogPotentiometer;
+import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 
 
 /**
@@ -22,24 +22,30 @@ import edu.wpi.first.wpilibj.Timer;
  */
 public class IntakeMotorBase extends CasserolePID{
     VictorSPX intakeArmMotor;
-    AnalogPotentiometer armPot;
+    Counter intakeArmHallSensor;
 
     boolean isOpenLoop = false;
 
     boolean isInverted = false;
     double outputCmd = 0;
+    double curPosDeg=0;
 
     double lowerLimitVoltage=0;
     double upperLimitVoltage=0;
     double lowerLimitDegrees=0;
     double upperLimitDegrees=0;
+    double direction =0;
+    double curMotorCmd=0;
 
-    double potentiometerReading = 0;
 
-    public IntakeMotorBase(double Kp_in, double Ki_in, double Kd_in,int Motor_id,int Pot_id){
+    public IntakeMotorBase(double Kp_in, double Ki_in, double Kd_in,int Motor_id,int Hall_Sensor_id){
         super(Kp_in,Ki_in,Kd_in);
         intakeArmMotor = new VictorSPX(Motor_id);
-        armPot = new AnalogPotentiometer(Pot_id);
+        intakeArmHallSensor = new Counter();
+        intakeArmHallSensor.setUpSource(Hall_Sensor_id);
+        intakeArmHallSensor.setUpDownCounterMode();
+        intakeArmHallSensor.setSemiPeriodMode(true);
+        intakeArmHallSensor.setSamplesToAverage(4);
         this.threadName = ("IntakePID " + Motor_id);
     }
 
@@ -83,27 +89,48 @@ public class IntakeMotorBase extends CasserolePID{
         upperLimitDegrees = degrees;
     }
 
-    public double getSensorRawVoltage(){
-        return armPot.get();
+    public void resetPosition(){
+        curPosDeg=0;
+    }
+
+
+    public void setIntakeCmd(){
+        if(curMotorCmd>1){
+            direction=1;
+        }else if (curMotorCmd<1){
+            direction=-1;
+        }else{
+            direction=0;
+        }
     }
 
 
     @Override
     protected double returnPIDInput() {
-        potentiometerReading = armPot.get();
-        return convertVoltsToDeg(potentiometerReading);
+        //TODO FIX THIS MILES
+        double hallConversionFactor=1;
+        double hallSensorDifference = intakeArmHallSensor.get();
+        double deltaDeg = hallConversionFactor*hallSensorDifference; 
+        if(direction>0){
+            curPosDeg = curPosDeg+deltaDeg; 
+        }else if(direction<0){
+            curPosDeg = curPosDeg-deltaDeg; 
+        }
+        return curPosDeg;
     }
 
     @Override
     protected void usePIDOutput(double pidOutput) {
         if(isOpenLoop == false){
             intakeArmMotor.set(ControlMode.PercentOutput,pidOutput);
+            curMotorCmd=pidOutput;
         }
     }
 
     public void setManualMotorCommand(double cmd){
         if(isOpenLoop == true){
             intakeArmMotor.set(ControlMode.PercentOutput,cmd); 
+            curMotorCmd=cmd;
         }
     }
 }
