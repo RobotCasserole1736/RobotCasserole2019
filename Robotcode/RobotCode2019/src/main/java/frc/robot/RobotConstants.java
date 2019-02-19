@@ -43,18 +43,16 @@ public class RobotConstants {
 
     //Digital
     public static final int BALL_INTAKE_PORT = 1;
-    public static final int INTAKE_LIMIT_SWITCH_PORT = 2;
-    public static final int ARM_UPPER_LIMIT_SWITCH_PORT  = 2;
-    public static final int ARM_LOWER_LIMIT_SWITCH_PORT  = 3;
-    public static final int LINE_FOLLOWING_SENSOR_1_PORT = 4;
-    public static final int LINE_FOLLOWING_SENSOR_2_PORT = 5;
-    public static final int LINE_FOLLOWING_SENSOR_3_PORT = 6;
-    public static final int LINE_FOLLOWING_SENSOR_4_PORT = 7;
-    public static final int LINE_FOLLOWING_SENSOR_5_PORT = 8;
-    public static final int PEZ_SOLENOID_LIMIT_SWITCH_PORT = 9;
 
-    public static final int LEFT_INTAKE_COUNTER = 11;
-    public static final int RIGHT_INTAKE_COUNTER = 11;
+    public static final int LINE_FOLLOWING_SENSOR_1_PORT = 3;
+    public static final int LINE_FOLLOWING_SENSOR_2_PORT = 4;
+    public static final int LINE_FOLLOWING_SENSOR_3_PORT = 5;
+
+    public static final int LEFT_INTAKE_COUNTER = 6;
+    public static final int RIGHT_INTAKE_COUNTER = 7;
+    public static final int INTAKE_LIMIT_SWITCH_PORT = 8;
+
+    public static final int PEZ_SOLENOID_LIMIT_SWITCH_PORT = 9;
 
     //PWM/Motor
     public static final int VISON_LED_RING_PORT = 0;
