@@ -99,10 +99,10 @@ public class RobotPose {
     public RobotPose() {
         DesX = new Signal("botDesPoseX", "in");
         DesY = new Signal("botDesPoseY", "in");
-        DesT = new Signal("botDesPoseT", "deg");
+        DesT = new Signal("botDesPoseT", "Deg");
         ActX = new Signal("botActPoseX", "in");
         ActY = new Signal("botActPoseY", "in");
-        ActT = new Signal("botActPoseT", "deg");
+        ActT = new Signal("botActPoseT", "Deg");
     }
 
     public void setLeftMotorSpeed(double speed) {

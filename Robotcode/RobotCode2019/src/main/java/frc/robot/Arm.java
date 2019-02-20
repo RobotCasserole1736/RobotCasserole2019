@@ -176,8 +176,8 @@ public class Arm {
 
         armMotorCmdSig = new Signal("Arm Motor Command", "cmd");
         armMotorCurrentSig = new Signal("Arm Motor Current", "A");
-        armDesPosSig = new Signal("Arm Desired Position", "deg");
-        armActPosSig = new Signal("Arm Actual Position", "deg");
+        armDesPosSig = new Signal("Arm Desired Position", "Deg");
+        armActPosSig = new Signal("Arm Actual Position", "Deg");
         armActVelSig = new Signal("Arm Actual Velocity", "deg per sec");
         armDesVelSig = new Signal("Arm Desired Velocity", "deg per sec");
         armLowerLimitSig = new Signal("Arm Lower Position Limit Switch", "bool");

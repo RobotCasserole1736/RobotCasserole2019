@@ -118,14 +118,14 @@ public class JeVoisInterface {
         tgtAngleSig = new Signal("Jevois Target Angle", "rad");
         tgtXPosSig = new Signal("Jevois Target X Position", "ft");
         tgtYPosSig = new Signal("Jevois Target Y Position", "ft");
-        tgtRotationSig = new Signal("Jevois Target Rotation Angle", "deg");
+        tgtRotationSig = new Signal("Jevois Target Rotation Angle", "Deg");
         tgtCaptureTimeSig = new Signal("Jevois Image Capture Time", "sec");
         jevoisCpuTempSig = new Signal("Jevois CPU Temp", "C");
         jevoisCpuLoadSig = new Signal("Jevois CPU Load", "pct");
         jevoisFramerateSig = new Signal("Jevois Framerate", "fps");
         jevoisPacketsPerSecSig = new Signal("Jevois Packets Per Sec", "pps");
         framecounterSig = new Signal("Jevois Frame Count", "count");
-        tgtGeneralAngleSig = new Signal("Jevois General Angle", "deg");
+        tgtGeneralAngleSig = new Signal("Jevois General Angle", "Deg");
 
         //Retry strategy to get this serial port open.
         //I have yet to see a single retry used assuming the camera is plugged in

@@ -195,10 +195,12 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
         updateGains(true);
     }
 
+    double angleErrorInput = 0;
     public void setPositionCmd(double forwardReverseCmd, double angleError){
         opModeCmd = DrivetrainOpMode.TargetAngleLock;
         this.forwardReverseCmd = forwardReverseCmd;
-        desiredAngle = Drivetrain.getInstance().getGyroAngle() + angleError;
+        angleErrorInput = angleError;
+
     }
 
     public void setOpenLoopCmd(double forwardReverseCmd, double rotationCmd) {
@@ -359,9 +361,15 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
         } else if(prevOpMode != DrivetrainOpMode.OpenLoop && opMode == DrivetrainOpMode.OpenLoop) {
             //Going into OpenLoop
             gyroLockPID.disable();
+        } else if(prevOpMode != DrivetrainOpMode.TargetAngleLock && opMode == DrivetrainOpMode.TargetAngleLock){
+            desiredAngle = getGyroAngle() - angleErrorInput;
+            gyroLockPID.setSetpoint(desiredAngle);
+            gyroLockPID.enable();
         } else if(prevOpMode != DrivetrainOpMode.ClosedLoop && opMode == DrivetrainOpMode.ClosedLoop) {
+            gyroLockPID.disable();
             //I term Accumulator should be auto-cleared
         } else if(prevOpMode != DrivetrainOpMode.ClosedLoopWithGyro && opMode == DrivetrainOpMode.ClosedLoopWithGyro) {
+            gyroLockPID.disable();
             //I term Accumulator should be auto-cleared
         }
 
