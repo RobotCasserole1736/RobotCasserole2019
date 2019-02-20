@@ -152,6 +152,7 @@ public class Robot extends TimedRobot {
             drivetrain = Drivetrain.getInstance();
             climber = Climber.getInstance();
             intakeControl = IntakeControl.getInstance();
+            
             pezControl = PEZControl.getInstance();
             onboardAccel = new BuiltInAccelerometer();
             frontUltrasonic = FrontUltrasonic.getInstance();
@@ -173,6 +174,7 @@ public class Robot extends TimedRobot {
             AutoSeqDistToTgtEst.getInstance();
             autonomous = Autonomous.getInstance();
             sensorCheck = SensorCheck.getInstance();
+
 
             /* Init local telemetry signals */
             rioDSSampLoadSig = new Signal("Dataserver Stored Samples", "count"); 
@@ -215,14 +217,13 @@ public class Robot extends TimedRobot {
             CrashTracker.logTeleopInit();
 
             //Intake check - if it's not at the correct location, kill the robot!
-            if((intakeControl.getLeftArmPosition() > 15 && intakeControl.getRightArmPosition() > 15) && !wasAutoRun) {
+            if((!intakeControl.setAndCheckInitialState()) && !wasAutoRun) {
                 System.out.println("Error: !!! UNSAFE STARTUP STATE !!!");
                 throw new Error("Error!!! Robot started in unsafe state");
             }
 
             dataServer.logger.startLoggingTeleop();
             matchState.SetPeriod(MatchState.Period.OperatorControl);
-            intakeControl.closedLoop();
             eyeOfVeganSauron.setLEDRingState(true);
         } catch(Throwable t) {
             CrashTracker.logThrowableCrash(t);
@@ -238,7 +239,7 @@ public class Robot extends TimedRobot {
             wasAutoRun = true;
 
             //Intake check - if it's not at the correct location, kill the robot!
-            if(intakeControl.getLeftArmPosition() > 15 && intakeControl.getRightArmPosition() > 15) {
+            if(!intakeControl.setAndCheckInitialState()) {
                 System.out.println("Error: !!! UNSAFE STARTUP STATE !!!");
                 throw new Error("Error!!! Robot started in unsafe state");
             }
@@ -246,7 +247,6 @@ public class Robot extends TimedRobot {
             dataServer.logger.startLoggingAuto();
             ledController.setPattern(LEDPatterns.Pattern4);
             matchState.SetPeriod(MatchState.Period.Autonomous);
-            intakeControl.closedLoop();
             eyeOfVeganSauron.setLEDRingState(false); //test
             setMatchInitialCommands();
             pneumaticsControl.start();
@@ -549,7 +549,6 @@ public class Robot extends TimedRobot {
 
     @Override
     public void testInit(){
-        intakeControl.openLoop();
         arm.forceArmStop();
     }
 
@@ -560,7 +559,6 @@ public class Robot extends TimedRobot {
         arm.setManualMovementCmd(0);
         
         loopTiming.markLoopStart();
-        intakeControl.sampleSensors();
         pneumaticsControl.start();//ensure compressor is running
 
         pezControl.setPositionCmd(PEZPos.Neutralize);
@@ -568,13 +566,13 @@ public class Robot extends TimedRobot {
         //Manual overrides for motors we can't turn by hand
         //climber.setManualMotorCommand(operatorController.xb.getY(Hand.kLeft));
         double intakeCmd =-1.0*operatorController.xb.getY(Hand.kRight);
-        if(Math.abs(intakeCmd) < 0.15){
+        if(Math.abs(intakeCmd) < 0.20){
             intakeCmd = 0;
         }
-        intakeControl.intakeLeftArmMotor.setManualMotorCommand(intakeCmd);
-        intakeControl.intakeRightArmMotor.setManualMotorCommand(intakeCmd);
-        intakeControl.updateTelemetry();
-        
+        intakeControl.manualIntakeOverride();
+        intakeControl.update();
+
+        climber.update();
         
         loopTiming.markLoopEnd();
     }
