@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import frc.lib.Calibration.Calibration;
 import frc.lib.DataServer.Signal;
+import frc.lib.SignalMath.AveragingFilter;
 import frc.robot.IntakeControl.IntakePos;
 import frc.robot.IntakeControl.IntakeSpd;
 
@@ -42,6 +43,7 @@ public class DriverController {
     boolean LockDrivetrainAngle = false;
     IntakeSpd intakeSpdReq;
     IntakePos intakePosReq;
+    AveragingFilter filt;
 
     /* Behavior/performance calibrations */
     Calibration slowMoveFwdRevScaleFactor;
@@ -69,6 +71,7 @@ public class DriverController {
 
     /** Constructor */
     private DriverController(){
+        filt = new AveragingFilter(5,0);
         xb = new XboxController(RobotConstants.DRIVER_CONTROLLER_USB_IDX);
         slowMoveFwdRevScaleFactor = new Calibration("Driver Fwd-Rev Slow Move Scale Factor",  0.30, 0, 1);
         slowMoveRotateScaleFactor = new Calibration("Driver Rotation Slow Move Scale Factor", 0.5, 0, 1);
@@ -152,6 +155,9 @@ public class DriverController {
             driverFwdRevCmd *= slowMoveFwdRevScaleFactor.get();
             driverRotateCmd *= slowMoveRotateScaleFactor.get();
         }
+
+        //code to Parkify turning
+        driverRotateCmd = filt.filter(driverRotateCmd);
 
         if(xb.getAButton()){
             gyroAngleLockReq = true;
