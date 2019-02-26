@@ -23,6 +23,7 @@ package frc.robot;
 import frc.lib.Calibration.*;
 import frc.lib.DataServer.Signal;
 import frc.lib.Util.DaBouncer;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Solenoid;
 
 import com.revrobotics.CANSparkMax;
@@ -51,6 +52,7 @@ public class Arm {
     double curArmAngle;
     CANDigitalInput upperLimitSwitch;
     CANDigitalInput lowerLimitSwitch;
+    DigitalInput middleLimitSwitch;
     
     /////The PID StartUps\\\\\
     public double kIz;
@@ -84,6 +86,8 @@ public class Arm {
 
     Calibration bottomLimitSwitchDegreeCal;
     Calibration topLimitSwitchDegreeCal;
+    Calibration middleSensorArmTopsideEdgeDegreeCal;
+    Calibration middleSensorArmBottomsideEdgeDegreeCal;
 
     Calibration kMaxOutputCal;
     Calibration kMinOutputCal;
@@ -104,8 +108,10 @@ public class Arm {
     /////////Limit Switches\\\\\\\\\\
     boolean topOfMotion = false;
     boolean bottomOfMotion = false; 
+    boolean middleOfMotion = false;
     boolean topOfMotionPrev = false;
     boolean bottomOfMotionPrev = false; 
+    boolean middleOfMotionPrev = false;
 
     Signal armMotorCurrentSig;
     Signal armMotorCmdSig;
@@ -115,6 +121,7 @@ public class Arm {
     Signal armDesVelSig;
     Signal armLowerLimitSig;
     Signal armUpperLimitSig;
+    Signal armMiddleLimitSig;
     Signal atDesAngleSig;
     Signal armGearSkipCounterSig;
 
@@ -166,8 +173,10 @@ public class Arm {
         upperLimitSwitch.enableLimitSwitch(true);
         lowerLimitSwitch.enableLimitSwitch(true);
 
+        middleLimitSwitch = new DigitalInput(RobotConstants.ARM_MIDDLE_POS_SENSOR);
 
-        //Mechanically reversed direction is "forward" in our code
+
+        //Mechanically reversed direction is "forward" in our code... 
         //This doesn't seem to work as I'd expect in closed loop so we'll invert when going to/from the motor.
         sadey.setInverted(false);
 
@@ -182,6 +191,7 @@ public class Arm {
         armDesVelSig = new Signal("Arm Desired Velocity", "deg per sec");
         armLowerLimitSig = new Signal("Arm Lower Position Limit Switch", "bool");
         armUpperLimitSig = new Signal("Arm Upper Position Limit Switch", "bool");
+        armMiddleLimitSig = new Signal("Arm Middle Position Sensor", "bool");
         atDesAngleSig = new Signal("Arm At Desired Angle", "bool");
         armGearSkipCounterSig = new Signal("Arm Gear Skip Count", "count");
 
@@ -202,6 +212,8 @@ public class Arm {
         gravOffsetHorz    = new Calibration("Arm Required Voltage at Horz V", 0.5);
         bottomLimitSwitchDegreeCal = new Calibration("Arm Limit Switch Angle Bottom Deg", -60);
         topLimitSwitchDegreeCal    = new Calibration("Arm Limit Switch Angle Top Deg", 129.0);
+        middleSensorArmTopsideEdgeDegreeCal    = new Calibration("Arm Limit Switch Angle Middle TopEdge Deg", 129.0);
+        middleSensorArmBottomsideEdgeDegreeCal    = new Calibration("Arm Limit Switch Angle Middle BottomEdge Deg", 129.0);
 
         //Calibration for the Arm Trapezoidal\\
         kMaxOutputCal = new Calibration("Arm SmartMotion Max Power", 1);
@@ -293,33 +305,63 @@ public class Arm {
     }
 
     public void sampleSensors() {
-       topOfMotionPrev = topOfMotion;
-       bottomOfMotionPrev = bottomOfMotion;
-       topOfMotion = upperLimitSwitch.get();
-       bottomOfMotion = lowerLimitSwitch.get();
+        topOfMotionPrev = topOfMotion;
+        bottomOfMotionPrev = bottomOfMotion;
+        middleOfMotionPrev = middleOfMotion;
+        topOfMotion = upperLimitSwitch.get();
+        bottomOfMotion = lowerLimitSwitch.get();
+        middleOfMotion = middleLimitSwitch.get();
+        boolean travelIsUpward = (curArmAngle < desAngle);
 
 
-       curArmAngle = INVERT_FACTOR*armEncoder.getPosition();
+        curArmAngle = INVERT_FACTOR*armEncoder.getPosition();
 
-       if (topOfMotion == true && topOfMotionPrev == false){
-           double expectedAngle = topLimitSwitchDegreeCal.get();
-           if(Math.abs(expectedAngle - curArmAngle) > 5.0){
-                //We just hit the top limit switch, and the error was bigger than one tooth at the bottom gear - we probably slipped a tooth.
-                //Reset encoder position at top
-                armEncoder.setPosition(convertArmDegToMotorRot(topLimitSwitchDegreeCal.get())); 
-                forceUpdate = true;
-                gearSkipCounter++;
-           }
-       } 
-
-       if (bottomOfMotion == true && bottomOfMotionPrev == false){
-           armEncoder.setPosition(convertArmDegToMotorRot(bottomLimitSwitchDegreeCal.get()));
-           forceUpdate = true;
-       }
-
+        //If one of the limit switches has fired off, run the approprate slip check routine
+        if (topOfMotion == true && topOfMotionPrev == false){
+            //Rising edge on the top limit switch implies the arm just hit the uppermost position.
+           checkSlip(topLimitSwitchDegreeCal.get());
+        } else if(bottomOfMotion == true && bottomOfMotionPrev == false){
+            //Rising edge on the bottom limit switch implies the arm just hit the bottommost position.
+           checkSlip(bottomLimitSwitchDegreeCal.get());
+        } else if(travelIsUpward) { //Arm is moving toward the top
+            if(middleOfMotion == true && middleOfMotionPrev == false){
+                //Rising edge of sensor with upward motion implies we just saw the top edge of the arm pass the sensor
+                checkSlip(middleSensorArmTopsideEdgeDegreeCal.get());
+            } else if(middleOfMotion == false && middleOfMotionPrev == true){
+                //Falling edge of the sensor with upward motion implies we just saw the bottom edge of the arm pass the sensor
+                checkSlip(middleSensorArmBottomsideEdgeDegreeCal.get());
+            }
+        } else { //Arm is moving toward the bottom
+            if(middleOfMotion == false && middleOfMotionPrev == true){
+                //Falling edge of the sensor with downward motion implies we just saw the top edge of the arm pass the sensor
+                checkSlip(middleSensorArmTopsideEdgeDegreeCal.get());
+            } else if(middleOfMotion == true && middleOfMotionPrev == false){
+                //Rising edge of the sensor with downward motion implies we just saw the bottom edge of the arm pass the sensor
+                checkSlip(middleSensorArmBottomsideEdgeDegreeCal.get());
+            }
+        }
     }
 
-    public double convertArmDegToMotorRot(double in){
+    /** If the measured distance is off by more than this, we should conclude that we slipped a gear tooth. */
+    /* This should correspond to chain slipping over one tooth of the bottom sprocket (on the versaplanetary) */
+    private final double TOOTH_SLIP_THRESH_DEG = 5.5;
+
+    /**
+     * Compares the Arm position to an expected value. If the difference is larger than one tooth-worth of slippage,
+     * increment the counter and reset the encoder position.
+     */
+    private void checkSlip(double expectedPos){
+        if(Math.abs(expectedPos - curArmAngle) > TOOTH_SLIP_THRESH_DEG){
+             armEncoder.setPosition(convertArmDegToMotorRot(expectedPos)); 
+             forceUpdate = true;
+             gearSkipCounter++;
+        }
+    }
+
+    /**
+     * Convert from arm degrees (our unit of choice) to motor rotations (REV's unit of choice)
+     */
+    private double convertArmDegToMotorRot(double in){
         return INVERT_FACTOR*in/((1/GEARBOX_GEAR_RATIO)*(1/SPROCKET_GEAR_RATIO)*360);
     }
 

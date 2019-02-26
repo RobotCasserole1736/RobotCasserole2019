@@ -34,24 +34,16 @@ public class RobotConstants {
     public static final int INTAKE_RIGHT_POT_PORT = 3;
     public static final int ULTRASONIC_FRONT_PORT = 4;
     public static final int ULTRASONIC_REAR_PORT = 5;
-    
-
-
-
-
 
 
     //Digital
     public static final int BALL_INTAKE_PORT = 1;
-
+    public static final int ARM_MIDDLE_POS_SENSOR = 2;
     public static final int LINE_FOLLOWING_SENSOR_1_PORT = 3;
     public static final int LINE_FOLLOWING_SENSOR_2_PORT = 4;
     public static final int LINE_FOLLOWING_SENSOR_3_PORT = 5;
-
     public static final int INTAKE_BACK_LIMIT_SWITCH_PORT = 8;
-
     public static final int INTAKE_FRONT_LIMIT_SWITCH_PORT = 6;
-
     public static final int PEZ_SOLENOID_LIMIT_SWITCH_PORT = 9;
 
     //PWM/Motor
