@@ -557,6 +557,7 @@ public class Robot extends TimedRobot {
         
         //Cause arm to stop
         arm.setManualMovementCmd(0);
+        climber.setManualMovement(true);
         
         loopTiming.markLoopStart();
         pneumaticsControl.start();//ensure compressor is running
