@@ -27,8 +27,14 @@ import frc.lib.Util.DaBouncer;
 
 public class SensorCheck {
  
-    DaBouncer aboveDebouncer;
-    DaBouncer belowDebouncer;
+    DaBouncer dtLeftEncoderFaultDbnc;
+    DaBouncer dtRightEncoderFaultDbnc;
+    DaBouncer dtRightTalon1FaultDbnc;
+    DaBouncer dtRightTalon2FaultDbnc;
+    DaBouncer dtLeftTalon1FaultDbnc;
+    DaBouncer dtLeftTalon2FaultDbnc;
+    DaBouncer compressorCutoffFaultDbnc;
+    DaBouncer compressorPresenceFaultDbnc;
 
     DriverController driverController;
     Drivetrain drivetrain;
@@ -46,19 +52,23 @@ public class SensorCheck {
 
     boolean faultDetected;
 
-	// You will want to rename all instances of "EmptyClass" with your actual class name and "empty" with a variable name
-	private static SensorCheck empty = null;
-
+	private static SensorCheck inst = null;
 	public static synchronized SensorCheck getInstance() {
-		if(empty == null)
-			empty = new SensorCheck();
-		return empty;
+		if(inst == null)
+			inst = new SensorCheck();
+		return inst;
 	}
 
 	// This is the private constructor that will be called once by getInstance() and it should instantiate anything that will be required by the class
 	private SensorCheck() {
-        aboveDebouncer = new DaBouncer();
-        belowDebouncer = new DaBouncer();
+        dtLeftEncoderFaultDbnc = new DaBouncer(0, 10);
+        dtRightEncoderFaultDbnc = new DaBouncer(0, 10);
+        dtRightTalon1FaultDbnc = new DaBouncer(0, 10);
+        dtRightTalon2FaultDbnc = new DaBouncer(0, 10);
+        dtLeftTalon1FaultDbnc = new DaBouncer(0, 10);
+        dtLeftTalon2FaultDbnc = new DaBouncer(0, 10);
+        compressorCutoffFaultDbnc = new DaBouncer(0, 10);
+        compressorPresenceFaultDbnc = new DaBouncer(0, 10);
 
         driverController = DriverController.getInstance();
         drivetrain = Drivetrain.getInstance();
@@ -68,79 +78,76 @@ public class SensorCheck {
 
     public void update() {
         //Drivetrain left encoder
-        if((driverController.getDriverFwdRevCmd() > 0) && (aboveDebouncer.AboveDebounce(drivetrain.getLeftWheelSpeedRPM()) == true)) {
-            dtLeftEncoderFault = false;
-            faultDetected = false;
-        }else if((driverController.getDriverFwdRevCmd() > 0) && (aboveDebouncer.AboveDebounce(drivetrain.getLeftWheelSpeedRPM()) == false)) {
-            dtLeftEncoderFault = true;
-            faultDetected = true;
-        }else if((driverController.getDriverFwdRevCmd() < 0) && (belowDebouncer.BelowDebounce(drivetrain.getLeftWheelSpeedRPM()) == true)) {
-            dtLeftEncoderFault = false;
-            faultDetected = false;
-        }else if((driverController.getDriverFwdRevCmd() < 0) && (belowDebouncer.BelowDebounce(drivetrain.getLeftWheelSpeedRPM()) == false)) {
-            dtLeftEncoderFault = true;
-            faultDetected = true;
-        } 
+        if((driverController.getDriverFwdRevCmd() > 0) && (driverController.getDriverRotateCmd() == 0) && (drivetrain.getLeftWheelSpeedRPM()) <= 0.0) {
+            // Driver command is forward, but left speed is not forward.
+            dtLeftEncoderFault = dtLeftEncoderFaultDbnc.AboveDebounceBoo(true);
+        } else if((driverController.getDriverFwdRevCmd() < 0) && (driverController.getDriverRotateCmd() == 0) && (drivetrain.getLeftWheelSpeedRPM()) >= 0.0)  {
+            // Driver command is reverse, but right speed is not reverse.
+            dtLeftEncoderFault = dtLeftEncoderFaultDbnc.AboveDebounceBoo(true);
+        } else {
+            dtLeftEncoderFault = dtLeftEncoderFaultDbnc.AboveDebounceBoo(false);
+        }
         
         //Drivetrain right encoder
-        if((driverController.getDriverFwdRevCmd() > 0) && (aboveDebouncer.AboveDebounce(drivetrain.getRightWheelSpeedRPM()) == true)) {
-            dtRightEncoderFault = false; //change these to right
-            faultDetected = false;
-        }else if((driverController.getDriverFwdRevCmd() > 0) && (aboveDebouncer.AboveDebounce(drivetrain.getRightWheelSpeedRPM()) == false)) {
-            dtRightEncoderFault = true;
-            faultDetected = true;
-        }else if((driverController.getDriverFwdRevCmd() < 0) && (belowDebouncer.BelowDebounce(drivetrain.getRightWheelSpeedRPM()) == true)) {
-            dtRightEncoderFault = false;
-            faultDetected = false;
-        }else if((driverController.getDriverFwdRevCmd() < 0) && (belowDebouncer.BelowDebounce(drivetrain.getRightWheelSpeedRPM()) == false)) {
-            dtRightEncoderFault = true;
-            faultDetected = true;
-        } 
+        if((driverController.getDriverFwdRevCmd() > 0) && (driverController.getDriverRotateCmd() == 0) && (drivetrain.getRightWheelSpeedRPM()) <= 0.0) {
+            // Driver command is forward, but Right speed is not forward.
+            dtRightEncoderFault = dtRightEncoderFaultDbnc.AboveDebounceBoo(true);
+        } else if((driverController.getDriverFwdRevCmd() < 0) && (driverController.getDriverRotateCmd() == 0) && (drivetrain.getRightWheelSpeedRPM()) >= 0.0)  {
+            // Driver command is reverse, but right speed is not reverse.
+            dtRightEncoderFault = dtRightEncoderFaultDbnc.AboveDebounceBoo(true);
+        } else {
+            dtRightEncoderFault = dtRightEncoderFaultDbnc.AboveDebounceBoo(false);
+        }
 
         //Drivetrain motor currents
-        if((driverController.getDriverFwdRevCmd() != 0) && (drivetrain.getLeftTalon1Current() != 0)) {
-            dtLeftTalon1Fault = false;
-            faultDetected = false;
-        }else if((driverController.getDriverFwdRevCmd() != 0) && (drivetrain.getLeftTalon1Current() == 0)) {
-            dtLeftTalon1Fault = true;
-            faultDetected = true;
-        }else if((driverController.getDriverFwdRevCmd() != 0) && (drivetrain.getLeftTalon2Current() != 0)) {
-            dtLeftTalon2Fault = false;
-            faultDetected = false;
-        }else if((driverController.getDriverFwdRevCmd() != 0) && (drivetrain.getLeftTalon2Current() == 0)) {
-            dtLeftTalon2Fault = true;
-            faultDetected = true;
-        }else if((driverController.getDriverFwdRevCmd() != 0) && (drivetrain.getRightTalon1Current() != 0)) {
-            dtRightTalon1Fault = false;
-            faultDetected = false;
-        }else if((driverController.getDriverFwdRevCmd() != 0) && (drivetrain.getRightTalon1Current() == 0)) {
-            dtRightTalon1Fault = true;
-            faultDetected = true;
-        }else if((driverController.getDriverFwdRevCmd() != 0) && (drivetrain.getRightTalon2Current() != 0)) {
-            dtRightTalon2Fault = false;
-            faultDetected = false;
-        }else if((driverController.getDriverFwdRevCmd() != 0) && (drivetrain.getRightTalon2Current() == 0)) {
-            dtRightTalon2Fault = true;
-            faultDetected = true;
+        if((driverController.getDriverFwdRevCmd() != 0) || (driverController.getDriverRotateCmd() != 0)){
+            if(drivetrain.getLeftTalon1Current() != 0){
+                dtLeftTalon1Fault = dtLeftTalon1FaultDbnc.AboveDebounceBoo(true);
+            } else {
+                dtLeftTalon1Fault = dtLeftTalon1FaultDbnc.AboveDebounceBoo(false);
+            }
+
+            if(drivetrain.getLeftTalon2Current() != 0){
+                dtLeftTalon2Fault = dtLeftTalon2FaultDbnc.AboveDebounceBoo(true);
+            } else {
+                dtLeftTalon2Fault = dtLeftTalon2FaultDbnc.AboveDebounceBoo(false);
+            }
+
+            if(drivetrain.getRightTalon1Current() != 0){
+                dtRightTalon1Fault = dtRightTalon1FaultDbnc.AboveDebounceBoo(true);
+            } else {
+                dtRightTalon1Fault = dtRightTalon1FaultDbnc.AboveDebounceBoo(false);
+            }
+
+            if(drivetrain.getRightTalon2Current() != 0){
+                dtRightTalon2Fault = dtRightTalon2FaultDbnc.AboveDebounceBoo(true);
+            } else {
+                dtRightTalon2Fault = dtRightTalon2FaultDbnc.AboveDebounceBoo(false);
+            }
+        } else {
+            dtLeftTalon1Fault  = dtLeftTalon1FaultDbnc.AboveDebounceBoo(false);
+            dtLeftTalon2Fault  = dtLeftTalon2FaultDbnc.AboveDebounceBoo(false);
+            dtRightTalon1Fault = dtRightTalon1FaultDbnc.AboveDebounceBoo(false);
+            dtRightTalon2Fault = dtRightTalon2FaultDbnc.AboveDebounceBoo(false);
         }
 
-        //Compressor cutoff switch
-        if((compressor.getPressureSwitchValue() == false) && (pneumatic.getPressure() > 100)) {
-            compressorCutoffFault = false;
-            faultDetected = false;
-        }else if((compressor.getPressureSwitchValue() == false) && (pneumatic.getPressure() < 100)) {
-            compressorCutoffFault = true;
-            faultDetected = true;
+
+        //Compressor cutoff switch & pressure sensor cross-check
+        if((compressor.getPressureSwitchValue() == false) && (pneumatic.getPressure() < 100)) {
+            compressorCutoffFault = compressorCutoffFaultDbnc.AboveDebounceBoo(true);
+        }else{
+            compressorCutoffFault = compressorCutoffFaultDbnc.AboveDebounceBoo(false);
         }
 
-        //Compressor plugged in?
-        if(pneumatic.getPressure() > -5) {
-            compressorPresenceFault = false;
-            faultDetected = false;
-        }else if(pneumatic.getPressure() <= -5) {
-            compressorPresenceFault = true;
-            faultDetected = true;
+        //Pressure sensor not-plugged-in check.
+        if(pneumatic.getPressure() <= -5.0) {
+            //if we think we have a vaccuum, well, we don't....
+            compressorPresenceFault = compressorPresenceFaultDbnc.AboveDebounceBoo(true);
+        } else {
+            compressorPresenceFault = compressorPresenceFaultDbnc.AboveDebounceBoo(false);
         }
+
+        faultDetected = dtLeftEncoderFault | dtRightEncoderFault | dtLeftTalon1Fault | dtLeftTalon2Fault | dtRightTalon1Fault | compressorCutoffFault | compressorPresenceFault;
     }
 
     public boolean isFaultDetected() {
@@ -162,9 +169,9 @@ public class SensorCheck {
         }else if(dtRightTalon2Fault == true) {
             description = "DT Right Motor 2 Electrical Fault";
         }else if(compressorCutoffFault == true) {
-            description = "Compressor Cutoff Switch Fault";
+            description = "Pressure Sensor Low Pressure Fault";
         }else if(compressorPresenceFault == true) {
-            description = "Pressure Sensor Unplugged or Faulty";
+            description = "Pressure Sensor Unplugged Fault";
         }else{
             description = "No Fault";
         } 
