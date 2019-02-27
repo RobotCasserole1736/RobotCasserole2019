@@ -39,6 +39,7 @@ public class Climber {
     Calibration servo1UnLockedCal;
     Calibration servo2LockedCal;
     Calibration servo2UnLockedCal;
+    boolean manualMode = false;
 
     /* Singleton stuff */
     private static Climber climbCtrl = null;
@@ -59,22 +60,38 @@ public class Climber {
 
     }
 
+    public void setManualMovement(boolean manualCmd){
+        manualMode=manualCmd;
+    }
+
     public void update(){
         boolean enable = OperatorController.getInstance().getClimberEnable();
         boolean release = OperatorController.getInstance().getClimberReleace();
-
-        if(enable){
-            climbServo1.set(servo1UnLockedCal.get());
-            climbServo2.set(servo2UnLockedCal.get());
-            if(release){
-                climbEjectSol.set(true);
+        if(manualMode){
+            if(enable){
+                climbServo1.set(servo1UnLockedCal.get());
+                climbServo2.set(servo2UnLockedCal.get());
+                if(release){
+                    climbEjectSol.set(true);
+                } else {
+                    climbEjectSol.set(false);
+                }
             } else {
+                climbServo1.set(servo1LockedCal.get());
+                climbServo2.set(servo2LockedCal.get());
                 climbEjectSol.set(false);
             }
-        } else {
-            climbServo1.set(servo1LockedCal.get());
-            climbServo2.set(servo2LockedCal.get());
-            climbEjectSol.set(false);
+
+        }else{
+            if(enable && release){
+                climbServo1.set(servo1UnLockedCal.get());
+                climbServo2.set(servo2UnLockedCal.get());
+                climbEjectSol.set(true);
+
+            }else {
+
+                climbEjectSol.set(false);
+            }
         }
        
     }

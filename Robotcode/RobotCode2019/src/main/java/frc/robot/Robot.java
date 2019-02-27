@@ -320,10 +320,12 @@ public class Robot extends TimedRobot {
             poseCalc.setRightMotorSpeed(drivetrain.getRightWheelSpeedRPM());
             poseCalc.update();
 
+            climber.setManualMovement(false);
+            climber.update();
+
             /* Update Other subsytems */
             ledController.update();
             pneumaticsControl.update();
-            climber.update();
             telemetryUpdate();
             
             /*Update CrashTracker*/
@@ -557,6 +559,7 @@ public class Robot extends TimedRobot {
         
         //Cause arm to stop
         arm.setManualMovementCmd(0);
+        climber.setManualMovement(true);
         
         loopTiming.markLoopStart();
         pneumaticsControl.start();//ensure compressor is running
