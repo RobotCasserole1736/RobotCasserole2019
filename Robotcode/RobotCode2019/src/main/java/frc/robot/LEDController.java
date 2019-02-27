@@ -45,7 +45,10 @@ public class LEDController {
         Pattern3(3), /* "Fade In and Fade Out R&W" */
         Pattern4(4), /* "Running Lights R&W" */
         Pattern5(5), /* "Theatre Chase R&W" */
-        Pattern6(6); /* "Strobe" */
+        Pattern6(6), /* "Strobe: Red" */
+        Pattern7(7), /* "Strobe: Green" */
+        Pattern8(8), /* "Strobe: Blue" */
+        Pattern9(9); /* "Strobe: White" */
      
         public final int value;
 
@@ -96,6 +99,18 @@ public class LEDController {
             break;
             case Pattern6:
                 ctrl.setSpeed(0.25);
+            
+            break;
+            case Pattern7:
+                ctrl.setSpeed(0.5);
+            
+            break;
+            case Pattern8:
+                ctrl.setSpeed(0.75);
+
+            break;
+            case Pattern9:
+                ctrl.setSpeed(1.0);
         }
     }
 
