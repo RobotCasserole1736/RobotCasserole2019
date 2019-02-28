@@ -41,6 +41,7 @@ import frc.lib.LoadMon.CasseroleRIOLoadMonitor;
 import frc.lib.WebServer.CasseroleDriverView;
 import frc.lib.WebServer.CasseroleWebServer;
 import frc.lib.Util.CrashTracker;
+import frc.lib.Util.DaBouncer;
 import frc.robot.Arm.ArmPos;
 import frc.robot.IntakeControl.IntakePos;
 import frc.robot.LEDController.LEDPatterns;
@@ -119,6 +120,10 @@ public class Robot extends TimedRobot {
 
     //Safety check for robot state
     boolean wasAutoRun = false;
+
+    //For LED patterns, debounce the gamepiece released command.
+    boolean prevGamepieceReleaseReq = false;
+    int gamepieceReleasePatternCounter = 0;
 
     public Robot() {
         super(RobotConstants.MAIN_LOOP_SAMPLE_RATE_S);
@@ -333,11 +338,35 @@ public class Robot extends TimedRobot {
             loopTiming.markLoopEnd();
 
 
+            //LED pattern control
             if(autonomous.getAutoFailed() == true){
-                ledController.setPattern(LEDPatterns.Pattern6);
-            } else {
+                //Choose "Error" pattern
                 ledController.setPattern(LEDPatterns.Pattern3);
+            } else {
+                if(operatorController.getGampieceReleaseRequest() == true && prevGamepieceReleaseReq == false){
+                    gamepieceReleasePatternCounter = 50;
+                }
+                prevGamepieceReleaseReq = operatorController.getGampieceReleaseRequest();
+
+                if(gamepieceReleasePatternCounter > 0){
+                    gamepieceReleasePatternCounter--;
+                }
+
+                if(gamepieceReleasePatternCounter != 0){
+                    //Run Gamepiece-release pattern
+                    ledController.setPattern(LEDPatterns.Pattern4);
+                } else {
+                    if(jevois.isVisionOnline() && jevois.isTgtVisible()){
+                        //Run Target-Seen pattern
+                        ledController.setPattern(LEDPatterns.Pattern2);
+                    } else {
+                        //Run Target-not-seen pattern
+                        ledController.setPattern(LEDPatterns.Pattern1);
+                    }
+                }
+
             }
+            
 
         } catch(Throwable t) {
             CrashTracker.logThrowableCrash(t);
