@@ -89,7 +89,8 @@ public class Climber {
                 climbEjectSol.set(true);
 
             }else {
-
+                climbServo1.set(servo1LockedCal.get());
+                climbServo2.set(servo2LockedCal.get());
                 climbEjectSol.set(false);
             }
         }
