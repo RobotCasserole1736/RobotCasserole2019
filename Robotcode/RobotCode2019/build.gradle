@@ -72,16 +72,8 @@ dependencies {
     compile group: 'org.eclipse.jetty', name: 'jetty-io', version: '9.3.9.v20160517'
     compile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
 
-    // The 2019.2.1 release of halsim_ds_socket is broken on windows, so we use Jaci's patched versions
-    if (wpi.platforms.desktop == 'windowsx86-64') {
-        simulation rootProject.files('lib/halsim_ds_socketd.dll')
-    } else if (wpi.platforms.desktop == 'osxx86-64') {
-        simulation rootProject.files('lib/libhalsim_ds_socketd.dylib')
-    } else if (wpi.platforms.desktop == 'linuxx86-64') {
-        simulation rootProject.files('lib/libhalsim_ds_socketd.so')
-    } else {
-        simulation "edu.wpi.first.halsim:halsim_ds_socket:${wpi.wpilibVersion}:${wpi.platforms.desktop}debug@zip"
-    }
+    simulation "edu.wpi.first.halsim:halsim_ds_socket:${wpi.wpilibVersion}:${wpi.platforms.desktop}debug@zip"
+    simulation "edu.wpi.first.halsim:halsim_ds_socket:${wpi.wpilibVersion}:${wpi.platforms.desktop}@zip"
 }
 
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')
