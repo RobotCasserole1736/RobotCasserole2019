@@ -41,12 +41,12 @@ public class LEDController {
     }
 
     public enum LEDPatterns {
-        Pattern0(0), 
-        Pattern1(1), 
-        Pattern2(2), 
-        Pattern3(3), 
-        Pattern4(4),
-        Pattern5(5); 
+        Pattern0(0), // "Color Wipe R&W"
+        Pattern1(1), // "Running Lights [RED]"
+        Pattern2(2), // "Running Lights [WHITE]"
+        Pattern3(3), // "Strobe [RED]"
+        Pattern4(4), // "Meteor Rain"
+        Pattern5(5); // "Cyclon Bounce"
      
         public final int value;
 
