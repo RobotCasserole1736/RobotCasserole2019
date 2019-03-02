@@ -140,6 +140,7 @@ public class Autonomous {
                         nextState = StateEnum.autoError;
                     }
                 } else {
+                    seq.stop();
                     nextState = StateEnum.Inactive;
                 }
 
@@ -301,15 +302,20 @@ public class Autonomous {
 
             case autoError:
                 
-                double curTime = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
-                //Blink a driver station LED while failed
-                if(curTime >= nextBlinkTransitionTime){
-                    nextBlinkTransitionTime = curTime + BLINK_RATE_MSEC;
-                    blinkState = !blinkState;
+                if(autoMoveRequested){
+                    double curTime = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
+                    //Blink a driver station LED while failed
+                    if(curTime >= nextBlinkTransitionTime){
+                        nextBlinkTransitionTime = curTime + BLINK_RATE_MSEC;
+                        blinkState = !blinkState;
+                    }
+                    seq.stop();
+                    autoFailed = true;
+                    nextState = StateEnum.autoError; 
+                } else {
+                    autoFailed = false;
+                    nextState = StateEnum.Inactive; 
                 }
-                seq.stop();
-
-                autoFailed = true;
             break;
 
             default:

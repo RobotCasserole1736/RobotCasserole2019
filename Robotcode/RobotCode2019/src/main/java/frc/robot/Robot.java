@@ -230,6 +230,7 @@ public class Robot extends TimedRobot {
             dataServer.logger.startLoggingTeleop();
             matchState.SetPeriod(MatchState.Period.OperatorControl);
             eyeOfVeganSauron.setLEDRingState(true);
+            intakeControl.closedLoop();
         } catch(Throwable t) {
             CrashTracker.logThrowableCrash(t);
             throw t;
@@ -255,6 +256,7 @@ public class Robot extends TimedRobot {
             eyeOfVeganSauron.setLEDRingState(false); //test
             setMatchInitialCommands();
             pneumaticsControl.start();
+            intakeControl.closedLoop();
             CrashTracker.logMatchInfo();
         } catch(Throwable t) {
             CrashTracker.logThrowableCrash(t);
@@ -413,6 +415,7 @@ public class Robot extends TimedRobot {
             matchState.SetPeriod(MatchState.Period.Disabled);
             eyeOfVeganSauron.setLEDRingState(false);
             arm.forceArmStop();
+            intakeControl.closedLoop();
 
         } catch(Throwable t) {
             CrashTracker.logThrowableCrash(t);
@@ -582,6 +585,7 @@ public class Robot extends TimedRobot {
     @Override
     public void testInit(){
         arm.forceArmStop();
+        intakeControl.openLoop();
     }
 
     @Override
@@ -602,7 +606,7 @@ public class Robot extends TimedRobot {
         if(Math.abs(intakeCmd) < 0.20){
             intakeCmd = 0;
         }
-        intakeControl.manualIntakeOverride();
+        
         intakeControl.update();
 
         climber.update();
