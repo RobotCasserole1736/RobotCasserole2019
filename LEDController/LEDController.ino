@@ -1,247 +1,213 @@
-#include <Adafruit_NeoPixel.h>
-#define PIN 6
-#define NUM_LEDS 60
-// Parameter 1 = number of pixels in strip
-// Parameter 2 = pin number (most are valid)
-// Parameter 3 = pixel type flags, add together as needed:
-//   NEO_KHZ800  800 KHz bitstream (most NeoPixel products w/WS2812 LEDs)
-//   NEO_KHZ400  400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
-//   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
-//   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_LEDS, PIN, NEO_GRB + NEO_KHZ800);
+#include <FastLED.h>
+#include <Streaming.h>
 
-int D1Pin = 4;
-int D2Pin = 3;
-int val1 = 0;
-int val2 = 0;
-String patternNumber;
-String patternName = "";
+#define DATA_PIN    6
+//#define CLK_PIN   4
+#define LED_TYPE    WS2811
+#define COLOR_ORDER RGB
+#define NUM_LEDS    40
+CRGB leds[NUM_LEDS];
+
+#define BRIGHTNESS          96
+#define FRAMES_PER_SECOND  120
+
+int pin = 4;
+int PWMV;
+int patternNumber = 0;
+String patternName = "???";
+int currentCount;
 
 void setup() {
-  pinMode(D1Pin, INPUT_PULLUP);
-  pinMode(D2Pin, INPUT_PULLUP);
+  delay(3000); // 3 second delay for recovery
 
-  strip.begin();
-  strip.show(); // Initialize all pixels to 'off'
+  // tell FastLED about the LED strip configuration
+  FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
+  //FastLED.addLeds<LED_TYPE,DATA_PIN,CLK_PIN,COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
+
+  // set master brightness control
+  FastLED.setBrightness(BRIGHTNESS);
 
   Serial.begin(57600);
+  pinMode(pin, INPUT);
 }
 
-void loop() {
-  val1 = digitalRead(D1Pin);
-  val2 = digitalRead(D2Pin);
-  
-  
-  if ((val2 == LOW) && (val1 == LOW))
-  {
-    meteorRain(0xff,0xff,0xff,10, 64, true, 30);
-    patternNumber = 1;
-    patternName = "Meteor Rain";
-  }
-  
-  if ((val2 == LOW) && (val1 == HIGH))
-  {
-    Fire(55,120,15);
-    patternNumber = 2;
-    patternName = "Fire";
-  }
-  
-  if ((val2 == HIGH) && (val1 == LOW))
-  {
-    theaterChase(0xff,0,0,50);
-    patternNumber = 3;
-    patternName = "Theatre Chase";
-  }
-  
-  if ((val2 == HIGH) && (val1 == HIGH))
-  {
-    RGBLoop();
-    patternNumber = 4;
-    patternName = "Fade In and Fade Out";
-  }
+uint8_t gHue = 0; // rotating "base color" used by many of the patterns
 
-  Serial.print("Pattern No. ");
-  Serial.print(patternNumber);
-  Serial.print(": ");
-  Serial.print(patternName);
-  Serial.print("Pin Status: ");
-  Serial.print(val1);
-  Serial.print(" ");
-  Serial.print(val2);
-  Serial.println(""); 
+void readPWM() {
+  PWMV = pulseIn(pin, HIGH, 50000);
 }
 
-void theaterChase(byte red, byte green, byte blue, int SpeedDelay) {
-  for (int j=0; j<10; j++) {  //do 10 cycles of chasing
-    for (int q=0; q < 3; q++) {
-      for (int i=0; i < NUM_LEDS; i=i+3) {
-        setPixel(i+q, red, green, blue);    //turn every third pixel on
-      }
-      showStrip();
-     
-      delay(SpeedDelay);
-     
-      for (int i=0; i < NUM_LEDS; i=i+3) {
-        setPixel(i+q, 0,0,0);        //turn every third pixel off
-      }
+void loop()
+{
+  if ((PWMV >= -50) && (PWMV <= 50))
+  {
+    colorWipe(0xff, 0x00, 0x00, 50);
+    colorWipe(0xff, 0xff, 0xff, 50);
+  }
+
+  if ((PWMV >= 950) && (PWMV <= 1050))
+  {
+    RunningLights(0xff, 0x00, 0x00, 50);
+  }
+
+  if ((PWMV >= 1200) && (PWMV <= 1300))
+  {
+    RunningLights(0xff, 0xff, 0xff, 50);
+  }
+
+  if ((PWMV >= 1450) && (PWMV <= 1550))
+  {
+    Strobe(0xff, 0x00, 0x00, 10, 50, 1000);
+  }
+
+  if ((PWMV >= 1700) && (PWMV <= 1800))
+  {
+    meteorRain(0xff, 0xff, 0xff, 10, 64, true, 30);
+  }
+
+  if ((PWMV >= 1950) && (PWMV <= 2050))
+  {
+    CylonBounce(0xff, 0xff, 0xff, 5, 10, 50);
+  }
+
+  // send the 'leds' array out to the actual LED strip
+  FastLED.show();
+  // insert a delay to keep the framerate modest
+  FastLED.delay(1000 / FRAMES_PER_SECOND);
+
+  // do some periodic updates
+  EVERY_N_MILLISECONDS( 20 ) {
+    gHue++;  // slowly cycle the "base color" through the rainbow
+  }
+  EVERY_N_MILLISECONDS(200) {
+    readPWM();  //Ensure we keep PWM reading up to date
+  }
+}
+
+#define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
+
+//**************************************************************
+// Pattern: Color Wipe
+//**************************************************************
+
+void colorWipe(byte red, byte green, byte blue, int SpeedDelay) {
+  for (uint16_t i = 0; i < NUM_LEDS; i++) {
+    setPixel(i, red, green, blue);
+    showStrip();
+    delay(SpeedDelay);
+  }
+}
+
+//**************************************************************
+// Pattern: Cylon
+//**************************************************************
+
+void CylonBounce(byte red, byte green, byte blue, int EyeSize, int SpeedDelay, int ReturnDelay) {
+
+  for (int i = 0; i < NUM_LEDS - EyeSize - 2; i++) {
+    setAll(0, 0, 0);
+    setPixel(i, red / 10, green / 10, blue / 10);
+    for (int j = 1; j <= EyeSize; j++) {
+      setPixel(i + j, red, green, blue);
     }
+    setPixel(i + EyeSize + 1, red / 10, green / 10, blue / 10);
+    showStrip();
+    delay(SpeedDelay);
   }
+
+  delay(ReturnDelay);
+
+  for (int i = NUM_LEDS - EyeSize - 2; i > 0; i--) {
+    setAll(0, 0, 0);
+    setPixel(i, red / 10, green / 10, blue / 10);
+    for (int j = 1; j <= EyeSize; j++) {
+      setPixel(i + j, red, green, blue);
+    }
+    setPixel(i + EyeSize + 1, red / 10, green / 10, blue / 10);
+    showStrip();
+    delay(SpeedDelay);
+  }
+
+  delay(ReturnDelay);
 }
 
-void meteorRain(byte red, byte green, byte blue, byte meteorSize, byte meteorTrailDecay, boolean meteorRandomDecay, int SpeedDelay) {  
-  setAll(0,0,0);
-  
-  for(int i = 0; i < NUM_LEDS+NUM_LEDS; i++) {
-    
-    
+//**************************************************************
+// Pattern: Meteor Rain
+//**************************************************************
+
+void meteorRain(byte red, byte green, byte blue, byte meteorSize, byte meteorTrailDecay, boolean meteorRandomDecay, int SpeedDelay) {
+  setAll(0, 0, 0);
+
+  for (int i = 0; i < NUM_LEDS + NUM_LEDS; i++) {
     // fade brightness all LEDs one step
-    for(int j=0; j<NUM_LEDS; j++) {
-      if( (!meteorRandomDecay) || (random(10)>5) ) {
-        fadeToBlack(j, meteorTrailDecay );        
+    for (int j = 0; j < NUM_LEDS; j++) {
+      if ( (!meteorRandomDecay) || (random(10) > 5) ) {
+        fadeToBlack(j, meteorTrailDecay );
       }
     }
-    
     // draw meteor
-    for(int j = 0; j < meteorSize; j++) {
-      if( ( i-j <NUM_LEDS) && (i-j>=0) ) {
-        setPixel(i-j, red, green, blue);
-      } 
+    for (int j = 0; j < meteorSize; j++) {
+      if ( ( i - j < NUM_LEDS) && (i - j >= 0) ) {
+        setPixel(i - j, red, green, blue);
+      }
     }
-   
     showStrip();
     delay(SpeedDelay);
   }
 }
 
 void fadeToBlack(int ledNo, byte fadeValue) {
- #ifdef ADAFRUIT_NEOPIXEL_H 
-    // NeoPixel
-    uint32_t oldColor;
-    uint8_t r, g, b;
-    int value;
-    
-    oldColor = strip.getPixelColor(ledNo);
-    r = (oldColor & 0x00ff0000UL) >> 16;
-    g = (oldColor & 0x0000ff00UL) >> 8;
-    b = (oldColor & 0x000000ffUL);
-
-    r=(r<=10)? 0 : (int) r-(r*fadeValue/256);
-    g=(g<=10)? 0 : (int) g-(g*fadeValue/156);
-    b=(b<=10)? 0 : (int) b-(b*fadeValue/156);
-    
-    strip.setPixelColor(ledNo, r,g,b);
- #endif
- #ifndef ADAFRUIT_NEOPIXEL_H
-   // FastLED
-   leds[ledNo].fadeToBlackBy( fadeValue );
- #endif  
+  leds[ledNo].fadeToBlackBy( fadeValue );
 }
 
-void Fire(int Cooling, int Sparking, int SpeedDelay) {
-  static byte heat[NUM_LEDS];
-  int cooldown;
-  
-  // Step 1.  Cool down every cell a little
-  for( int i = 0; i < NUM_LEDS; i++) {
-    cooldown = random(0, ((Cooling * 10) / NUM_LEDS) + 2);
-    
-    if(cooldown>heat[i]) {
-      heat[i]=0;
-    } else {
-      heat[i]=heat[i]-cooldown;
-    }
-  }
-  
-  // Step 2.  Heat from each cell drifts 'up' and diffuses a little
-  for( int k= NUM_LEDS - 1; k >= 2; k--) {
-    heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2]) / 3;
-  }
-    
-  // Step 3.  Randomly ignite new 'sparks' near the bottom
-  if( random(255) < Sparking ) {
-    int y = random(7);
-    heat[y] = heat[y] + random(160,255);
-    //heat[y] = random(160,255);
-  }
+//**************************************************************
+// Pattern: Running Lights
+//**************************************************************
+int Position = 0;
+void RunningLights(byte red, byte green, byte blue, int WaveDelay) {
 
-  // Step 4.  Convert heat to LED colors
-  for( int j = 0; j < NUM_LEDS; j++) {
-    setPixelHeatColor(j, heat[j] );
-  }
 
-  showStrip();
-  delay(SpeedDelay);
-}
-
-void setPixelHeatColor (int Pixel, byte temperature) {
-  // Scale 'heat' down from 0-255 to 0-191
-  byte t192 = round((temperature/255.0)*191);
- 
-  // calculate ramp up from
-  byte heatramp = t192 & 0x3F; // 0..63
-  heatramp <<= 2; // scale up to 0..252
- 
-  // figure out which third of the spectrum we're in:
-  if( t192 > 0x80) {                     // hottest
-    setPixel(Pixel, 255, 255, heatramp);
-  } else if( t192 > 0x40 ) {             // middle
-    setPixel(Pixel, 255, heatramp, 0);
-  } else {                               // coolest
-    setPixel(Pixel, heatramp, 0, 0);
+  Position++; // = 0; //Position + Rate;
+  for (int i = 0; i < NUM_LEDS; i++) {
+    setPixel(i, ((sin(i + Position / 2) * 127 + 128) / 255)*red,
+             ((sin(i + Position / 2) * 127 + 128) / 255)*green,
+             ((sin(i + Position / 2) * 127 + 128) / 255)*blue);
   }
 }
 
-void RGBLoop(){
-  for(int j = 0; j < 3; j++ ) { 
-    // Fade IN
-    for(int k = 0; k < 256; k++) { 
-      switch(j) { 
-        case 0: setAll(k,0,0); break;
-        case 1: setAll(k,k,k); break;
-      }
-      showStrip();
-      delay(0);
-    }
-    // Fade OUT
-    for(int k = 255; k >= 0; k--) { 
-      switch(j) { 
-        case 0: setAll(k,0,0); break;
-        case 1: setAll(k,k,k); break;
-      }
-      showStrip();
-      delay(0);
-    }
+//**************************************************************
+// Pattern: Strobe
+//**************************************************************
+
+void Strobe(byte red, byte green, byte blue, int StrobeCount, int FlashDelay, int EndPause) {
+  for (int j = 0; j < StrobeCount; j++) {
+    setAll(red, green, blue);
+    showStrip();
+    delay(FlashDelay);
+    setAll(0, 0, 0);
+    showStrip();
+    delay(FlashDelay);
   }
 }
-// *** REPLACE TO HERE ***
+
+//**************************************************************
+// Strip/Pixel Commands
+//**************************************************************
 
 void showStrip() {
- #ifdef ADAFRUIT_NEOPIXEL_H 
-   // NeoPixel
-   strip.show();
- #endif
- #ifndef ADAFRUIT_NEOPIXEL_H
-   // FastLED
-   FastLED.show();
- #endif
+  FastLED.show();
 }
 
 void setPixel(int Pixel, byte red, byte green, byte blue) {
- #ifdef ADAFRUIT_NEOPIXEL_H 
-   // NeoPixel
-   strip.setPixelColor(Pixel, strip.Color(red, green, blue));
- #endif
- #ifndef ADAFRUIT_NEOPIXEL_H 
-   // FastLED
-   leds[Pixel].r = red;
-   leds[Pixel].g = green;
-   leds[Pixel].b = blue;
- #endif
+  // FastLED
+  leds[Pixel].g = red;
+  leds[Pixel].r = green;
+  leds[Pixel].b = blue;
 }
 
 void setAll(byte red, byte green, byte blue) {
-  for(int i = 0; i < NUM_LEDS; i++ ) {
-    setPixel(i, red, green, blue); 
+  for (int i = 0; i < NUM_LEDS; i++ ) {
+    setPixel(i, red, green, blue);
   }
   showStrip();
 }
