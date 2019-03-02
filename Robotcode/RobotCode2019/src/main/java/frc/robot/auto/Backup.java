@@ -28,12 +28,12 @@ import frc.lib.AutoSequencer.AutoEvent;
 public class Backup extends AutoEvent {
     
     public Backup() {
-        driveBackward = new PathPlannerAutoEvent(waypoints, time, true, 0.2, 0.5, 0.001, 0.9);
+        driveBackward = new PathPlannerAutoEvent(waypointsInches, time, true, 0.2, 0.5, 0.001, 0.9);
     }
 
     PathPlannerAutoEvent driveBackward;
 
-    private final double[][] waypoints = new double[][] {
+    private final double[][] waypointsInches = new double[][] {
         {0,0},
         {0,-8}
     };
@@ -43,7 +43,6 @@ public class Backup extends AutoEvent {
     @Override
     public void userUpdate() {
         driveBackward.userUpdate();
-        // shotCTRL.setDesiredShooterState(ShooterStates.PREP_TO_SHOOT);
     }
 
     @Override

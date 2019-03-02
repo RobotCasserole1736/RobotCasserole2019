@@ -191,7 +191,7 @@ public class PathPlannerAutoEvent extends AutoEvent {
      * Force both sides of the drivetrain to zero
      */
     public void userForceStop() {
-    	Drivetrain.getInstance().setClosedLoopSpeedCmd(0, 0);
+    	Drivetrain.getInstance().setOpenLoopCmd(0,0);
     }
 
 

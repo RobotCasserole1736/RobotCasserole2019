@@ -19,6 +19,7 @@ package frc.robot.auto;
  *   if you would consider donating to our club to help further STEM education.
  */
 
+import edu.wpi.first.wpilibj.Timer;
 import frc.lib.AutoSequencer.AutoEvent;
 import frc.robot.JeVoisInterface;
 import frc.robot.Utils;
@@ -32,41 +33,44 @@ public class AutoSeqFinalAlign extends AutoEvent {
 
     final double ALIGNMENT_SPEED_FTPERSEC = 2;
 
+    final double MAX_TIME_S = 3.0;
+    double startTime = 0;
+
     double motorRotationCmd;
     double desiredAngle;
 
-    int angleOffset;
+    double initial_angle = 0;
 
     public AutoSeqFinalAlign(){
         motorRotationCmd = 0;
-        angleOffset = 0;
         camera = JeVoisInterface.getInstance();
         dt = Drivetrain.getInstance();
     }
 
-    public double getJeVoisAngle() {
+    public double getAlignmentAngle() {
         if(camera.isVisionOnline() || camera.isTgtVisible()){
-            return angleOffset - camera.getTgtAngle();
+            return dt.getGyroAngle() - camera.getTgtGeneralAngle();
         } else {
-            return angleOffset;
+            return dt.getGyroAngle();
         }
 
     }
 
     @Override
     public void userStart() {
-
+        desiredAngle = getAlignmentAngle();
+        startTime = Timer.getFPGATimestamp();
     }
 
     @Override
     public void userUpdate() {
         double motorSpeed = Utils.FT_PER_SEC_TO_RPM(ALIGNMENT_SPEED_FTPERSEC);
-        dt.setClosedLoopSpeedCmd(motorSpeed, motorSpeed, dt.getGyroAngle() - getJeVoisAngle());
+        dt.setClosedLoopSpeedCmd(motorSpeed, motorSpeed, desiredAngle);
     }
 
     @Override
     public void userForceStop() {
-
+        dt.setOpenLoopCmd(0,0);
     }
 
     @Override
@@ -76,8 +80,10 @@ public class AutoSeqFinalAlign extends AutoEvent {
 
     @Override
     public boolean isDone() {
+        boolean timedOut = (Timer.getFPGATimestamp() > (startTime + MAX_TIME_S) );
+
         // 1/12 is to say 1 inch instead of 1 foot.
-        return AutoSeqDistToTgtEst.getInstance().getEstDistanceFt() < 1.0/12.0;
+        return (AutoSeqDistToTgtEst.getInstance().getEstDistanceFt() < 1.0/12.0) || timedOut;
     }
 
 }

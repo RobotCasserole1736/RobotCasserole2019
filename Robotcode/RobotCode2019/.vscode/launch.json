@@ -6,6 +6,20 @@
   "configurations": [
     {
       "type": "java",
+      "name": "CodeLens (Launch) - BackupHigh",
+      "request": "launch",
+      "mainClass": "frc.robot.auto.BackupHigh",
+      "projectName": "RobotCode2019"
+    },
+    {
+      "type": "java",
+      "name": "CodeLens (Launch) - Backup",
+      "request": "launch",
+      "mainClass": "frc.robot.auto.Backup",
+      "projectName": "RobotCode2019"
+    },
+    {
+      "type": "java",
       "name": "CodeLens (Launch) - FalconPathPlanner",
       "request": "launch",
       "mainClass": "frc.lib.PathPlanner.FalconPathPlanner",

@@ -110,6 +110,7 @@ public class Autonomous {
     public Autonomous(){
         curState = INITAL_STATE;
         prevState = INITAL_STATE;
+        seq = new AutoSequencer("AutonomousAlign");
     }
 
     public void update(){
@@ -134,6 +135,7 @@ public class Autonomous {
                     if(opModeAllowsAuto && visionAvailable){
                         nextState = StateEnum.SendJevoislatch;
                         sendJevoislatch = true;
+                        seq.clearAllEvents();
                     } else {
                         nextState = StateEnum.autoError;
                     }
@@ -215,16 +217,14 @@ public class Autonomous {
                 if(autoMoveRequested == true){
                     if(OperatorController.getInstance().getAutoAlignHighReq()){
                         //If we're placing top, we can only start at the final alignment step going backward
-                        nextState = StateEnum.addLineFollower;
+                        nextState = StateEnum.addLineFollower; 
                     } else {
                         //If we're placing mid/low, we use Jevois to path plan up to the target location
-                        AutoSeqPathPlan pp = new AutoSeqPathPlan(xTargetOffset, yTargetOffset, targetPositionAngle); //TODO - handle the case where the path planner can't create a path based on current angle constraints with "getPathAvailable()"
-                        if(pp.getPathAvailable()){
+                        AutoSeqPathPlan pp = new AutoSeqPathPlan(xTargetOffset, yTargetOffset, targetPositionAngle); 
+                        if(!pp.getPathAvailable()){
                             nextState = StateEnum.autoError;
                         }
-                        parent = pp;
-                        seq.addEvent(parent);
-                        parent = new AutoSeqFinalAlign();
+                        seq.addEvent(pp);
                         nextState = StateEnum.addAllAutoEvents;
                     }
                 } else {
@@ -235,12 +235,15 @@ public class Autonomous {
 
             case addLineFollower:
                 
-                if(OperatorController.getInstance().getAutoAlignHighReq()){
-                    parent = new TopPlaceFinalAlign();
-                    nextState = StateEnum.addAllAutoEvents;
-                } else {
-                    nextState = StateEnum.pathPlanner;
-                }
+                //if(OperatorController.getInstance().getAutoAlignHighReq()){
+                //    parent = new TopPlaceFinalAlign();
+                //    nextState = StateEnum.addAllAutoEvents;
+                //} else {
+                //    nextState = StateEnum.pathPlanner;
+                //}
+
+                //TODO not yet handled
+                nextState = StateEnum.autoError;
 
             break;
 
@@ -249,31 +252,37 @@ public class Autonomous {
                 //By Default, go to update
                 nextState = StateEnum.autoSeqUpdate;
                 
+                //Add the arm movement
                 if(OperatorController.getInstance().getAutoAlignLowReq()){
-                    parent.addChildEvent(new MoveArmLowPos(curOpMode));
+                    seq.addEvent(new MoveArmLowPos(curOpMode));
                 } else if(OperatorController.getInstance().getAutoAlignMidReq()){
-                    parent.addChildEvent(new MoveArmMidPos(curOpMode));
+                    seq.addEvent(new MoveArmMidPos(curOpMode));
                 } else if(OperatorController.getInstance().getAutoAlignHighReq()){
-                    parent.addChildEvent(new MoveArmTopPos(curOpMode));
+                    seq.addEvent(new MoveArmTopPos(curOpMode));
                 } else {
                     CrashTracker.logAndPrint("[Autonomous] Error invalid Autostate.");
                     nextState = StateEnum.Inactive;
                 }
 
+                //Add the final-align motion
+                seq.addEvent(new AutoSeqFinalAlign());
+
+                //Add the gripper release motion
                 if(curOpMode == OpMode.CargoCarry){
-                    parent.addChildEvent(new MoveGripper(PEZPos.CargoRelease));
+                    seq.addEvent(new MoveGripper(PEZPos.CargoRelease));
                 } else {
-                    parent.addChildEvent(new MoveGripper(PEZPos.HatchRelease));
+                    seq.addEvent(new MoveGripper(PEZPos.HatchRelease));
                 }
                 
-                seq.addEvent(parent);
-
+                
+                //Add the back-up motion
                 if(isForward){
                     parent.addChildEvent(new Backup());
                 } else {
                     parent.addChildEvent(new BackupHigh());
                 }
 
+                //Fire off the sequencer
                 seq.start();
             
             break;
@@ -292,8 +301,7 @@ public class Autonomous {
 
             case autoError:
                 
-                double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
-                double curTime = sampleTimeMS;
+                double curTime = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
                 //Blink a driver station LED while failed
                 if(curTime >= nextBlinkTransitionTime){
                     nextBlinkTransitionTime = curTime + BLINK_RATE_MSEC;
