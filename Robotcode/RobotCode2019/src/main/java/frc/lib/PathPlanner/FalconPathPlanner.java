@@ -698,7 +698,7 @@ public class FalconPathPlanner {
 
         final FalconPathPlanner path = new FalconPathPlanner(waypoints);
 
-        path.setPathBeta(0.2);
+        path.setPathBeta(0.05);
         path.setPathAlpha(0.5);
         path.setVelocityAlpha(0.001);
         path.setVelocityBeta(0.9);

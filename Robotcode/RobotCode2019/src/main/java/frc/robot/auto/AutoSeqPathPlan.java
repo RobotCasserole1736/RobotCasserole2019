@@ -8,7 +8,9 @@ import frc.lib.AutoSequencer.AutoEvent;
 import frc.lib.PathPlanner.FalconPathPlanner;
 import frc.lib.Util.CrashTracker;
 import frc.robot.Drivetrain;
+import frc.robot.RioSimMode;
 import frc.robot.RobotConstants;
+import frc.robot.RobotPose;
 import frc.robot.Utils;
 
 /*
@@ -47,7 +49,9 @@ public class AutoSeqPathPlan extends AutoEvent {
 
     double initialHeading = 0;
 
-    final double PATH_DURATION_FROM_DISTANCE_RATIO = 1.0/1.0 ; //untis of seconds per foot, because reasons
+    final double PATH_DURATION_FROM_DISTANCE_RATIO = 1.0/1.0 ; //units of seconds per foot, because reasons
+
+    final double JEVOIS_TO_PATH_PLAN_ANGLE_OFFSEST_DEG = -90.0;
 
     /**
      * Creates a new path from the current robot position up to a point in front of the target, pointed straight at it.
@@ -55,7 +59,8 @@ public class AutoSeqPathPlan extends AutoEvent {
     public AutoSeqPathPlan(double tgt_pos_x_ft, double tgt_pos_y_ft, double tgt_pos_angle_rad){
         dt = Drivetrain.getInstance();
 
-        double targetAngle = tgt_pos_angle_rad+(java.lang.Math.PI/2);
+        //Convert reference frames
+        double targetAngleRad = tgt_pos_angle_rad + Math.toRadians(JEVOIS_TO_PATH_PLAN_ANGLE_OFFSEST_DEG);
 
         //Use a completely made up formula to calcualte the duration of the path plan event.
         double psuedoDistance = Math.sqrt(tgt_pos_x_ft*tgt_pos_x_ft + tgt_pos_y_ft*tgt_pos_y_ft); //as-the-bird-flies distance to target
@@ -65,20 +70,20 @@ public class AutoSeqPathPlan extends AutoEvent {
 
         //This matrix is for the x and y position of the target. It is supposed to be a 2 X 1.
         double [] pointAheadOfEndMatrix = 
-            {tgt_pos_x_ft-24, tgt_pos_y_ft};
+            {tgt_pos_x_ft, tgt_pos_y_ft-3.0};
 
         double [] endOfLineMatrix = 
-            {tgt_pos_x_ft-18, tgt_pos_y_ft};
+            {tgt_pos_x_ft, tgt_pos_y_ft-1.5};
 
-        CrashTracker.logAndPrint("[AutoSeq Path Plan] Target Position X = " + tgt_pos_x_ft);
-        CrashTracker.logAndPrint("[AutoSeq Path Plan] Target Position Y = " + tgt_pos_y_ft);
+        CrashTracker.logAndPrint("[AutoSeq Path Plan] Target Position X (ft) = " + tgt_pos_x_ft);
+        CrashTracker.logAndPrint("[AutoSeq Path Plan] Target Position Y (ft) = " + tgt_pos_y_ft);
 
         double [][] rotationMatrix = {
-            {java.lang.Math.cos(targetAngle), -java.lang.Math.sin(targetAngle)},
-            {java.lang.Math.sin(targetAngle), java.lang.Math.cos(targetAngle)}
+            {java.lang.Math.cos(targetAngleRad), -java.lang.Math.sin(targetAngleRad)},
+            {java.lang.Math.sin(targetAngleRad), java.lang.Math.cos(targetAngleRad)}
         };
 
-        CrashTracker.logAndPrint("[AutoSeq Path Plan] Angle from Target = " + tgt_pos_angle_rad);
+        CrashTracker.logAndPrint("[AutoSeq Path Plan] Angle from Target (Deg) = " + Math.toDegrees(targetAngleRad));
 
         double [] wayPoint3 = multiplyMatrices(rotationMatrix, pointAheadOfEndMatrix);
 
@@ -89,7 +94,7 @@ public class AutoSeqPathPlan extends AutoEvent {
         waypoints.add(wp1);
 
         double[] wp2 = 
-            {0, 0.5};
+            {0, 1.5};
         waypoints.add(wp2);
 
         double[] wp3 = wayPoint3;
@@ -102,14 +107,20 @@ public class AutoSeqPathPlan extends AutoEvent {
         CrashTracker.logAndPrint("[AutoSeq Path Plan] Waypoint4 X = " + wayPoint4[0]);
         CrashTracker.logAndPrint("[AutoSeq Path Plan] Waypoint4 Y = " + wayPoint4[1]);
 
+        //Calculate the smooth path
         path = new FalconPathPlanner(waypoints.toArray(new double[waypoints.size()][2]));
-        path.setPathBeta(0.2);
+        path.setPathBeta(0.02);
         path.setPathAlpha(0.5);
         path.setVelocityAlpha(0.001);
         path.setVelocityBeta(0.9);
         path.calculate(pathDurationSec, RobotConstants.MAIN_LOOP_SAMPLE_RATE_S, RobotConstants.ROBOT_TRACK_WIDTH_FT);
 
+        if(RioSimMode.getInstance().isDesktop()){
+            FalconPathPlanner.plotPath(path);
+        }
 
+        //Update the pose view with our new desired location, converting to robotPose reference frame
+        RobotPose.getInstance().setDesiredPose(wayPoint4[0], wayPoint4[1], Math.toDegrees(targetAngleRad) + RobotPose.getInstance().INIT_POSE_T);
 
     }
 
@@ -161,7 +172,7 @@ public class AutoSeqPathPlan extends AutoEvent {
     /**
      * Return the heading command, relative to how the gyro returns angles, at the specified time (in sec)
      */
-    public double getHeadingCmdRPM(double time_sec){
+    public double getHeadingCmdDeg(double time_sec){
         int timestep = (int)Math.floor(time_sec/RobotConstants.MAIN_LOOP_SAMPLE_RATE_S);
         double cmdHeading = 0;
 
@@ -183,7 +194,7 @@ public class AutoSeqPathPlan extends AutoEvent {
     @Override
     public void userUpdate() {
         thisLoopTime = Timer.getFPGATimestamp() - startTime;
-        dt.setClosedLoopSpeedCmd(getLeftSpeedCmdRPM(thisLoopTime), getRightSpeedCmdRPM(thisLoopTime),getHeadingCmdRPM(thisLoopTime));
+        dt.setClosedLoopSpeedCmd(getLeftSpeedCmdRPM(thisLoopTime), getRightSpeedCmdRPM(thisLoopTime),getHeadingCmdDeg(thisLoopTime));
     }
 
     @Override

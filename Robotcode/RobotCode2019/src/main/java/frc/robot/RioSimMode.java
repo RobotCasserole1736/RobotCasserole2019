@@ -53,7 +53,7 @@ import frc.lib.Util.CrashTracker;
         // We force sim mode whenever the OS is windows. This is because we all have windows development machines. Laugh it up, fuzzball.
         // We force non-sim mode whenever the MAC address of our current platform is the roboRIO mounted on the real robot. 
         // We allow user to select sim or non-sim mode when running on any other device (the testboard most likely)
-        isSimMode = System.getProperty("os.name").contains("Windows") || ( (macStr.compareToIgnoreCase(ROBOTMAC) != 0) && forceSimMode.get() > 0.0001);
+        isSimMode = isDesktop() || ( (macStr.compareToIgnoreCase(ROBOTMAC) != 0) && forceSimMode.get() > 0.0001);
 
         if(isSimMode){
             CrashTracker.logAndPrint("Warning: >>>>>>>>---------------------------------<<<<<<<<");
@@ -64,6 +64,10 @@ import frc.lib.Util.CrashTracker;
 
     public boolean isSimMode(){
         return isSimMode;
+    }
+
+    public boolean isDesktop(){
+        return System.getProperty("os.name").contains("Windows"); //sorry linux
     }
 
     private void setMACAddr(){

@@ -173,7 +173,7 @@ public class Robot extends TimedRobot {
             /* Init software utilities */
             loadMon= new CasseroleRIOLoadMonitor();
             loopTiming = LoopTiming.getInstance();
-            poseCalc = new RobotPose();
+            poseCalc = RobotPose.getInstance();
             matchState = MatchState.getInstance();
             DrivetrainClosedLoopTestVectors.getInstance();
             AutoSeqDistToTgtEst.getInstance();
@@ -323,6 +323,7 @@ public class Robot extends TimedRobot {
 
             poseCalc.setLeftMotorSpeed(drivetrain.getLeftWheelSpeedRPM());
             poseCalc.setRightMotorSpeed(drivetrain.getRightWheelSpeedRPM());
+            poseCalc.setMeasuredPoseAngle(drivetrain.getGyroAngle(), drivetrain.isGyroOnline());
             poseCalc.update();
 
             climber.setManualMovement(false);
