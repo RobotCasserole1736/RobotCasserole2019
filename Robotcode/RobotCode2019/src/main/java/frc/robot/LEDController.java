@@ -32,6 +32,8 @@ public class LEDController {
 
     private LEDPatterns patternCmd;
 
+
+
     public static synchronized LEDController getInstance() {
         if(ledCtrl == null)
             ledCtrl = new LEDController();
@@ -39,16 +41,12 @@ public class LEDController {
     }
 
     public enum LEDPatterns {
-        Pattern0(0), /* "Blank" */ 
-        Pattern1(1), /* "Fire" */
-        Pattern2(2), /* "Meteor Rain" */
-        Pattern3(3), /* "Fade In and Fade Out R&W" */
-        Pattern4(4), /* "Running Lights R&W" */
-        Pattern5(5), /* "Theatre Chase R&W" */
-        Pattern6(6), /* "Strobe: Red" */
-        Pattern7(7), /* "Strobe: Green" */
-        Pattern8(8), /* "Strobe: Blue" */
-        Pattern9(9); /* "Strobe: White" */
+        Pattern0(0), 
+        Pattern1(1), 
+        Pattern2(2), 
+        Pattern3(3), 
+        Pattern4(4),
+        Pattern5(5); 
      
         public final int value;
 
@@ -82,40 +80,30 @@ public class LEDController {
 
             break;
             case Pattern2:
-                ctrl.setSpeed(-0.25);
-
-            break;
-            case Pattern3:
                 ctrl.setSpeed(-0.5);
 
             break;
-            case Pattern4:
-                ctrl.setSpeed(-0.75);
-
-            break;
-            case Pattern5:
+            case Pattern3:
                 ctrl.setSpeed(0.0);
 
             break;
-            case Pattern6:
-                ctrl.setSpeed(0.25);
-            
-            break;
-            case Pattern7:
+            case Pattern4:
                 ctrl.setSpeed(0.5);
-            
-            break;
-            case Pattern8:
-                ctrl.setSpeed(0.75);
 
             break;
-            case Pattern9:
+            case Pattern5:
                 ctrl.setSpeed(1.0);
+
+            break;
         }
     }
 
     public void setPattern(LEDPatterns pattern_in){
         patternCmd = pattern_in;
+    }
+
+    public void setDisabledPattern(){
+        patternCmd = LEDPatterns.Pattern0;
     }
 
 }
