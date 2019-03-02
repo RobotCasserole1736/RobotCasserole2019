@@ -21,62 +21,74 @@ package frc.robot;
  */
 
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.Timer;
-
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import frc.lib.Calibration.Calibration;
 import frc.lib.DataServer.Signal;
+import frc.lib.Util.DaBouncer;
 
 public class IntakeControl{
 
     boolean runSimMode;
 
     DigitalInput ballInIntake;
-    DigitalInput backIntakeSwitch;
-    DigitalInput frontIntakeSwitch;
-
-    
 
     WPI_TalonSRX intakeMotor;
-    VictorSPX intakeLeftArmMotor;
-    VictorSPX intakeRightArmMotor;
+    IntakeMotorBase intakeLeftArmMotor;
+    IntakeMotorBase intakeRightArmMotor;
+    
+    int loopCounter = 0;
 
-    double intakeMotorCmd = 0;
-    double intakeRollerCmd = 0;
+    Signal leftIntakeMotorPosSig;
+    Signal rightIntakeMotorPosSig;
+    Signal retractStateCmdSig;
+    Signal motorSpeedCmdSig;
+    Signal ballInIntakeSig;
+    Signal leftIntakePosSensorVoltageSig;
+    Signal rightIntakePosSensorVoltageSig;
 
     Calibration intakeSpeed;
     Calibration ejectSpeed;
-    Calibration groundToExtendTime;
-    Calibration retractedToExtendTime;
+    Calibration extendTime;
+    Calibration retractAngle;
+    Calibration extendAngle;
+    Calibration groundAngle;
+    Calibration intakeMotorP;
+    Calibration intakeMotorI;
+    Calibration intakeMotorD;
+    Calibration lowerLeftPotVoltage;
+    Calibration upperLeftPotVoltage;
+    Calibration lowerRightPotVoltage;
+    Calibration upperRightPotVoltage;
+    Calibration minIntakeAngle;
+    Calibration maxIntakeAngle;
 
     Calibration positionOverride;
 
-    boolean isOnTarget;
+    double currentLeftPosition;
+    double currentRightPosition;
 
-    Signal intakeCmdStateSig;
-    Signal motorSpeedCmdSig;
-    Signal ballInIntakeSig;
-    Signal isOnTargetSig; 
-    Signal intakeAtBackLimit;
-    Signal intakeAtFrontLimit;
-    Signal rollerSpeedCmdSig;
+    final double MAX_ALLOWABLE_ERR_DEG = 5.0;
+    final int ALLOWABLE_ERR_DBNC_LOOPS = 10;
+
+    DaBouncer rightOnTargetDbnc;
+    DaBouncer leftOnTargetDbnc;
+
+    boolean leftOnTarget = false;
+    boolean rightOnTarget = false;
+
+    Signal rightOnTargetSig; 
+    Signal leftOnTargetSig;
+
+    DriverController dController;
+    OperatorController opController;
+    Arm arm;
+
+    DaBouncer ballDetectedDbnc;
 
     boolean ballDetected = false;
-    boolean backLimitSwitchPressed = false;
-    boolean frontLimitSwitchPressed = false;
 
-    double transitionEndTime = 0;
-
-    //Start with intake retracted and stopped
-    private IntakePos intakePosDes = IntakePos.Retract;
-    private IntakePos intakePosAct = IntakePos.Retract;
-    private IntakePos prevIntakePosDes = IntakePos.Retract;
-    private IntakeSpd intakeSpdCmd = IntakeSpd.Stop;
-
-    /* singelton stuff */
     private static IntakeControl iControl = null;
+
     public static synchronized IntakeControl getInstance() {
         if(iControl == null)
             iControl = new IntakeControl();
@@ -88,32 +100,61 @@ public class IntakeControl{
 
         intakeSpeed = new Calibration("Intake Intake Speed motor cmd", 0.5, 0, 1);
         ejectSpeed = new Calibration("Intake Eject Speed motor cmd", 0.5, 0, 1);
-        groundToExtendTime = new Calibration("Intake Ground to Extend Time sec", 0.4, 0, 10);
-        retractedToExtendTime = new Calibration("Intake Retracted to Extend Time Sec", 0.85, 0, 10);
+        extendTime = new Calibration("Intake Est Extend Time sec", 0.500, 0, 5);
+        intakeMotorP = new Calibration("Intake Motor P", 0.1);
+        intakeMotorI = new Calibration("Intake Motor I", 0);
+        intakeMotorD = new Calibration("Intake Motor D", 0);
+        retractAngle = new Calibration("Intake Angle of Retracted State deg", 5);
+        extendAngle = new Calibration("Intake Angle of Extended State deg", 130);
+        groundAngle = new Calibration("Intake Angle of Ground State deg", 170);
+
+        lowerLeftPotVoltage = new Calibration("Intake Lowest Value of Left Potentiometer V", 0.292, 0, 6);
+        upperLeftPotVoltage = new Calibration("Intake Highest Value of Left Potentiometer V", 0.982, 0, 6);
+        lowerRightPotVoltage = new Calibration("Intake Lowest Value of Right Potentiometer V", 0.0573, 0, 6);
+        upperRightPotVoltage = new Calibration("Intake Highest Value of Right Potentiometer V", 0.750, 0, 6);
+        minIntakeAngle = new Calibration("Intake Minimum Angle deg", 0) ;
+        maxIntakeAngle = new Calibration("Intake Maximum Angle deg", 180) ;
         
         positionOverride = new Calibration("Intake Position Override Enable", 0, 0, 1);
+
+        rightOnTargetDbnc = new DaBouncer(MAX_ALLOWABLE_ERR_DEG, ALLOWABLE_ERR_DBNC_LOOPS);
+        leftOnTargetDbnc = new DaBouncer(MAX_ALLOWABLE_ERR_DEG, ALLOWABLE_ERR_DBNC_LOOPS);
+        ballDetectedDbnc = new DaBouncer(0,ALLOWABLE_ERR_DBNC_LOOPS);
         
         ballInIntake = new DigitalInput(RobotConstants.BALL_INTAKE_PORT);
-        backIntakeSwitch = new DigitalInput(RobotConstants.INTAKE_BACK_LIMIT_SWITCH_PORT);
-        frontIntakeSwitch = new DigitalInput(RobotConstants.INTAKE_FRONT_LIMIT_SWITCH_PORT);
-
         intakeMotor = new WPI_TalonSRX(RobotConstants.INTAKE_MOTOR_CANID);
-        intakeLeftArmMotor  = new VictorSPX(RobotConstants.INTAKE_MOTOR_LEFT_CANID);
-        intakeRightArmMotor = new VictorSPX(RobotConstants.INTAKE_MOTOR_RIGHT_CANID);
+        //TODO figure out which one is inverted
+        intakeLeftArmMotor = new IntakeMotorBase(intakeMotorP.get(),intakeMotorI.get(),intakeMotorD.get(),RobotConstants.INTAKE_MOTOR_LEFT_CANID,RobotConstants.INTAKE_LEFT_POT_PORT);
+        intakeRightArmMotor = new IntakeMotorBase(intakeMotorP.get(),intakeMotorI.get(),intakeMotorD.get(),RobotConstants.INTAKE_MOTOR_RIGHT_CANID,RobotConstants.INTAKE_RIGHT_POT_PORT);
+        intakeLeftArmMotor.setInverted(false);
+        intakeRightArmMotor.setInverted(true);
+        intakeLeftArmMotor.setLowerLimitVoltage(lowerLeftPotVoltage.get());
+        intakeLeftArmMotor.setUpperLimitVoltage(upperLeftPotVoltage.get());
+        intakeLeftArmMotor.setLowerLimitDegrees(minIntakeAngle.get());
+        intakeLeftArmMotor.setUpperLimitDegrees(maxIntakeAngle.get());
+        intakeRightArmMotor.setLowerLimitVoltage(lowerRightPotVoltage.get());
+        intakeRightArmMotor.setUpperLimitVoltage(upperRightPotVoltage.get());
+        intakeRightArmMotor.setLowerLimitDegrees(minIntakeAngle.get());
+        intakeRightArmMotor.setUpperLimitDegrees(maxIntakeAngle.get());
 
-        intakeCmdStateSig = new Signal("Intake Commanded Position", "Intake Pos Enum");
-        motorSpeedCmdSig = new Signal("Intake Arms Motor Commands", "cmd");
-        rollerSpeedCmdSig = new Signal("Intake Roller Motor Command", "cmd");
+        dController = DriverController.getInstance();
+        opController = OperatorController.getInstance();
+        arm = Arm.getInstance();
+        leftIntakeMotorPosSig = new Signal("Intake Left Motor Actual Position","deg");
+        rightIntakeMotorPosSig = new Signal("Intake Right Motor Actual Position","deg");
+        leftIntakePosSensorVoltageSig = new Signal("Intake Left Sensor Raw Voltage","V");
+        rightIntakePosSensorVoltageSig = new Signal("Intake Right Sensor Raw Voltage","V");
+        retractStateCmdSig = new Signal("Intake Commanded Position", "Intake Pos Enum");
+        motorSpeedCmdSig = new Signal("Intake Roller Motor Command", "cmd");
         ballInIntakeSig = new Signal("Intake Ball Present", "bool");
-        isOnTargetSig  = new Signal("Intake Arm Position On Target", "bool");
-        intakeAtBackLimit  = new Signal("Intake Arms at Back Limit", "bool");
-        intakeAtFrontLimit  = new Signal("Intake Arms at Front Limit", "bool");
+        rightOnTargetSig = new Signal("Intake Right Arm Position On Target", "bool");
+        leftOnTargetSig  = new Signal("Intake Left Arm Position On Target", "bool");
 
     }
 
     //Intake positions that can be requested
     public enum IntakePos {
-        Extend(0), Retract(1), Ground(2), InTransit(3);
+        Extend(0), Retract(1), Ground(2), Stop(3);
 
         public final int value;
 
@@ -142,58 +183,60 @@ public class IntakeControl{
         }
     }
 
-    public void manualIntakeOverride(){
-        int dpadPos = OperatorController.getInstance().xb.getPOV();
-
-        if(dpadPos == 0){
-            intakePosDes = IntakePos.Ground;
-        } else if(dpadPos == 90 || dpadPos == 270){
-            intakePosDes = IntakePos.Extend;
-        } else if(dpadPos == 180){
-            intakePosDes = IntakePos.Retract;
-        }
-    }
+    //Start with intake retracted and stopped
+    private IntakePos intakePosCmd = IntakePos.Retract;
+    private IntakePos prevIntakePosCmd = IntakePos.Retract;
+    private IntakeSpd intakeSpdCmd = IntakeSpd.Stop;
 
     public void setPositionCmd(IntakePos posIn){
 
-        intakePosDes = posIn;
+        //Test only - enable manual control from driver controller when override is active
+        if(positionOverride.get() == 1.0){
+            int dpadPos = DriverController.getInstance().xb.getPOV();
+
+            if(dpadPos == 0){
+                intakePosCmd = IntakePos.Ground;
+            } else if(dpadPos == 90 || dpadPos == 270){
+                intakePosCmd = IntakePos.Extend;
+            } else if(dpadPos == 180){
+                intakePosCmd = IntakePos.Retract;
+            }
+        } else {
+            intakePosCmd = posIn;
+        }
 
     }
 
-    public void stopIntakeMotion(){
-        intakeMotorCmd = 0;
-        intakeRollerCmd = 0;
-        intakeLeftArmMotor.set(ControlMode.PercentOutput, 0);
-        intakeRightArmMotor.set(ControlMode.PercentOutput, 0);
+    //Returns TRUE if the intake is retracted sufficently to start the robot, false if not.
+    public boolean setAndCheckInitialState(){
+        if(currentRightPosition < 15 && currentLeftPosition < 15){
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public IntakePos getPositionCmd(){
-        return intakePosDes;
+        return intakePosCmd;
     }
 
     public void setSpeedCmd(IntakeSpd speedIn){
         intakeSpdCmd=speedIn;
     }
 
+    public void emergencyStop(){
+        intakeLeftArmMotor.stop();
+        intakeRightArmMotor.stop();
+        intakePosCmd=IntakePos.Stop;
+        intakeSpdCmd=IntakeSpd.Stop;
+        intakeMotor.set(0);
+    }
+
     public boolean isAtDesPos(){
         if(runSimMode){
             return true;
         } else {
-            return isOnTarget;
-        }
-    }
-
-    // Reads the back limit switch and attempts to set up initail states 
-    // Returns true if we're at the retracted state, false otherwise.
-    public boolean setAndCheckInitialState(){
-        sampleSensors();
-        if(backLimitSwitchPressed){
-            intakePosAct = IntakePos.Retract;
-            intakePosDes = IntakePos.Retract;
-            prevIntakePosDes = IntakePos.Retract;
-            return true;
-        } else {
-            return false;
+            return rightOnTarget && leftOnTarget;
         }
     }
 
@@ -201,105 +244,93 @@ public class IntakeControl{
     public void sampleSensors(){
         if(!runSimMode){
             ballDetected = !ballInIntake.get(); //Sensor outputs high for no ball, low for ball 
-            backLimitSwitchPressed = backIntakeSwitch.get();
-            frontLimitSwitchPressed = frontIntakeSwitch.get();
+            currentLeftPosition= intakeLeftArmMotor.returnPIDInput();
+            currentRightPosition= intakeRightArmMotor.returnPIDInput();
         }
     }
 
-    public boolean getBackLimitSwitchPressed(){
-        return backLimitSwitchPressed;
-    }
-
-    public boolean getFrontLimitSwitchPressed(){
-        return frontLimitSwitchPressed;
-    }
-
     public void update(){
+        double intakeMotorCmd = 0;
+        
+        //Temp - do this elsewhere
+        intakeLeftArmMotor.setKp(intakeMotorP.get());
+        intakeLeftArmMotor.setKi(intakeMotorI.get());
+        intakeLeftArmMotor.setKd(intakeMotorD.get());
 
+        intakeRightArmMotor.setKp(intakeMotorP.get());
+        intakeRightArmMotor.setKi(intakeMotorI.get());
+        intakeRightArmMotor.setKd(intakeMotorD.get());
+
+        
         sampleSensors();
 
         if(runSimMode){
-            intakePosAct = intakePosDes;
+            if(intakePosCmd==IntakePos.Extend){
+                currentLeftPosition = (extendAngle.get());
+                currentRightPosition = (extendAngle.get());
+            }else if(intakePosCmd==IntakePos.Ground){
+                currentLeftPosition = (groundAngle.get());
+                currentRightPosition = (groundAngle.get()); 
+            }else if(intakePosCmd==IntakePos.Retract){
+                currentLeftPosition = (retractAngle.get());
+                currentRightPosition = (retractAngle.get()); 
+            }
+
             ballDetected = false;
 
         } else {
 
-            if(intakePosDes==IntakePos.Extend){
-                if(prevIntakePosDes != IntakePos.Extend){
-                    //When going to extend, we need to run the motor till the timer has expired
-                    if(intakePosAct == IntakePos.Ground){
-                        transitionEndTime = Timer.getFPGATimestamp() + groundToExtendTime.get();
-                        intakeMotorCmd = -1.0;
-                    } else if(intakePosAct == IntakePos.Retract){
-                        transitionEndTime = Timer.getFPGATimestamp() + retractedToExtendTime.get();
-                        intakeMotorCmd = 1.0;
-                    }
-                } else {
-                    if(Timer.getFPGATimestamp() > transitionEndTime){
-                        intakePosAct = IntakePos.Extend;
-                        intakeMotorCmd = 0;
-                    } else {
-                        intakePosAct = IntakePos.InTransit;
-                    }
-                }
-            }else if(intakePosDes==IntakePos.Ground){
-                //When going to the ground, just command the motor forward.
-                if(frontLimitSwitchPressed){
-                    intakeMotorCmd = 0.0;
-                    intakePosAct = IntakePos.Ground;
-                } else {
-                    intakeMotorCmd = 1.0;
-                    intakePosAct = IntakePos.InTransit;
-                }
-            }else if(intakePosDes==IntakePos.Retract){
-                //When going to retract, just command the motor backward.
-                if(backLimitSwitchPressed){
-                    intakeMotorCmd = 0.0;
-                    intakePosAct = IntakePos.Retract;
-                }else {
-                    intakeMotorCmd = -1.0;
-                    intakePosAct = IntakePos.InTransit;
-                }
+            if(MatchState.getInstance().GetPeriod() != MatchState.Period.OperatorControl &&
+               MatchState.getInstance().GetPeriod() != MatchState.Period.Autonomous) {
+                //Start intake within frame perimiter and in safe state
+                setPositionCmd(IntakePos.Retract);
+                setSpeedCmd(IntakeSpd.Stop);
+            }
+    
+            //Intake Arm stuffs
+            if(intakePosCmd==IntakePos.Extend){
+                intakeLeftArmMotor.setSetpoint(extendAngle.get());
+                intakeRightArmMotor.setSetpoint(extendAngle.get());
+            }else if(intakePosCmd==IntakePos.Ground){
+                intakeLeftArmMotor.setSetpoint(groundAngle.get());
+                intakeRightArmMotor.setSetpoint(groundAngle.get()); 
+            }else if(intakePosCmd==IntakePos.Retract){
+                intakeLeftArmMotor.setSetpoint(retractAngle.get());
+                intakeRightArmMotor.setSetpoint(retractAngle.get()); 
             }else{
                 //Don't change the setpoint otherwise.
             }
 
-            //Overarching saftey cutouts
-            if(frontLimitSwitchPressed){
-                if(intakeMotorCmd > 0.0){
-                    intakeMotorCmd = 0.0;
-                }
-            } else if(backLimitSwitchPressed){
-                if(intakeMotorCmd < 0.0){
-                    intakeMotorCmd = 0.0;
-                }
+            if(intakePosCmd != prevIntakePosCmd){
+                rightOnTargetDbnc.resetCounters();
+                leftOnTargetDbnc.resetCounters();
             }
 
-            intakeLeftArmMotor.set(ControlMode.PercentOutput, intakeMotorCmd);
-            intakeRightArmMotor.set(ControlMode.PercentOutput, intakeMotorCmd);
-
-
-            isOnTarget = (intakePosAct == intakePosDes);
+            //Debounce whether we're at the correct position or not.
+            rightOnTarget = rightOnTargetDbnc.BelowDebounce(Math.abs(intakeRightArmMotor.getCurError()));
+            leftOnTarget  = leftOnTargetDbnc.BelowDebounce(Math.abs(intakeLeftArmMotor.getCurError()));
+            
 
             //Intake motor control
             if((ballDetected) && (intakeSpdCmd == IntakeSpd.Intake)){ //If we got a ball, don't Intake
-                intakePosDes = IntakePos.Ground;
-                intakeRollerCmd = 0;
+                intakePosCmd = IntakePos.Ground;
+                intakeMotorCmd = 0;
             }else if((!ballDetected) && (intakeSpdCmd == IntakeSpd.Intake)){ //If we don't, Intake
-                intakeRollerCmd = intakeSpeed.get();
+                intakeMotorCmd = intakeSpeed.get();
             }else if(intakeSpdCmd == IntakeSpd.Stop){ //Whether we have a ball or not, we can Stop and Eject
-                intakeRollerCmd = 0;
+                intakeMotorCmd = 0;
             }else if(intakeSpdCmd == IntakeSpd.Eject){
-                intakeRollerCmd = -1 * ejectSpeed.get();
+                intakeMotorCmd = -1 * ejectSpeed.get();
             }else{ //If for some reason it is confused, don't run the intake
-                intakeRollerCmd = 0;
+                intakeMotorCmd = 0;
             }
     
-            intakeMotor.set(intakeRollerCmd); //motor is no longer
+            intakeMotor.set(-1*intakeMotorCmd); //motor is mechanically inverted
 
-            prevIntakePosDes = intakePosDes;
+            prevIntakePosCmd = intakePosCmd;
     
-
+            double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
+            motorSpeedCmdSig.addSample(sampleTimeMS, intakeMotorCmd);
             updateTelemetry();
         }
 
@@ -309,17 +340,34 @@ public class IntakeControl{
     public void updateTelemetry(){
         /* Update Telemetry */
         double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
-        motorSpeedCmdSig.addSample(sampleTimeMS, intakeMotorCmd);
-        rollerSpeedCmdSig.addSample(sampleTimeMS, intakeRollerCmd);
-        intakeCmdStateSig.addSample(sampleTimeMS, intakePosDes.toInt());
+        leftIntakeMotorPosSig.addSample(sampleTimeMS, currentLeftPosition);
+        rightIntakeMotorPosSig.addSample(sampleTimeMS, currentRightPosition);
+        leftIntakePosSensorVoltageSig.addSample(sampleTimeMS, intakeLeftArmMotor.getSensorRawVoltage());
+        rightIntakePosSensorVoltageSig.addSample(sampleTimeMS, intakeRightArmMotor.getSensorRawVoltage());
+        retractStateCmdSig.addSample(sampleTimeMS, intakePosCmd.toInt());
         ballInIntakeSig.addSample(sampleTimeMS, ballDetected);
-        isOnTargetSig.addSample(sampleTimeMS, isOnTarget);  
-        intakeAtBackLimit.addSample(sampleTimeMS, backLimitSwitchPressed);  
-        intakeAtFrontLimit.addSample(sampleTimeMS, frontLimitSwitchPressed);  
+        rightOnTargetSig.addSample(sampleTimeMS, rightOnTarget); 
+        leftOnTargetSig.addSample(sampleTimeMS, leftOnTarget);  
+    }
+
+    public double getLeftArmPosition() {
+        return currentLeftPosition;
+    }
+
+    public double getRightArmPosition() {
+        return currentRightPosition;
     }
 
     public boolean isBallDetected(){
         return ballDetected;
+    }
+    public void openLoop(){
+        intakeLeftArmMotor.killPID();
+        intakeRightArmMotor.killPID();
+    }
+    public void closedLoop(){
+        intakeLeftArmMotor.start();
+        intakeRightArmMotor.start();
     }
 
 }
