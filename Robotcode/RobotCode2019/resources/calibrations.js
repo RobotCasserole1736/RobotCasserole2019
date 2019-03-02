@@ -102,6 +102,7 @@ function genTable(arr) {
     }
     out += "</table>";
     document.getElementById("id02").innerHTML = out;
+    filterChangeHandler(filterSpec);
 }
 
 function handleApplyButtonClick(input_box){
@@ -113,13 +114,16 @@ function handleApplyButtonClick(input_box){
     } else {
         dataSocket.send("set:"+input_box.name+":"+val); 
     }
+    filterChangeHandler(filterSpec);
 
 }
 
 function handleResetButtonClick(input_box){
     dataSocket.send("reset:"+input_box.name); 
+    filterChangeHandler(filterSpec);
 }
 
 function handleSaveBtnClick(){
     dataSocket.send("save"); 
+    filterChangeHandler(filterSpec);
 }
