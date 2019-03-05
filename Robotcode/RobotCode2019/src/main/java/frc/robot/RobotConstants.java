@@ -49,7 +49,6 @@ public class RobotConstants {
     public static final int LINE_FOLLOWING_SENSOR_3_PORT = 5;
 
     public static final int INTAKE_BACK_LIMIT_SWITCH_PORT = 8;
-
     public static final int INTAKE_FRONT_LIMIT_SWITCH_PORT = 6;
 
     public static final int PEZ_SOLENOID_LIMIT_SWITCH_PORT = 9;
