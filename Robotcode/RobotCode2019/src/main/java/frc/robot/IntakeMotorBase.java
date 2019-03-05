@@ -21,6 +21,8 @@ public class IntakeMotorBase extends CasserolePID{
 
     boolean isOpenLoop = false;
 
+    boolean isAtForwardLimit = false;
+
     boolean isInverted = false;
     double outputCmd = 0;
 
@@ -51,6 +53,10 @@ public class IntakeMotorBase extends CasserolePID{
     public void start(){
         isOpenLoop = false;
         super.start();
+    }
+
+    public void setAtForwardLimit(boolean atLimit){
+        isAtForwardLimit = atLimit;
     }
 
     double convertVoltsToDeg(double voltage_in){
@@ -97,12 +103,18 @@ public class IntakeMotorBase extends CasserolePID{
     @Override
     protected void usePIDOutput(double pidOutput) {
         if(isOpenLoop == false){
+            if(isAtForwardLimit && pidOutput > 0){
+                pidOutput = 0;
+            }
             intakeArmMotor.set(ControlMode.PercentOutput,pidOutput);
         }
     }
 
     public void setManualMotorCommand(double cmd){
         if(isOpenLoop == true){
+            if(isAtForwardLimit && cmd > 0){
+                cmd = 0;
+            }
             intakeArmMotor.set(ControlMode.PercentOutput,cmd); 
         }
     }

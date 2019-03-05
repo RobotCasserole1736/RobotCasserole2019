@@ -35,6 +35,7 @@ public class IntakeControl{
     WPI_TalonSRX intakeMotor;
     IntakeMotorBase intakeLeftArmMotor;
     IntakeMotorBase intakeRightArmMotor;
+    DigitalInput forwardLimitSwitch;
     
     int loopCounter = 0;
 
@@ -45,6 +46,7 @@ public class IntakeControl{
     Signal ballInIntakeSig;
     Signal leftIntakePosSensorVoltageSig;
     Signal rightIntakePosSensorVoltageSig;
+    Signal atForwardLimitSig;
 
     Calibration intakeSpeed;
     Calibration ejectSpeed;
@@ -75,6 +77,7 @@ public class IntakeControl{
 
     boolean leftOnTarget = false;
     boolean rightOnTarget = false;
+    boolean forwardLimitHit = false;
 
     Signal rightOnTargetSig; 
     Signal leftOnTargetSig;
@@ -123,7 +126,9 @@ public class IntakeControl{
         
         ballInIntake = new DigitalInput(RobotConstants.BALL_INTAKE_PORT);
         intakeMotor = new WPI_TalonSRX(RobotConstants.INTAKE_MOTOR_CANID);
-        //TODO figure out which one is inverted
+
+        forwardLimitSwitch = new DigitalInput(RobotConstants.INTAKE_FRONT_LIMIT_SWITCH_PORT);
+
         intakeLeftArmMotor = new IntakeMotorBase(intakeMotorP.get(),intakeMotorI.get(),intakeMotorD.get(),RobotConstants.INTAKE_MOTOR_LEFT_CANID,RobotConstants.INTAKE_LEFT_POT_PORT);
         intakeRightArmMotor = new IntakeMotorBase(intakeMotorP.get(),intakeMotorI.get(),intakeMotorD.get(),RobotConstants.INTAKE_MOTOR_RIGHT_CANID,RobotConstants.INTAKE_RIGHT_POT_PORT);
         intakeLeftArmMotor.setInverted(false);
@@ -149,6 +154,7 @@ public class IntakeControl{
         ballInIntakeSig = new Signal("Intake Ball Present", "bool");
         rightOnTargetSig = new Signal("Intake Right Arm Position On Target", "bool");
         leftOnTargetSig  = new Signal("Intake Left Arm Position On Target", "bool");
+        atForwardLimitSig  = new Signal("Intake At Forward Limit", "bool");
 
     }
 
@@ -246,6 +252,7 @@ public class IntakeControl{
             ballDetected = !ballInIntake.get(); //Sensor outputs high for no ball, low for ball 
             currentLeftPosition= intakeLeftArmMotor.returnPIDInput();
             currentRightPosition= intakeRightArmMotor.returnPIDInput();
+            forwardLimitHit = !forwardLimitSwitch.get(); //Pressed returns low, released returns high.
         }
     }
 
@@ -301,6 +308,9 @@ public class IntakeControl{
                 //Don't change the setpoint otherwise.
             }
 
+            intakeLeftArmMotor.setAtForwardLimit(forwardLimitHit);
+            intakeRightArmMotor.setAtForwardLimit(forwardLimitHit);
+
             if(intakePosCmd != prevIntakePosCmd){
                 rightOnTargetDbnc.resetCounters();
                 leftOnTargetDbnc.resetCounters();
@@ -348,6 +358,7 @@ public class IntakeControl{
         ballInIntakeSig.addSample(sampleTimeMS, ballDetected);
         rightOnTargetSig.addSample(sampleTimeMS, rightOnTarget); 
         leftOnTargetSig.addSample(sampleTimeMS, leftOnTarget);  
+        atForwardLimitSig.addSample(sampleTimeMS, forwardLimitHit);
     }
 
     public double getLeftArmPosition() {
