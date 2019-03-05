@@ -222,7 +222,7 @@ public class Robot extends TimedRobot {
             CrashTracker.logTeleopInit();
 
             //Intake check - if it's not at the correct location, kill the robot!
-            if((!intakeControl.setAndCheckInitialState()) && !wasAutoRun && !RioSimMode.getInstance().isSimMode()) {
+            if((!intakeControl.setAndCheckInitialState()) && !wasAutoRun && !RioSimMode.getInstance().isSimMode() && !DriverStation.getInstance().isFMSAttached()) {
                 System.out.println("Error: !!! UNSAFE STARTUP STATE !!!");
                 throw new Error("Error!!! Robot started in unsafe state");
             }
@@ -245,7 +245,7 @@ public class Robot extends TimedRobot {
             wasAutoRun = true;
 
             //Intake check - if it's not at the correct location, kill the robot!
-            if(!intakeControl.setAndCheckInitialState()&& !RioSimMode.getInstance().isSimMode()) {
+            if(!intakeControl.setAndCheckInitialState()&& !RioSimMode.getInstance().isSimMode() && !DriverStation.getInstance().isFMSAttached()) {
                 System.out.println("Error: !!! UNSAFE STARTUP STATE !!!");
                 throw new Error("Error!!! Robot started in unsafe state");
             }
