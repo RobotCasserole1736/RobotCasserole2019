@@ -25,10 +25,10 @@ public class RobotConstants {
 
 
     /////////////////////////////////////////////////////////////////////////////////////
-    // RoboRIO Input Ports
+    // RoboRIO Ports
     /////////////////////////////////////////////////////////////////////////////////////
 
-    //Analog
+    //Analog Input
     public static final int ANALOG_PRESSURE_SENSOR_PORT = 1;
     public static final int INTAKE_LEFT_POT_PORT = 2;
     public static final int INTAKE_RIGHT_POT_PORT = 3;
@@ -42,19 +42,19 @@ public class RobotConstants {
 
 
     //Digital
+    public static final int VISON_LED_RING_PORT = 0;
     public static final int BALL_INTAKE_PORT = 1;
-
+    // 2 unused
     public static final int LINE_FOLLOWING_SENSOR_1_PORT = 3;
     public static final int LINE_FOLLOWING_SENSOR_2_PORT = 4;
     public static final int LINE_FOLLOWING_SENSOR_3_PORT = 5;
-
-    public static final int INTAKE_BACK_LIMIT_SWITCH_PORT = 8;
     public static final int INTAKE_FRONT_LIMIT_SWITCH_PORT = 6;
-
+    //7 not used
+    public static final int INTAKE_BACK_LIMIT_SWITCH_PORT = 8;
     public static final int PEZ_SOLENOID_LIMIT_SWITCH_PORT = 9;
 
     //PWM/Motor
-    public static final int VISON_LED_RING_PORT = 0;
+
     public static final int CLIMBER_SERVO1 = 6;
     public static final int CLIMBER_SERVO2 = 7;
 

@@ -107,14 +107,14 @@ public class IntakeControl{
         intakeMotorP = new Calibration("Intake Motor P", 0.1);
         intakeMotorI = new Calibration("Intake Motor I", 0);
         intakeMotorD = new Calibration("Intake Motor D", 0);
-        retractAngle = new Calibration("Intake Angle of Retracted State deg", 5);
-        extendAngle = new Calibration("Intake Angle of Extended State deg", 130);
-        groundAngle = new Calibration("Intake Angle of Ground State deg", 170);
+        retractAngle = new Calibration("Intake Angle of Retracted State deg", 0);
+        extendAngle = new Calibration("Intake Angle of Extended State deg", 145);
+        groundAngle = new Calibration("Intake Angle of Ground State deg", 175);
 
-        lowerLeftPotVoltage = new Calibration("Intake Lowest Value of Left Potentiometer V", 0.292, 0, 6);
-        upperLeftPotVoltage = new Calibration("Intake Highest Value of Left Potentiometer V", 0.982, 0, 6);
-        lowerRightPotVoltage = new Calibration("Intake Lowest Value of Right Potentiometer V", 0.0573, 0, 6);
-        upperRightPotVoltage = new Calibration("Intake Highest Value of Right Potentiometer V", 0.750, 0, 6);
+        lowerLeftPotVoltage = new Calibration("Intake Lowest Value of Left Potentiometer V", 0.148, 0, 6);
+        upperLeftPotVoltage = new Calibration("Intake Highest Value of Left Potentiometer V", 0.740, 0, 6);
+        lowerRightPotVoltage = new Calibration("Intake Lowest Value of Right Potentiometer V", 0.340, 0, 6);
+        upperRightPotVoltage = new Calibration("Intake Highest Value of Right Potentiometer V", 0.931, 0, 6);
         minIntakeAngle = new Calibration("Intake Minimum Angle deg", 0) ;
         maxIntakeAngle = new Calibration("Intake Maximum Angle deg", 180) ;
         

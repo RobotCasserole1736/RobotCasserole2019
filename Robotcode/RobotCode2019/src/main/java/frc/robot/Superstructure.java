@@ -12,7 +12,6 @@ import frc.robot.PEZControl.PEZPos;
 import frc.robot.auto.Delay;
 import frc.robot.auto.EjectBall;
 import frc.robot.auto.MoveArmIntakePos;
-import frc.robot.auto.MoveArmLowPos;
 import frc.robot.auto.MoveArmMidPos;
 import frc.robot.auto.MoveGripper;
 import frc.robot.auto.MoveIntake;

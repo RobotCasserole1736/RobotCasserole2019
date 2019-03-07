@@ -607,6 +607,8 @@ public class Robot extends TimedRobot {
             intakeCmd = 0;
         }
         
+        intakeControl.intakeLeftArmMotor.setManualMotorCommand(intakeCmd);
+        intakeControl.intakeRightArmMotor.setManualMotorCommand(intakeCmd);
         intakeControl.update();
 
         climber.update();
