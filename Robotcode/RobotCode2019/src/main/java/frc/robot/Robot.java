@@ -323,40 +323,40 @@ public class Robot extends TimedRobot {
             double sampleTimeMs = loopTiming.getLoopStartTimeSec()*1000.0;
             frontUltrasonic.update();
             backUltrasonic.update();
-            ultrasonicsTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            ultrasonicsTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
             updateTimer.reset();
             linefollow.update();
-            lineFollowerTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            lineFollowerTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
             updateTimer.reset();
 
             /* Sample inputs from humans */
             driverController.update();
             operatorController.update();
-            controllersTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            controllersTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
             updateTimer.reset();
 
             superstructure.update();
-            superstructureTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            superstructureTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
             updateTimer.reset();
 
             autonomous.update();
-            autonomousTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            autonomousTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
             updateTimer.reset();
 
             arm.update();
-            armTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            armTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
             updateTimer.reset();
 
             pezControl.update();
-            pezTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            pezTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
             updateTimer.reset();
 
             intakeControl.update();
-            intakeTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            intakeTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
             updateTimer.reset();
 
             sensorCheck.update();
-            sensorCheckTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            sensorCheckTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
             updateTimer.reset();
 
             if(arm.getActualArmHeight() < 90) {
@@ -371,7 +371,7 @@ public class Robot extends TimedRobot {
             AutoSeqDistToTgtEst.getInstance().update();
 
             DrivetrainClosedLoopTestVectors.getInstance().update();
-            drivetrainClosedLoopVectorsTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            drivetrainClosedLoopVectorsTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
             updateTimer.reset();
 
             //Arbitrate driver & auto sequencer inputs to drivetrain
@@ -388,30 +388,30 @@ public class Robot extends TimedRobot {
             }
 
             drivetrain.update();
-            drivetrainTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            drivetrainTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
             updateTimer.reset();
 
             poseCalc.setLeftMotorSpeed(drivetrain.getLeftWheelSpeedRPM());
             poseCalc.setRightMotorSpeed(drivetrain.getRightWheelSpeedRPM());
             poseCalc.setMeasuredPoseAngle(drivetrain.getGyroAngle(), drivetrain.isGyroOnline());
             poseCalc.update();
-            poseCalcTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            poseCalcTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
             updateTimer.reset();
 
             climber.setManualMovement(false);
             climber.update();
-            climberTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            climberTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
             updateTimer.reset();
 
             /* Update Other subsytems */
             ledController.update();
-            ledTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            ledTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
             updateTimer.reset();
             pneumaticsControl.update();
-            pneumaticsTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            pneumaticsTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
             updateTimer.reset();
             telemetryUpdate();
-            telemetryTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            telemetryTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
             updateTimer.reset();
             
             /*Update CrashTracker*/
@@ -607,19 +607,19 @@ public class Robot extends TimedRobot {
         double sampleTimeMs = loopTiming.getLoopStartTimeSec()*1000.0;
 
         /* Update main loop signals */
-        rioDSSampLoadSig.addSample(sampleTimeMs, dataServer.getTotalStoredSamples());
-        rioCurrDrawLoadSig.addSample(sampleTimeMs, pdp.getTotalCurrent());
-        rioBattVoltLoadSig.addSample(sampleTimeMs, pdp.getVoltage());  
-        rioDSLogQueueLenSig.addSample(sampleTimeMs, dataServer.logger.getSampleQueueLength());
-        dtFwdRevAccelSig.addSample(sampleTimeMs, onboardAccel.getY());
-        dtLeftRightAccelSig.addSample(sampleTimeMs, onboardAccel.getZ());
-        dtUpDownAccelSig.addSample(sampleTimeMs, (onboardAccel.getX()*-1));
-        intakeLeftCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.INTAKE_LEFT_MOTOR_PDP_PORT));
-        intakeRightCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.INTAKE_LEFT_MOTOR_PDP_PORT));
-        climberReleaseMotorCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.CLIMBER_RELEASE_MOTOR_PDP_PORT));
+        //rioDSSampLoadSig.addSample(sampleTimeMs, dataServer.getTotalStoredSamples());
+        //rioCurrDrawLoadSig.addSample(sampleTimeMs, pdp.getTotalCurrent());
+        //rioBattVoltLoadSig.addSample(sampleTimeMs, pdp.getVoltage());  
+        //rioDSLogQueueLenSig.addSample(sampleTimeMs, dataServer.logger.getSampleQueueLength());
+        //dtFwdRevAccelSig.addSample(sampleTimeMs, onboardAccel.getY());
+        //dtLeftRightAccelSig.addSample(sampleTimeMs, onboardAccel.getZ());
+        //dtUpDownAccelSig.addSample(sampleTimeMs, (onboardAccel.getX()*-1));
+        //intakeLeftCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.INTAKE_LEFT_MOTOR_PDP_PORT));
+        //intakeRightCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.INTAKE_LEFT_MOTOR_PDP_PORT));
+        //climberReleaseMotorCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.CLIMBER_RELEASE_MOTOR_PDP_PORT));
         rioIsBrownoutSig.addSample(sampleTimeMs, RobotController.isBrownedOut());
-        matchTimeSig.addSample(sampleTimeMs, DriverStation.getInstance().getMatchTime());
-        rioCANBusUsagePctSig.addSample(sampleTimeMs, RobotController.getCANStatus().percentBusUtilization);
+        //matchTimeSig.addSample(sampleTimeMs, DriverStation.getInstance().getMatchTime());
+        //rioCANBusUsagePctSig.addSample(sampleTimeMs, RobotController.getCANStatus().percentBusUtilization);
     
         CasseroleDriverView.setDialValue("Main System Pressure", pneumaticsControl.getPressure());
         CasseroleDriverView.setDialValue("Speed", Math.abs(poseCalc.getRobotVelocity_ftpersec()));
@@ -629,12 +629,10 @@ public class Robot extends TimedRobot {
         CasseroleDriverView.setBoolean("Vision Camera Offline", !jevois.isVisionOnline());
         CasseroleDriverView.setBoolean("Vision Target Available", jevois.isTgtVisible());
         CasseroleDriverView.setBoolean("Auto Failed", autonomous.getAutoFailedLEDState());
-        CasseroleDriverView.setBoolean("Line Seen", linefollow.isEstLinePosAvailable());
         CasseroleDriverView.setBoolean("Fault Detected", sensorCheck.isFaultDetected());
         CasseroleDriverView.setStringBox("Op Mode", superstructure.getOpModeString());
         CasseroleDriverView.setBoolean("Arm At Limit", arm.getBottomOfMotion() || arm.getTopOfMotion());
         CasseroleDriverView.setBoolean("Ball In Intake", intakeControl.isBallDetected());
-        CasseroleDriverView.setStringBox("Fault Description", sensorCheck.getFaultDescription());
     }
         
     /**
@@ -652,12 +650,10 @@ public class Robot extends TimedRobot {
         CasseroleDriverView.newBoolean("Vision Camera Offline", "red");
         CasseroleDriverView.newBoolean("Auto Failed", "red");
         CasseroleDriverView.newBoolean("Vision Target Available", "green");
-        CasseroleDriverView.newBoolean("Line Seen", "green");
         CasseroleDriverView.newBoolean("Arm At Limit", "yellow");
         CasseroleDriverView.newBoolean("Fault Detected", "red");
         CasseroleDriverView.newBoolean("Ball In Intake", "green");
         CasseroleDriverView.newStringBox("Op Mode");
-        CasseroleDriverView.newStringBox("Fault Description");
     }
 
     @Override
