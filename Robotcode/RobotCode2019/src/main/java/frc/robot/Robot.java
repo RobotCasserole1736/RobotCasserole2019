@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import frc.lib.Calibration.CalWrangler;
 import frc.lib.DataServer.CasseroleDataServer;
@@ -125,6 +126,26 @@ public class Robot extends TimedRobot {
     boolean prevGamepieceReleaseReq = false;
     int gamepieceReleasePatternCounter = 0;
 
+    //FMS timer debugging stuff
+    Timer updateTimer;
+    Signal ultrasonicsTimer;
+    Signal lineFollowerTimer;
+    Signal controllersTimer;
+    Signal superstructureTimer;
+    Signal autonomousTimer;
+    Signal armTimer;
+    Signal pezTimer;
+    Signal intakeTimer;
+    Signal sensorCheckTimer;
+    Signal autoDistToTgtTimer;
+    Signal drivetrainClosedLoopVectorsTimer;
+    Signal drivetrainTimer;
+    Signal poseCalcTimer;
+    Signal climberTimer;
+    Signal ledTimer;
+    Signal pneumaticsTimer;
+    Signal telemetryTimer;
+
     public Robot() {
         super(RobotConstants.MAIN_LOOP_SAMPLE_RATE_S);
         CrashTracker.logRobotConstruction();
@@ -206,6 +227,27 @@ public class Robot extends TimedRobot {
 
             /* print the MAC address to the console for debugging */
             CrashTracker.logAndPrint("[MAC] Current MAC address: " + RioSimMode.getInstance().getMACAddr());
+
+            //Timer/Signals for debugging FMS delay issues
+            updateTimer = new Timer();
+            ultrasonicsTimer = new Signal("UltrasonicsTimer", "ms");
+            lineFollowerTimer = new Signal("LineFollowTimer", "ms");
+            controllersTimer = new Signal("ControllersTimer", "ms");
+            superstructureTimer = new Signal("SuperstructureTimer", "ms");
+            autonomousTimer = new Signal("AutonomousTimer", "ms");
+            armTimer = new Signal("ArmTimer", "ms");
+            pezTimer = new Signal("PEZTimer", "ms");
+            intakeTimer = new Signal("IntakeTimer", "ms");
+            sensorCheckTimer = new Signal("SensorCheckTimer", "ms");
+            autoDistToTgtTimer = new Signal("AutoDistToTgtTimer", "ms");
+            drivetrainClosedLoopVectorsTimer = new Signal("DTClosedLoopVectorsTimer", "ms");
+            drivetrainTimer = new Signal("DrivetrainTimer", "ms");
+            poseCalcTimer = new Signal("PoseCalcTimer", "ms");
+            climberTimer = new Signal("ClimberTimer", "ms");
+            ledTimer = new Signal("LEDTimer", "ms");
+            pneumaticsTimer = new Signal("PneumaticsTimer", "ms");
+            telemetryTimer = new Signal("TelemetryTimer", "ms");
+
         } catch(Throwable t) {
             CrashTracker.logThrowableCrash(t);
             throw t;
@@ -270,30 +312,52 @@ public class Robot extends TimedRobot {
      */
     private void matchPeriodicCommon(){
         try{
+            Timer updateTimer = new Timer();
             loopTiming.markLoopStart();
 
             eyeOfVeganSauron.setLEDRingState(true);
 
             /* Sample Sensors */
+            updateTimer.start();
+            updateTimer.reset();
+            double sampleTimeMs = loopTiming.getLoopStartTimeSec()*1000.0;
             frontUltrasonic.update();
             backUltrasonic.update();
+            ultrasonicsTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            updateTimer.reset();
             linefollow.update();
+            lineFollowerTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            updateTimer.reset();
 
             /* Sample inputs from humans */
             driverController.update();
             operatorController.update();
+            controllersTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            updateTimer.reset();
 
             superstructure.update();
+            superstructureTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            updateTimer.reset();
 
             autonomous.update();
+            autonomousTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            updateTimer.reset();
 
             arm.update();
+            armTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            updateTimer.reset();
 
             pezControl.update();
+            pezTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            updateTimer.reset();
 
             intakeControl.update();
+            intakeTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            updateTimer.reset();
 
             sensorCheck.update();
+            sensorCheckTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            updateTimer.reset();
 
             if(arm.getActualArmHeight() < 90) {
                 AutoSeqDistToTgtEst.getInstance().setVisionDistanceEstimate(jevois.getTgtPositionY(), jevois.isTgtVisible());
@@ -307,6 +371,8 @@ public class Robot extends TimedRobot {
             AutoSeqDistToTgtEst.getInstance().update();
 
             DrivetrainClosedLoopTestVectors.getInstance().update();
+            drivetrainClosedLoopVectorsTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            updateTimer.reset();
 
             //Arbitrate driver & auto sequencer inputs to drivetrain
             if(autonomous.getAutoSeqActive() || DrivetrainClosedLoopTestVectors.getInstance().isTestActive()){
@@ -322,19 +388,31 @@ public class Robot extends TimedRobot {
             }
 
             drivetrain.update();
+            drivetrainTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            updateTimer.reset();
 
             poseCalc.setLeftMotorSpeed(drivetrain.getLeftWheelSpeedRPM());
             poseCalc.setRightMotorSpeed(drivetrain.getRightWheelSpeedRPM());
             poseCalc.setMeasuredPoseAngle(drivetrain.getGyroAngle(), drivetrain.isGyroOnline());
             poseCalc.update();
+            poseCalcTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            updateTimer.reset();
 
             climber.setManualMovement(false);
             climber.update();
+            climberTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            updateTimer.reset();
 
             /* Update Other subsytems */
             ledController.update();
+            ledTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            updateTimer.reset();
             pneumaticsControl.update();
+            pneumaticsTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            updateTimer.reset();
             telemetryUpdate();
+            telemetryTimer.addSample(sampleTimeMs, updateTimer.get() / 1000);
+            updateTimer.reset();
             
             /*Update CrashTracker*/
             CrashTracker.logTeleopPeriodic();
