@@ -31,6 +31,7 @@ import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.PIDSource;
 import edu.wpi.first.wpilibj.PIDSourceType;
+import edu.wpi.first.wpilibj.Timer;
 import frc.lib.Calibration.Calibration;
 import frc.lib.DataServer.Signal;
 
@@ -100,9 +101,19 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
     Signal rightMotorCmdSig;
     //Signal gyroLockRotationCmdSig;
 
+    Signal sensorSampleTimerSig;
+    Signal modeTransitionTimerSig;
+    Signal motorSetTimerSig;
+    Signal telemetryTimerSig;
+
     public DrivetrainReal() {
         gyro = new ADXRS453_Gyro();
         angleOffset = 0;
+
+        sensorSampleTimerSig = new Signal("Drivetrain Timer Sensor Sample", "ms");
+        modeTransitionTimerSig = new Signal("Drivetrain Timer Mode Transition", "ms");
+        motorSetTimerSig = new Signal("Drivetrain Timer Motor Update", "ms");
+        telemetryTimerSig = new Signal("Drivetrain Timer Telemetry", "ms");
 
         /* Configure motor controllers */
         rightTalon1 = new WPI_TalonSRX(RobotConstants.DRIVETRAIN_RIGHT_1_CANID);
@@ -345,9 +356,17 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
     }
     
     public void update() {
+        double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
+        Timer updateTimer = new Timer();
+        updateTimer.start();
 
+        
+        
+        updateTimer.reset();
         sampleSensors();
+        sensorSampleTimerSig.addSample(sampleTimeMS, updateTimer.get() * 1000);
 
+        updateTimer.reset();
         prevOpMode = opMode;
         opMode = opModeCmd;
 
@@ -372,6 +391,10 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
             gyroLockPID.disable();
             //I term Accumulator should be auto-cleared
         }
+
+        modeTransitionTimerSig.addSample(sampleTimeMS, updateTimer.get() * 1000);
+
+        updateTimer.reset();
 
         if (opMode == DrivetrainOpMode.OpenLoop) {
             /* Drivetrain running open-loop, assign outputs straight from input commands */
@@ -418,8 +441,12 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
             leftTalon1.set(ControlMode.PercentOutput, 0);
         }
 
+        motorSetTimerSig.addSample(sampleTimeMS, updateTimer.get() * 1000);
+
+        updateTimer.reset();
+
         /* Update Telemetry */
-        double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
+
         //currentL1Sig.addSample(sampleTimeMS, left1Current );
         //currentL2Sig.addSample(sampleTimeMS, left2Current );
         //currentR1Sig.addSample(sampleTimeMS, right1Current);
@@ -434,6 +461,9 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
         leftMotorCmdSig.addSample(sampleTimeMS, getLeftMotorCmd());
         rightMotorCmdSig.addSample(sampleTimeMS, getRightMotorCmd());
         //gyroLockRotationCmdSig.addSample(sampleTimeMS, getGyroLockRotationCmd());
+
+        telemetryTimerSig.addSample(sampleTimeMS, updateTimer.get() * 1000);
+        
     }
 
     @Override

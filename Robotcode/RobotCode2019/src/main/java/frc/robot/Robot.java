@@ -128,11 +128,6 @@ public class Robot extends TimedRobot {
 
     //FMS timer debugging stuff
     Timer updateTimer;
-    Signal ultrasonicsTimer;
-    Signal lineFollowerTimer;
-    Signal controllersTimer;
-    Signal superstructureTimer;
-    Signal autonomousTimer;
     Signal armTimer;
     Signal pezTimer;
     Signal intakeTimer;
@@ -142,7 +137,6 @@ public class Robot extends TimedRobot {
     Signal drivetrainTimer;
     Signal poseCalcTimer;
     Signal climberTimer;
-    Signal ledTimer;
     Signal pneumaticsTimer;
     Signal telemetryTimer;
 
@@ -230,11 +224,6 @@ public class Robot extends TimedRobot {
 
             //Timer/Signals for debugging FMS delay issues
             updateTimer = new Timer();
-            ultrasonicsTimer = new Signal("UltrasonicsTimer", "ms");
-            lineFollowerTimer = new Signal("LineFollowTimer", "ms");
-            controllersTimer = new Signal("ControllersTimer", "ms");
-            superstructureTimer = new Signal("SuperstructureTimer", "ms");
-            autonomousTimer = new Signal("AutonomousTimer", "ms");
             armTimer = new Signal("ArmTimer", "ms");
             pezTimer = new Signal("PEZTimer", "ms");
             intakeTimer = new Signal("IntakeTimer", "ms");
@@ -244,7 +233,6 @@ public class Robot extends TimedRobot {
             drivetrainTimer = new Signal("DrivetrainTimer", "ms");
             poseCalcTimer = new Signal("PoseCalcTimer", "ms");
             climberTimer = new Signal("ClimberTimer", "ms");
-            ledTimer = new Signal("LEDTimer", "ms");
             pneumaticsTimer = new Signal("PneumaticsTimer", "ms");
             telemetryTimer = new Signal("TelemetryTimer", "ms");
 
@@ -323,24 +311,15 @@ public class Robot extends TimedRobot {
             double sampleTimeMs = loopTiming.getLoopStartTimeSec()*1000.0;
             frontUltrasonic.update();
             backUltrasonic.update();
-            ultrasonicsTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
-            updateTimer.reset();
             linefollow.update();
-            lineFollowerTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
-            updateTimer.reset();
 
             /* Sample inputs from humans */
             driverController.update();
             operatorController.update();
-            controllersTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
-            updateTimer.reset();
 
             superstructure.update();
-            superstructureTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
-            updateTimer.reset();
 
             autonomous.update();
-            autonomousTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
             updateTimer.reset();
 
             arm.update();
@@ -401,11 +380,9 @@ public class Robot extends TimedRobot {
             climber.setManualMovement(false);
             climber.update();
             climberTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
-            updateTimer.reset();
 
             /* Update Other subsytems */
             ledController.update();
-            ledTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
             updateTimer.reset();
             pneumaticsControl.update();
             pneumaticsTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
