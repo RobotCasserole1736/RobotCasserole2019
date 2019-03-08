@@ -384,6 +384,7 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
             desiredAngle = getGyroAngle() - angleErrorInput;
             gyroLockPID.setSetpoint(desiredAngle);
             gyroLockPID.enable();
+            JeVoisInterface.getInstance().latchTarget();//Ensure we one-time save pictures on the camera
         } else if(prevOpMode != DrivetrainOpMode.ClosedLoop && opMode == DrivetrainOpMode.ClosedLoop) {
             gyroLockPID.disable();
             //I term Accumulator should be auto-cleared

@@ -288,7 +288,11 @@ public class Arm {
     }
 
     public void setMatchStartPosition(){
-        armEncoder.setPosition(convertArmDegToMotorRot(-54.0)); //fudge
+        setMatchStartPosition(-53.0);//fudge
+    }
+
+    public void setMatchStartPosition(double initPos_deg){
+        armEncoder.setPosition(convertArmDegToMotorRot(initPos_deg)); 
         forceUpdate = true;
     }
 

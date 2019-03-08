@@ -88,6 +88,7 @@ public class JeVoisInterface {
     private Signal tgtGeneralAngleSig;
     private Signal jevoisPacketsPerSecSig;
     private Signal framecounterSig;
+    private Signal jevoisLatchCounterSig;
 
 
 
@@ -126,6 +127,7 @@ public class JeVoisInterface {
         jevoisPacketsPerSecSig = new Signal("Jevois Packets Per Sec", "pps");
         framecounterSig = new Signal("Jevois Frame Count", "count");
         tgtGeneralAngleSig = new Signal("Jevois General Angle", "Deg");
+        jevoisLatchCounterSig = new Signal("Jevois Latch Count", "count");
 
         //Retry strategy to get this serial port open.
         //I have yet to see a single retry used assuming the camera is plugged in
@@ -329,7 +331,7 @@ public class JeVoisInterface {
      * Indicates to the Camera that it should lock on to whatever vision target it sees in the middle of the screen right now
      */
     public void latchTarget(){
-        sendCmd("latch\n");
+        sendCmd("latch");
     }
 
     //=======================================================
@@ -691,6 +693,7 @@ public class JeVoisInterface {
         jevoisPacketsPerSecSig.addSample(sample_time_ms, packetRxRatePPS);
         framecounterSig.addSample(sample_time_ms, frameCounter);
         tgtGeneralAngleSig.addSample(sample_time_ms, tgtGeneralAngle_deg);
+        jevoisLatchCounterSig.addSample(sample_time_ms, latchCounter);
 
         return 0;
     }

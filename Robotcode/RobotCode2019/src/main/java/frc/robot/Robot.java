@@ -551,6 +551,7 @@ public class Robot extends TimedRobot {
     public enum GamePiece {
         Nothing, Cargo, Hatch;
     }
+
     //final String[] gpOptions =    {GamePiece.Hatch.toString(), GamePiece.Cargo.toString(), GamePiece.Nothing.toString()};
 
     private void setMatchInitialCommands(){
@@ -568,14 +569,14 @@ public class Robot extends TimedRobot {
             pezControl.setPositionCmd(PEZPos.HatchGrab);
             superstructure.setInitialOpMode(OpMode.Hatch);
             arm.setPositionCmd(ArmPos.LowerHatch);
-            arm.setMatchStartPosition();
+            arm.setMatchStartPosition(-1.0*Double.parseDouble(CasseroleDriverView.getAutoSelectorVal("Starting Arm Angle")));
             pezControl.setInitHatch();
         } else {
             intakeControl.setPositionCmd(IntakePos.Retract);
             pezControl.setPositionCmd(PEZPos.HatchGrab);
             superstructure.setInitialOpMode(OpMode.Hatch);
             arm.setPositionCmd(ArmPos.LowerHatch);
-            arm.setMatchStartPosition();
+            arm.setMatchStartPosition(-1.0*Double.parseDouble(CasseroleDriverView.getAutoSelectorVal("Starting Arm Angle")));
             pezControl.setInitHatch();
         }
     }
@@ -612,11 +613,13 @@ public class Robot extends TimedRobot {
         CasseroleDriverView.setBoolean("Ball In Intake", intakeControl.isBallDetected());
     }
         
+    final String startAngleOptions[] = {"48.0", "49.0", "50.0", "51.0", "52.0", "53.0", "54.0", "55.0", "56.0", "57.0" };
     /**
      * This function sets up the driver view website
      */
     private void initDriverView(){
         //CasseroleDriverView.newAutoSelector("Starting Gamepiece", gpOptions);
+        CasseroleDriverView.newAutoSelector("Starting Arm Angle", startAngleOptions);
         CasseroleDriverView.newDial("Main System Pressure", 0, 140, 10, 80, 125);
         CasseroleDriverView.newWebcam("cam1", RobotConstants.CAM_1_STREAM_URL, 50, 75, 270);
         CasseroleDriverView.newWebcam("cam2", RobotConstants.CAM_2_STREAM_URL, 25, 50, 90);
