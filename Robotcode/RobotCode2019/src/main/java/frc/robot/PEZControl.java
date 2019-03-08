@@ -51,7 +51,7 @@ public class PEZControl {
 
     Signal posReqSig;
     Signal posStableSig;
-    Signal retractedLimSwSig;
+    //Signal retractedLimSwSig;
     Signal stopperCylCmdSig;
     Signal gripperCylCmdSig;
 
@@ -130,7 +130,7 @@ public class PEZControl {
 
         posReqSig =new Signal("Gripper Position Requested", "pos");
         posStableSig =new Signal("Gripper Position Stable", "bool");
-        retractedLimSwSig =new Signal("Gripper Retracted Switch", "bool");
+        //retractedLimSwSig =new Signal("Gripper Retracted Switch", "bool");
         stopperCylCmdSig = new Signal("Gripper Stopper Cylinder Command", "bool");
         gripperCylCmdSig = new Signal("Gripper Main Cylinder Command", "bool");
     }
@@ -246,7 +246,7 @@ public class PEZControl {
         double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
         posReqSig.addSample(sampleTimeMS, posReq.toInt());
         posStableSig.addSample(sampleTimeMS, posStable);
-        retractedLimSwSig.addSample(sampleTimeMS, limitSwitchVal);
+        //retractedLimSwSig.addSample(sampleTimeMS, limitSwitchVal);
         stopperCylCmdSig.addSample(sampleTimeMS, convStopperSolPos(stopperCmd));
         gripperCylCmdSig.addSample(sampleTimeMS, convGripperSolPos(mainCylCmd));
 

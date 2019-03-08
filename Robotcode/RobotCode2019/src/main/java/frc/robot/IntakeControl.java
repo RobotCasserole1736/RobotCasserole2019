@@ -43,10 +43,12 @@ public class IntakeControl{
     Signal rightIntakeMotorPosSig;
     Signal retractStateCmdSig;
     Signal motorSpeedCmdSig;
-    Signal ballInIntakeSig;
+    //Signal ballInIntakeSig;
     Signal leftIntakePosSensorVoltageSig;
     Signal rightIntakePosSensorVoltageSig;
-    Signal atForwardLimitSig;
+    //Signal atForwardLimitSig;
+    //Signal rightOnTargetSig; 
+    //Signal leftOnTargetSig;
 
     Calibration intakeSpeed;
     Calibration ejectSpeed;
@@ -78,9 +80,6 @@ public class IntakeControl{
     boolean leftOnTarget = false;
     boolean rightOnTarget = false;
     boolean forwardLimitHit = false;
-
-    Signal rightOnTargetSig; 
-    Signal leftOnTargetSig;
 
     DriverController dController;
     OperatorController opController;
@@ -151,10 +150,10 @@ public class IntakeControl{
         rightIntakePosSensorVoltageSig = new Signal("Intake Right Sensor Raw Voltage","V");
         retractStateCmdSig = new Signal("Intake Commanded Position", "Intake Pos Enum");
         motorSpeedCmdSig = new Signal("Intake Roller Motor Command", "cmd");
-        ballInIntakeSig = new Signal("Intake Ball Present", "bool");
-        rightOnTargetSig = new Signal("Intake Right Arm Position On Target", "bool");
-        leftOnTargetSig  = new Signal("Intake Left Arm Position On Target", "bool");
-        atForwardLimitSig  = new Signal("Intake At Forward Limit", "bool");
+        //ballInIntakeSig = new Signal("Intake Ball Present", "bool");
+        //rightOnTargetSig = new Signal("Intake Right Arm Position On Target", "bool");
+        //leftOnTargetSig  = new Signal("Intake Left Arm Position On Target", "bool");
+        //atForwardLimitSig  = new Signal("Intake At Forward Limit", "bool");
 
     }
 
@@ -355,10 +354,10 @@ public class IntakeControl{
         leftIntakePosSensorVoltageSig.addSample(sampleTimeMS, intakeLeftArmMotor.getSensorRawVoltage());
         rightIntakePosSensorVoltageSig.addSample(sampleTimeMS, intakeRightArmMotor.getSensorRawVoltage());
         retractStateCmdSig.addSample(sampleTimeMS, intakePosCmd.toInt());
-        ballInIntakeSig.addSample(sampleTimeMS, ballDetected);
-        rightOnTargetSig.addSample(sampleTimeMS, rightOnTarget); 
-        leftOnTargetSig.addSample(sampleTimeMS, leftOnTarget);  
-        atForwardLimitSig.addSample(sampleTimeMS, forwardLimitHit);
+        //ballInIntakeSig.addSample(sampleTimeMS, ballDetected);
+        //rightOnTargetSig.addSample(sampleTimeMS, rightOnTarget); 
+        //leftOnTargetSig.addSample(sampleTimeMS, leftOnTarget);  
+        //atForwardLimitSig.addSample(sampleTimeMS, forwardLimitHit);
     }
 
     public double getLeftArmPosition() {
