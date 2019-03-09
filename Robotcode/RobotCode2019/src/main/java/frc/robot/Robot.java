@@ -612,8 +612,8 @@ public class Robot extends TimedRobot {
         CasseroleDriverView.setBoolean("Arm At Limit", arm.getBottomOfMotion() || arm.getTopOfMotion());
         CasseroleDriverView.setBoolean("Ball In Intake", intakeControl.isBallDetected());
     }
-        
-    final String startAngleOptions[] = {"48.0", "49.0", "50.0", "51.0", "52.0", "53.0", "54.0", "55.0", "56.0", "57.0" };
+        //I am a bad engineer
+    final String startAngleOptions[] = {"48.0", "49.0", "50.0", "51.0", "52.0", "53.0", "54.0", "55.0", "56.0", "57.0", "58.0", "59.0", "60.0", "61.0", "62.0", "63.0", "64.0" };
     /**
      * This function sets up the driver view website
      */
