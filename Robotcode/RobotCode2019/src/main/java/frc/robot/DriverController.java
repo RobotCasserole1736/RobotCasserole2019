@@ -71,7 +71,7 @@ public class DriverController {
 
     /** Constructor */
     private DriverController(){
-        filt = new AveragingFilter(5,0);
+        filt = new AveragingFilter(2,0);
         xb = new XboxController(RobotConstants.DRIVER_CONTROLLER_USB_IDX);
         slowMoveFwdRevScaleFactor = new Calibration("Driver Fwd-Rev Slow Move Scale Factor",  0.30, 0, 1);
         slowMoveRotateScaleFactor = new Calibration("Driver Rotation Slow Move Scale Factor", 0.5, 0, 1);
@@ -157,7 +157,7 @@ public class DriverController {
         }
 
         //code to Parkify turning
-        driverRotateCmd = filt.filter(driverRotateCmd);
+        //driverRotateCmd = filt.filter(driverRotateCmd);
 
         if(xb.getAButton()){
             gyroAngleLockReq = true;

@@ -187,17 +187,17 @@ public class Arm {
 
 
         /////Calibration Things\\\\\
-        topCargoHeightCal    = new Calibration("Arm Cargo Level Pos Top Deg", 103);
-        midCargoHeightCal    = new Calibration("Arm Cargo Level Pos Mid Deg", 15);
+        topCargoHeightCal    = new Calibration("Arm Cargo Level Pos Top Deg", 110);
+        midCargoHeightCal    = new Calibration("Arm Cargo Level Pos Mid Deg", 18);
         lowCargoHeightCal    = new Calibration("Arm Cargo Level Pos Bottom Deg", -22);
-        intakeCargoHeightCal = new Calibration("Arm Cargo Level Pos Intake Deg", -55);
+        intakeCargoHeightCal = new Calibration("Arm Cargo Level Pos Intake Deg", -58);
 
         topHatchHeightCal    = new Calibration("Arm Hatch Level Pos Top Deg", 110);
         midHatchHeightCal    = new Calibration("Arm Hatch Level Pos Mid Deg", 5);
         lowHatchHeightCal    = new Calibration("Arm Hatch Level Pos Bottom Deg", -42);
         intakeHatchHeightCal = new Calibration("Arm Hatch Level Pos Intake Deg", -42);
 
-        intakeDangerZoneUpperHeight = new Calibration("Arm Intake Danger Zone Upper Pos Deg", -42);
+        intakeDangerZoneUpperHeight = new Calibration("Arm Intake Danger Zone Upper Pos Deg", -60);
         
         gravOffsetHorz    = new Calibration("Arm Required Voltage at Horz V", 0.5);
         bottomLimitSwitchDegreeCal = new Calibration("Arm Limit Switch Angle Bottom Deg", -60);
@@ -288,7 +288,11 @@ public class Arm {
     }
 
     public void setMatchStartPosition(){
-        armEncoder.setPosition(convertArmDegToMotorRot(bottomLimitSwitchDegreeCal.get() + 5.0)); //fudge
+        setMatchStartPosition(-53.0);//fudge
+    }
+
+    public void setMatchStartPosition(double initPos_deg){
+        armEncoder.setPosition(convertArmDegToMotorRot(initPos_deg)); 
         forceUpdate = true;
     }
 

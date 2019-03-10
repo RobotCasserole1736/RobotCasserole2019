@@ -43,10 +43,12 @@ public class IntakeControl{
     Signal rightIntakeMotorPosSig;
     Signal retractStateCmdSig;
     Signal motorSpeedCmdSig;
-    Signal ballInIntakeSig;
+    //Signal ballInIntakeSig;
     Signal leftIntakePosSensorVoltageSig;
     Signal rightIntakePosSensorVoltageSig;
-    Signal atForwardLimitSig;
+    //Signal atForwardLimitSig;
+    //Signal rightOnTargetSig; 
+    //Signal leftOnTargetSig;
 
     Calibration intakeSpeed;
     Calibration ejectSpeed;
@@ -79,9 +81,6 @@ public class IntakeControl{
     boolean rightOnTarget = false;
     boolean forwardLimitHit = false;
 
-    Signal rightOnTargetSig; 
-    Signal leftOnTargetSig;
-
     DriverController dController;
     OperatorController opController;
     Arm arm;
@@ -107,14 +106,14 @@ public class IntakeControl{
         intakeMotorP = new Calibration("Intake Motor P", 0.1);
         intakeMotorI = new Calibration("Intake Motor I", 0);
         intakeMotorD = new Calibration("Intake Motor D", 0);
-        retractAngle = new Calibration("Intake Angle of Retracted State deg", 5);
-        extendAngle = new Calibration("Intake Angle of Extended State deg", 130);
-        groundAngle = new Calibration("Intake Angle of Ground State deg", 170);
+        retractAngle = new Calibration("Intake Angle of Retracted State deg", 0);
+        extendAngle = new Calibration("Intake Angle of Extended State deg", 145);
+        groundAngle = new Calibration("Intake Angle of Ground State deg", 175);
 
-        lowerLeftPotVoltage = new Calibration("Intake Lowest Value of Left Potentiometer V", 0.292, 0, 6);
-        upperLeftPotVoltage = new Calibration("Intake Highest Value of Left Potentiometer V", 0.982, 0, 6);
-        lowerRightPotVoltage = new Calibration("Intake Lowest Value of Right Potentiometer V", 0.0573, 0, 6);
-        upperRightPotVoltage = new Calibration("Intake Highest Value of Right Potentiometer V", 0.750, 0, 6);
+        lowerLeftPotVoltage = new Calibration("Intake Lowest Value of Left Potentiometer V", 0.0205, 0, 6);
+        upperLeftPotVoltage = new Calibration("Intake Highest Value of Left Potentiometer V", 0.671, 0, 6);
+        lowerRightPotVoltage = new Calibration("Intake Lowest Value of Right Potentiometer V", 0.340, 0, 6);
+        upperRightPotVoltage = new Calibration("Intake Highest Value of Right Potentiometer V", 0.971, 0, 6);
         minIntakeAngle = new Calibration("Intake Minimum Angle deg", 0) ;
         maxIntakeAngle = new Calibration("Intake Maximum Angle deg", 180) ;
         
@@ -151,10 +150,10 @@ public class IntakeControl{
         rightIntakePosSensorVoltageSig = new Signal("Intake Right Sensor Raw Voltage","V");
         retractStateCmdSig = new Signal("Intake Commanded Position", "Intake Pos Enum");
         motorSpeedCmdSig = new Signal("Intake Roller Motor Command", "cmd");
-        ballInIntakeSig = new Signal("Intake Ball Present", "bool");
-        rightOnTargetSig = new Signal("Intake Right Arm Position On Target", "bool");
-        leftOnTargetSig  = new Signal("Intake Left Arm Position On Target", "bool");
-        atForwardLimitSig  = new Signal("Intake At Forward Limit", "bool");
+        //ballInIntakeSig = new Signal("Intake Ball Present", "bool");
+        //rightOnTargetSig = new Signal("Intake Right Arm Position On Target", "bool");
+        //leftOnTargetSig  = new Signal("Intake Left Arm Position On Target", "bool");
+        //atForwardLimitSig  = new Signal("Intake At Forward Limit", "bool");
 
     }
 
@@ -355,10 +354,10 @@ public class IntakeControl{
         leftIntakePosSensorVoltageSig.addSample(sampleTimeMS, intakeLeftArmMotor.getSensorRawVoltage());
         rightIntakePosSensorVoltageSig.addSample(sampleTimeMS, intakeRightArmMotor.getSensorRawVoltage());
         retractStateCmdSig.addSample(sampleTimeMS, intakePosCmd.toInt());
-        ballInIntakeSig.addSample(sampleTimeMS, ballDetected);
-        rightOnTargetSig.addSample(sampleTimeMS, rightOnTarget); 
-        leftOnTargetSig.addSample(sampleTimeMS, leftOnTarget);  
-        atForwardLimitSig.addSample(sampleTimeMS, forwardLimitHit);
+        //ballInIntakeSig.addSample(sampleTimeMS, ballDetected);
+        //rightOnTargetSig.addSample(sampleTimeMS, rightOnTarget); 
+        //leftOnTargetSig.addSample(sampleTimeMS, leftOnTarget);  
+        //atForwardLimitSig.addSample(sampleTimeMS, forwardLimitHit);
     }
 
     public double getLeftArmPosition() {

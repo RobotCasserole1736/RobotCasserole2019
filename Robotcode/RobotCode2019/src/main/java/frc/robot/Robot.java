@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import frc.lib.Calibration.CalWrangler;
 import frc.lib.DataServer.CasseroleDataServer;
@@ -125,6 +126,20 @@ public class Robot extends TimedRobot {
     boolean prevGamepieceReleaseReq = false;
     int gamepieceReleasePatternCounter = 0;
 
+    //FMS timer debugging stuff
+    Timer updateTimer;
+    Signal armTimer;
+    Signal pezTimer;
+    Signal intakeTimer;
+    Signal sensorCheckTimer;
+    Signal autoDistToTgtTimer;
+    Signal drivetrainClosedLoopVectorsTimer;
+    Signal drivetrainTimer;
+    Signal poseCalcTimer;
+    Signal climberTimer;
+    Signal pneumaticsTimer;
+    Signal telemetryTimer;
+
     public Robot() {
         super(RobotConstants.MAIN_LOOP_SAMPLE_RATE_S);
         CrashTracker.logRobotConstruction();
@@ -206,6 +221,21 @@ public class Robot extends TimedRobot {
 
             /* print the MAC address to the console for debugging */
             CrashTracker.logAndPrint("[MAC] Current MAC address: " + RioSimMode.getInstance().getMACAddr());
+
+            //Timer/Signals for debugging FMS delay issues
+            updateTimer = new Timer();
+            armTimer = new Signal("ArmTimer", "ms");
+            pezTimer = new Signal("PEZTimer", "ms");
+            intakeTimer = new Signal("IntakeTimer", "ms");
+            sensorCheckTimer = new Signal("SensorCheckTimer", "ms");
+            autoDistToTgtTimer = new Signal("AutoDistToTgtTimer", "ms");
+            drivetrainClosedLoopVectorsTimer = new Signal("DTClosedLoopVectorsTimer", "ms");
+            drivetrainTimer = new Signal("DrivetrainTimer", "ms");
+            poseCalcTimer = new Signal("PoseCalcTimer", "ms");
+            climberTimer = new Signal("ClimberTimer", "ms");
+            pneumaticsTimer = new Signal("PneumaticsTimer", "ms");
+            telemetryTimer = new Signal("TelemetryTimer", "ms");
+
         } catch(Throwable t) {
             CrashTracker.logThrowableCrash(t);
             throw t;
@@ -270,11 +300,15 @@ public class Robot extends TimedRobot {
      */
     private void matchPeriodicCommon(){
         try{
+            Timer updateTimer = new Timer();
             loopTiming.markLoopStart();
 
             eyeOfVeganSauron.setLEDRingState(true);
 
             /* Sample Sensors */
+            updateTimer.start();
+            updateTimer.reset();
+            double sampleTimeMs = loopTiming.getLoopStartTimeSec()*1000.0;
             frontUltrasonic.update();
             backUltrasonic.update();
             linefollow.update();
@@ -286,14 +320,23 @@ public class Robot extends TimedRobot {
             superstructure.update();
 
             autonomous.update();
+            updateTimer.reset();
 
             arm.update();
+            armTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
+            updateTimer.reset();
 
             pezControl.update();
+            pezTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
+            updateTimer.reset();
 
             intakeControl.update();
+            intakeTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
+            updateTimer.reset();
 
             sensorCheck.update();
+            sensorCheckTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
+            updateTimer.reset();
 
             if(arm.getActualArmHeight() < 90) {
                 AutoSeqDistToTgtEst.getInstance().setVisionDistanceEstimate(jevois.getTgtPositionY(), jevois.isTgtVisible());
@@ -307,6 +350,8 @@ public class Robot extends TimedRobot {
             AutoSeqDistToTgtEst.getInstance().update();
 
             DrivetrainClosedLoopTestVectors.getInstance().update();
+            drivetrainClosedLoopVectorsTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
+            updateTimer.reset();
 
             //Arbitrate driver & auto sequencer inputs to drivetrain
             if(autonomous.getAutoSeqActive() || DrivetrainClosedLoopTestVectors.getInstance().isTestActive()){
@@ -322,19 +367,29 @@ public class Robot extends TimedRobot {
             }
 
             drivetrain.update();
+            drivetrainTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
+            updateTimer.reset();
 
             poseCalc.setLeftMotorSpeed(drivetrain.getLeftWheelSpeedRPM());
             poseCalc.setRightMotorSpeed(drivetrain.getRightWheelSpeedRPM());
             poseCalc.setMeasuredPoseAngle(drivetrain.getGyroAngle(), drivetrain.isGyroOnline());
             poseCalc.update();
+            poseCalcTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
+            updateTimer.reset();
 
             climber.setManualMovement(false);
             climber.update();
+            climberTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
 
             /* Update Other subsytems */
             ledController.update();
+            updateTimer.reset();
             pneumaticsControl.update();
+            pneumaticsTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
+            updateTimer.reset();
             telemetryUpdate();
+            telemetryTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
+            updateTimer.reset();
             
             /*Update CrashTracker*/
             CrashTracker.logTeleopPeriodic();
@@ -496,6 +551,7 @@ public class Robot extends TimedRobot {
     public enum GamePiece {
         Nothing, Cargo, Hatch;
     }
+
     //final String[] gpOptions =    {GamePiece.Hatch.toString(), GamePiece.Cargo.toString(), GamePiece.Nothing.toString()};
 
     private void setMatchInitialCommands(){
@@ -513,14 +569,14 @@ public class Robot extends TimedRobot {
             pezControl.setPositionCmd(PEZPos.HatchGrab);
             superstructure.setInitialOpMode(OpMode.Hatch);
             arm.setPositionCmd(ArmPos.LowerHatch);
-            arm.setMatchStartPosition();
+            arm.setMatchStartPosition(-1.0*Double.parseDouble(CasseroleDriverView.getAutoSelectorVal("Starting Arm Angle")));
             pezControl.setInitHatch();
         } else {
             intakeControl.setPositionCmd(IntakePos.Retract);
             pezControl.setPositionCmd(PEZPos.HatchGrab);
             superstructure.setInitialOpMode(OpMode.Hatch);
             arm.setPositionCmd(ArmPos.LowerHatch);
-            arm.setMatchStartPosition();
+            arm.setMatchStartPosition(-1.0*Double.parseDouble(CasseroleDriverView.getAutoSelectorVal("Starting Arm Angle")));
             pezControl.setInitHatch();
         }
     }
@@ -529,19 +585,19 @@ public class Robot extends TimedRobot {
         double sampleTimeMs = loopTiming.getLoopStartTimeSec()*1000.0;
 
         /* Update main loop signals */
-        rioDSSampLoadSig.addSample(sampleTimeMs, dataServer.getTotalStoredSamples());
-        rioCurrDrawLoadSig.addSample(sampleTimeMs, pdp.getTotalCurrent());
-        rioBattVoltLoadSig.addSample(sampleTimeMs, pdp.getVoltage());  
-        rioDSLogQueueLenSig.addSample(sampleTimeMs, dataServer.logger.getSampleQueueLength());
-        dtFwdRevAccelSig.addSample(sampleTimeMs, onboardAccel.getY());
-        dtLeftRightAccelSig.addSample(sampleTimeMs, onboardAccel.getZ());
-        dtUpDownAccelSig.addSample(sampleTimeMs, (onboardAccel.getX()*-1));
-        intakeLeftCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.INTAKE_LEFT_MOTOR_PDP_PORT));
-        intakeRightCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.INTAKE_LEFT_MOTOR_PDP_PORT));
-        climberReleaseMotorCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.CLIMBER_RELEASE_MOTOR_PDP_PORT));
+        //rioDSSampLoadSig.addSample(sampleTimeMs, dataServer.getTotalStoredSamples());
+        //rioCurrDrawLoadSig.addSample(sampleTimeMs, pdp.getTotalCurrent());
+        //rioBattVoltLoadSig.addSample(sampleTimeMs, pdp.getVoltage());  
+        //rioDSLogQueueLenSig.addSample(sampleTimeMs, dataServer.logger.getSampleQueueLength());
+        //dtFwdRevAccelSig.addSample(sampleTimeMs, onboardAccel.getY());
+        //dtLeftRightAccelSig.addSample(sampleTimeMs, onboardAccel.getZ());
+        //dtUpDownAccelSig.addSample(sampleTimeMs, (onboardAccel.getX()*-1));
+        //intakeLeftCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.INTAKE_LEFT_MOTOR_PDP_PORT));
+        //intakeRightCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.INTAKE_LEFT_MOTOR_PDP_PORT));
+        //climberReleaseMotorCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.CLIMBER_RELEASE_MOTOR_PDP_PORT));
         rioIsBrownoutSig.addSample(sampleTimeMs, RobotController.isBrownedOut());
-        matchTimeSig.addSample(sampleTimeMs, DriverStation.getInstance().getMatchTime());
-        rioCANBusUsagePctSig.addSample(sampleTimeMs, RobotController.getCANStatus().percentBusUtilization);
+        //matchTimeSig.addSample(sampleTimeMs, DriverStation.getInstance().getMatchTime());
+        //rioCANBusUsagePctSig.addSample(sampleTimeMs, RobotController.getCANStatus().percentBusUtilization);
     
         CasseroleDriverView.setDialValue("Main System Pressure", pneumaticsControl.getPressure());
         CasseroleDriverView.setDialValue("Speed", Math.abs(poseCalc.getRobotVelocity_ftpersec()));
@@ -551,19 +607,19 @@ public class Robot extends TimedRobot {
         CasseroleDriverView.setBoolean("Vision Camera Offline", !jevois.isVisionOnline());
         CasseroleDriverView.setBoolean("Vision Target Available", jevois.isTgtVisible());
         CasseroleDriverView.setBoolean("Auto Failed", autonomous.getAutoFailedLEDState());
-        CasseroleDriverView.setBoolean("Line Seen", linefollow.isEstLinePosAvailable());
         CasseroleDriverView.setBoolean("Fault Detected", sensorCheck.isFaultDetected());
         CasseroleDriverView.setStringBox("Op Mode", superstructure.getOpModeString());
         CasseroleDriverView.setBoolean("Arm At Limit", arm.getBottomOfMotion() || arm.getTopOfMotion());
         CasseroleDriverView.setBoolean("Ball In Intake", intakeControl.isBallDetected());
-        CasseroleDriverView.setStringBox("Fault Description", sensorCheck.getFaultDescription());
     }
-        
+        //I am a bad engineer
+    final String startAngleOptions[] = {"48.0", "49.0", "50.0", "51.0", "52.0", "53.0", "54.0", "55.0", "56.0", "57.0", "58.0", "59.0", "60.0", "61.0", "62.0", "63.0", "64.0" };
     /**
      * This function sets up the driver view website
      */
     private void initDriverView(){
         //CasseroleDriverView.newAutoSelector("Starting Gamepiece", gpOptions);
+        CasseroleDriverView.newAutoSelector("Starting Arm Angle", startAngleOptions);
         CasseroleDriverView.newDial("Main System Pressure", 0, 140, 10, 80, 125);
         CasseroleDriverView.newWebcam("cam1", RobotConstants.CAM_1_STREAM_URL, 50, 75, 270);
         CasseroleDriverView.newWebcam("cam2", RobotConstants.CAM_2_STREAM_URL, 25, 50, 90);
@@ -574,12 +630,10 @@ public class Robot extends TimedRobot {
         CasseroleDriverView.newBoolean("Vision Camera Offline", "red");
         CasseroleDriverView.newBoolean("Auto Failed", "red");
         CasseroleDriverView.newBoolean("Vision Target Available", "green");
-        CasseroleDriverView.newBoolean("Line Seen", "green");
         CasseroleDriverView.newBoolean("Arm At Limit", "yellow");
         CasseroleDriverView.newBoolean("Fault Detected", "red");
         CasseroleDriverView.newBoolean("Ball In Intake", "green");
         CasseroleDriverView.newStringBox("Op Mode");
-        CasseroleDriverView.newStringBox("Fault Description");
     }
 
     @Override
@@ -607,6 +661,8 @@ public class Robot extends TimedRobot {
             intakeCmd = 0;
         }
         
+        intakeControl.intakeLeftArmMotor.setManualMotorCommand(intakeCmd);
+        intakeControl.intakeRightArmMotor.setManualMotorCommand(intakeCmd);
         intakeControl.update();
 
         climber.update();
