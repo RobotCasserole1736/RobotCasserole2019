@@ -1,9 +1,6 @@
 package frc.robot.auto;
 
 import frc.lib.AutoSequencer.AutoEvent;
-import frc.robot.IntakeControl;
-import frc.robot.IntakeControl.IntakePos;
-import frc.robot.IntakeControl.IntakeSpd;
 
 /*
  *******************************************************************************************
@@ -25,6 +22,7 @@ import frc.robot.IntakeControl.IntakeSpd;
  *   if you would consider donating to our club to help further STEM education.
  */
 
+/*
 public class EjectBall extends AutoEvent {
 
 
@@ -71,3 +69,4 @@ public class EjectBall extends AutoEvent {
         return retVal;
     }
 }
+*/

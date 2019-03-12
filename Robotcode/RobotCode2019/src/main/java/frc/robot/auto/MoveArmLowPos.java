@@ -2,7 +2,6 @@ package frc.robot.auto;
 
 import frc.lib.AutoSequencer.AutoEvent;
 import frc.robot.Arm;
-import frc.robot.Superstructure.OpMode;
 
 /*
  *******************************************************************************************
@@ -24,6 +23,7 @@ import frc.robot.Superstructure.OpMode;
  *   if you would consider donating to our club to help further STEM education.
  */
 
+ /*
 public class MoveArmLowPos extends AutoEvent {
     
     OpMode curOpMode;
@@ -63,3 +63,4 @@ public class MoveArmLowPos extends AutoEvent {
         return Arm.getInstance().atDesiredHeight();
     }
 }
+*/

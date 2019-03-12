@@ -24,7 +24,6 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import frc.lib.Calibration.Calibration;
 import frc.lib.DataServer.Signal;
-import frc.robot.IntakeControl.IntakeSpd;
 
 public class OperatorController {
 
@@ -36,7 +35,6 @@ public class OperatorController {
     boolean grabReq;
     ArmPosCmd armPosReq;
     double  armManualPosCmd;
-    IntakeSpd intakeSpdReq;
     boolean climberReleaseReq;
     boolean climberRelEnable;
 
@@ -160,14 +158,6 @@ public class OperatorController {
 
         armManualPosCmd = Utils.ctrlAxisScale(-1*aCmd, joystickExpScaleFactor.get(), joystickDeadzone.get());
 
-        if(xb.getTriggerAxis(Hand.kRight) > 0.5){
-            intakeSpdReq = IntakeSpd.Intake;
-        } else if(xb.getTriggerAxis(Hand.kLeft) > 0.5){
-            intakeSpdReq = IntakeSpd.Eject;
-        } else {
-            intakeSpdReq = IntakeSpd.Stop;
-        }
-
         climberRelEnable = xb.getBackButton();
         climberReleaseReq = ( Math.abs(xb.getY(Hand.kRight)) > 0.5);
 
@@ -180,7 +170,6 @@ public class OperatorController {
         autoAlignHighReqSig.addSample(sample_time_ms,autoAlignHighReq);
         autoAlignMidReqSig.addSample(sample_time_ms,autoAlignMidReq);
         autoAlignLowReqSig.addSample(sample_time_ms,autoAlignLowReq);
-        intakeSpdReqSig.addSample(sample_time_ms, intakeSpdReq.toInt());
         climberEnableReqSig.addSample(sample_time_ms, climberRelEnable);
         climberReleaseReqSig.addSample(sample_time_ms, climberReleaseReq);
     }
@@ -211,10 +200,6 @@ public class OperatorController {
 
     public boolean getAutoAlignLowReq() {
         return this.autoAlignLowReq;
-    }
-
-    public IntakeSpd getIntakeSpdReq() {
-        return this.intakeSpdReq;
     }
 
     public boolean getAutoMove() {

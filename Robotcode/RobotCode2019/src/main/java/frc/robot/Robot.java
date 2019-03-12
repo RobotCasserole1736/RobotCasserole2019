@@ -44,10 +44,7 @@ import frc.lib.WebServer.CasseroleWebServer;
 import frc.lib.Util.CrashTracker;
 import frc.lib.Util.DaBouncer;
 import frc.robot.Arm.ArmPos;
-import frc.robot.IntakeControl.IntakePos;
 import frc.robot.LEDController.LEDPatterns;
-import frc.robot.PEZControl.PEZPos;
-import frc.robot.Superstructure.OpMode;
 import frc.robot.auto.AutoSeqDistToTgtEst;
 import frc.robot.auto.Autonomous;
 
@@ -87,12 +84,8 @@ public class Robot extends TimedRobot {
     Arm arm;
     Drivetrain drivetrain;
     Climber climber;
-    IntakeControl intakeControl;
-    PEZControl pezControl;
     FrontUltrasonic frontUltrasonic;
     BackUltrasonic backUltrasonic;
-    LineFollower linefollow;
-    Superstructure superstructure;
 
     //Top level telemetry signals
     Signal rioDSSampLoadSig;
@@ -171,14 +164,10 @@ public class Robot extends TimedRobot {
             arm = Arm.getInstance();
             drivetrain = Drivetrain.getInstance();
             climber = Climber.getInstance();
-            intakeControl = IntakeControl.getInstance();
-            
-            pezControl = PEZControl.getInstance();
+
             onboardAccel = new BuiltInAccelerometer();
             frontUltrasonic = FrontUltrasonic.getInstance();
             backUltrasonic = BackUltrasonic.getInstance();
-            linefollow = LineFollower.getInstance();
-            superstructure = Superstructure.getInstance();
             eyeOfVeganSauron = VisionLEDRingControl.getInstance();
 
             /* Init input from humans */
@@ -252,15 +241,14 @@ public class Robot extends TimedRobot {
             CrashTracker.logTeleopInit();
 
             //Intake check - if it's not at the correct location, kill the robot!
-            if((!intakeControl.setAndCheckInitialState()) && !wasAutoRun && !RioSimMode.getInstance().isSimMode() && !DriverStation.getInstance().isFMSAttached()) {
-                System.out.println("Error: !!! UNSAFE STARTUP STATE !!!");
-                throw new Error("Error!!! Robot started in unsafe state");
-            }
+            //if((!intakeControl.setAndCheckInitialState()) && !wasAutoRun && !RioSimMode.getInstance().isSimMode() && !DriverStation.getInstance().isFMSAttached()) {
+            //    System.out.println("Error: !!! UNSAFE STARTUP STATE !!!");
+            //    throw new Error("Error!!! Robot started in unsafe state");
+            //}
 
             dataServer.logger.startLoggingTeleop();
             matchState.SetPeriod(MatchState.Period.OperatorControl);
             eyeOfVeganSauron.setLEDRingState(true);
-            intakeControl.closedLoop();
         } catch(Throwable t) {
             CrashTracker.logThrowableCrash(t);
             throw t;
@@ -275,10 +263,10 @@ public class Robot extends TimedRobot {
             wasAutoRun = true;
 
             //Intake check - if it's not at the correct location, kill the robot!
-            if(!intakeControl.setAndCheckInitialState()&& !RioSimMode.getInstance().isSimMode() && !DriverStation.getInstance().isFMSAttached()) {
-                System.out.println("Error: !!! UNSAFE STARTUP STATE !!!");
-                throw new Error("Error!!! Robot started in unsafe state");
-            }
+            //if(!intakeControl.setAndCheckInitialState()&& !RioSimMode.getInstance().isSimMode() && !DriverStation.getInstance().isFMSAttached()) {
+            //    System.out.println("Error: !!! UNSAFE STARTUP STATE !!!");
+            //    throw new Error("Error!!! Robot started in unsafe state");
+            //}
 
             dataServer.logger.startLoggingAuto();
             ledController.setPattern(LEDPatterns.Pattern4);
@@ -286,7 +274,6 @@ public class Robot extends TimedRobot {
             eyeOfVeganSauron.setLEDRingState(false); //test
             setMatchInitialCommands();
             pneumaticsControl.start();
-            intakeControl.closedLoop();
             CrashTracker.logMatchInfo();
         } catch(Throwable t) {
             CrashTracker.logThrowableCrash(t);
@@ -311,13 +298,11 @@ public class Robot extends TimedRobot {
             double sampleTimeMs = loopTiming.getLoopStartTimeSec()*1000.0;
             frontUltrasonic.update();
             backUltrasonic.update();
-            linefollow.update();
 
             /* Sample inputs from humans */
             driverController.update();
             operatorController.update();
 
-            superstructure.update();
 
             autonomous.update();
             updateTimer.reset();
@@ -326,11 +311,9 @@ public class Robot extends TimedRobot {
             armTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
             updateTimer.reset();
 
-            pezControl.update();
             pezTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
             updateTimer.reset();
 
-            intakeControl.update();
             intakeTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
             updateTimer.reset();
 
@@ -470,7 +453,6 @@ public class Robot extends TimedRobot {
             matchState.SetPeriod(MatchState.Period.Disabled);
             eyeOfVeganSauron.setLEDRingState(false);
             arm.forceArmStop();
-            intakeControl.closedLoop();
 
         } catch(Throwable t) {
             CrashTracker.logThrowableCrash(t);
@@ -492,13 +474,11 @@ public class Robot extends TimedRobot {
             /* Sample Sensors */
             frontUltrasonic.update();
             backUltrasonic.update();
-            linefollow.update();
 
             /* Sample inputs from humans to keep telemetry updated, but we won't actually use it. */
             driverController.update();
             operatorController.update();
 
-            superstructure.update();
             sensorCheck.update();
 
             /* Map subsystem IO */
@@ -508,10 +488,6 @@ public class Robot extends TimedRobot {
             arm.setPositionCmd(ArmPos.Disabled);
             arm.updateCalValues(false);
             arm.update();
-
-            pezControl.update();
-
-            intakeControl.update();
 
             //Keep drivetrain stopped.
             drivetrain.setOpenLoopCmd(0,0);
@@ -558,26 +534,14 @@ public class Robot extends TimedRobot {
         String gpStart = GamePiece.Hatch.toString();
 
         if(gpStart.compareTo(GamePiece.Cargo.toString())==0){
-            intakeControl.setPositionCmd(IntakePos.Retract); //TODO -what should this be?
-            pezControl.setPositionCmd(PEZPos.CargoGrab);
-            superstructure.setInitialOpMode(OpMode.CargoCarry);
             arm.setPositionCmd(ArmPos.LowerCargo);
             //arm.setMatchStartPosition(); //todo, this should be something else
-            pezControl.setInitCargo();
         } else if(gpStart.compareTo(GamePiece.Hatch.toString())==0){
-            intakeControl.setPositionCmd(IntakePos.Retract);
-            pezControl.setPositionCmd(PEZPos.HatchGrab);
-            superstructure.setInitialOpMode(OpMode.Hatch);
             arm.setPositionCmd(ArmPos.LowerHatch);
             arm.setMatchStartPosition(-1.0*Double.parseDouble(CasseroleDriverView.getAutoSelectorVal("Starting Arm Angle")));
-            pezControl.setInitHatch();
         } else {
-            intakeControl.setPositionCmd(IntakePos.Retract);
-            pezControl.setPositionCmd(PEZPos.HatchGrab);
-            superstructure.setInitialOpMode(OpMode.Hatch);
             arm.setPositionCmd(ArmPos.LowerHatch);
             arm.setMatchStartPosition(-1.0*Double.parseDouble(CasseroleDriverView.getAutoSelectorVal("Starting Arm Angle")));
-            pezControl.setInitHatch();
         }
     }
 
@@ -608,9 +572,7 @@ public class Robot extends TimedRobot {
         CasseroleDriverView.setBoolean("Vision Target Available", jevois.isTgtVisible());
         CasseroleDriverView.setBoolean("Auto Failed", autonomous.getAutoFailedLEDState());
         CasseroleDriverView.setBoolean("Fault Detected", sensorCheck.isFaultDetected());
-        CasseroleDriverView.setStringBox("Op Mode", superstructure.getOpModeString());
         CasseroleDriverView.setBoolean("Arm At Limit", arm.getBottomOfMotion() || arm.getTopOfMotion());
-        CasseroleDriverView.setBoolean("Ball In Intake", intakeControl.isBallDetected());
     }
         //I am a bad engineer
     final String startAngleOptions[] = {"48.0", "49.0", "50.0", "51.0", "52.0", "53.0", "54.0", "55.0", "56.0", "57.0", "58.0", "59.0", "60.0", "61.0", "62.0", "63.0", "64.0" };
@@ -639,7 +601,6 @@ public class Robot extends TimedRobot {
     @Override
     public void testInit(){
         arm.forceArmStop();
-        intakeControl.openLoop();
     }
 
     @Override
@@ -652,7 +613,6 @@ public class Robot extends TimedRobot {
         loopTiming.markLoopStart();
         pneumaticsControl.start();//ensure compressor is running
 
-        pezControl.setPositionCmd(PEZPos.Neutralize);
 
         //Manual overrides for motors we can't turn by hand
         //climber.setManualMotorCommand(operatorController.xb.getY(Hand.kLeft));
@@ -660,10 +620,6 @@ public class Robot extends TimedRobot {
         if(Math.abs(intakeCmd) < 0.20){
             intakeCmd = 0;
         }
-        
-        intakeControl.intakeLeftArmMotor.setManualMotorCommand(intakeCmd);
-        intakeControl.intakeRightArmMotor.setManualMotorCommand(intakeCmd);
-        intakeControl.update();
 
         climber.update();
         

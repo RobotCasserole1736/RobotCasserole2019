@@ -8,9 +8,6 @@ import frc.lib.Util.CrashTracker;
 import frc.robot.JeVoisInterface;
 import frc.robot.LoopTiming;
 import frc.robot.OperatorController;
-import frc.robot.PEZControl.PEZPos;
-import frc.robot.Superstructure.OpMode;
-import frc.robot.Superstructure;
 
 /*
  *******************************************************************************************
@@ -96,7 +93,7 @@ public class Autonomous {
 
     AutoEvent parent; 
     
-    OpMode curOpMode = Superstructure.getInstance().getActualOpMode();
+    //OpMode curOpMode = Superstructure.getInstance().getActualOpMode();
 
     private static Autonomous empty = null;
 
@@ -119,8 +116,8 @@ public class Autonomous {
         boolean autoMoveRequested = OperatorController.getInstance().getAutoMove();
         boolean visionAvailable = JeVoisInterface.getInstance().isTgtVisible() && JeVoisInterface.getInstance().isVisionOnline();
 
-        OpMode curOpMode = Superstructure.getInstance().getActualOpMode();
-        boolean opModeAllowsAuto = (curOpMode == OpMode.CargoCarry || curOpMode == OpMode.Hatch);
+        //OpMode curOpMode = Superstructure.getInstance().getActualOpMode();
+        //boolean opModeAllowsAuto = (curOpMode == OpMode.CargoCarry || curOpMode == OpMode.Hatch);
 
         //Main update loop
         StateEnum nextState = curState;
@@ -131,18 +128,18 @@ public class Autonomous {
         //Do different things depending on what state you are in
         switch(curState){
             case Inactive:
-                if(autoMoveRequested == true){
-                    if(opModeAllowsAuto && visionAvailable){
-                        nextState = StateEnum.SendJevoislatch;
-                        sendJevoislatch = true;
-                        seq.clearAllEvents();
-                    } else {
-                        nextState = StateEnum.autoError;
-                    }
-                } else {
-                    seq.stop();
-                    nextState = StateEnum.Inactive;
-                }
+                //if(autoMoveRequested == true){
+                    //if(opModeAllowsAuto && visionAvailable){
+                    //    nextState = StateEnum.SendJevoislatch;
+                    //    sendJevoislatch = true;
+                    //    seq.clearAllEvents();
+                    //} else {
+                    //    nextState = StateEnum.autoError;
+                    //}
+                //} else {
+                //    seq.stop();
+                //    nextState = StateEnum.Inactive;
+                //}
 
             break;
 
@@ -254,26 +251,26 @@ public class Autonomous {
                 nextState = StateEnum.autoSeqUpdate;
                 
                 //Add the arm movement
-                if(OperatorController.getInstance().getAutoAlignLowReq()){
-                    seq.addEvent(new MoveArmLowPos(curOpMode));
-                } else if(OperatorController.getInstance().getAutoAlignMidReq()){
-                    seq.addEvent(new MoveArmMidPos(curOpMode));
-                } else if(OperatorController.getInstance().getAutoAlignHighReq()){
-                    seq.addEvent(new MoveArmTopPos(curOpMode));
-                } else {
-                    CrashTracker.logAndPrint("[Autonomous] Error invalid Autostate.");
-                    nextState = StateEnum.Inactive;
-                }
+                //if(OperatorController.getInstance().getAutoAlignLowReq()){
+                //    seq.addEvent(new MoveArmLowPos(curOpMode));
+                //} else if(OperatorController.getInstance().getAutoAlignMidReq()){
+                //    seq.addEvent(new MoveArmMidPos(curOpMode));
+                //} else if(OperatorController.getInstance().getAutoAlignHighReq()){
+                //    seq.addEvent(new MoveArmTopPos(curOpMode));
+                //} else {
+                //    CrashTracker.logAndPrint("[Autonomous] Error invalid Autostate.");
+                //    nextState = StateEnum.Inactive;
+                //}
 
                 //Add the final-align motion
                 seq.addEvent(new AutoSeqFinalAlign());
 
                 //Add the gripper release motion
-                if(curOpMode == OpMode.CargoCarry){
-                    seq.addEvent(new MoveGripper(PEZPos.CargoRelease));
-                } else {
-                    seq.addEvent(new MoveGripper(PEZPos.HatchRelease));
-                }
+                //if(curOpMode == OpMode.CargoCarry){
+                //    seq.addEvent(new MoveGripper(PEZPos.CargoRelease));
+                //} else {
+                //    seq.addEvent(new MoveGripper(PEZPos.HatchRelease));
+                //}
                 
                 
                 //Add the back-up motion

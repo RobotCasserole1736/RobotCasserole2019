@@ -25,8 +25,6 @@ import edu.wpi.first.wpilibj.GenericHID.Hand;
 import frc.lib.Calibration.Calibration;
 import frc.lib.DataServer.Signal;
 import frc.lib.SignalMath.AveragingFilter;
-import frc.robot.IntakeControl.IntakePos;
-import frc.robot.IntakeControl.IntakeSpd;
 
 public class DriverController {
 
@@ -41,8 +39,6 @@ public class DriverController {
     boolean compressorDisableReq;
     boolean compressorEnableReq;
     boolean LockDrivetrainAngle = false;
-    IntakeSpd intakeSpdReq;
-    IntakePos intakePosReq;
     AveragingFilter filt;
 
     /* Behavior/performance calibrations */
@@ -92,8 +88,8 @@ public class DriverController {
     /** Main update function */
     public void update(){
         //Temp, give some default values
-        intakeSpdReq = IntakeSpd.Stop;
-        intakePosReq = IntakePos.Retract;
+        //intakeSpdReq = IntakeSpd.Stop;
+        //intakePosReq = IntakePos.Retract;
 
         //if(xb.getBumper(Hand.kRight)){
         //    intakePosReq = IntakePos.Extend;
@@ -189,19 +185,9 @@ public class DriverController {
         gyroAngleLockReqSig.addSample(sample_time_ms, gyroAngleLockReq);
         compressorDisableReqSig.addSample(sample_time_ms, compressorDisableReq);
         compressorEnableReqSig.addSample(sample_time_ms, compressorEnableReq);
-        intakeSpdReqSig.addSample(sample_time_ms, intakeSpdReq.toInt());
-        intakePosReqSig.addSample(sample_time_ms, intakePosReq.toInt());
     }
 
     /* Getters for getting driver commands */
-
-    public IntakePos getIntakePosReq() {
-        return this.intakePosReq;
-    }
-
-    public IntakeSpd getIntakeSpdReq() {
-        return this.intakeSpdReq;
-    }
 
     public double getDriverFwdRevCmd() {
         return this.driverFwdRevCmd;

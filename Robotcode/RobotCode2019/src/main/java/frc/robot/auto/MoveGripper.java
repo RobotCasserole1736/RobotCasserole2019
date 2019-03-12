@@ -1,8 +1,6 @@
 package frc.robot.auto;
 
 import frc.lib.AutoSequencer.AutoEvent;
-import frc.robot.PEZControl;
-import frc.robot.PEZControl.PEZPos;
 
 /*
  *******************************************************************************************
@@ -24,6 +22,7 @@ import frc.robot.PEZControl.PEZPos;
  *   if you would consider donating to our club to help further STEM education.
  */
 
+ /*
 public class MoveGripper extends AutoEvent {
 
     PEZPos desPos;
@@ -57,3 +56,4 @@ public class MoveGripper extends AutoEvent {
         return PEZControl.getInstance().isAtDesPos();
     }
 }
+*/
