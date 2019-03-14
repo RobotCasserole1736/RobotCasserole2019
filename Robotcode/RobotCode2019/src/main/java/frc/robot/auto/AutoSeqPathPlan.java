@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
 import frc.lib.AutoSequencer.AutoEvent;
+import frc.lib.DataServer.Signal;
 import frc.lib.PathPlanner.FalconPathPlanner;
 import frc.lib.Util.CrashTracker;
 import frc.robot.Drivetrain;
@@ -49,16 +50,21 @@ public class AutoSeqPathPlan extends AutoEvent {
 
     double initialHeading = 0;
 
+    private Signal rotationMatrix;
+
     final double PATH_DURATION_FROM_DISTANCE_RATIO = 1.0/1.0 ; //units of seconds per foot, because reasons
 
     final double JEVOIS_TO_PATH_PLAN_ANGLE_OFFSEST_DEG = -90.0;
 
+    
     /**
      * Creates a new path from the current robot position up to a point in front of the target, pointed straight at it.
      */
     public AutoSeqPathPlan(double tgt_pos_x_ft, double tgt_pos_y_ft, double tgt_pos_angle_rad){
         dt = Drivetrain.getInstance();
 
+        double sampleTimeMS = LoopTiming.getInstance().getLoopStartTimeSec() * 1000.0;
+        
         //Convert reference frames
         double targetAngleRad = tgt_pos_angle_rad + Math.toRadians(JEVOIS_TO_PATH_PLAN_ANGLE_OFFSEST_DEG);
 
@@ -122,6 +128,7 @@ public class AutoSeqPathPlan extends AutoEvent {
         //Update the pose view with our new desired location, converting to robotPose reference frame
         RobotPose.getInstance().setDesiredPose(wayPoint4[0], wayPoint4[1], Math.toDegrees(targetAngleRad) + RobotPose.getInstance().INIT_POSE_T);
 
+        rotationMatrix.addSample(sampleTimeMS, wp1);
     }
 
     /**
