@@ -42,9 +42,9 @@ import frc.lib.LoadMon.CasseroleRIOLoadMonitor;
 import frc.lib.WebServer.CasseroleDriverView;
 import frc.lib.WebServer.CasseroleWebServer;
 import frc.lib.Util.CrashTracker;
-import frc.lib.Util.DaBouncer;
 import frc.robot.Arm.ArmPos;
 import frc.robot.LEDController.LEDPatterns;
+import frc.robot.OperatorController.ArmPosCmd;
 import frc.robot.auto.AutoSeqDistToTgtEst;
 import frc.robot.auto.Autonomous;
 
@@ -122,8 +122,6 @@ public class Robot extends TimedRobot {
     //FMS timer debugging stuff
     Timer updateTimer;
     Signal armTimer;
-    Signal pezTimer;
-    Signal intakeTimer;
     Signal sensorCheckTimer;
     Signal autoDistToTgtTimer;
     Signal drivetrainClosedLoopVectorsTimer;
@@ -214,8 +212,6 @@ public class Robot extends TimedRobot {
             //Timer/Signals for debugging FMS delay issues
             updateTimer = new Timer();
             armTimer = new Signal("ArmTimer", "ms");
-            pezTimer = new Signal("PEZTimer", "ms");
-            intakeTimer = new Signal("IntakeTimer", "ms");
             sensorCheckTimer = new Signal("SensorCheckTimer", "ms");
             autoDistToTgtTimer = new Signal("AutoDistToTgtTimer", "ms");
             drivetrainClosedLoopVectorsTimer = new Signal("DTClosedLoopVectorsTimer", "ms");
@@ -240,12 +236,6 @@ public class Robot extends TimedRobot {
             /*Update CrashTracker*/
             CrashTracker.logTeleopInit();
 
-            //Intake check - if it's not at the correct location, kill the robot!
-            //if((!intakeControl.setAndCheckInitialState()) && !wasAutoRun && !RioSimMode.getInstance().isSimMode() && !DriverStation.getInstance().isFMSAttached()) {
-            //    System.out.println("Error: !!! UNSAFE STARTUP STATE !!!");
-            //    throw new Error("Error!!! Robot started in unsafe state");
-            //}
-
             dataServer.logger.startLoggingTeleop();
             matchState.SetPeriod(MatchState.Period.OperatorControl);
             eyeOfVeganSauron.setLEDRingState(true);
@@ -261,12 +251,6 @@ public class Robot extends TimedRobot {
             /*Update CrashTracker*/
             CrashTracker.logAutoInit();
             wasAutoRun = true;
-
-            //Intake check - if it's not at the correct location, kill the robot!
-            //if(!intakeControl.setAndCheckInitialState()&& !RioSimMode.getInstance().isSimMode() && !DriverStation.getInstance().isFMSAttached()) {
-            //    System.out.println("Error: !!! UNSAFE STARTUP STATE !!!");
-            //    throw new Error("Error!!! Robot started in unsafe state");
-            //}
 
             dataServer.logger.startLoggingAuto();
             ledController.setPattern(LEDPatterns.Pattern4);
@@ -307,14 +291,25 @@ public class Robot extends TimedRobot {
             autonomous.update();
             updateTimer.reset();
 
+            //Map operator command directly to arm position
+            if(autonomous.getAutoSeqActive()) {
+                if(operatorController.getArmManualPosCmd() != 0.0) {
+                    arm.setManualMovementCmd(operatorController.getArmManualPosCmd());
+                } else if(operatorController.getArmPosReq() == ArmPosCmd.IntakeCargo) {
+                    arm.setPositionCmd(ArmPos.IntakeCargo);
+                } else if (operatorController.getArmPosReq() == ArmPosCmd.IntakeCargo) {
+                    arm.setPositionCmd(ArmPos.IntakeHatch);
+                } else if (operatorController.getArmPosReq() == ArmPosCmd.Lower) {
+                    arm.setPositionCmd(ArmPos.LowerCargo); //Let's just say we only do cargo now.
+                } else if (operatorController.getArmPosReq() == ArmPosCmd.Middle) {
+                    arm.setPositionCmd(ArmPos.MiddleCargo);
+                } else if (operatorController.getArmPosReq() == ArmPosCmd.Top) {
+                    arm.setPositionCmd(ArmPos.TopCargo);
+                }
+            }
+
             arm.update();
             armTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
-            updateTimer.reset();
-
-            pezTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
-            updateTimer.reset();
-
-            intakeTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
             updateTimer.reset();
 
             sensorCheck.update();
@@ -549,19 +544,19 @@ public class Robot extends TimedRobot {
         double sampleTimeMs = loopTiming.getLoopStartTimeSec()*1000.0;
 
         /* Update main loop signals */
-        //rioDSSampLoadSig.addSample(sampleTimeMs, dataServer.getTotalStoredSamples());
-        //rioCurrDrawLoadSig.addSample(sampleTimeMs, pdp.getTotalCurrent());
-        //rioBattVoltLoadSig.addSample(sampleTimeMs, pdp.getVoltage());  
-        //rioDSLogQueueLenSig.addSample(sampleTimeMs, dataServer.logger.getSampleQueueLength());
-        //dtFwdRevAccelSig.addSample(sampleTimeMs, onboardAccel.getY());
-        //dtLeftRightAccelSig.addSample(sampleTimeMs, onboardAccel.getZ());
-        //dtUpDownAccelSig.addSample(sampleTimeMs, (onboardAccel.getX()*-1));
-        //intakeLeftCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.INTAKE_LEFT_MOTOR_PDP_PORT));
-        //intakeRightCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.INTAKE_LEFT_MOTOR_PDP_PORT));
-        //climberReleaseMotorCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.CLIMBER_RELEASE_MOTOR_PDP_PORT));
+        rioDSSampLoadSig.addSample(sampleTimeMs, dataServer.getTotalStoredSamples());
+        rioCurrDrawLoadSig.addSample(sampleTimeMs, pdp.getTotalCurrent());
+        rioBattVoltLoadSig.addSample(sampleTimeMs, pdp.getVoltage());  
+        rioDSLogQueueLenSig.addSample(sampleTimeMs, dataServer.logger.getSampleQueueLength());
+        dtFwdRevAccelSig.addSample(sampleTimeMs, onboardAccel.getY());
+        dtLeftRightAccelSig.addSample(sampleTimeMs, onboardAccel.getZ());
+        dtUpDownAccelSig.addSample(sampleTimeMs, (onboardAccel.getX()*-1));
+        intakeLeftCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.INTAKE_LEFT_MOTOR_PDP_PORT));
+        intakeRightCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.INTAKE_LEFT_MOTOR_PDP_PORT));
+        climberReleaseMotorCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.CLIMBER_RELEASE_MOTOR_PDP_PORT));
         rioIsBrownoutSig.addSample(sampleTimeMs, RobotController.isBrownedOut());
-        //matchTimeSig.addSample(sampleTimeMs, DriverStation.getInstance().getMatchTime());
-        //rioCANBusUsagePctSig.addSample(sampleTimeMs, RobotController.getCANStatus().percentBusUtilization);
+        matchTimeSig.addSample(sampleTimeMs, DriverStation.getInstance().getMatchTime());
+        rioCANBusUsagePctSig.addSample(sampleTimeMs, RobotController.getCANStatus().percentBusUtilization);
     
         CasseroleDriverView.setDialValue("Main System Pressure", pneumaticsControl.getPressure());
         CasseroleDriverView.setDialValue("Speed", Math.abs(poseCalc.getRobotVelocity_ftpersec()));

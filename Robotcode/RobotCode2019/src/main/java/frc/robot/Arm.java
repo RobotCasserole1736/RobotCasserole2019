@@ -287,6 +287,22 @@ public class Arm {
         }
     }
 
+    public enum OpMode {
+        Cargo(3),
+        Hatch(2), 
+        None(0);
+
+        public final int value;
+
+        private OpMode(int value) {
+            this.value = value;
+        }
+                
+        public int toInt(){
+            return this.value;
+        }
+    }
+
     public void setMatchStartPosition(){
         setMatchStartPosition(-53.0);//fudge
     }

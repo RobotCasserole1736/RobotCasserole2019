@@ -23,6 +23,7 @@ import frc.lib.AutoSequencer.AutoEvent;
  */
 
  /*
+ //TODO - rework this for whatever the new gripper is.
 public class MoveGripper extends AutoEvent {
 
     PEZPos desPos;

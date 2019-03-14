@@ -2,6 +2,7 @@ package frc.robot.auto;
 
 import frc.lib.AutoSequencer.AutoEvent;
 import frc.robot.Arm;
+import frc.robot.Arm.OpMode;
 
 /*
  *******************************************************************************************
@@ -23,7 +24,7 @@ import frc.robot.Arm;
  *   if you would consider donating to our club to help further STEM education.
  */
 
-/*
+
 public class MoveArmMidPos extends AutoEvent {
     
     OpMode curOpMode;
@@ -34,7 +35,7 @@ public class MoveArmMidPos extends AutoEvent {
 
     @Override
     public void userStart() {
-        if(curOpMode == OpMode.CargoCarry){
+        if(curOpMode == OpMode.Cargo){
             Arm.getInstance().setPositionCmd(Arm.ArmPos.MiddleCargo);
         } else if(curOpMode == OpMode.Hatch){
             Arm.getInstance().setPositionCmd(Arm.ArmPos.MiddleHatch);
@@ -63,4 +64,3 @@ public class MoveArmMidPos extends AutoEvent {
         return Arm.getInstance().atDesiredHeight();
     }
 } 
-*/

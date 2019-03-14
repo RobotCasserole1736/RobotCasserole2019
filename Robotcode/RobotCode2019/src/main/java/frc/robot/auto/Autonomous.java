@@ -8,6 +8,7 @@ import frc.lib.Util.CrashTracker;
 import frc.robot.JeVoisInterface;
 import frc.robot.LoopTiming;
 import frc.robot.OperatorController;
+import frc.robot.Arm.OpMode;
 
 /*
  *******************************************************************************************
@@ -39,7 +40,6 @@ public class Autonomous {
         waitForLatch(2),   /* wait for latln */
         sampleFromJEV(3),   /* sample from JCV */
         pathPlanner(4),   /* Path-Planner*/
-        addLineFollower(5),   /* add Line follower*/
         addAllAutoEvents(6),   /* Add all auto events*/
         autoSeqUpdate(7),  /* AutoSeq .update()*/
         autoError(8); /*EEEERRRROOORRRRR*/
@@ -116,8 +116,6 @@ public class Autonomous {
         boolean autoMoveRequested = OperatorController.getInstance().getAutoMove();
         boolean visionAvailable = JeVoisInterface.getInstance().isTgtVisible() && JeVoisInterface.getInstance().isVisionOnline();
 
-        //OpMode curOpMode = Superstructure.getInstance().getActualOpMode();
-        //boolean opModeAllowsAuto = (curOpMode == OpMode.CargoCarry || curOpMode == OpMode.Hatch);
 
         //Main update loop
         StateEnum nextState = curState;
@@ -128,18 +126,18 @@ public class Autonomous {
         //Do different things depending on what state you are in
         switch(curState){
             case Inactive:
-                //if(autoMoveRequested == true){
-                    //if(opModeAllowsAuto && visionAvailable){
-                    //    nextState = StateEnum.SendJevoislatch;
-                    //    sendJevoislatch = true;
-                    //    seq.clearAllEvents();
-                    //} else {
-                    //    nextState = StateEnum.autoError;
-                    //}
-                //} else {
-                //    seq.stop();
-                //    nextState = StateEnum.Inactive;
-                //}
+                if(autoMoveRequested == true){
+                    if(visionAvailable){
+                        nextState = StateEnum.SendJevoislatch;
+                        sendJevoislatch = true;
+                        seq.clearAllEvents();
+                    } else {
+                        nextState = StateEnum.autoError;
+                    }
+                } else {
+                    seq.stop();
+                    nextState = StateEnum.Inactive;
+                }
 
             break;
 
@@ -214,8 +212,8 @@ public class Autonomous {
                 
                 if(autoMoveRequested == true){
                     if(OperatorController.getInstance().getAutoAlignHighReq()){
-                        //If we're placing top, we can only start at the final alignment step going backward
-                        nextState = StateEnum.addLineFollower; 
+                        //Top Placement cannot be handled now without line followers :(
+                        nextState = StateEnum.autoError; 
                     } else {
                         //If we're placing mid/low, we use Jevois to path plan up to the target location
                         AutoSeqPathPlan pp = new AutoSeqPathPlan(xTargetOffset, yTargetOffset, targetPositionAngle); 
@@ -231,46 +229,28 @@ public class Autonomous {
 
             break;
 
-            case addLineFollower:
-                
-                //if(OperatorController.getInstance().getAutoAlignHighReq()){
-                //    parent = new TopPlaceFinalAlign();
-                //    nextState = StateEnum.addAllAutoEvents;
-                //} else {
-                //    nextState = StateEnum.pathPlanner;
-                //}
-
-                //TODO not yet handled
-                nextState = StateEnum.autoError;
-
-            break;
-
             case addAllAutoEvents:
 
                 //By Default, go to update
                 nextState = StateEnum.autoSeqUpdate;
                 
                 //Add the arm movement
-                //if(OperatorController.getInstance().getAutoAlignLowReq()){
-                //    seq.addEvent(new MoveArmLowPos(curOpMode));
-                //} else if(OperatorController.getInstance().getAutoAlignMidReq()){
-                //    seq.addEvent(new MoveArmMidPos(curOpMode));
-                //} else if(OperatorController.getInstance().getAutoAlignHighReq()){
-                //    seq.addEvent(new MoveArmTopPos(curOpMode));
-                //} else {
-                //    CrashTracker.logAndPrint("[Autonomous] Error invalid Autostate.");
-                //    nextState = StateEnum.Inactive;
-                //}
+                if(OperatorController.getInstance().getAutoAlignLowReq()){
+                    seq.addEvent(new MoveArmLowPos(OpMode.Cargo));
+                } else if(OperatorController.getInstance().getAutoAlignMidReq()){
+                    seq.addEvent(new MoveArmMidPos(OpMode.Cargo));
+                } else if(OperatorController.getInstance().getAutoAlignHighReq()){
+                    seq.addEvent(new MoveArmTopPos(OpMode.Cargo));
+                } else {
+                    CrashTracker.logAndPrint("[Autonomous] Error invalid Autostate.");
+                    nextState = StateEnum.Inactive;
+                }
 
                 //Add the final-align motion
                 seq.addEvent(new AutoSeqFinalAlign());
 
                 //Add the gripper release motion
-                //if(curOpMode == OpMode.CargoCarry){
-                //    seq.addEvent(new MoveGripper(PEZPos.CargoRelease));
-                //} else {
-                //    seq.addEvent(new MoveGripper(PEZPos.HatchRelease));
-                //}
+                //TODO - make gripper release auto sequencer events
                 
                 
                 //Add the back-up motion
