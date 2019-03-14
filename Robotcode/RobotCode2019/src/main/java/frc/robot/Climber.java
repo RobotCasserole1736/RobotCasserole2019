@@ -31,15 +31,10 @@ import frc.lib.Calibration.Calibration;
 
 public class Climber {
 
-    Servo climbServo1;
-    Servo climbServo2;   
-    Solenoid climbEjectSol;
+    
 
-    Calibration servo1LockedCal;
-    Calibration servo1UnLockedCal;
-    Calibration servo2LockedCal;
-    Calibration servo2UnLockedCal;
-    boolean manualMode = false;
+    Solenoid climbLeftCyl;
+    Solenoid climbRightCyl;
 
     /* Singleton stuff */
     private static Climber climbCtrl = null;
@@ -50,51 +45,26 @@ public class Climber {
     }
 
     private Climber(){
-        climbServo1 = new Servo(RobotConstants.CLIMBER_SERVO1);
-        climbServo2 = new Servo(RobotConstants.CLIMBER_SERVO2);
-        climbEjectSol = new Solenoid(RobotConstants.CLIMBER_EJECT_SOL);
-        servo1LockedCal = new Calibration("Servo 1 Locked Angle DEG", 0.5);
-        servo1UnLockedCal = new Calibration("Servo 1 Unlocked Angle DEG", 0.2);
-        servo2LockedCal = new Calibration("Servo 2 Locked Angle DEG", 0.5);
-        servo2UnLockedCal = new Calibration("Servo 2 Unlocked Angle DEG", 0.8);
+        
+        climbLeftCyl= new Solenoid(RobotConstants.CLIMBER_LEFT_CYL);
+        climbRightCyl = new Solenoid(RobotConstants.CLIMBER_RIGHT_CYL);
 
     }
 
-    public void setManualMovement(boolean manualCmd){
-        manualMode=manualCmd;
-    }
 
     public void update(){
         boolean enable = OperatorController.getInstance().getClimberEnable();
         boolean release = OperatorController.getInstance().getClimberReleace();
-        if(manualMode){
-            if(enable){
-                climbServo1.set(servo1UnLockedCal.get());
-                climbServo2.set(servo2UnLockedCal.get());
-                if(release){
-                    climbEjectSol.set(true);
+        
+                if(enable && release){
+                    climbLeftCyl.set(true);
+                    climbRightCyl.set(true);
                 } else {
-                    climbEjectSol.set(false);
+                    climbLeftCyl.set(false);
+                    climbRightCyl.set(false);
                 }
-            } else {
-                climbServo1.set(servo1LockedCal.get());
-                climbServo2.set(servo2LockedCal.get());
-                climbEjectSol.set(false);
-            }
-
-        }else{
-            if(enable && release){
-                climbServo1.set(servo1UnLockedCal.get());
-                climbServo2.set(servo2UnLockedCal.get());
-                climbEjectSol.set(true);
-
-            }else {
-                climbServo1.set(servo1LockedCal.get());
-                climbServo2.set(servo2LockedCal.get());
-                climbEjectSol.set(false);
-            }
+           
         }
        
     }
 
-}
