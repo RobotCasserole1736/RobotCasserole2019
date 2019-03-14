@@ -197,10 +197,10 @@ public class Arm {
         lowHatchHeightCal    = new Calibration("Arm Hatch Level Pos Bottom Deg", -42);
         intakeHatchHeightCal = new Calibration("Arm Hatch Level Pos Intake Deg", -42);
 
-        intakeDangerZoneUpperHeight = new Calibration("Arm Intake Danger Zone Upper Pos Deg", -60);
+        intakeDangerZoneUpperHeight = new Calibration("Arm Intake Danger Zone Upper Pos Deg", -45);
         
         gravOffsetHorz    = new Calibration("Arm Required Voltage at Horz V", 0.5);
-        bottomLimitSwitchDegreeCal = new Calibration("Arm Limit Switch Angle Bottom Deg", -60);
+        bottomLimitSwitchDegreeCal = new Calibration("Arm Limit Switch Angle Bottom Deg", -45);
         topLimitSwitchDegreeCal    = new Calibration("Arm Limit Switch Angle Top Deg", 129.0);
 
         //Calibration for the Arm Trapezoidal\\
