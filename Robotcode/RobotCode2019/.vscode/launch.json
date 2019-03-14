@@ -5,27 +5,6 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "java",
-      "name": "CodeLens (Launch) - BackupHigh",
-      "request": "launch",
-      "mainClass": "frc.robot.auto.BackupHigh",
-      "projectName": "RobotCode2019"
-    },
-    {
-      "type": "java",
-      "name": "CodeLens (Launch) - Backup",
-      "request": "launch",
-      "mainClass": "frc.robot.auto.Backup",
-      "projectName": "RobotCode2019"
-    },
-    {
-      "type": "java",
-      "name": "CodeLens (Launch) - FalconPathPlanner",
-      "request": "launch",
-      "mainClass": "frc.lib.PathPlanner.FalconPathPlanner",
-      "projectName": "RobotCode2019"
-    },
-    {
       "type": "wpilib",
       "name": "WPILib Desktop Debug",
       "request": "launch",
