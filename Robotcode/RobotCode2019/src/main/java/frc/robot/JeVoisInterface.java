@@ -80,7 +80,6 @@ public class JeVoisInterface {
     private Signal tgtAngleSig;
     private Signal tgtXPosSig;
     private Signal tgtYPosSig;
-    private Signal tgtRotationSig;
     private Signal tgtCaptureTimeSig;
     private Signal jevoisCpuTempSig;
     private Signal jevoisCpuLoadSig;
@@ -119,7 +118,6 @@ public class JeVoisInterface {
         tgtAngleSig = new Signal("Jevois Target Angle", "rad");
         tgtXPosSig = new Signal("Jevois Target X Position", "ft");
         tgtYPosSig = new Signal("Jevois Target Y Position", "ft");
-        tgtRotationSig = new Signal("Jevois Target Rotation Angle", "Deg");
         tgtCaptureTimeSig = new Signal("Jevois Image Capture Time", "sec");
         jevoisCpuTempSig = new Signal("Jevois CPU Temp", "C");
         jevoisCpuLoadSig = new Signal("Jevois CPU Load", "pct");
@@ -685,7 +683,6 @@ public class JeVoisInterface {
         tgtAngleSig.addSample(sample_time_ms, tgtAngle_rad);
         tgtXPosSig.addSample(sample_time_ms, tgtXPos_ft);
         tgtYPosSig.addSample(sample_time_ms, tgtYPos_ft);
-        tgtRotationSig.addSample(sample_time_ms, latchCounter);
         tgtCaptureTimeSig.addSample(sample_time_ms, tgtTime);
         jevoisCpuTempSig.addSample(sample_time_ms, jeVoisCpuTempC);
         jevoisCpuLoadSig.addSample(sample_time_ms, jeVoisCpuLoadPct);
