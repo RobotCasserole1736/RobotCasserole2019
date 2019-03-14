@@ -97,7 +97,8 @@ public class Robot extends TimedRobot {
     Signal dtUpDownAccelSig;
     Signal intakeLeftCurrentSig;
     Signal intakeRightCurrentSig;
-    Signal climberReleaseMotorCurrentSig;
+    //I don't think so ??? Signal climberReleaseMotorCurrentSig;
+    
     Signal rioIsBrownoutSig;
     Signal matchTimeSig;
     Signal rioCANBusUsagePctSig;
@@ -129,7 +130,7 @@ public class Robot extends TimedRobot {
     Signal drivetrainClosedLoopVectorsTimer;
     Signal drivetrainTimer;
     Signal poseCalcTimer;
-    Signal climberTimer;
+    //Signal climberTimer;
     Signal pneumaticsTimer;
     Signal telemetryTimer;
 
@@ -195,7 +196,7 @@ public class Robot extends TimedRobot {
             dtUpDownAccelSig = new Signal("Drivetrain Up/Down Acceleration", "g");
             intakeLeftCurrentSig = new Signal("Intake Left Motor Current", "A");
             intakeRightCurrentSig = new Signal("Intake Right Motor Current", "A");
-            climberReleaseMotorCurrentSig = new Signal("Climber Release Motor Current", "A");
+            //climberReleaseMotorCurrentSig = new Signal("Climber Release Motor Current", "A");
             rioIsBrownoutSig = new Signal("Robot Brownout", "bool");
             matchTimeSig = new Signal("Match Time", "sec");
             rioCANBusUsagePctSig = new Signal("Robot CAN Bus Utilization", "pct");
@@ -221,7 +222,7 @@ public class Robot extends TimedRobot {
             drivetrainClosedLoopVectorsTimer = new Signal("DTClosedLoopVectorsTimer", "ms");
             drivetrainTimer = new Signal("DrivetrainTimer", "ms");
             poseCalcTimer = new Signal("PoseCalcTimer", "ms");
-            climberTimer = new Signal("ClimberTimer", "ms");
+            //climberTimer = new Signal("ClimberTimer", "ms");
             pneumaticsTimer = new Signal("PneumaticsTimer", "ms");
             telemetryTimer = new Signal("TelemetryTimer", "ms");
 
@@ -360,9 +361,9 @@ public class Robot extends TimedRobot {
             poseCalcTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
             updateTimer.reset();
 
-            climber.setManualMovement(false);
+            
             climber.update();
-            climberTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
+            //climberTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
 
             /* Update Other subsytems */
             ledController.update();
@@ -608,7 +609,7 @@ public class Robot extends TimedRobot {
         
         //Cause arm to stop
         arm.setManualMovementCmd(0);
-        climber.setManualMovement(true);
+        
         
         loopTiming.markLoopStart();
         pneumaticsControl.start();//ensure compressor is running

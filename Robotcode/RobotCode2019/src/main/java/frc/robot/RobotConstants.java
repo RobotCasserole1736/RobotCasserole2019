@@ -55,9 +55,6 @@ public class RobotConstants {
 
     //PWM/Motor
 
-    public static final int CLIMBER_SERVO1 = 6;
-    public static final int CLIMBER_SERVO2 = 7;
-
 
     //Relay
 
@@ -78,6 +75,9 @@ public class RobotConstants {
     public static final int PEZ_DUB_SOLENOID_MID_STOPPER = 2;
     public static final int PEZ_DUB_SOLENOID_MID_STOPPER2 = 3;
     public static final int CLIMBER_EJECT_SOL = 4;
+    public static final int CLIMBER_LEFT_CYL = 6;
+    public static final int CLIMBER_RIGHT_CYL = 7;
+
 
 
     /////////////////////////////////////////////////////////////////////////////////////
