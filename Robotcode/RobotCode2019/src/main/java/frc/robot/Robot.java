@@ -97,7 +97,6 @@ public class Robot extends TimedRobot {
     Signal dtUpDownAccelSig;
     Signal intakeLeftCurrentSig;
     Signal intakeRightCurrentSig;
-    //I don't think so ??? Signal climberReleaseMotorCurrentSig;
     
     Signal rioIsBrownoutSig;
     Signal matchTimeSig;
@@ -128,7 +127,6 @@ public class Robot extends TimedRobot {
     Signal drivetrainClosedLoopVectorsTimer;
     Signal drivetrainTimer;
     Signal poseCalcTimer;
-    //Signal climberTimer;
     Signal pneumaticsTimer;
     Signal telemetryTimer;
 
@@ -194,7 +192,6 @@ public class Robot extends TimedRobot {
             dtUpDownAccelSig = new Signal("Drivetrain Up/Down Acceleration", "g");
             intakeLeftCurrentSig = new Signal("Intake Left Motor Current", "A");
             intakeRightCurrentSig = new Signal("Intake Right Motor Current", "A");
-            //climberReleaseMotorCurrentSig = new Signal("Climber Release Motor Current", "A");
             rioIsBrownoutSig = new Signal("Robot Brownout", "bool");
             matchTimeSig = new Signal("Match Time", "sec");
             rioCANBusUsagePctSig = new Signal("Robot CAN Bus Utilization", "pct");
@@ -218,7 +215,6 @@ public class Robot extends TimedRobot {
             drivetrainClosedLoopVectorsTimer = new Signal("DTClosedLoopVectorsTimer", "ms");
             drivetrainTimer = new Signal("DrivetrainTimer", "ms");
             poseCalcTimer = new Signal("PoseCalcTimer", "ms");
-            //climberTimer = new Signal("ClimberTimer", "ms");
             pneumaticsTimer = new Signal("PneumaticsTimer", "ms");
             telemetryTimer = new Signal("TelemetryTimer", "ms");
 
@@ -358,7 +354,6 @@ public class Robot extends TimedRobot {
 
             
             climber.update();
-            //climberTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
 
             /* Update Other subsytems */
             ledController.update();
@@ -554,7 +549,6 @@ public class Robot extends TimedRobot {
         dtUpDownAccelSig.addSample(sampleTimeMs, (onboardAccel.getX()*-1));
         intakeLeftCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.INTAKE_LEFT_MOTOR_PDP_PORT));
         intakeRightCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.INTAKE_LEFT_MOTOR_PDP_PORT));
-        climberReleaseMotorCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.CLIMBER_RELEASE_MOTOR_PDP_PORT));
         rioIsBrownoutSig.addSample(sampleTimeMs, RobotController.isBrownedOut());
         matchTimeSig.addSample(sampleTimeMs, DriverStation.getInstance().getMatchTime());
         rioCANBusUsagePctSig.addSample(sampleTimeMs, RobotController.getCANStatus().percentBusUtilization);
