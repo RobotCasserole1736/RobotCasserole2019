@@ -271,6 +271,8 @@ public class Robot extends TimedRobot {
             Timer updateTimer = new Timer();
             loopTiming.markLoopStart();
 
+            boolean simpleAlignFailed = false;
+
             eyeOfVeganSauron.setLEDRingState(true);
 
             /* Sample Sensors */
@@ -334,8 +336,13 @@ public class Robot extends TimedRobot {
             } else if(driverController.getGyroAngleLockReq()){
                 //Map driver inputs to drivetrain in gyro-lock mode
                 drivetrain.setGyroLockCmd(driverController.getDriverFwdRevCmd());
-            } else if(driverController.getLockDrivetrainAngle()){
-                drivetrain.setPositionCmd(driverController.getDriverFwdRevCmd(), JeVoisInterface.getInstance().getTgtGeneralAngle());
+            } else if(driverController.getVisionSimpleAlignRequest()){
+                if(JeVoisInterface.getInstance().isVisionOnline() && JeVoisInterface.getInstance().isTgtVisible()){
+                    drivetrain.setPositionCmd(driverController.getDriverFwdRevCmd(), JeVoisInterface.getInstance().getTgtGeneralAngle());
+                    simpleAlignFailed = false;
+                } else {
+                    simpleAlignFailed = true;
+                }
             } else {
                 // Map driver inputs to drivetrain open loop
                 drivetrain.setOpenLoopCmd(driverController.getDriverFwdRevCmd(), driverController.getDriverRotateCmd());
@@ -371,7 +378,7 @@ public class Robot extends TimedRobot {
 
 
             //LED pattern control
-            if(autonomous.getAutoFailed() == true){
+            if(autonomous.getAutoFailed() || simpleAlignFailed){
                 //Choose "Error" pattern
                 ledController.setPattern(LEDPatterns.Pattern3);
             } else {

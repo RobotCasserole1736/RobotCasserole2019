@@ -209,7 +209,7 @@ public class DriverController {
         return this.gyroAngleLockReq;
     }
 
-    public boolean getLockDrivetrainAngle() {
+    public boolean getVisionSimpleAlignRequest() {
         return this.LockDrivetrainAngle;
     }
 
