@@ -108,6 +108,9 @@ public class Autonomous {
         curState = INITAL_STATE;
         prevState = INITAL_STATE;
         seq = new AutoSequencer("AutonomousAlign");
+        tgtXPosBuf=new MathyCircularBuffer(NUM_AVG_JEVOIS_SAMPLES);
+        tgtYPosBuf=new MathyCircularBuffer(NUM_AVG_JEVOIS_SAMPLES);
+        tgtAngleBuf=new MathyCircularBuffer(NUM_AVG_JEVOIS_SAMPLES);
     }
 
     public void update(){
@@ -146,7 +149,7 @@ public class Autonomous {
                 if(autoMoveRequested == true){
                     jeVoisPreLatchCount = JeVoisInterface.getInstance().getLatchCounter();
                     JeVoisInterface.getInstance().latchTarget();
-                        
+                    autoStartTimestamp=Timer.getFPGATimestamp();
                     nextState = StateEnum.waitForLatch;
                 } else {
                     nextState = StateEnum.Inactive;
