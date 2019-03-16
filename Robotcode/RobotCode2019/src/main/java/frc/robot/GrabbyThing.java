@@ -38,8 +38,8 @@ public class GrabbyThing {
     }
 
     private GrabbyThing() {
-        leftIntakeMotor = new WPI_TalonSRX(RobotConstants.INTAKE_LEFT_MOTOR_PWM_PORT);
-        rightIntakeMotor = new WPI_TalonSRX(RobotConstants.INTAKE_RIGHT_MOTOR_PWM_PORT);
+        leftIntakeMotor = new WPI_TalonSRX(RobotConstants.INTAKE_MOTOR_LEFT_CANID);
+        rightIntakeMotor = new WPI_TalonSRX(RobotConstants.INTAKE_MOTOR_RIGHT_CANID);
         wristStabilization = new Solenoid(RobotConstants.WRIST_STABILIZATION_CYL);
         grabberPos = new Solenoid(RobotConstants.GRIPPER_POS_CYL);
     }

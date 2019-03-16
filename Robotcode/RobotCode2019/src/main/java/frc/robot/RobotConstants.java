@@ -16,9 +16,9 @@ public class RobotConstants {
     public static final int DRIVETRAIN_LEFT_2_CANID = 15;
     public static final int DRIVETRAIN_RIGHT_1_CANID = 2;
     public static final int DRIVETRAIN_RIGHT_2_CANID = 14;
-    /*public static final int INTAKE_MOTOR_CANID = 8;
+    public static final int INTAKE_MOTOR_CANID = 8;
     public static final int INTAKE_MOTOR_LEFT_CANID = 31;
-    public static final int INTAKE_MOTOR_RIGHT_CANID = 32;*/
+    public static final int INTAKE_MOTOR_RIGHT_CANID = 32;
     public static final int LEFT_INTAKE_CANID = 31;
     public static final int RIGHT_INTAKE_CANID = 32;
     
@@ -67,9 +67,7 @@ public class RobotConstants {
     /////////////////////////////////////////////////////////////////////////////////////
     // PDP Ports
     /////////////////////////////////////////////////////////////////////////////////////
-    /*public static final int INTAKE_LEFT_MOTOR_PDP_PORT = 0;
-    public static final int INTAKE_RIGHT_MOTOR_PDP_PORT = 1;
-    */
+  
     public static final int INTAKE_LEFT_MOTOR_PDP_PORT = 0;
     public static final int INTAKE_RIGHT_MOTOR_PDP_PORT = 1;
     public static final int CLIMBER_RELEASE_MOTOR_PDP_PORT = 2;
