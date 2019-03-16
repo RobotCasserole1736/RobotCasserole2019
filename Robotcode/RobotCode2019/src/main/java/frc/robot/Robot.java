@@ -547,8 +547,8 @@ public class Robot extends TimedRobot {
         dtFwdRevAccelSig.addSample(sampleTimeMs, onboardAccel.getY());
         dtLeftRightAccelSig.addSample(sampleTimeMs, onboardAccel.getZ());
         dtUpDownAccelSig.addSample(sampleTimeMs, (onboardAccel.getX()*-1));
-        intakeLeftCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.INTAKE_LEFT_MOTOR_PDP_PORT));
-        intakeRightCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.INTAKE_LEFT_MOTOR_PDP_PORT));
+        //intakeLeftCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.INTAKE_LEFT_MOTOR_PDP_PORT));
+        //intakeRightCurrentSig.addSample(sampleTimeMs, pdp.getCurrent(RobotConstants.INTAKE_LEFT_MOTOR_PDP_PORT));
         rioIsBrownoutSig.addSample(sampleTimeMs, RobotController.isBrownedOut());
         matchTimeSig.addSample(sampleTimeMs, DriverStation.getInstance().getMatchTime());
         rioCANBusUsagePctSig.addSample(sampleTimeMs, RobotController.getCANStatus().percentBusUtilization);
