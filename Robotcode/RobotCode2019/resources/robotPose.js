@@ -103,7 +103,13 @@ var FIELDTAPEPOLY23_FT =
     [[-10.6, 54],[-10.6, 52.5],[-10.8, 52.5],[-10.8, 54],[-10.6, 54]];    
     
 var FIELDTAPEPOLY24_FT =
-    [[10.6, 54],[10.6, 52.5],[10.8, 52.5],[10.8, 54],[10.6, 54]];    
+    [[10.6, 54],[10.6, 52.5],[10.8, 52.5],[10.8, 54],[10.6, 54]];  
+    
+var FIELDLENGTHMARKER3_FT =
+    [[-9,16.25],[9,16.25],[9,16.75],[-9,16.75],[-9,16.25]]
+
+var FIELDLENGTHMARKER6_FT =
+    [[-9,13.25],[9,13.25],[9,13.75],[-9,13.75],[-9,13.25]]
     //Render Constants
 var PX_PER_FOOT = 15;
 var FIELD_COLOR = '#534F4D';
@@ -645,6 +651,35 @@ function procData(json_data) {
             for (i = 0; i < FIELDTAPEPOLY24_FT.length; i++) {
                 x_px = FIELDTAPEPOLY24_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
                 y_px = this.ctx.canvas.height - (FIELDTAPEPOLY24_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+            for (i = 0; i < FIELDLENGTHMARKER3_FT.length; i++) {
+                x_px = FIELDLENGTHMARKER3_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDLENGTHMARKER3_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
+
+                if (i == 0) {
+                    this.ctx.moveTo(x_px, y_px);
+                } else {
+                    this.ctx.lineTo(x_px, y_px);
+                }
+            }
+
+            this.ctx.closePath();
+            this.ctx.fill();
+
+
+            for (i = 0; i < FIELDLENGTHMARKER6_FT.length; i++) {
+                x_px = FIELDLENGTHMARKER6_FT[i][0] * PX_PER_FOOT + this.bot_origin_offset_x;
+                y_px = this.ctx.canvas.height - (FIELDLENGTHMARKER6_FT[i][1] * PX_PER_FOOT) + this.bot_origin_offset_y; //transform from software refrence frame to html/js canvas reference frame.
 
                 if (i == 0) {
                     this.ctx.moveTo(x_px, y_px);
