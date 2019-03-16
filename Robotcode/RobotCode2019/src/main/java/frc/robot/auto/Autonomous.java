@@ -39,7 +39,7 @@ public class Autonomous {
         SendJevoislatch(1),   /* Send jevois latch */
         waitForLatch(2),   /* wait for latln */
         sampleFromJEV(3),   /* sample from JCV */
-        pathPlanner(4),   /* Path-Planner*/
+        armMoveAndPathPlan(4),   /* Path-Planner*/
         addAllAutoEvents(6),   /* Add all auto events*/
         autoSeqUpdate(7),  /* AutoSeq .update()*/
         autoError(8); /*EEEERRRROOORRRRR*/
@@ -198,7 +198,7 @@ public class Autonomous {
                                         xTargetOffset = tgtXPosBuf.getAverage();
                                         yTargetOffset = tgtYPosBuf.getAverage();
                                         targetPositionAngle = tgtAngleBuf.getAverage();
-                                        nextState = StateEnum.pathPlanner; 
+                                        nextState = StateEnum.armMoveAndPathPlan; 
                                     } 
                                 }                    
                             }
@@ -210,57 +210,49 @@ public class Autonomous {
 
             break;
 
-            case pathPlanner:
-                
+            case armMoveAndPathPlan:
+
                 if(autoMoveRequested == true){
-                    if(DriverController.getInstance().getAutoAlignHighReq()){
-                        //Top Placement cannot be handled now without line followers :(
-                        nextState = StateEnum.autoError; 
+
+                    //Add the arm movement
+                    if(DriverController.getInstance().getAutoAlignLowPlaceReq()){
+                        seq.addEvent(new MoveArmLowPos(OpMode.Cargo));
+                    } else if(DriverController.getInstance().getAutoAlignMidPlaceReq()){
+                        seq.addEvent(new MoveArmMidPos(OpMode.Cargo));
+                    } else if(DriverController.getInstance().getAutoAlignHatchPickupReq()){
+                        seq.addEvent(new MoveArmIntakePos(OpMode.Hatch));
                     } else {
-                        //If we're placing mid/low, we use Jevois to path plan up to the target location
-                        AutoSeqPathPlan pp = new AutoSeqPathPlan(xTargetOffset/12, yTargetOffset/12, targetPositionAngle); 
-                        if(!pp.getPathAvailable()){
-                            nextState = StateEnum.autoError;
-                        }
-                        seq.addEvent(pp);
-                        nextState = StateEnum.addAllAutoEvents;
+                        CrashTracker.logAndPrint("[Autonomous] Error invalid Autostate.");
                     }
+                
+                    //We use Jevois to path plan up to the target location
+                    AutoSeqPathPlan pp = new AutoSeqPathPlan(xTargetOffset/12.0, yTargetOffset/12.0, targetPositionAngle); 
+                    if(!pp.getPathAvailable()){
+                        nextState = StateEnum.autoError;
+                    }
+                    seq.addEvent(pp);
+                    nextState = StateEnum.addAllAutoEvents;
+
                 } else {
                     nextState = StateEnum.Inactive;
                 }
-
             break;
 
             case addAllAutoEvents:
 
                 //By Default, go to update
                 nextState = StateEnum.autoSeqUpdate;
-                
-                //Add the arm movement
-                if(DriverController.getInstance().getAutoAlignLowReq()){
-                    seq.addEvent(new MoveArmLowPos(OpMode.Cargo));
-                } else if(DriverController.getInstance().getAutoAlignMidReq()){
-                    seq.addEvent(new MoveArmMidPos(OpMode.Cargo));
-                } else if(DriverController.getInstance().getAutoAlignHighReq()){
-                    seq.addEvent(new MoveArmTopPos(OpMode.Cargo));
-                } else {
-                    CrashTracker.logAndPrint("[Autonomous] Error invalid Autostate.");
-                    nextState = StateEnum.Inactive;
-                }
-
-                //Add the final-align motion
-                seq.addEvent(new AutoSeqFinalAlign());
 
                 //Add the gripper release motion
-                //TODO - make gripper release auto sequencer events
-                
-                
+                if(DriverController.getInstance().getAutoAlignHatchPickupReq()){
+                    //TODO - make and add gripper pickup auto sequencer events
+                } else {
+                    //TODO - make gripper release auto sequencer events
+                }
+
                 //Add the back-up motion
-                //if(isForward){
-                    seq.addEvent(new Backup());
-                //} else {
-                //    parent.addChildEvent(new BackupHigh());
-                //}
+                seq.addEvent(new Backup());
+
 
                 //Fire off the sequencer
                 seq.start();
