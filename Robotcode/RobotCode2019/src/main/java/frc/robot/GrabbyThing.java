@@ -32,9 +32,16 @@ public class GrabbyThing {
     public boolean hatchModeDesired;
     public boolean ballModeDesired;
     //State Variables
+    public boolean switchGamePiece;
+    
     GamePiece gamePiece_in; 
     GripperPos gripperPos_in;
     WristPos wristPos_in;
+    GrabbyStateMachine grabbyState_in;
+    GrabbyStateMachine curState;
+    GrabbyStateMachine prevState;
+    GrabbyStateMachine nextState;
+
     public boolean currentIsOk;
     //Calibrations
     Calibration intakeHatchMotorSpeedCal;
@@ -98,43 +105,82 @@ public class GrabbyThing {
         public int toInt(){
             return this.value;
         }
+    }
+    public enum GrabbyStateMachine {
+        
+        HatchReady(0),
+        CargoReady(1),
+        HatchHold(2),
+        CargoHold(3), 
+        HatchShoot(4), 
+        CargoShoot(5),
+        HatchIntake(6),
+        CargoIntake(7); 
+    
+        public final int value;
+        private GrabbyStateMachine(int value) {
+            this.value = value;
         }
 
-    public void update() {
-        //Operator Presses Intake Button
-        if(intakeRequested) {
-            if(gamePiece_in == GamePiece.Cargo) {
-                if(currentIsOk) {
+        public int toInt() {
+            return this.value;
+        }
+    }
+    
+    
+    
+    public void update(){
+        //Main update loop
+        nextState = curState;
+
+        //Step 0 - save previous state
+        prevState = curState;
+
+        switch(curState) {
+            case HatchReady:
+                grabberPos.set(false);
+                    if(intakeRequested) {
+                        nextState = GrabbyStateMachine.HatchIntake;
+                    } else if(switchGamePiece) {
+                        nextState = GrabbyStateMachine.CargoReady;
+                        switchGamePiece = false;
+                    }
+            break;
+            case CargoReady:
+                grabberPos.set(true);
+                    if(intakeRequested) {
+                        nextState = GrabbyStateMachine.CargoIntake;
+                    } else if(switchGamePiece) {
+                        nextState = GrabbyStateMachine.HatchReady;
+                        switchGamePiece = false;
+                    }
+            break;
+            case HatchHold:
+            break;
+            case CargoHold: 
+            break;
+            case HatchShoot:
+            break; 
+            case CargoShoot:
+            break;
+            case HatchIntake:
+                if(intakeRequested && currentIsOk){
+                    leftIntakeMotor.set(ControlMode.PercentOutput, intakeHatchMotorSpeedCal.get());
+                    rightIntakeMotor.set(ControlMode.PercentOutput, -1*intakeHatchMotorSpeedCal.get());
+                }
+            break;
+            case CargoIntake:
+                if(intakeRequested && currentIsOk){
                     leftIntakeMotor.set(ControlMode.PercentOutput, intakeCargoMotorSpeedCal.get());
                     rightIntakeMotor.set(ControlMode.PercentOutput, -1*intakeCargoMotorSpeedCal.get());
                 }
-            }
-            else if(gamePiece_in == GamePiece.Hatch) {
-                leftIntakeMotor.set(ControlMode.PercentOutput, intakeHatchMotorSpeedCal.get());
-                rightIntakeMotor.set(ControlMode.PercentOutput, -1*intakeHatchMotorSpeedCal.get());
-            }
-            //Operator Presses Eject Button 
-        else if(ejectRequested) {
-            if(gamePiece_in == GamePiece.Cargo) {
-                    if(currentIsOk) {
-                leftIntakeMotor.set(ControlMode.PercentOutput, ejectCargoMotorSpeedCal.get());
-                rightIntakeMotor.set(ControlMode.PercentOutput, -1*ejectCargoMotorSpeedCal.get());
-                    }
-                }
-            else if(gamePiece_in == GamePiece.Hatch) {
-                leftIntakeMotor.set(ControlMode.PercentOutput, ejectHatchMotorSpeedCal.get());
-                rightIntakeMotor.set(ControlMode.PercentOutput, -1*ejectHatchMotorSpeedCal.get());
-            } 
-       }
-
+            break;
+        } 
       
     }
-
-    public double getCurGamePiece() {
-
-    }
 }
-}
+
+
 
 
 
