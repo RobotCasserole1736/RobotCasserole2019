@@ -3,9 +3,7 @@ package frc.robot.auto;
 import java.util.ArrayList;
 
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.interfaces.Gyro;
 import frc.lib.AutoSequencer.AutoEvent;
-import frc.lib.DataServer.Signal;
 import frc.lib.PathPlanner.FalconPathPlanner;
 import frc.lib.Util.CrashTracker;
 import frc.robot.Drivetrain;
@@ -217,7 +215,6 @@ public class AutoSeqPathPlan extends AutoEvent {
     public static double[] multiplyMatrices(double[][] firstMatrix, double[] secondMatrix) {
 
         int r1 = firstMatrix.length;
-        int r2 = secondMatrix.length;
         int c1 = firstMatrix[0].length;
         int c2 = 1;
 
