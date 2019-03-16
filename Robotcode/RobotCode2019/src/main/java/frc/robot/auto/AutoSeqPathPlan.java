@@ -71,10 +71,10 @@ public class AutoSeqPathPlan extends AutoEvent {
 
         //This matrix is for the x and y position of the target. It is supposed to be a 2 X 1.
         double [] pointAheadOfEndMatrix = 
-            {tgt_pos_x_ft, tgt_pos_y_ft-3.0};
+            {tgt_pos_x_ft, tgt_pos_y_ft-1.5};
 
         double [] endOfLineMatrix = 
-            {tgt_pos_x_ft, tgt_pos_y_ft-1.5};
+            {tgt_pos_x_ft, tgt_pos_y_ft};
 
         CrashTracker.logAndPrint("[AutoSeq Path Plan] Target Position X (ft) = " + tgt_pos_x_ft);
         CrashTracker.logAndPrint("[AutoSeq Path Plan] Target Position Y (ft) = " + tgt_pos_y_ft);
