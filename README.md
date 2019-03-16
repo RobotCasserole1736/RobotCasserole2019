@@ -1,4 +1,4 @@
-![logo](http://robotcasserole.org/wp-content/uploads/2017/01/banner_2017_text.png)
+![logo](https://user-images.githubusercontent.com/4583662/54397726-78099780-4685-11e9-8c16-db0be2048d60.jpg)
 
 # RobotCasserole2019
 Software for Robot Casserole's 2019 FIRST Deep Space competition season
