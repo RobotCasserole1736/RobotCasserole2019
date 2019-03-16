@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
 import frc.lib.AutoSequencer.AutoEvent;
+import frc.lib.DataServer.Signal;
 import frc.lib.PathPlanner.FalconPathPlanner;
 import frc.lib.Util.CrashTracker;
 import frc.robot.Drivetrain;
@@ -51,16 +52,18 @@ public class AutoSeqPathPlan extends AutoEvent {
 
     final double PATH_DURATION_FROM_DISTANCE_RATIO = 1.0/1.0 ; //units of seconds per foot, because reasons
 
-    final double JEVOIS_TO_PATH_PLAN_ANGLE_OFFSEST_DEG = -90.0;
+    //final double JEVOIS_TO_PATH_PLAN_ANGLE_OFFSEST_DEG = 0.0;
 
+    
     /**
      * Creates a new path from the current robot position up to a point in front of the target, pointed straight at it.
      */
-    public AutoSeqPathPlan(double tgt_pos_x_ft, double tgt_pos_y_ft, double tgt_pos_angle_rad){
+    public AutoSeqPathPlan(double tgt_pos_y_ft, double tgt_pos_x_ft, double tgt_pos_angle_rad){
         dt = Drivetrain.getInstance();
 
+        
         //Convert reference frames
-        double targetAngleRad = tgt_pos_angle_rad + Math.toRadians(JEVOIS_TO_PATH_PLAN_ANGLE_OFFSEST_DEG);
+        double targetAngleRad = tgt_pos_angle_rad;
 
         //Use a completely made up formula to calcualte the duration of the path plan event.
         double psuedoDistance = Math.sqrt(tgt_pos_x_ft*tgt_pos_x_ft + tgt_pos_y_ft*tgt_pos_y_ft); //as-the-bird-flies distance to target
@@ -82,8 +85,8 @@ public class AutoSeqPathPlan extends AutoEvent {
             {java.lang.Math.cos(targetAngleRad), -java.lang.Math.sin(targetAngleRad)},
             {java.lang.Math.sin(targetAngleRad), java.lang.Math.cos(targetAngleRad)}
         };
-
-        CrashTracker.logAndPrint("[AutoSeq Path Plan] Angle from Target (Deg) = " + Math.toDegrees(targetAngleRad));
+        double targetAngleDeg=(targetAngleRad*180)/Math.PI;
+        CrashTracker.logAndPrint("[AutoSeq Path Plan] Angle from Target (Deg) = " + targetAngleDeg+tgt_pos_angle_rad);
 
         double [] wayPoint3 = multiplyMatrices(rotationMatrix, pointAheadOfEndMatrix);
 
@@ -121,7 +124,6 @@ public class AutoSeqPathPlan extends AutoEvent {
 
         //Update the pose view with our new desired location, converting to robotPose reference frame
         RobotPose.getInstance().setDesiredPose(wayPoint4[0], wayPoint4[1], Math.toDegrees(targetAngleRad) + RobotPose.getInstance().INIT_POSE_T);
-
     }
 
     /**

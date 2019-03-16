@@ -108,6 +108,9 @@ public class Autonomous {
         curState = INITAL_STATE;
         prevState = INITAL_STATE;
         seq = new AutoSequencer("AutonomousAlign");
+        tgtXPosBuf=new MathyCircularBuffer(NUM_AVG_JEVOIS_SAMPLES);
+        tgtYPosBuf=new MathyCircularBuffer(NUM_AVG_JEVOIS_SAMPLES);
+        tgtAngleBuf=new MathyCircularBuffer(NUM_AVG_JEVOIS_SAMPLES);
     }
 
     public void update(){
@@ -146,7 +149,7 @@ public class Autonomous {
                 if(autoMoveRequested == true){
                     jeVoisPreLatchCount = JeVoisInterface.getInstance().getLatchCounter();
                     JeVoisInterface.getInstance().latchTarget();
-                        
+                    autoStartTimestamp=Timer.getFPGATimestamp();
                     nextState = StateEnum.waitForLatch;
                 } else {
                     nextState = StateEnum.Inactive;
@@ -177,7 +180,6 @@ public class Autonomous {
                     } else {
                         if(visionAvailable){
                             long frameCounter = JeVoisInterface.getInstance().getFrameRXCount();
-                            
                             if(frameCounter != prevFrameCounter){
                                 //A new sample has come in from the vision camera
                                 tgtXPosBuf.pushFront(JeVoisInterface.getInstance().getTgtPositionX());
@@ -195,7 +197,7 @@ public class Autonomous {
                                         //Target is declared "Stable"
                                         xTargetOffset = tgtXPosBuf.getAverage();
                                         yTargetOffset = tgtYPosBuf.getAverage();
-                                        targetPositionAngle = tgtAngleBuf.getAverage(); 
+                                        targetPositionAngle = tgtAngleBuf.getAverage();
                                         nextState = StateEnum.pathPlanner; 
                                     } 
                                 }                    
@@ -216,7 +218,7 @@ public class Autonomous {
                         nextState = StateEnum.autoError; 
                     } else {
                         //If we're placing mid/low, we use Jevois to path plan up to the target location
-                        AutoSeqPathPlan pp = new AutoSeqPathPlan(xTargetOffset, yTargetOffset, targetPositionAngle); 
+                        AutoSeqPathPlan pp = new AutoSeqPathPlan(xTargetOffset/12, yTargetOffset/12, targetPositionAngle); 
                         if(!pp.getPathAvailable()){
                             nextState = StateEnum.autoError;
                         }
@@ -254,11 +256,11 @@ public class Autonomous {
                 
                 
                 //Add the back-up motion
-                if(isForward){
-                    parent.addChildEvent(new Backup());
-                } else {
-                    parent.addChildEvent(new BackupHigh());
-                }
+                //if(isForward){
+                    seq.addEvent(new Backup());
+                //} else {
+                //    parent.addChildEvent(new BackupHigh());
+                //}
 
                 //Fire off the sequencer
                 seq.start();
