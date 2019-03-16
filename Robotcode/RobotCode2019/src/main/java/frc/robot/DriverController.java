@@ -39,7 +39,10 @@ public class DriverController {
     boolean compressorDisableReq;
     boolean compressorEnableReq;
     boolean LockDrivetrainAngle = false;
-    AveragingFilter filt;
+    boolean autoMove;
+    boolean autoAlignHighReq;
+    boolean autoAlignMidReq;
+    boolean autoAlignLowReq;
 
     /* Behavior/performance calibrations */
     Calibration slowMoveFwdRevScaleFactor;
@@ -48,6 +51,8 @@ public class DriverController {
     Calibration joystickDeadzone;
     Calibration joystickUpperDeadzone;
   
+    AveragingFilter filt;
+
     /* Telemetry */
     Signal driverFwdRevCmdSig;
     Signal driverRotateCmdSig;
@@ -55,8 +60,9 @@ public class DriverController {
     Signal gyroAngleLockReqSig;
     Signal compressorDisableReqSig;
     Signal compressorEnableReqSig;
-    Signal intakeSpdReqSig;
-    Signal intakePosReqSig;
+    Signal autoAlignHighReqSig;
+    Signal autoAlignMidReqSig;
+    Signal autoAlignLowReqSig;
 
     /* Singleton stuff */
     private static DriverController drvCtrl = null;
@@ -81,35 +87,30 @@ public class DriverController {
         gyroAngleLockReqSig = new Signal("Driver Gyro Angle Lock Command", "bool");
         compressorDisableReqSig = new Signal("Driver Compressor Disable Command", "bool");
         compressorEnableReqSig = new Signal("Driver Compressor Enable Command", "bool");
-        intakeSpdReqSig = new Signal("Driver Intake Speed Command", "speed enum");
-        intakePosReqSig = new Signal("Driver Intake Position Command", "pos enum");
+        autoAlignHighReqSig = new Signal("Operator Auto Align Top Command", "bool");
+        autoAlignMidReqSig = new Signal("Operator Auto Align Mid Command", "bool");
+        autoAlignLowReqSig = new Signal("Operator Auto Align Low Command", "bool");
     }
 
     /** Main update function */
     public void update(){
-        //Temp, give some default values
-        //intakeSpdReq = IntakeSpd.Stop;
-        //intakePosReq = IntakePos.Retract;
 
-        //if(xb.getBumper(Hand.kRight)){
-        //    intakePosReq = IntakePos.Extend;
-        //} else {
-        //    intakePosReq = IntakePos.Retract;
-        //}
+        autoAlignHighReq = false;
+        autoAlignMidReq = false;
+        autoAlignLowReq = false;
+        autoMove = false;
 
-        //if(xb.getTriggerAxis(Hand.kRight) > 0.5){
-        //    //When pulling a ball in, override the intake to be extended.
-        //    intakePosReq = IntakePos.Extend;
-        //    intakeSpdReq = IntakeSpd.Intake;
-        //} else if(xb.getTriggerAxis(Hand.kLeft) > 0.5){
-        //    //Same deal as pulling a ball in
-        //    intakePosReq = IntakePos.Extend;
-        //    intakeSpdReq = IntakeSpd.Eject;
-        //} else {
-        //    intakeSpdReq = IntakeSpd.Stop;
-        //    //If not pressing a trigger or right bumper, override the intake to be retracted
-        //    intakePosReq = IntakePos.Retract;
-        //}
+        int povAngle = xb.getPOV(0);
+        if(povAngle == 0){
+            autoAlignHighReq = true;
+            autoMove = true;
+        } else if(povAngle == 90 || povAngle == 270) {
+            autoAlignMidReq = true;
+            autoMove = true;
+        } else if(povAngle == 180) {
+            autoAlignLowReq = true;
+            autoMove = true;
+        }
 
         if(xb.getStartButton()){
             compressorEnableReq = true;
@@ -185,6 +186,9 @@ public class DriverController {
         gyroAngleLockReqSig.addSample(sample_time_ms, gyroAngleLockReq);
         compressorDisableReqSig.addSample(sample_time_ms, compressorDisableReq);
         compressorEnableReqSig.addSample(sample_time_ms, compressorEnableReq);
+        autoAlignHighReqSig.addSample(sample_time_ms,autoAlignHighReq);
+        autoAlignMidReqSig.addSample(sample_time_ms,autoAlignMidReq);
+        autoAlignLowReqSig.addSample(sample_time_ms,autoAlignLowReq);
     }
 
     /* Getters for getting driver commands */
@@ -209,8 +213,24 @@ public class DriverController {
         return this.gyroAngleLockReq;
     }
 
-    public boolean getLockDrivetrainAngle() {
+    public boolean getVisionSimpleAlignRequest() {
         return this.LockDrivetrainAngle;
+    }
+
+    public boolean getAutoAlignHighReq() {
+        return this.autoAlignHighReq;
+    }
+
+    public boolean getAutoAlignMidReq() {
+        return this.autoAlignMidReq;
+    }
+
+    public boolean getAutoAlignLowReq() {
+        return this.autoAlignLowReq;
+    }
+
+    public boolean getAutoMove() {
+        return this.autoMove;
     }
 
 }
