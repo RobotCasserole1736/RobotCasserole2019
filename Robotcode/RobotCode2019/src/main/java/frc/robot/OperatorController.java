@@ -38,12 +38,6 @@ public class OperatorController {
     boolean climberReleaseReq;
     boolean climberRelEnable;
 
-    /* Auto Alignment Related Variables */
-    boolean autoMove;
-    boolean autoAlignHighReq;
-    boolean autoAlignMidReq;
-    boolean autoAlignLowReq;
-
     /* Behavior/feel calibrations */
     Calibration joystickExpScaleFactor;
     Calibration joystickDeadzone;
@@ -54,9 +48,6 @@ public class OperatorController {
     Signal gamepieceReleaseReqSig;
     Signal armPosReqSig;
     Signal armManualPosCmdSig;
-    Signal autoAlignHighReqSig;
-    Signal autoAlignMidReqSig;
-    Signal autoAlignLowReqSig;
     Signal intakeSpdReqSig;
     Signal climberEnableReqSig;
     Signal climberReleaseReqSig;
@@ -100,9 +91,6 @@ public class OperatorController {
         gamepieceReleaseReqSig = new Signal("Operator Gamepiece Release Command", "bool");
         armPosReqSig = new Signal("Operator Arm Position Command", "Arm Pos Enum");
         armManualPosCmdSig = new Signal("Operator Manual Arm Position Command", "cmd");
-        autoAlignHighReqSig = new Signal("Operator Auto Align Top Command", "bool");
-        autoAlignMidReqSig = new Signal("Operator Auto Align Mid Command", "bool");
-        autoAlignLowReqSig = new Signal("Operator Auto Align Low Command", "bool");
         intakeSpdReqSig = new Signal("Operator Intake Speed Command", "speed enum");
         climberEnableReqSig = new Signal("Operator Climber Release Enable Command", "bool");
         climberReleaseReqSig = new Signal("Operator Climber Release Command", "bool");
@@ -112,10 +100,6 @@ public class OperatorController {
     public void update(){
         //Init requests
         armPosReq = ArmPosCmd.None;
-        autoAlignHighReq = false;
-        autoAlignMidReq = false;
-        autoAlignLowReq = false;
-        autoMove = false;
 
         //Get Gamepiece Release/Grab request
         grabReq = xb.getBumper(Hand.kLeft);
@@ -123,30 +107,18 @@ public class OperatorController {
 
         //Get arm or auto-align requests
         int povAngle = xb.getPOV(0);
-        if(xb.getXButton()){
-            if(povAngle == 0){
-                autoAlignHighReq = true;
-                autoMove = true;
-            } else if(povAngle == 90 || povAngle == 270) {
-                autoAlignMidReq = true;
-                autoMove = true;
-            } else if(povAngle == 180) {
-                autoAlignLowReq = true;
-                autoMove = true;
-            }
-        } else {
-            if(povAngle == 0){
-                armPosReq = ArmPosCmd.Top;
-            } else if(povAngle == 90 || povAngle == 270) {
-                armPosReq = ArmPosCmd.Middle;
-            } else if(povAngle == 180) {
-                armPosReq = ArmPosCmd.Lower;
-            } else if(xb.getYButton()) {
-                armPosReq = ArmPosCmd.IntakeHatch;
-            } else if(xb.getAButton()) {
-                armPosReq = ArmPosCmd.IntakeCargo;
-            }
+        if(povAngle == 0){
+            armPosReq = ArmPosCmd.Top;
+        } else if(povAngle == 90 || povAngle == 270) {
+            armPosReq = ArmPosCmd.Middle;
+        } else if(povAngle == 180) {
+            armPosReq = ArmPosCmd.Lower;
+        } else if(xb.getYButton()) {
+            armPosReq = ArmPosCmd.IntakeHatch;
+        } else if(xb.getAButton()) {
+            armPosReq = ArmPosCmd.IntakeCargo;
         }
+
 
         //UpperDeadzone Logic
         double aCmd=xb.getY(Hand.kLeft)/joystickUpperDeadzone.get();
@@ -167,9 +139,6 @@ public class OperatorController {
         gamepieceReleaseReqSig.addSample(sample_time_ms,releaseReq);
         armPosReqSig.addSample(sample_time_ms,armPosReq.toInt());
         armManualPosCmdSig.addSample(sample_time_ms,armManualPosCmd);
-        autoAlignHighReqSig.addSample(sample_time_ms,autoAlignHighReq);
-        autoAlignMidReqSig.addSample(sample_time_ms,autoAlignMidReq);
-        autoAlignLowReqSig.addSample(sample_time_ms,autoAlignLowReq);
         climberEnableReqSig.addSample(sample_time_ms, climberRelEnable);
         climberReleaseReqSig.addSample(sample_time_ms, climberReleaseReq);
     }
@@ -188,22 +157,6 @@ public class OperatorController {
 
     public double getArmManualPosCmd() {
         return this.armManualPosCmd;
-    }
-
-    public boolean getAutoAlignHighReq() {
-        return this.autoAlignHighReq;
-    }
-
-    public boolean getAutoAlignMidReq() {
-        return this.autoAlignMidReq;
-    }
-
-    public boolean getAutoAlignLowReq() {
-        return this.autoAlignLowReq;
-    }
-
-    public boolean getAutoMove() {
-        return this.autoMove;
     }
 
     public boolean getClimberEnable() {

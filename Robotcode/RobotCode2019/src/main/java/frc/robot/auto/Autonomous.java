@@ -5,9 +5,9 @@ import frc.lib.AutoSequencer.AutoEvent;
 import frc.lib.AutoSequencer.AutoSequencer;
 import frc.lib.SignalMath.MathyCircularBuffer;
 import frc.lib.Util.CrashTracker;
+import frc.robot.DriverController;
 import frc.robot.JeVoisInterface;
 import frc.robot.LoopTiming;
-import frc.robot.OperatorController;
 import frc.robot.Arm.OpMode;
 
 /*
@@ -113,7 +113,7 @@ public class Autonomous {
     public void update(){
 
         //Sample Inputs
-        boolean autoMoveRequested = OperatorController.getInstance().getAutoMove();
+        boolean autoMoveRequested = DriverController.getInstance().getAutoMove();
         boolean visionAvailable = JeVoisInterface.getInstance().isTgtVisible() && JeVoisInterface.getInstance().isVisionOnline();
 
 
@@ -211,7 +211,7 @@ public class Autonomous {
             case pathPlanner:
                 
                 if(autoMoveRequested == true){
-                    if(OperatorController.getInstance().getAutoAlignHighReq()){
+                    if(DriverController.getInstance().getAutoAlignHighReq()){
                         //Top Placement cannot be handled now without line followers :(
                         nextState = StateEnum.autoError; 
                     } else {
@@ -235,11 +235,11 @@ public class Autonomous {
                 nextState = StateEnum.autoSeqUpdate;
                 
                 //Add the arm movement
-                if(OperatorController.getInstance().getAutoAlignLowReq()){
+                if(DriverController.getInstance().getAutoAlignLowReq()){
                     seq.addEvent(new MoveArmLowPos(OpMode.Cargo));
-                } else if(OperatorController.getInstance().getAutoAlignMidReq()){
+                } else if(DriverController.getInstance().getAutoAlignMidReq()){
                     seq.addEvent(new MoveArmMidPos(OpMode.Cargo));
-                } else if(OperatorController.getInstance().getAutoAlignHighReq()){
+                } else if(DriverController.getInstance().getAutoAlignHighReq()){
                     seq.addEvent(new MoveArmTopPos(OpMode.Cargo));
                 } else {
                     CrashTracker.logAndPrint("[Autonomous] Error invalid Autostate.");
