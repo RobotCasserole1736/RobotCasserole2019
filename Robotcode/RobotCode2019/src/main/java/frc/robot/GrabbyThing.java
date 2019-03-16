@@ -12,22 +12,27 @@ import frc.lib.DataServer.Signal;
 import frc.robot.RobotConstants;
 
 import edu.wpi.first.wpilibj.Solenoid;
+
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
+//import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
 public class GrabbyThing {
 
-    WPI_TalonSRX leftIntakeMotor;
-    WPI_TalonSRX rightIntakeMotor;
+    WPI_VictorSPX leftIntakeMotor;
+    WPI_VictorSPX rightIntakeMotor;
     Solenoid wristStabilization;
     Solenoid grabberPos;
 
     //State Variables
- 
-
     public boolean IntakeRequested;
     public boolean ejectRequested;
-    public boolean HatchModeDesired;
+    public boolean hatchModeDesired;
     public boolean ballModeDesired;
+    //Calibrations
+    Calibration intakeMotorSpeedCal;
+    Calibration ejectMotorSpeedCal;
 
     private static GrabbyThing singularInstance = null;
 
@@ -38,11 +43,15 @@ public class GrabbyThing {
     }
 
     private GrabbyThing() {
-        leftIntakeMotor = new WPI_TalonSRX(RobotConstants.INTAKE_MOTOR_LEFT_CANID);
-        rightIntakeMotor = new WPI_TalonSRX(RobotConstants.INTAKE_MOTOR_RIGHT_CANID);
+        leftIntakeMotor = WPI_VictorSPX(RobotConstants.INTAKE_MOTOR_LEFT_CANID);
+        rightIntakeMotor = WPI_VictorSPX(RobotConstants.INTAKE_MOTOR_RIGHT_CANID);
         wristStabilization = new Solenoid(RobotConstants.WRIST_STABILIZATION_CYL);
         grabberPos = new Solenoid(RobotConstants.GRIPPER_POS_CYL);
+
+        intakeMotorSpeedCal = new Calibration("Intake Motor Speed % of Max", 0.5);
+        ejectMotorSpeedCal = new Calibration("Eject Motor Speed % of Max", 0.5);
     }
+
     public enum GripperPos {
         Expanded(0), Shrunken(1);
 
@@ -68,7 +77,12 @@ public class GrabbyThing {
         }
 
     public void update() {
-       
+       if(IntakeRequested) {
+           leftIntakeMotor.set(ControlMode.PercentOutput, intakeMotorSpeedCal.get());
+           rightIntakeMotor.set(ControlMode.PercentOutput, intakeMotorSpeedCal.get());
+
+       }
+       else if()
       
     }
     }
