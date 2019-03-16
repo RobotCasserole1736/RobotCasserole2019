@@ -82,6 +82,7 @@ public class Autonomous {
     int jeVoisSampleCounter = 0;
 
     long prevFrameCounter = 0;
+    boolean prevAutoMoveRequested = false;
 
     final int NUM_AVG_JEVOIS_SAMPLES = 3;
 
@@ -92,16 +93,15 @@ public class Autonomous {
     AutoSequencer seq;
 
     AutoEvent parent; 
-    
-    //OpMode curOpMode = Superstructure.getInstance().getActualOpMode();
 
-    private static Autonomous empty = null;
+
+    private static Autonomous instance = null;
 
    
     public static synchronized Autonomous getInstance() {
-        if (empty == null)
-            empty = new Autonomous();
-        return empty;
+        if (instance == null)
+            instance = new Autonomous();
+        return instance;
     }
 
     public Autonomous(){
@@ -129,7 +129,8 @@ public class Autonomous {
         //Do different things depending on what state you are in
         switch(curState){
             case Inactive:
-                if(autoMoveRequested == true){
+                blinkState = false;
+                if(autoMoveRequested == true && prevAutoMoveRequested == false){
                     if(visionAvailable){
                         nextState = StateEnum.SendJevoislatch;
                         sendJevoislatch = true;
@@ -263,7 +264,7 @@ public class Autonomous {
 
                 seq.update();
 
-                if(!autoMoveRequested && seq.isRunning()){
+                if(!autoMoveRequested || !seq.isRunning()){
                     //Cancel sequence
                     seq.stop();
                     nextState = StateEnum.Inactive; 
@@ -296,6 +297,7 @@ public class Autonomous {
         }
 
         curState = nextState;
+        prevAutoMoveRequested = autoMoveRequested;
     }
 
     public StateEnum getState(){
