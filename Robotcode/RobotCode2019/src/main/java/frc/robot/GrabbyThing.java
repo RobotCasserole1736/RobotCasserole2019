@@ -14,25 +14,33 @@ import frc.robot.RobotConstants;
 import edu.wpi.first.wpilibj.Solenoid;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 //import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
 public class GrabbyThing {
 
-    WPI_VictorSPX leftIntakeMotor;
-    WPI_VictorSPX rightIntakeMotor;
+    VictorSPX leftIntakeMotor;
+    VictorSPX rightIntakeMotor;
     Solenoid wristStabilization;
     Solenoid grabberPos;
 
-    //State Variables
-    public boolean IntakeRequested;
+    //Driver Inputs
+    public boolean intakeRequested;
     public boolean ejectRequested;
     public boolean hatchModeDesired;
     public boolean ballModeDesired;
+    //State Variables
+    GamePiece gamePiece_in; 
+    GripperPos gripperPos_in;
+    WristPos wristPos_in;
+    public boolean currentIsOk;
     //Calibrations
-    Calibration intakeMotorSpeedCal;
-    Calibration ejectMotorSpeedCal;
+    Calibration intakeHatchMotorSpeedCal;
+    Calibration ejectHatchMotorSpeedCal;
+    Calibration intakeCargoMotorSpeedCal;
+    Calibration ejectCargoMotorSpeedCal;
 
     private static GrabbyThing singularInstance = null;
 
@@ -43,13 +51,29 @@ public class GrabbyThing {
     }
 
     private GrabbyThing() {
-        leftIntakeMotor = WPI_VictorSPX(RobotConstants.INTAKE_MOTOR_LEFT_CANID);
-        rightIntakeMotor = WPI_VictorSPX(RobotConstants.INTAKE_MOTOR_RIGHT_CANID);
+        leftIntakeMotor = new VictorSPX(RobotConstants.INTAKE_LEFT_MOTOR_PWM_PORT);
+        rightIntakeMotor = new VictorSPX(RobotConstants.INTAKE_LEFT_MOTOR_PWM_PORT);
         wristStabilization = new Solenoid(RobotConstants.WRIST_STABILIZATION_CYL);
         grabberPos = new Solenoid(RobotConstants.GRIPPER_POS_CYL);
 
-        intakeMotorSpeedCal = new Calibration("Intake Motor Speed % of Max", 0.5);
-        ejectMotorSpeedCal = new Calibration("Eject Motor Speed % of Max", 0.5);
+        intakeHatchMotorSpeedCal = new Calibration("Intake Motor Speed % of Max", 0.5);
+        ejectHatchMotorSpeedCal = new Calibration("Eject Motor Speed % of Max", 0.5);
+        intakeCargoMotorSpeedCal = new Calibration("Intake Motor Speed % of Max", 0.5);
+        ejectCargoMotorSpeedCal = new Calibration("Eject Motor Speed % of Max", 0.5);
+    }
+
+    public enum GamePiece {
+        Cargo(0), Hatch(1);
+
+        public final int value;
+
+        private GamePiece(int value) {
+            this.value = value;
+        }
+                
+        public int toInt(){
+            return this.value;
+        }
     }
 
     public enum GripperPos {
@@ -77,15 +101,40 @@ public class GrabbyThing {
         }
 
     public void update() {
-       if(IntakeRequested) {
-           leftIntakeMotor.set(ControlMode.PercentOutput, intakeMotorSpeedCal.get());
-           rightIntakeMotor.set(ControlMode.PercentOutput, intakeMotorSpeedCal.get());
-
+        //Operator Presses Intake Button
+        if(intakeRequested) {
+            if(gamePiece_in == GamePiece.Cargo) {
+                if(currentIsOk) {
+                    leftIntakeMotor.set(ControlMode.PercentOutput, intakeCargoMotorSpeedCal.get());
+                    rightIntakeMotor.set(ControlMode.PercentOutput, -1*intakeCargoMotorSpeedCal.get());
+                }
+            }
+            else if(gamePiece_in == GamePiece.Hatch) {
+                leftIntakeMotor.set(ControlMode.PercentOutput, intakeHatchMotorSpeedCal.get());
+                rightIntakeMotor.set(ControlMode.PercentOutput, -1*intakeHatchMotorSpeedCal.get());
+            }
+            //Operator Presses Eject Button 
+        else if(ejectRequested) {
+            if(gamePiece_in == GamePiece.Cargo) {
+                    if(currentIsOk) {
+                leftIntakeMotor.set(ControlMode.PercentOutput, ejectCargoMotorSpeedCal.get());
+                rightIntakeMotor.set(ControlMode.PercentOutput, -1*ejectCargoMotorSpeedCal.get());
+                    }
+                }
+            else if(gamePiece_in == GamePiece.Hatch) {
+                leftIntakeMotor.set(ControlMode.PercentOutput, ejectHatchMotorSpeedCal.get());
+                rightIntakeMotor.set(ControlMode.PercentOutput, -1*ejectHatchMotorSpeedCal.get());
+            } 
        }
-       else if()
+
       
     }
+
+    public double getCurGamePiece() {
+
     }
+}
+}
 
 
 
