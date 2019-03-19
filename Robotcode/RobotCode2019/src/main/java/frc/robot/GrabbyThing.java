@@ -12,6 +12,7 @@ import frc.lib.DataServer.Signal;
 import frc.robot.RobotConstants;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Solenoid;
+import frc.robot.Arm;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
@@ -27,6 +28,8 @@ public class GrabbyThing {
     Solenoid grabberPos;
     DigitalInput ballGrabbed;
 
+    Arm myArm;
+
     //Driver Inputs
     public boolean intakeRequested;
     public boolean ejectRequested;
@@ -34,6 +37,7 @@ public class GrabbyThing {
     public boolean ballModeDesired;
     //State Variables
     public boolean switchGamePiece;
+    public double curArmPos;
     
     GamePiece gamePiece_in; 
     GripperPos gripperPos_in;
@@ -43,12 +47,17 @@ public class GrabbyThing {
     GrabbyStateMachine prevState;
     GrabbyStateMachine nextState;
 
+    public double currentLim = 40;
+    public double curCurrentFromIntake;
     public boolean currentIsOk;
     //Calibrations
     Calibration intakeHatchMotorSpeedCal;
     Calibration ejectHatchMotorSpeedCal;
     Calibration intakeCargoMotorSpeedCal;
     Calibration ejectCargoMotorSpeedCal;
+
+    Calibration lowerWristSwitchCal;
+    Calibration upperWristSwitchCal;
 
     private static GrabbyThing singularInstance = null;
 
@@ -58,7 +67,9 @@ public class GrabbyThing {
         return singularInstance;
     }
 
+
     private GrabbyThing() {
+        myArm = Arm.getInstance();
         milesLeft = new VictorSPX(RobotConstants.INTAKE_LEFT_MOTOR_PWM_PORT);
         zoeIsRight = new VictorSPX(RobotConstants.INTAKE_LEFT_MOTOR_PWM_PORT);
         wristStabilization = new Solenoid(RobotConstants.WRIST_STABILIZATION_CYL);
@@ -68,6 +79,9 @@ public class GrabbyThing {
         ejectHatchMotorSpeedCal = new Calibration("Eject Motor Speed % of Max", 0.5);
         intakeCargoMotorSpeedCal = new Calibration("Intake Motor Speed % of Max", 0.5);
         ejectCargoMotorSpeedCal = new Calibration("Eject Motor Speed % of Max", 0.5);
+
+        lowerWristSwitchCal = new Calibration("When Do We Bend Wrist Lower", -10);
+        upperWristSwitchCal = new Calibration("When Do We Bend Wrist Upper",100);
     }
 
     public enum GamePiece {
@@ -125,8 +139,19 @@ public class GrabbyThing {
 
         public int toInt() {
             return this.value;
-        }
+        }    
     }
+    //Set Variables
+
+
+    //Setting motors and solenoid Pos
+    public void hatchGrip() {
+        grabberPos.set(false);
+    }   
+    public void cargoGrip() {
+        grabberPos.set(true);
+    }
+
     public void ejectCargo() {
         milesLeft.set(ControlMode.PercentOutput, ejectCargoMotorSpeedCal.get());
         zoeIsRight.set(ControlMode.PercentOutput, -1*ejectCargoMotorSpeedCal.get());
@@ -143,18 +168,37 @@ public class GrabbyThing {
         milesLeft.set(ControlMode.PercentOutput, intakeHatchMotorSpeedCal.get());
         zoeIsRight.set(ControlMode.PercentOutput, -1*intakeHatchMotorSpeedCal.get());
     }
+    public void switchZone() {
+        
+    }
+    public void wristAlign() {
+        curArmPos = myArm.getActualArmHeight();
+        if(curArmPos < lowerWristSwitchCal.get() || curArmPos > upperWristSwitchCal.get()) {
+
+        }
+    }
+    
+    
     
 
     public void update(){
         //Main update loop
         nextState = curState;
-
+            
+        if(curCurrentFromIntake > currentLim) {
+            currentIsOk = false;
+        }
+        else {
+            currentIsOk = true;
+        }
         //Step 0 - save previous state
         prevState = curState;
-
+        
+        
         switch(curState) {
+            //Can switch States and is ready to grab a game piece
             case HatchReady:
-                grabberPos.set(false);
+                hatchGrip();
                     if(intakeRequested) {
                         nextState = GrabbyStateMachine.HatchIntake;
                     } else if(switchGamePiece) {
@@ -162,8 +206,9 @@ public class GrabbyThing {
                         switchGamePiece = false;
                     }
             break;
+
             case CargoReady:
-                grabberPos.set(true);
+                cargoGrip();
                     if(intakeRequested) {
                         nextState = GrabbyStateMachine.CargoIntake;
                     } else if(switchGamePiece) {
@@ -172,17 +217,20 @@ public class GrabbyThing {
                     }
             break;
 
+            //Is currently holding a game piece
             case HatchHold:
                 if(ejectRequested) {
                 nextState = GrabbyStateMachine.HatchShoot;
                 }
             break;
+
             case CargoHold:
             if(ejectRequested){
                 nextState = GrabbyStateMachine.CargoShoot;
             } 
             break;
 
+            //Shooting a Game Piece
             case HatchShoot:
                 if(ejectRequested) {
                     ejectHatch();
@@ -194,7 +242,7 @@ public class GrabbyThing {
                 }
             break;
 
-
+            //Intaking a Game Piece 
             case HatchIntake:
                 if(intakeRequested && currentIsOk){
                     intakeHatch();
