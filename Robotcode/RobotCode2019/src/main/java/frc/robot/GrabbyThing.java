@@ -10,7 +10,7 @@ package frc.robot;
 import frc.lib.Calibration.*;
 import frc.lib.DataServer.Signal;
 import frc.robot.RobotConstants;
-
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Solenoid;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -21,10 +21,11 @@ import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
 public class GrabbyThing {
 
-    VictorSPX leftIntakeMotor;
-    VictorSPX rightIntakeMotor;
+    VictorSPX milesLeft;
+    VictorSPX zoeIsRight;
     Solenoid wristStabilization;
     Solenoid grabberPos;
+    DigitalInput ballGrabbed;
 
     //Driver Inputs
     public boolean intakeRequested;
@@ -58,8 +59,8 @@ public class GrabbyThing {
     }
 
     private GrabbyThing() {
-        leftIntakeMotor = new VictorSPX(RobotConstants.INTAKE_LEFT_MOTOR_PWM_PORT);
-        rightIntakeMotor = new VictorSPX(RobotConstants.INTAKE_LEFT_MOTOR_PWM_PORT);
+        milesLeft = new VictorSPX(RobotConstants.INTAKE_LEFT_MOTOR_PWM_PORT);
+        zoeIsRight = new VictorSPX(RobotConstants.INTAKE_LEFT_MOTOR_PWM_PORT);
         wristStabilization = new Solenoid(RobotConstants.WRIST_STABILIZATION_CYL);
         grabberPos = new Solenoid(RobotConstants.GRIPPER_POS_CYL);
 
@@ -126,9 +127,24 @@ public class GrabbyThing {
             return this.value;
         }
     }
+    public void ejectCargo() {
+        milesLeft.set(ControlMode.PercentOutput, ejectCargoMotorSpeedCal.get());
+        zoeIsRight.set(ControlMode.PercentOutput, -1*ejectCargoMotorSpeedCal.get());
+    }
+    public void ejectHatch() {
+        milesLeft.set(ControlMode.PercentOutput, ejectHatchMotorSpeedCal.get());
+        zoeIsRight.set(ControlMode.PercentOutput, -1*ejectHatchMotorSpeedCal.get());
+    }
+    public void intakeCargo() {
+        milesLeft.set(ControlMode.PercentOutput, intakeHatchMotorSpeedCal.get());
+        zoeIsRight.set(ControlMode.PercentOutput, -1*intakeHatchMotorSpeedCal.get());
+    }
+    public void intakeHatch() {
+        milesLeft.set(ControlMode.PercentOutput, intakeHatchMotorSpeedCal.get());
+        zoeIsRight.set(ControlMode.PercentOutput, -1*intakeHatchMotorSpeedCal.get());
+    }
     
-    
-    
+
     public void update(){
         //Main update loop
         nextState = curState;
@@ -155,28 +171,63 @@ public class GrabbyThing {
                         switchGamePiece = false;
                     }
             break;
+
             case HatchHold:
+                if(ejectRequested) {
+                nextState = GrabbyStateMachine.HatchShoot;
+                }
             break;
-            case CargoHold: 
+            case CargoHold:
+            if(ejectRequested){
+                nextState = GrabbyStateMachine.CargoShoot;
+            } 
             break;
+
             case HatchShoot:
+                if(ejectRequested) {
+                    ejectHatch();
+                }
             break; 
             case CargoShoot:
+                if(ejectRequested) {
+                    ejectCargo();
+                }
             break;
+
+
             case HatchIntake:
                 if(intakeRequested && currentIsOk){
-                    leftIntakeMotor.set(ControlMode.PercentOutput, intakeHatchMotorSpeedCal.get());
-                    rightIntakeMotor.set(ControlMode.PercentOutput, -1*intakeHatchMotorSpeedCal.get());
+                    intakeHatch();
+                    
+                }
+                else {
+                    nextState = GrabbyStateMachine.HatchHold;
                 }
             break;
             case CargoIntake:
                 if(intakeRequested && currentIsOk){
-                    leftIntakeMotor.set(ControlMode.PercentOutput, intakeCargoMotorSpeedCal.get());
-                    rightIntakeMotor.set(ControlMode.PercentOutput, -1*intakeCargoMotorSpeedCal.get());
+                    intakeCargo();
+                } else if(ballGrabbed.get()) {
+                    nextState = GrabbyStateMachine.CargoHold;
                 }
             break;
         } 
       
+    }
+    public boolean getIsBallInIntake() {
+        return ballGrabbed.get();
+    }
+    public boolean getIntakeRequested() {
+        return intakeRequested;
+    }
+    public boolean getEjectRequested() {
+        return ejectRequested;
+    }
+    public boolean getCurGripperPos() {
+        return grabberPos.get();
+    }
+    public boolean getCurWristPos() {
+        return grabberPos.get();
     }
 }
 
