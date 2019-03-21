@@ -43,6 +43,8 @@ public class DriverController {
     boolean autoAlignHatchPickupReq;
     boolean autoAlignMidPlaceReq;
     boolean autoAlignLowPlaceReq;
+    
+    boolean extendCylReq = false;
 
     /* Behavior/performance calibrations */
     Calibration slowMoveFwdRevScaleFactor;
@@ -173,6 +175,11 @@ public class DriverController {
         } else {
             LockDrivetrainAngle = false;
         }
+        if(xb.getXButton()) {
+            extendCylReq = true;
+        }else{
+            extendCylReq = false;
+        }
 
         //If we want to drive backward, invert the command.
         driverFwdRevCmd *= invertFactor;
@@ -231,6 +238,9 @@ public class DriverController {
 
     public boolean getAutoMove() {
         return this.autoMove;
+    }
+    public boolean getHatchHolderPos() {
+        return this.extendCylReq;
     }
 
 }

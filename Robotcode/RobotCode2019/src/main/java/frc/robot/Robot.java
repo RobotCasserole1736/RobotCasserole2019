@@ -48,6 +48,7 @@ import frc.robot.OperatorController.ArmPosCmd;
 import frc.robot.auto.AutoSeqDistToTgtEst;
 import frc.robot.auto.Autonomous;
 import edu.wpi.first.wpilibj.Solenoid;
+import frc.robot.GrabbyThing;
 
 
 
@@ -83,6 +84,7 @@ public class Robot extends TimedRobot {
     LEDController ledController;
     PneumaticsControl pneumaticsControl;
     Arm arm;
+    GrabbyThing grabbyThing;
     Drivetrain drivetrain;
     Climber climber;
     FrontUltrasonic frontUltrasonic;
@@ -164,6 +166,7 @@ public class Robot extends TimedRobot {
             pneumaticsControl = PneumaticsControl.getInstance();
             jevois = JeVoisInterface.getInstance();
             arm = Arm.getInstance();
+            grabbyThing =GrabbyThing.getInstance();
             drivetrain = Drivetrain.getInstance();
             climber = Climber.getInstance();
 
@@ -300,23 +303,32 @@ public class Robot extends TimedRobot {
             updateTimer.reset();
 
             //Map operator command directly to arm position
-            if(autonomous.getAutoSeqActive()) {
-                if(operatorController.getArmManualPosCmd() != 0.0) {
-                    arm.setManualMovementCmd(operatorController.getArmManualPosCmd());
-                } else if(operatorController.getArmPosReq() == ArmPosCmd.IntakeCargo) {
-                    arm.setPositionCmd(ArmPos.IntakeCargo);
-                } else if (operatorController.getArmPosReq() == ArmPosCmd.IntakeCargo) {
-                    arm.setPositionCmd(ArmPos.IntakeHatch);
-                } else if (operatorController.getArmPosReq() == ArmPosCmd.Lower) {
-                    arm.setPositionCmd(ArmPos.LowerCargo); //Let's just say we only do cargo now.
-                } else if (operatorController.getArmPosReq() == ArmPosCmd.Middle) {
-                    arm.setPositionCmd(ArmPos.MiddleCargo);
-                } else if (operatorController.getArmPosReq() == ArmPosCmd.Top) {
-                    arm.setPositionCmd(ArmPos.TopCargo);
-                }
+            if(operatorController.getArmPosReq() == ArmPosCmd.IntakeCargo) {
+                arm.setPositionCmd(ArmPos.IntakeCargo);
+            } else if (operatorController.getArmPosReq() == ArmPosCmd.IntakeCargo) {
+                arm.setPositionCmd(ArmPos.IntakeHatch);
+            } else if (operatorController.getArmPosReq() == ArmPosCmd.Lower) {
+                arm.setPositionCmd(ArmPos.LowerCargo); //Let's just say we only do cargo now.
+            } else if (operatorController.getArmPosReq() == ArmPosCmd.Middle) {
+                arm.setPositionCmd(ArmPos.MiddleCargo);
+            } else if (operatorController.getArmPosReq() == ArmPosCmd.Top) {
+                arm.setPositionCmd(ArmPos.TopCargo);
+            //TODO might have broken manual override. fix at some point.
+            } else if(operatorController.getArmManualPosCmd() != 0.0) {
+                arm.setManualMovementCmd(operatorController.getArmManualPosCmd());
+            } else if(operatorController.getArmManualPosCmd() == 0.0 && operatorController.getPrevArmManualPosCmd()!=0){
+                arm.setPositionCmd(ArmPos.Disabled);
+            }
+
+
+            if(driverController.extendCylReq) {
+                backSole.set(true);
+            }
+                else {backSole.set(false);
             }
 
             arm.update();
+            grabbyThing.update();
             armTimer.addSample(sampleTimeMs, updateTimer.get() * 1000);
             updateTimer.reset();
 
@@ -443,11 +455,11 @@ public class Robot extends TimedRobot {
         /*Update CrashTracker*/
         CrashTracker.logAutoPeriodic();
         matchPeriodicCommon();
-        boolean cylRetracted = backSole.get();
-        if(!cylRetracted) {
-            backSole.set(true);
-            cylRetracted = true;
-            }
+        //boolean cylRetracted = backSole.get();
+        //if(!cylRetracted) {
+        //    backSole.set(true);
+        //    cylRetracted = true;
+        //    }
         
 
     }
@@ -587,6 +599,7 @@ public class Robot extends TimedRobot {
         CasseroleDriverView.setBoolean("Auto Failed", autonomous.getAutoFailedLEDState());
         CasseroleDriverView.setBoolean("Fault Detected", sensorCheck.isFaultDetected());
         CasseroleDriverView.setBoolean("Arm At Limit", arm.getBottomOfMotion() || arm.getTopOfMotion());
+        CasseroleDriverView.setStringBox("Fault", sensorCheck.getFaultDescription());
     }
         //I am a bad engineer
     final String startAngleOptions[] = {"48.0", "49.0", "50.0", "51.0", "52.0", "53.0", "54.0", "55.0", "56.0", "57.0", "58.0", "59.0", "60.0", "61.0", "62.0", "63.0", "64.0" };
@@ -610,6 +623,7 @@ public class Robot extends TimedRobot {
         CasseroleDriverView.newBoolean("Fault Detected", "red");
         CasseroleDriverView.newBoolean("Ball In Intake", "green");
         CasseroleDriverView.newStringBox("Op Mode");
+        CasseroleDriverView.newStringBox("Fault");
     }
 
     @Override

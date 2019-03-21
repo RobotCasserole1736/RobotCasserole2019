@@ -28,8 +28,7 @@ public class Climber {
 
     
 
-    Solenoid climbLeftCyl;
-    Solenoid climbRightCyl;
+    Solenoid climbCyl;
 
     /* Singleton stuff */
     private static Climber climbCtrl = null;
@@ -41,8 +40,7 @@ public class Climber {
 
     private Climber(){
         
-        climbLeftCyl= new Solenoid(RobotConstants.CLIMBER_LEFT_CYL);
-        climbRightCyl = new Solenoid(RobotConstants.CLIMBER_RIGHT_CYL);
+        climbCyl= new Solenoid(RobotConstants.CLIMBER_CYL);
 
     }
 
@@ -52,11 +50,9 @@ public class Climber {
         boolean release = OperatorController.getInstance().getClimberReleace();
         
                 if(enable && release){
-                    climbLeftCyl.set(true);
-                    climbRightCyl.set(true);
+                    climbCyl.set(true);
                 } else {
-                    climbLeftCyl.set(false);
-                    climbRightCyl.set(false);
+                    climbCyl.set(false);
                 }
            
         }

@@ -77,14 +77,14 @@ public class RobotConstants {
     // Solenoid Ports
     /////////////////////////////////////////////////////////////////////////////////////
 
-    public static final int WRIST_STABILIZATION_CYL = 0;
-    public static final int GRIPPER_POS_CYL = 1;
+    public static final int WRIST_STABILIZATION_CYL = 1;
+    public static final int GRIPPER_POS_CYL_A = 2;
+    public static final int GRIPPER_POS_CYL_B = 3;
     
     
 
     public static final int CLIMBER_EJECT_SOL = 4;
-    public static final int CLIMBER_LEFT_CYL = 6;
-    public static final int CLIMBER_RIGHT_CYL = 7;
+    public static final int CLIMBER_CYL = 7;
     
 
 

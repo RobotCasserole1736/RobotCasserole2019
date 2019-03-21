@@ -10,6 +10,7 @@ package frc.robot;
 import frc.lib.Calibration.*;
 import frc.robot.RobotConstants;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
@@ -23,7 +24,7 @@ public class GrabbyThing {
     VictorSPX milesLeft;
     VictorSPX zoeIsRight;
     Solenoid wristStabilization;
-    Solenoid grabberPos;
+    DoubleSolenoid grabberPos;
     DigitalInput ballGrabbed;
     PowerDistributionPanel pdp;
 
@@ -34,6 +35,7 @@ public class GrabbyThing {
     public boolean ejectRequested;
     public boolean hatchModeDesired;
     public boolean ballModeDesired;
+    boolean wristInvert=false;
     //State Variables
     public boolean cargoModeActive;
     public boolean switchGamePiece;
@@ -75,11 +77,11 @@ public class GrabbyThing {
 
     private GrabbyThing() {
         myArm = Arm.getInstance();
-        milesLeft = new VictorSPX(RobotConstants.INTAKE_LEFT_MOTOR_PWM_PORT);
-        zoeIsRight = new VictorSPX(RobotConstants.INTAKE_RIGHT_MOTOR_PWM_PORT);
+        milesLeft = new VictorSPX(RobotConstants.LEFT_INTAKE_CANID);
+        zoeIsRight = new VictorSPX(RobotConstants.RIGHT_INTAKE_CANID);
 
         wristStabilization = new Solenoid(RobotConstants.WRIST_STABILIZATION_CYL);
-        grabberPos = new Solenoid(RobotConstants.GRIPPER_POS_CYL);
+        grabberPos = new DoubleSolenoid(RobotConstants.GRIPPER_POS_CYL_A, RobotConstants.GRIPPER_POS_CYL_B);
         cargoModeActive = false;
         wristIsAngled = false;
         stallProtectionActive = false;
@@ -88,11 +90,11 @@ public class GrabbyThing {
         pdp = new PowerDistributionPanel();
 
         intakeHatchMotorSpeedCal = new Calibration("Intake Motor Speed % of Max", 1.0);
-        ejectHatchMotorSpeedCal = new Calibration("Eject Motor Speed % of Max", 1.0);
+        ejectHatchMotorSpeedCal = new Calibration("Eject Motor Speed % of Max", .75);
         intakeCargoMotorSpeedCal = new Calibration("Intake Motor Speed % of Max", 1.0);
         ejectCargoMotorSpeedCal = new Calibration("Eject Motor Speed % of Max", 1.0);
 
-        lowerWristLowPosSwitchCal = new Calibration("When Do We Bend Wrist Lower - Low Pos", -20);
+        lowerWristLowPosSwitchCal = new Calibration("When Do We Bend Wrist Lower - Low Pos", -20);//to -5
         upperWristLowPosSwitchCal = new Calibration("When Do We Bend Wrist Upper - Low Pos", -5);
         lowerWristHighPosSwitchCal = new Calibration("When Do We Bend Wrist Lower - High Pos", 80);
         upperWristHighPosSwitchCal = new Calibration("When Do We Bend Wrist Upper - High Pos", 140); //Obviously more than the arm travels, but it doesn't matter
@@ -165,40 +167,40 @@ public class GrabbyThing {
     //Setting motors and solenoid Pos
     public void hatchGripMode() {
         if(cargoModeActive) {
-            grabberPos.set(false);
+            grabberPos.set(DoubleSolenoid.Value.kReverse);
             cargoModeActive = false;
         }
     }   
     public void cargoGripMode() {
         if(!cargoModeActive) {
-            grabberPos.set(true);
+            grabberPos.set(DoubleSolenoid.Value.kForward);
             cargoModeActive = true;
         }
     }
 
     public void ejectCargo() {
-        milesLeft.set(ControlMode.PercentOutput, ejectCargoMotorSpeedCal.get());
-        zoeIsRight.set(ControlMode.PercentOutput, -1*ejectCargoMotorSpeedCal.get());
+        milesLeft.set(ControlMode.PercentOutput, -1*ejectCargoMotorSpeedCal.get());
+        zoeIsRight.set(ControlMode.PercentOutput, ejectCargoMotorSpeedCal.get());
     }
     public void ejectHatch() {
-        milesLeft.set(ControlMode.PercentOutput, -1*ejectHatchMotorSpeedCal.get());
-        zoeIsRight.set(ControlMode.PercentOutput, ejectHatchMotorSpeedCal.get());
+        milesLeft.set(ControlMode.PercentOutput, ejectHatchMotorSpeedCal.get());
+        zoeIsRight.set(ControlMode.PercentOutput, -1*ejectHatchMotorSpeedCal.get());
     }
     public void intakeCargo() {
-        milesLeft.set(ControlMode.PercentOutput, -1*intakeHatchMotorSpeedCal.get());
-        zoeIsRight.set(ControlMode.PercentOutput, intakeHatchMotorSpeedCal.get());
-    }
-    public void intakeHatch() {
         milesLeft.set(ControlMode.PercentOutput, intakeHatchMotorSpeedCal.get());
         zoeIsRight.set(ControlMode.PercentOutput, -1*intakeHatchMotorSpeedCal.get());
     }
-    public void holdCargo() {
-        milesLeft.set(ControlMode.PercentOutput, -0.25*intakeHatchMotorSpeedCal.get());
-        zoeIsRight.set(ControlMode.PercentOutput, 0.25*intakeHatchMotorSpeedCal.get());
+    public void intakeHatch() {
+        milesLeft.set(ControlMode.PercentOutput, -1*intakeHatchMotorSpeedCal.get());
+        zoeIsRight.set(ControlMode.PercentOutput, intakeHatchMotorSpeedCal.get());
     }
-    public void holdHatch() {
+    public void holdCargo() {
         milesLeft.set(ControlMode.PercentOutput, 0.25*intakeHatchMotorSpeedCal.get());
         zoeIsRight.set(ControlMode.PercentOutput, -0.25*intakeHatchMotorSpeedCal.get());
+    }
+    public void holdHatch() {
+        milesLeft.set(ControlMode.PercentOutput, -0.25*intakeHatchMotorSpeedCal.get());
+        zoeIsRight.set(ControlMode.PercentOutput, 0.25*intakeHatchMotorSpeedCal.get());
     }
 
     public void switchZone() {
@@ -210,13 +212,21 @@ public class GrabbyThing {
            (curArmPos > lowerWristHighPosSwitchCal.get() && curArmPos < upperWristHighPosSwitchCal.get())) {
             if(!wristIsAngled) {
                 wristIsAngled = true;
-                wristStabilization.set(wristIsAngled);
+                if(wristInvert==true){
+                    wristStabilization.set(!wristIsAngled);
+                }else{
+                    wristStabilization.set(wristIsAngled);
+                }
             }
         }
         else {
             if(wristIsAngled) {
                 wristIsAngled = false;
-                wristStabilization.set(false);
+                if(wristInvert==true){
+                    wristStabilization.set(!wristIsAngled);
+                }else{
+                    wristStabilization.set(wristIsAngled);
+                }
             }
         }
     }
@@ -251,10 +261,12 @@ public class GrabbyThing {
         wristAlign();
 
         // TODO: Update these next few lines with button inputs from operator instead of just false!!
-        intakeRequested = false;
-        ejectRequested = false;
-        hatchModeDesired = false;
-        ballModeDesired = false;
+        intakeRequested = OperatorController.getInstance().getGampieceGrabRequest();
+        ejectRequested = OperatorController.getInstance().getGampieceReleaseRequest();
+        hatchModeDesired = OperatorController.getInstance().getHatchMode();
+        ballModeDesired = OperatorController.getInstance().getCargoMode();;
+
+        wristInvert= OperatorController.getInstance().getInverted();
 
         if(hatchModeDesired) {
             hatchGripMode();
@@ -388,12 +400,16 @@ public class GrabbyThing {
     public boolean getEjectRequested() {
         return ejectRequested;
     }
-    public boolean getCurGripperPos() {
-        return grabberPos.get();
-    }
-    public boolean getCurWristPos() {
-        return grabberPos.get();
-    }
+
+    
+    
+
+    // public boolean getCurGripperPos() {
+    //     return grabberPos.get();
+    // }
+    // public boolean getCurWristPos() {
+    //     return grabberPos.get();
+    // }
 
     public boolean getStallProtectionActive() {
         return stallProtectionActive;

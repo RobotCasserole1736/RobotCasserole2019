@@ -35,8 +35,12 @@ public class OperatorController {
     boolean grabReq;
     ArmPosCmd armPosReq;
     double  armManualPosCmd;
+    double armPrevManualPosCmd;
     boolean climberReleaseReq;
     boolean climberRelEnable;
+    boolean hatchMode=false;
+    boolean cargoMode=false;
+    boolean wristinverted=false;
 
     /* Behavior/feel calibrations */
     Calibration joystickExpScaleFactor;
@@ -84,7 +88,7 @@ public class OperatorController {
         xb = new XboxController(RobotConstants.OPERATOR_CONTROLLER_USB_IDX);
 
         joystickExpScaleFactor = new Calibration("Operator Joystick Exponential Scale Factor", 3.0 , 1, 10);
-        joystickDeadzone = new Calibration("Operator Joystick Deadzone ", 0.15, 0, 1);
+        joystickDeadzone = new Calibration("Operator Joystick Deadzone ", 0.25, 0, 1);
         joystickUpperDeadzone = new Calibration("Upper Deadzone of Joystick",0.95);
 
         gamepieceGrabReqSig = new Signal("Operator Gamepiece Grab Command", "bool");
@@ -118,6 +122,18 @@ public class OperatorController {
         } else if(xb.getAButton()) {
             armPosReq = ArmPosCmd.IntakeCargo;
         }
+            
+        if(xb.getXButton()){
+            cargoMode=true;
+            hatchMode=false;
+        }else if(xb.getBButton()){
+            cargoMode=false;
+            hatchMode=true;
+        }
+        if(xb.getStickButtonPressed(Hand.kLeft)){
+            wristinverted=!wristinverted;
+        }
+
 
 
         //UpperDeadzone Logic
@@ -127,7 +143,10 @@ public class OperatorController {
         }else if(aCmd<-1){
             aCmd=-1;
         }
-
+        
+        armPrevManualPosCmd=armManualPosCmd;
+        
+         
         armManualPosCmd = Utils.ctrlAxisScale(-1*aCmd, joystickExpScaleFactor.get(), joystickDeadzone.get());
 
         climberRelEnable = xb.getBackButton();
@@ -147,6 +166,14 @@ public class OperatorController {
         return this.grabReq;
     }
 
+    public boolean getHatchMode(){
+        return this.hatchMode;
+    }
+
+    public boolean getCargoMode(){
+        return this.cargoMode;
+    }
+
     public boolean getGampieceReleaseRequest() {
         return this.releaseReq;
     }
@@ -154,9 +181,17 @@ public class OperatorController {
     public ArmPosCmd getArmPosReq() {
         return this.armPosReq;
     }
+    
+    public boolean getInverted(){
+        return this.wristinverted;
+    }
 
     public double getArmManualPosCmd() {
         return this.armManualPosCmd;
+    }
+
+    public double getPrevArmManualPosCmd(){
+        return this.armPrevManualPosCmd;
     }
 
     public boolean getClimberEnable() {
@@ -166,4 +201,5 @@ public class OperatorController {
     public boolean getClimberReleace() {
         return this.climberReleaseReq;
     }
+
 }

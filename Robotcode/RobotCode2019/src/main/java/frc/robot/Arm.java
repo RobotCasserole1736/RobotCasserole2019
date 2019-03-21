@@ -187,9 +187,9 @@ public class Arm {
 
 
         /////Calibration Things\\\\\
-        topCargoHeightCal    = new Calibration("Arm Cargo Level Pos Top Deg", 110);
-        midCargoHeightCal    = new Calibration("Arm Cargo Level Pos Mid Deg", 18);
-        lowCargoHeightCal    = new Calibration("Arm Cargo Level Pos Bottom Deg", -22);
+        topCargoHeightCal    = new Calibration("Arm Cargo Level Pos Top Deg", 100);
+        midCargoHeightCal    = new Calibration("Arm Cargo Level Pos Mid Deg", 9);
+        lowCargoHeightCal    = new Calibration("Arm Cargo Level Pos Bottom Deg", -30);
         intakeCargoHeightCal = new Calibration("Arm Cargo Level Pos Intake Deg", -58);
 
         topHatchHeightCal    = new Calibration("Arm Hatch Level Pos Top Deg", 110);
@@ -368,26 +368,28 @@ public class Arm {
             sampleSensors();
             
             //Update the position based on what the driver requested
-            if(curManMoveCmd != 0 || posIn == ArmPos.Disabled) {
-                armPID.setReference(INVERT_FACTOR*curManMoveCmd*6.0, ControlType.kVoltage);
-                desAngle = curArmAngle;
-            } else {
-                double desRotation = desAngle;
+            armPID.setReference(INVERT_FACTOR*curManMoveCmd*6.0, ControlType.kVoltage);
+            desAngle = curArmAngle;
+            // if(curManMoveCmd != 0 || posIn == ArmPos.Disabled) {
+            //     armPID.setReference(INVERT_FACTOR*curManMoveCmd*6.0, ControlType.kVoltage);
+            //     desAngle = curArmAngle;
+            // } else {
+            //     double desRotation = desAngle;
                 
-                //double gravComp = gravComp(); //Turns out, controls wise I guess we don't need this
+            //     //double gravComp = gravComp(); //Turns out, controls wise I guess we don't need this
 
-                //testDesVel = desRotation; //TEMP - test only
-                //armPID.setReference(INVERT_FACTOR*testDesVel, ControlType.kVelocity, 0, 0); //TEMP - test only
-                //armPID.setReference(INVERT_FACTOR*desRotation, ControlType.kPosition, 0, gravComp); // AKA not-smart motion
+            //     //testDesVel = desRotation; //TEMP - test only
+            //     //armPID.setReference(INVERT_FACTOR*testDesVel, ControlType.kVelocity, 0, 0); //TEMP - test only
+            //     //armPID.setReference(INVERT_FACTOR*desRotation, ControlType.kPosition, 0, gravComp); // AKA not-smart motion
 
-                //we've gotten reports that this is an expensive funciton call to make, so don't make it unless you need to?
-                if(desRotation != desRotationPrev || forceUpdate || true){ //Turns out we can't do this without new firmware
-                    armPID.setReference(INVERT_FACTOR*desRotation, ControlType.kSmartMotion, 0, 0);
-                    forceUpdate = false;
-                }
+            //     //we've gotten reports that this is an expensive funciton call to make, so don't make it unless you need to?
+            //     if(desRotation != desRotationPrev || forceUpdate || true){ //Turns out we can't do this without new firmware
+            //         armPID.setReference(INVERT_FACTOR*desRotation, ControlType.kSmartMotion, 0, 0);
+            //         forceUpdate = false;
+            //     }
                 
-                desRotationPrev = desRotation;
-            }
+            //     desRotationPrev = desRotation;
+            // }
 
         }
 
