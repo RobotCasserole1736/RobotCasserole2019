@@ -1,7 +1,5 @@
 package frc.robot;
 
-import java.util.Set;
-
 import edu.wpi.first.wpilibj.PWM;
 
 /*

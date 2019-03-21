@@ -76,11 +76,7 @@ public class RobotConstants {
     /////////////////////////////////////////////////////////////////////////////////////
     // Solenoid Ports
     /////////////////////////////////////////////////////////////////////////////////////
-    /*public static final int PEZ_SOLENOID_PORT_CARGO = 0;
-    public static final int PEZ_SOLENOID_PORT_HATCH = 1;
-    public static final int PEZ_DUB_SOLENOID_MID_STOPPER = 2;
-    public static final int PEZ_DUB_SOLENOID_MID_STOPPER2 = 3;
-*/
+
     public static final int WRIST_STABILIZATION_CYL = 0;
     public static final int GRIPPER_POS_CYL = 1;
     

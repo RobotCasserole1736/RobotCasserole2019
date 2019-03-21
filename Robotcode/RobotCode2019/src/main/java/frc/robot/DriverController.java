@@ -40,9 +40,9 @@ public class DriverController {
     boolean compressorEnableReq;
     boolean LockDrivetrainAngle = false;
     boolean autoMove;
-    boolean autoAlignHighReq;
-    boolean autoAlignMidReq;
-    boolean autoAlignLowReq;
+    boolean autoAlignHatchPickupReq;
+    boolean autoAlignMidPlaceReq;
+    boolean autoAlignLowPlaceReq;
 
     /* Behavior/performance calibrations */
     Calibration slowMoveFwdRevScaleFactor;
@@ -60,9 +60,9 @@ public class DriverController {
     Signal gyroAngleLockReqSig;
     Signal compressorDisableReqSig;
     Signal compressorEnableReqSig;
-    Signal autoAlignHighReqSig;
-    Signal autoAlignMidReqSig;
-    Signal autoAlignLowReqSig;
+    Signal autoAlignHatchPickupReqSig;
+    Signal autoAlignMidPlaceReqSig;
+    Signal autoAlignLowPlaceReqSig;
 
     /* Singleton stuff */
     private static DriverController drvCtrl = null;
@@ -87,28 +87,28 @@ public class DriverController {
         gyroAngleLockReqSig = new Signal("Driver Gyro Angle Lock Command", "bool");
         compressorDisableReqSig = new Signal("Driver Compressor Disable Command", "bool");
         compressorEnableReqSig = new Signal("Driver Compressor Enable Command", "bool");
-        autoAlignHighReqSig = new Signal("Operator Auto Align Top Command", "bool");
-        autoAlignMidReqSig = new Signal("Operator Auto Align Mid Command", "bool");
-        autoAlignLowReqSig = new Signal("Operator Auto Align Low Command", "bool");
+        autoAlignHatchPickupReqSig = new Signal("Driver Auto Align Hatch Pickup Command", "bool");
+        autoAlignMidPlaceReqSig = new Signal("Driver Auto Align Mid Place Command", "bool");
+        autoAlignLowPlaceReqSig = new Signal("Driver Auto Align Low Place Command", "bool");
     }
 
     /** Main update function */
     public void update(){
 
-        autoAlignHighReq = false;
-        autoAlignMidReq = false;
-        autoAlignLowReq = false;
+        autoAlignHatchPickupReq = false;
+        autoAlignMidPlaceReq = false;
+        autoAlignLowPlaceReq = false;
         autoMove = false;
 
         int povAngle = xb.getPOV(0);
         if(povAngle == 0){
-            autoAlignHighReq = true;
+            autoAlignHatchPickupReq = true;
             autoMove = true;
         } else if(povAngle == 90 || povAngle == 270) {
-            autoAlignMidReq = true;
+            autoAlignMidPlaceReq = true;
             autoMove = true;
         } else if(povAngle == 180) {
-            autoAlignLowReq = true;
+            autoAlignLowPlaceReq = true;
             autoMove = true;
         }
 
@@ -186,9 +186,9 @@ public class DriverController {
         gyroAngleLockReqSig.addSample(sample_time_ms, gyroAngleLockReq);
         compressorDisableReqSig.addSample(sample_time_ms, compressorDisableReq);
         compressorEnableReqSig.addSample(sample_time_ms, compressorEnableReq);
-        autoAlignHighReqSig.addSample(sample_time_ms,autoAlignHighReq);
-        autoAlignMidReqSig.addSample(sample_time_ms,autoAlignMidReq);
-        autoAlignLowReqSig.addSample(sample_time_ms,autoAlignLowReq);
+        autoAlignHatchPickupReqSig.addSample(sample_time_ms,autoAlignHatchPickupReq);
+        autoAlignMidPlaceReqSig.addSample(sample_time_ms,autoAlignMidPlaceReq);
+        autoAlignLowPlaceReqSig.addSample(sample_time_ms,autoAlignLowPlaceReq);
     }
 
     /* Getters for getting driver commands */
@@ -217,16 +217,16 @@ public class DriverController {
         return this.LockDrivetrainAngle;
     }
 
-    public boolean getAutoAlignHighReq() {
-        return this.autoAlignHighReq;
+    public boolean getAutoAlignHatchPickupReq() {
+        return this.autoAlignHatchPickupReq;
     }
 
-    public boolean getAutoAlignMidReq() {
-        return this.autoAlignMidReq;
+    public boolean getAutoAlignMidPlaceReq() {
+        return this.autoAlignMidPlaceReq;
     }
 
-    public boolean getAutoAlignLowReq() {
-        return this.autoAlignLowReq;
+    public boolean getAutoAlignLowPlaceReq() {
+        return this.autoAlignLowPlaceReq;
     }
 
     public boolean getAutoMove() {

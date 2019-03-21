@@ -29,8 +29,6 @@ public class JeVoisInterface {
     private static final String PACKET_START_CHAR = "{";
     private static final String PACKET_END_CHAR = "}";
     private static final String PACKET_DILEM_CHAR = ",";
-    private static final int PACKET_NUM_EXPECTED_FIELDS = 3;
-    
     
     // Confgure the camera to stream debug images or not.
     private boolean broadcastUSBCam = false;
@@ -461,6 +459,7 @@ public class JeVoisInterface {
      * Will return the whole thing once the first "OK" or "ERR" is seen in the stream.
      * Returns null if no string read back yet.
      */
+    @SuppressWarnings("unused")
     private String getCmdResponseNonBlock() {
         String retval =  null;
         if (visionPort != null){
@@ -640,7 +639,7 @@ public class JeVoisInterface {
         final int NUM_EXPECTED_TOKENS = 10;
 
         //Split string into many substrings, presuming those strings are separated by commas
-        String[] tokens = pkt.split(",");
+        String[] tokens = pkt.split(PACKET_DILEM_CHAR);
 
         //Check there were enough substrings found
         if(tokens.length < NUM_EXPECTED_TOKENS){
