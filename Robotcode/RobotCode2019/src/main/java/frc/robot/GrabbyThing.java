@@ -8,17 +8,15 @@
 package frc.robot;
 
 import frc.lib.Calibration.*;
-import frc.lib.DataServer.Signal;
 import frc.robot.RobotConstants;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Arm;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
-//import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
 public class GrabbyThing {
 
@@ -27,6 +25,7 @@ public class GrabbyThing {
     Solenoid wristStabilization;
     Solenoid grabberPos;
     DigitalInput ballGrabbed;
+    PowerDistributionPanel pdp;
 
     Arm myArm;
 
@@ -36,8 +35,12 @@ public class GrabbyThing {
     public boolean hatchModeDesired;
     public boolean ballModeDesired;
     //State Variables
+    public boolean cargoModeActive;
     public boolean switchGamePiece;
     public double curArmPos;
+    public boolean wristIsAngled;
+    public boolean stallProtectionActive;
+    public Timer stallTimer;
     
     GamePiece gamePiece_in; 
     GripperPos gripperPos_in;
@@ -49,15 +52,17 @@ public class GrabbyThing {
 
     public double currentLim = 40;
     public double curCurrentFromIntake;
-    public boolean currentIsOk;
     //Calibrations
     Calibration intakeHatchMotorSpeedCal;
     Calibration ejectHatchMotorSpeedCal;
     Calibration intakeCargoMotorSpeedCal;
     Calibration ejectCargoMotorSpeedCal;
 
-    Calibration lowerWristSwitchCal;
-    Calibration upperWristSwitchCal;
+    Calibration lowerWristLowPosSwitchCal;
+    Calibration upperWristLowPosSwitchCal;
+    Calibration lowerWristHighPosSwitchCal;
+    Calibration upperWristHighPosSwitchCal;
+    Calibration maxStallTimeSeconds;
 
     private static GrabbyThing singularInstance = null;
 
@@ -71,17 +76,30 @@ public class GrabbyThing {
     private GrabbyThing() {
         myArm = Arm.getInstance();
         milesLeft = new VictorSPX(RobotConstants.INTAKE_LEFT_MOTOR_PWM_PORT);
-        zoeIsRight = new VictorSPX(RobotConstants.INTAKE_LEFT_MOTOR_PWM_PORT);
+        zoeIsRight = new VictorSPX(RobotConstants.INTAKE_RIGHT_MOTOR_PWM_PORT);
+
         wristStabilization = new Solenoid(RobotConstants.WRIST_STABILIZATION_CYL);
         grabberPos = new Solenoid(RobotConstants.GRIPPER_POS_CYL);
+        cargoModeActive = false;
+        wristIsAngled = false;
+        stallProtectionActive = false;
+        stallTimer = new Timer();
+        stallTimer.reset();
+        pdp = new PowerDistributionPanel();
 
-        intakeHatchMotorSpeedCal = new Calibration("Intake Motor Speed % of Max", 0.5);
-        ejectHatchMotorSpeedCal = new Calibration("Eject Motor Speed % of Max", 0.5);
-        intakeCargoMotorSpeedCal = new Calibration("Intake Motor Speed % of Max", 0.5);
-        ejectCargoMotorSpeedCal = new Calibration("Eject Motor Speed % of Max", 0.5);
+        intakeHatchMotorSpeedCal = new Calibration("Intake Motor Speed % of Max", 1.0);
+        ejectHatchMotorSpeedCal = new Calibration("Eject Motor Speed % of Max", 1.0);
+        intakeCargoMotorSpeedCal = new Calibration("Intake Motor Speed % of Max", 1.0);
+        ejectCargoMotorSpeedCal = new Calibration("Eject Motor Speed % of Max", 1.0);
 
-        lowerWristSwitchCal = new Calibration("When Do We Bend Wrist Lower", -10);
-        upperWristSwitchCal = new Calibration("When Do We Bend Wrist Upper",100);
+        lowerWristLowPosSwitchCal = new Calibration("When Do We Bend Wrist Lower - Low Pos", -20);
+        upperWristLowPosSwitchCal = new Calibration("When Do We Bend Wrist Upper - Low Pos", -5);
+        lowerWristHighPosSwitchCal = new Calibration("When Do We Bend Wrist Lower - High Pos", 80);
+        upperWristHighPosSwitchCal = new Calibration("When Do We Bend Wrist Upper - High Pos", 140); //Obviously more than the arm travels, but it doesn't matter
+        maxStallTimeSeconds = new Calibration("Max stall time seconds", 2);
+
+        hatchGripMode();
+        wristAlign();
     }
 
     public enum GamePiece {
@@ -122,7 +140,7 @@ public class GrabbyThing {
         }
     }
     public enum GrabbyStateMachine {
-        
+
         HatchReady(0),
         CargoReady(1),
         HatchHold(2),
@@ -145,11 +163,17 @@ public class GrabbyThing {
 
 
     //Setting motors and solenoid Pos
-    public void hatchGrip() {
-        grabberPos.set(false);
+    public void hatchGripMode() {
+        if(cargoModeActive) {
+            grabberPos.set(false);
+            cargoModeActive = false;
+        }
     }   
-    public void cargoGrip() {
-        grabberPos.set(true);
+    public void cargoGripMode() {
+        if(!cargoModeActive) {
+            grabberPos.set(true);
+            cargoModeActive = true;
+        }
     }
 
     public void ejectCargo() {
@@ -157,24 +181,64 @@ public class GrabbyThing {
         zoeIsRight.set(ControlMode.PercentOutput, -1*ejectCargoMotorSpeedCal.get());
     }
     public void ejectHatch() {
-        milesLeft.set(ControlMode.PercentOutput, ejectHatchMotorSpeedCal.get());
-        zoeIsRight.set(ControlMode.PercentOutput, -1*ejectHatchMotorSpeedCal.get());
+        milesLeft.set(ControlMode.PercentOutput, -1*ejectHatchMotorSpeedCal.get());
+        zoeIsRight.set(ControlMode.PercentOutput, ejectHatchMotorSpeedCal.get());
     }
     public void intakeCargo() {
-        milesLeft.set(ControlMode.PercentOutput, intakeHatchMotorSpeedCal.get());
-        zoeIsRight.set(ControlMode.PercentOutput, -1*intakeHatchMotorSpeedCal.get());
+        milesLeft.set(ControlMode.PercentOutput, -1*intakeHatchMotorSpeedCal.get());
+        zoeIsRight.set(ControlMode.PercentOutput, intakeHatchMotorSpeedCal.get());
     }
     public void intakeHatch() {
         milesLeft.set(ControlMode.PercentOutput, intakeHatchMotorSpeedCal.get());
         zoeIsRight.set(ControlMode.PercentOutput, -1*intakeHatchMotorSpeedCal.get());
     }
+    public void holdCargo() {
+        milesLeft.set(ControlMode.PercentOutput, -0.25*intakeHatchMotorSpeedCal.get());
+        zoeIsRight.set(ControlMode.PercentOutput, 0.25*intakeHatchMotorSpeedCal.get());
+    }
+    public void holdHatch() {
+        milesLeft.set(ControlMode.PercentOutput, 0.25*intakeHatchMotorSpeedCal.get());
+        zoeIsRight.set(ControlMode.PercentOutput, -0.25*intakeHatchMotorSpeedCal.get());
+    }
+
     public void switchZone() {
         
     }
     public void wristAlign() {
         curArmPos = myArm.getActualArmHeight();
-        if(curArmPos < lowerWristSwitchCal.get() || curArmPos > upperWristSwitchCal.get()) {
+        if((curArmPos > lowerWristLowPosSwitchCal.get() && curArmPos < upperWristLowPosSwitchCal.get()) ||
+           (curArmPos > lowerWristHighPosSwitchCal.get() && curArmPos < upperWristHighPosSwitchCal.get())) {
+            if(!wristIsAngled) {
+                wristIsAngled = true;
+                wristStabilization.set(wristIsAngled);
+            }
+        }
+        else {
+            if(wristIsAngled) {
+                wristIsAngled = false;
+                wristStabilization.set(false);
+            }
+        }
+    }
 
+    public void checkStallProtection()
+    {
+        double leftCurrent = pdp.getCurrent(RobotConstants.INTAKE_LEFT_MOTOR_PDP_PORT);
+        double rightCurrent = pdp.getCurrent(RobotConstants.INTAKE_LEFT_MOTOR_PDP_PORT);
+
+        if(leftCurrent + rightCurrent > currentLim) {
+            if(stallTimer.get() == 0) {
+                stallTimer.start();
+            }
+            if(stallTimer.get() > maxStallTimeSeconds.get()) {
+                stallProtectionActive = true;
+                stallTimer.stop();
+                stallTimer.reset();
+            }
+        }
+        else {
+            stallTimer.stop();
+            stallTimer.reset();
         }
     }
     
@@ -182,84 +246,137 @@ public class GrabbyThing {
     
 
     public void update(){
-        //Main update loop
-        nextState = curState;
             
-        if(curCurrentFromIntake > currentLim) {
-            currentIsOk = false;
+        checkStallProtection();
+        wristAlign();
+
+        // TODO: Update these next few lines with button inputs from operator instead of just false!!
+        intakeRequested = false;
+        ejectRequested = false;
+        hatchModeDesired = false;
+        ballModeDesired = false;
+
+        if(hatchModeDesired) {
+            hatchGripMode();
         }
         else {
-            currentIsOk = true;
+            cargoGripMode();
         }
-        //Step 0 - save previous state
-        prevState = curState;
-        
-        
-        switch(curState) {
-            //Can switch States and is ready to grab a game piece
-            case HatchReady:
-                hatchGrip();
-                    if(intakeRequested) {
-                        nextState = GrabbyStateMachine.HatchIntake;
-                    } else if(switchGamePiece) {
-                        nextState = GrabbyStateMachine.CargoReady;
-                        switchGamePiece = false;
-                    }
-            break;
 
-            case CargoReady:
-                cargoGrip();
-                    if(intakeRequested) {
-                        nextState = GrabbyStateMachine.CargoIntake;
-                    } else if(switchGamePiece) {
-                        nextState = GrabbyStateMachine.HatchReady;
-                        switchGamePiece = false;
-                    }
-            break;
-
-            //Is currently holding a game piece
-            case HatchHold:
-                if(ejectRequested) {
-                nextState = GrabbyStateMachine.HatchShoot;
-                }
-            break;
-
-            case CargoHold:
-            if(ejectRequested){
-                nextState = GrabbyStateMachine.CargoShoot;
-            } 
-            break;
-
-            //Shooting a Game Piece
-            case HatchShoot:
-                if(ejectRequested) {
-                    ejectHatch();
-                }
-            break; 
-            case CargoShoot:
-                if(ejectRequested) {
-                    ejectCargo();
-                }
-            break;
-
-            //Intaking a Game Piece 
-            case HatchIntake:
-                if(intakeRequested && currentIsOk){
-                    intakeHatch();
-                    
+        if(cargoModeActive) {
+            if(intakeRequested) {
+                if(stallProtectionActive) {
+                    holdCargo();
                 }
                 else {
-                    nextState = GrabbyStateMachine.HatchHold;
-                }
-            break;
-            case CargoIntake:
-                if(intakeRequested && currentIsOk){
                     intakeCargo();
-                } else if(ballGrabbed.get()) {
-                    nextState = GrabbyStateMachine.CargoHold;
                 }
-            break;
-        } 
+            }
+            else if(ejectRequested) {
+                stallProtectionActive = false;
+                ejectCargo();
+            }
+            else {
+                stallProtectionActive = false;
+                holdCargo();
+            }
+        }
+        else {
+            if(intakeRequested) {
+                if(stallProtectionActive) {
+                    holdHatch();
+                }
+                else {
+                    intakeHatch();
+                }
+            }
+            else if(ejectRequested) {
+                stallProtectionActive = false;
+                ejectHatch();
+            }
+            else {
+                stallProtectionActive = false;
+                holdHatch();
+            }
+        }
+
+        //Main update loop
+        //nextState = curState;
+
+        //Step 0 - save previous state
+        //prevState = curState;
+        
+        
+        // switch(curState) {
+        //     //Can switch States and is ready to grab a game piece
+        //     case HatchReady:
+        //         hatchGripMode();
+        //             if(intakeRequested) {
+        //                 nextState = GrabbyStateMachine.HatchIntake;
+        //             } else if(switchGamePiece) {
+        //                 nextState = GrabbyStateMachine.CargoReady;
+        //                 switchGamePiece = false;
+        //             }
+        //     break;
+
+        //     case CargoReady:
+        //         cargoGripMode();
+        //             if(intakeRequested) {
+        //                 nextState = GrabbyStateMachine.CargoIntake;
+        //             } else if(switchGamePiece) {
+        //                 nextState = GrabbyStateMachine.HatchReady;
+        //                 switchGamePiece = false;
+        //             }
+        //     break;
+
+        //     //Is currently holding a game piece
+        //     case HatchHold:
+        //         if(ejectRequested) {
+        //         nextState = GrabbyStateMachine.HatchShoot;
+        //         }
+        //         else {
+        //             holdHatch();
+        //         }
+        //     break;
+
+        //     case CargoHold:
+        //     if(ejectRequested){
+        //         nextState = GrabbyStateMachine.CargoShoot;
+        //     }
+        //     else {
+        //         holdCargo();
+        //     }
+        //     break;
+
+        //     //Shooting a Game Piece
+        //     case HatchShoot:
+        //         if(ejectRequested) {
+        //             ejectHatch();
+        //         }
+        //     break; 
+        //     case CargoShoot:
+        //         if(ejectRequested) {
+        //             ejectCargo();
+        //         }
+        //     break;
+
+        //     //Intaking a Game Piece 
+        //     case HatchIntake:
+        //         if(intakeRequested && !stallProtectionActive){
+        //             intakeHatch();
+        //         }
+        //         else {
+        //             nextState = GrabbyStateMachine.HatchHold;
+        //         }
+        //     break;
+        //     case CargoIntake:
+        //         if(intakeRequested && !stallProtectionActive && !ballGrabbed.get()){
+        //             intakeCargo();
+        //         } else {
+        //             nextState = GrabbyStateMachine.CargoHold;
+        //         }
+        //     break;
+        // } 
       
     }
     public boolean getIsBallInIntake() {
@@ -276,6 +393,10 @@ public class GrabbyThing {
     }
     public boolean getCurWristPos() {
         return grabberPos.get();
+    }
+
+    public boolean getStallProtectionActive() {
+        return stallProtectionActive;
     }
 }
 
