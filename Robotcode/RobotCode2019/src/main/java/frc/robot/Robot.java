@@ -47,6 +47,7 @@ import frc.robot.LEDController.LEDPatterns;
 import frc.robot.OperatorController.ArmPosCmd;
 import frc.robot.auto.AutoSeqDistToTgtEst;
 import frc.robot.auto.Autonomous;
+import edu.wpi.first.wpilibj.Solenoid;
 
 
 
@@ -86,6 +87,10 @@ public class Robot extends TimedRobot {
     Climber climber;
     FrontUltrasonic frontUltrasonic;
     BackUltrasonic backUltrasonic;
+
+    //FakeClimber
+    Solenoid backSole;
+        
 
     //Top level telemetry signals
     Signal rioDSSampLoadSig;
@@ -161,6 +166,10 @@ public class Robot extends TimedRobot {
             arm = Arm.getInstance();
             drivetrain = Drivetrain.getInstance();
             climber = Climber.getInstance();
+
+            //Fake Climber
+            backSole = new Solenoid(RobotConstants.CLIMBER_EJECT_SOL);
+        
 
             onboardAccel = new BuiltInAccelerometer();
             frontUltrasonic = FrontUltrasonic.getInstance();
@@ -428,11 +437,19 @@ public class Robot extends TimedRobot {
     /**
      * This function is called periodically during sandstorm only.
      */
+    //Arm to 54/12
     @Override
     public void autonomousPeriodic() {
         /*Update CrashTracker*/
         CrashTracker.logAutoPeriodic();
         matchPeriodicCommon();
+        boolean cylRetracted = backSole.get();
+        if(!cylRetracted) {
+            backSole.set(true);
+            cylRetracted = true;
+            }
+        
+
     }
 
 

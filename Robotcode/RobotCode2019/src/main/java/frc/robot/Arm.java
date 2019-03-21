@@ -120,7 +120,7 @@ public class Arm {
 
     /////////Physical Mechanism Constants\\\\\\\\\\
     final double MAX_MANUAL_DEG_PER_SEC = 25.0;
-    final double SPROCKET_GEAR_RATIO = 5.0/1.0; //*17.0/12.0 we removed it so heres the value
+    final double SPROCKET_GEAR_RATIO = 54/12;//Was 5:1 //*17.0/12.0 we removed it so heres the value
     final double GEARBOX_GEAR_RATIO = 30.0/1.0;
 
     final double INVERT_FACTOR = -1.0;
