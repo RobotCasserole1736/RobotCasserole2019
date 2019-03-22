@@ -324,7 +324,8 @@ public class Robot extends TimedRobot {
             if(driverController.extendCylReq) {
                 backSole.set(true);
             }
-                else {backSole.set(false);
+            else {
+                backSole.set(false);
             }
 
             arm.update();

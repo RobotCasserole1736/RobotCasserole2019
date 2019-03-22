@@ -368,7 +368,8 @@ public class Arm {
             sampleSensors();
             
             //Update the position based on what the driver requested
-            armPID.setReference(INVERT_FACTOR*curManMoveCmd*6.0, ControlType.kVoltage);
+            double gravComp = gravComp();
+            armPID.setReference(INVERT_FACTOR*curManMoveCmd*6.0 + gravComp, ControlType.kVoltage);
             desAngle = curArmAngle;
             // if(curManMoveCmd != 0 || posIn == ArmPos.Disabled) {
             //     armPID.setReference(INVERT_FACTOR*curManMoveCmd*6.0, ControlType.kVoltage);
