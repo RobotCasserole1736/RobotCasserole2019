@@ -126,6 +126,8 @@ public class Robot extends TimedRobot {
     boolean prevGamepieceReleaseReq = false;
     int gamepieceReleasePatternCounter = 0;
 
+    boolean hatchMode = false;
+
     //FMS timer debugging stuff
     Timer updateTimer;
     Signal armTimer;
@@ -303,16 +305,34 @@ public class Robot extends TimedRobot {
             updateTimer.reset();
 
             //Map operator command directly to arm position
+            hatchMode = grabbyThing.getMode();
             if(operatorController.getArmPosReq() == ArmPosCmd.IntakeCargo) {
                 arm.setPositionCmd(ArmPos.IntakeCargo);
-            } else if (operatorController.getArmPosReq() == ArmPosCmd.IntakeCargo) {
+            } else if (operatorController.getArmPosReq() == ArmPosCmd.IntakeHatch) {
                 arm.setPositionCmd(ArmPos.IntakeHatch);
+                //TODO hatchmode is invverted because we couldn't find where it was wrong.
             } else if (operatorController.getArmPosReq() == ArmPosCmd.Lower) {
-                arm.setPositionCmd(ArmPos.LowerCargo); //Let's just say we only do cargo now.
+                if(hatchMode) {
+                    arm.setPositionCmd(ArmPos.LowerHatch);
+                }else {
+                    arm.setPositionCmd(ArmPos.LowerCargo);
+                }
+                 //Let's just say we only do cargo now.
             } else if (operatorController.getArmPosReq() == ArmPosCmd.Middle) {
-                arm.setPositionCmd(ArmPos.MiddleCargo);
+                if(hatchMode) {
+                    arm.setPositionCmd(ArmPos.MiddleHatch);
+                }else {
+                    arm.setPositionCmd(ArmPos.MiddleCargo);
+                }
+                
             } else if (operatorController.getArmPosReq() == ArmPosCmd.Top) {
-                arm.setPositionCmd(ArmPos.TopCargo);
+                if(hatchMode) {
+                    arm.setPositionCmd(ArmPos.TopHatch);
+                }else{
+                    arm.setPositionCmd(ArmPos.TopCargo);
+                }
+                
+            
             //TODO might have broken manual override. fix at some point.
             } else if(operatorController.getArmManualPosCmd() != 0.0) {
                 arm.setManualMovementCmd(operatorController.getArmManualPosCmd());

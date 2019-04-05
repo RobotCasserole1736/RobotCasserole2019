@@ -130,7 +130,7 @@ public class OperatorController {
             cargoMode=false;
             hatchMode=true;
         }
-        if(xb.getStickButtonPressed(Hand.kLeft)){
+        if(xb.getStickButtonPressed(Hand.kRight)){
             wristinverted=!wristinverted;
         }
 

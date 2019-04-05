@@ -330,6 +330,13 @@ public class JeVoisInterface {
         sendCmd("latch");
     }
 
+    public void recordTarget(){
+        sendCmd("record");
+    }
+    public void stopRecordTarget(){
+        sendCmd("stoprecord");
+    }
+
     //=======================================================
     //== END PUBLIC INTERFACE
     //=======================================================

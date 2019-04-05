@@ -125,6 +125,10 @@ public class DriverController {
             compressorDisableReq = false;
         }
 
+        if(xb.getYButton()){
+            JeVoisInterface.getInstance().recordTarget();
+        }
+
         //UpperDeadzone logic
         double frCmd=xb.getY(Hand.kLeft)/joystickUpperDeadzone.get();
         double rCmd=xb.getX(Hand.kRight)/joystickUpperDeadzone.get();

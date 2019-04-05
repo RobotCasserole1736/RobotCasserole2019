@@ -66,6 +66,8 @@ public class Arm {
     double   uncompensatedMotorCmd = 0;
     boolean  brakeIn = false;
     boolean  isZeroed = false;
+    boolean hatchMode=false;
+    boolean cargoMode=false;
 
     //Arm State Heights\\
     Calibration topCargoHeightCal;
@@ -187,21 +189,21 @@ public class Arm {
 
 
         /////Calibration Things\\\\\
-        topCargoHeightCal    = new Calibration("Arm Cargo Level Pos Top Deg", 100);
-        midCargoHeightCal    = new Calibration("Arm Cargo Level Pos Mid Deg", 9);
-        lowCargoHeightCal    = new Calibration("Arm Cargo Level Pos Bottom Deg", -30);
-        intakeCargoHeightCal = new Calibration("Arm Cargo Level Pos Intake Deg", -58);
+        topCargoHeightCal    = new Calibration("Arm Cargo Level Pos Top Deg", 140);
+        midCargoHeightCal    = new Calibration("Arm Cargo Level Pos Mid Deg", 45);
+        lowCargoHeightCal    = new Calibration("Arm Cargo Level Pos Bottom Deg", -7);
+        intakeCargoHeightCal = new Calibration("Arm Cargo Level Pos Intake Deg", -21);
 
         topHatchHeightCal    = new Calibration("Arm Hatch Level Pos Top Deg", 110);
-        midHatchHeightCal    = new Calibration("Arm Hatch Level Pos Mid Deg", 5);
-        lowHatchHeightCal    = new Calibration("Arm Hatch Level Pos Bottom Deg", -42);
-        intakeHatchHeightCal = new Calibration("Arm Hatch Level Pos Intake Deg", -42);
+        midHatchHeightCal    = new Calibration("Arm Hatch Level Pos Mid Deg", 20);
+        lowHatchHeightCal    = new Calibration("Arm Hatch Level Pos Bottom Deg", -28);
+        intakeHatchHeightCal = new Calibration("Arm Hatch Level Pos Intake Deg", -21);
 
         intakeDangerZoneUpperHeight = new Calibration("Arm Intake Danger Zone Upper Pos Deg", -45);
         
         gravOffsetHorz    = new Calibration("Arm Required Voltage at Horz V", 0.5);
         bottomLimitSwitchDegreeCal = new Calibration("Arm Limit Switch Angle Bottom Deg", -45);
-        topLimitSwitchDegreeCal    = new Calibration("Arm Limit Switch Angle Top Deg", 129.0);
+        topLimitSwitchDegreeCal    = new Calibration("Arm Limit Switch Angle Top Deg", 165.0);
 
         //Calibration for the Arm Trapezoidal\\
         kMaxOutputCal = new Calibration("Arm SmartMotion Max Power", 1);
@@ -369,13 +371,14 @@ public class Arm {
             
             //Update the position based on what the driver requested
             double gravComp = gravComp();
-            armPID.setReference(INVERT_FACTOR*curManMoveCmd*6.0 + gravComp, ControlType.kVoltage);
+            armPID.setReference(INVERT_FACTOR*curManMoveCmd*6.0 + INVERT_FACTOR*gravComp, ControlType.kVoltage);
             desAngle = curArmAngle;
-            // if(curManMoveCmd != 0 || posIn == ArmPos.Disabled) {
-            //     armPID.setReference(INVERT_FACTOR*curManMoveCmd*6.0, ControlType.kVoltage);
-            //     desAngle = curArmAngle;
-            // } else {
-            //     double desRotation = desAngle;
+
+            //  if(curManMoveCmd != 0 || posIn == ArmPos.Disabled) {
+            //      armPID.setReference(INVERT_FACTOR*curManMoveCmd*6.0, ControlType.kVoltage);
+            //      desAngle = curArmAngle;
+            //  } else {
+            //      double desRotation = desAngle;
                 
             //     //double gravComp = gravComp(); //Turns out, controls wise I guess we don't need this
 
@@ -384,13 +387,13 @@ public class Arm {
             //     //armPID.setReference(INVERT_FACTOR*desRotation, ControlType.kPosition, 0, gravComp); // AKA not-smart motion
 
             //     //we've gotten reports that this is an expensive funciton call to make, so don't make it unless you need to?
-            //     if(desRotation != desRotationPrev || forceUpdate || true){ //Turns out we can't do this without new firmware
-            //         armPID.setReference(INVERT_FACTOR*desRotation, ControlType.kSmartMotion, 0, 0);
-            //         forceUpdate = false;
-            //     }
+            //      if(desRotation != desRotationPrev || forceUpdate || true){ //Turns out we can't do this without new firmware
+            //          armPID.setReference(INVERT_FACTOR*desRotation, ControlType.kSmartMotion, 0, 0);
+            //          forceUpdate = false;
+            //      }
                 
-            //     desRotationPrev = desRotation;
-            // }
+            //      desRotationPrev = desRotation;
+            //  }
 
         }
 
@@ -514,6 +517,8 @@ public class Arm {
     public boolean atDesiredHeight() {
         return(atDesAngle); 
     }
+
+    
     
     public double gravComp() {
         double cosAngle = Math.cos(Math.toRadians(curArmAngle));
@@ -538,4 +543,5 @@ public class Arm {
     {
         sadey.setIdleMode(IdleMode.kBrake);
     }
+    
 }

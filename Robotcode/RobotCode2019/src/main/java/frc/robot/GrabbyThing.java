@@ -42,15 +42,16 @@ public class GrabbyThing {
     public double curArmPos;
     public boolean wristIsAngled;
     public boolean stallProtectionActive;
+    boolean hatchMode=false;
     public Timer stallTimer;
     
-    GamePiece gamePiece_in; 
+    //GamePiece gamePiece_in; 
     GripperPos gripperPos_in;
     WristPos wristPos_in;
-    GrabbyStateMachine grabbyState_in;
-    GrabbyStateMachine curState;
-    GrabbyStateMachine prevState;
-    GrabbyStateMachine nextState;
+    // GrabbyStateMachine grabbyState_in;
+    // GrabbyStateMachine curState;
+    // GrabbyStateMachine prevState;
+    // GrabbyStateMachine nextState;
 
     public double currentLim = 40;
     public double curCurrentFromIntake;
@@ -94,8 +95,8 @@ public class GrabbyThing {
         intakeCargoMotorSpeedCal = new Calibration("Intake Motor Speed % of Max", 1.0);
         ejectCargoMotorSpeedCal = new Calibration("Eject Motor Speed % of Max", 1.0);
 
-        lowerWristLowPosSwitchCal = new Calibration("When Do We Bend Wrist Lower - Low Pos", -20);//to -5
-        upperWristLowPosSwitchCal = new Calibration("When Do We Bend Wrist Upper - Low Pos", -5);
+        lowerWristLowPosSwitchCal = new Calibration("When Do We Bend Wrist Lower - Low Pos", -35);//Dallas wants this to Be around This only//to -5
+        upperWristLowPosSwitchCal = new Calibration("When Do We Bend Wrist Upper - Low Pos", -20);
         lowerWristHighPosSwitchCal = new Calibration("When Do We Bend Wrist Lower - High Pos", 80);
         upperWristHighPosSwitchCal = new Calibration("When Do We Bend Wrist Upper - High Pos", 140); //Obviously more than the arm travels, but it doesn't matter
         maxStallTimeSeconds = new Calibration("Max stall time seconds", 2);
@@ -104,19 +105,19 @@ public class GrabbyThing {
         wristAlign();
     }
 
-    public enum GamePiece {
-        Cargo(0), Hatch(1);
+    // public enum GamePiece {
+    //     Cargo(0), Hatch(1);
 
-        public final int value;
+    //     public final int value;
 
-        private GamePiece(int value) {
-            this.value = value;
-        }
+    //     private GamePiece(int value) {
+    //         this.value = value;
+    //     }
                 
-        public int toInt(){
-            return this.value;
-        }
-    }
+    //     public int toInt(){
+    //         return this.value;
+    //     }
+    // }
 
     public enum GripperPos {
         Expanded(0), Shrunken(1);
@@ -141,26 +142,26 @@ public class GrabbyThing {
             return this.value;
         }
     }
-    public enum GrabbyStateMachine {
+    // public enum GrabbyStateMachine {
 
-        HatchReady(0),
-        CargoReady(1),
-        HatchHold(2),
-        CargoHold(3), 
-        HatchShoot(4), 
-        CargoShoot(5),
-        HatchIntake(6),
-        CargoIntake(7); 
+    //     HatchReady(0),
+    //     CargoReady(1),
+    //     HatchHold(2),
+    //     CargoHold(3), 
+    //     HatchShoot(4), 
+    //     CargoShoot(5),
+    //     HatchIntake(6),
+    //     CargoIntake(7); 
     
-        public final int value;
-        private GrabbyStateMachine(int value) {
-            this.value = value;
-        }
+    //     public final int value;
+    //     private GrabbyStateMachine(int value) {
+    //         this.value = value;
+    //     }
 
-        public int toInt() {
-            return this.value;
-        }    
-    }
+    //     public int toInt() {
+    //         return this.value;
+    //     }    
+    // }
     //Set Variables
 
 
@@ -207,29 +208,39 @@ public class GrabbyThing {
         
     }
     public void wristAlign() {
-        curArmPos = myArm.getActualArmHeight();
-        if((curArmPos > lowerWristLowPosSwitchCal.get() && curArmPos < upperWristLowPosSwitchCal.get()) ||
-           (curArmPos > lowerWristHighPosSwitchCal.get() && curArmPos < upperWristHighPosSwitchCal.get())) {
-            if(!wristIsAngled) {
-                wristIsAngled = true;
-                if(wristInvert==true){
+        // if(wristInvert){
+        //     wristStabilization.set(true);
+        // }else{
+        //     wristStabilization.set(false);
+        // }
+        
+        // lowerWristLowPosSwitchCal = new Calibration("When Do We Bend Wrist Lower - Low Pos", -20);//to -5
+        // upperWristLowPosSwitchCal = new Calibration("When Do We Bend Wrist Upper - Low Pos", -5);
+        // lowerWristHighPosSwitchCal = new Calibration("When Do We Bend Wrist Lower - High Pos", 80);
+        // upperWristHighPosSwitchCal = new Calibration("When Do We Bend Wrist Upper - High Pos", 140); //Obviously more than the arm travels, but it doesn't matter
+
+         curArmPos = myArm.getActualArmHeight();
+
+         //Old Code curArmPos > lowerWristLowPosSwitchCal.get() && curArmPos < upperWristLowPosSwitchCal.get()
+            //curArmPos > lowerWristHighPosSwitchCal.get() && curArmPos < upperWristHighPosSwitchCal.get())
+        //  if(curArmPos > lowerWristLowPosSwitchCal.get() && curArmPos < upperWristLowPosSwitchCal.get() ) 
+        //  //||(curArmPos >) 
+        //  {
+        //     if(!wristIsAngled) {
+        //         wristIsAngled = true;
+        //         }
+        //     }
+        //     else{
+        //         if(wristIsAngled) {
+        //             wristIsAngled = false;
+        //         }
+        //     }
+            if(wristInvert){
                     wristStabilization.set(!wristIsAngled);
                 }else{
                     wristStabilization.set(wristIsAngled);
                 }
-            }
         }
-        else {
-            if(wristIsAngled) {
-                wristIsAngled = false;
-                if(wristInvert==true){
-                    wristStabilization.set(!wristIsAngled);
-                }else{
-                    wristStabilization.set(wristIsAngled);
-                }
-            }
-        }
-    }
 
     public void checkStallProtection()
     {
@@ -264,7 +275,13 @@ public class GrabbyThing {
         intakeRequested = OperatorController.getInstance().getGampieceGrabRequest();
         ejectRequested = OperatorController.getInstance().getGampieceReleaseRequest();
         hatchModeDesired = OperatorController.getInstance().getHatchMode();
-        ballModeDesired = OperatorController.getInstance().getCargoMode();;
+        if(hatchModeDesired){
+            hatchMode=true;
+        }
+        ballModeDesired = OperatorController.getInstance().getCargoMode();
+        if(ballModeDesired){
+            hatchMode=false;
+        }
 
         wristInvert= OperatorController.getInstance().getInverted();
 
@@ -399,6 +416,9 @@ public class GrabbyThing {
     }
     public boolean getEjectRequested() {
         return ejectRequested;
+    }
+    public boolean getMode() {
+        return hatchMode;
     }
 
     

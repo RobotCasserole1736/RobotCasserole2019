@@ -6,6 +6,7 @@ import frc.lib.AutoSequencer.AutoSequencer;
 import frc.lib.SignalMath.MathyCircularBuffer;
 import frc.lib.Util.CrashTracker;
 import frc.robot.DriverController;
+import frc.robot.GrabbyThing;
 import frc.robot.JeVoisInterface;
 import frc.robot.LoopTiming;
 import frc.robot.Arm.OpMode;
@@ -214,7 +215,6 @@ public class Autonomous {
             case armMoveAndPathPlan:
 
                 if(autoMoveRequested == true){
-
                     //Add the arm movement
                     if(DriverController.getInstance().getAutoAlignLowPlaceReq()){
                         seq.addEvent(new MoveArmLowPos(OpMode.Cargo));
@@ -246,9 +246,9 @@ public class Autonomous {
 
                 //Add the gripper release motion
                 if(DriverController.getInstance().getAutoAlignHatchPickupReq()){
-                    //TODO - make and add gripper pickup auto sequencer events
+                    GrabbyThing.getInstance().intakeHatch();
                 } else {
-                    //TODO - make gripper release auto sequencer events
+                    GrabbyThing.getInstance().ejectHatch();
                 }
 
                 //Add the back-up motion
