@@ -37,23 +37,30 @@ class RectangleDetector:
         #A bunch of standard init stuff
         self.prevlcent=0
         self.prevrcent=0
-        self.resetcounter=0
+        self.latchcounter=0
         self.frame=0
         self.framerate_fps=0
         self.CPULoad_pct=0
         self.CPUTemp_C=0
         self.pipelineDelay_us=0
+        self.vidcount=16
+        self.pauseval=False
+        self.pausecheck=False
+        self.captureval=False
+        self.savedcounter=0
+        self.capturecounter=0
         self.pattern = re.compile('([0-9]*\.[0-9]+|[0-9]+) fps, ([0-9]*\.[0-9]+|[0-9]+)% CPU, ([0-9]*\.[0-9]+|[0-9]+)C,')
         
         #The real world points of our object with (0,0,0) being the centerpoint of the line connecting the two closest points
-        self.ObjPoints=np.array([(0,-5.3771,-5.3248),
-                            (0,-7.3134,-4.8241),
-                            (0,-5.9363,0.5008),
-                            (0,-4.0000,0),
-                            (0,5.3771,-5.3248),
-                            (0,4.0000,0),
-                            (0,5.9363,0.5008),
-                            (0,7.3134,-4.8241)
+        self.ObjPoints=np.array([
+                            #(-5.3771,-5.3248,0),
+                            (-7.3134,-4.8241,0),
+                            (-5.9363,0.5008,0),
+                            (-4.0000,0,0),
+                            #(5.3771,-5.3248,0),
+                            (4.0000,0,0),
+                            (5.9363,0.5008,0),
+                            (7.3134,-4.8241,0)
                             ],dtype=np.float64)
                             
     # ###################################################################################################
@@ -102,7 +109,7 @@ class RectangleDetector:
         self.DataTracker()
             
         #sends output over serial
-        jevois.sendSerial("{{{},{},{},{},{},{},{},{},{},{}}}\n".format(self.ret,self.yaw,self.xval,self.yval,self.resetcounter,self.framerate_fps,self.CPULoad_pct,self.CPUTemp_C,self.pipelineDelay_us,self.angle))
+        jevois.sendSerial("{{{},{},{},{},{},{},{},{},{},{}}}\n".format(self.ret,self.angle2,self.xval,self.yval,self.latchcounter,self.framerate_fps,self.CPULoad_pct,self.CPUTemp_C,self.pipelineDelay_us,self.angle1))
             
         #Sends maskoutput if streaming
         if (self.streamCheck):
@@ -142,6 +149,34 @@ class RectangleDetector:
         #Starts timer
         self.pipeline_start_time = datetime.now()
         
+        #Debugging Options
+        
+        #Pauses video feed
+        if(self.pauseval):
+            if(self.pausecheck):
+                name="/jevois/data/pause.png"
+                cv2.imwrite(name,self.inimg)
+                self.pausecheck=False
+            self.inimg=cv2.imread("/jevois/data/pause.png")
+        
+        #Records one frame a second
+        if (self.vidcount<=15):
+            self.vidcount=self.vidcount-1
+        if(self.vidcount<=0):
+            self.vidcount=15
+            name="/jevois/data/frame{}.png".format(self.savedcounter)
+            cv2.imwrite(name,self.inimg)
+            self.savedcounter+=1
+            
+        #captures a single frame
+        if(self.captureval):
+            name="/jevois/data/capture{}.png".format(self.capturecounter)
+            cv2.imwrite(name,self.inimg)
+            self.capturecounter+=1
+            self.captureval=False
+        
+        
+        
         #Counts our frames
         self.frame+=1
         
@@ -154,6 +189,8 @@ class RectangleDetector:
         hsv = cv2.cvtColor(self.inimg, cv2.COLOR_RGB2HSV)
         
         #Defines hsv values of targets
+        #lowerBrightness = np.array([70,0,150])
+        #upperBrightness = np.array([100,200,255])
         lowerBrightness = np.array([50,0,75])
         upperBrightness = np.array([100,200,255])
         
@@ -198,6 +235,8 @@ class RectangleDetector:
         potentialrtarget=[]
         potentialrrect=[]
         self.ret="F"
+        self.angle1=0
+        self.angle2=0
         self.yaw=0
         self.xval=0
         self.yval=0
@@ -214,13 +253,13 @@ class RectangleDetector:
             box = np.int0(box)
             
             #Matches Angles to Respective Targets, draws Red, Blue, and Green for left, right, and no match respectively
-            if (angle<=-55.0 and angle>=-80.0):
+            if (angle<=-55.0 and angle>=-88.0):
                 potentialltarget.append(i)
                 potentiallrect.append(rect[0])
                 if self.streamCheck:
                     cv2.drawContours(self.maskoutput,[box],0,(255,0,0),2)
                     
-            elif (angle<=-5.0 and angle>=-30.0):
+            elif (angle<=-2.0 and angle>=-35.0):
                 potentialrtarget.append(i)
                 potentialrrect.append(rect[0])
                 if self.streamCheck:
@@ -241,7 +280,7 @@ class RectangleDetector:
                     #Prepares to score pairs, calculates height difference of targets, how close they are to center, and how close to eachother
                     PairingScore=0
                     CenterHeightDistance=abs(lcent[1]-rcent[1])
-                    CenterPoint=abs((lcent[0]+rcent[0])-1280)
+                    CenterPoint=abs((lcent[0]+rcent[0])-self.w)
                     TargetDistance=abs(rcent[0]-lcent[0])
                     
                     #Checks if their was a previous value
@@ -278,22 +317,50 @@ class RectangleDetector:
             coords2d=[]
             for contour in pair:
                 cnt=contourinput[contour]
-                coords2d.append(tuple(cnt[cnt[:,:,1].argmax()][0]))
+                #coords2d.append(tuple(cnt[cnt[:,:,1].argmax()][0]))
                 coords2d.append(tuple(cnt[cnt[:,:,0].argmin()][0]))
                 coords2d.append(tuple(cnt[cnt[:,:,1].argmin()][0]))
                 coords2d.append(tuple(cnt[cnt[:,:,0].argmax()][0]))
-            ImgPoints=np.array([coords2d[0],coords2d[1],coords2d[2],coords2d[3],coords2d[4],coords2d[5],coords2d[6],coords2d[7]], dtype="double")
+                if(self.streamCheck):
+                    #cv2.circle(self.maskoutput,tuple(cnt[cnt[:,:,1].argmax()][0]),10,[255,0,0])
+                    cv2.circle(self.maskoutput,tuple(cnt[cnt[:,:,0].argmin()][0]),10,[0,255,0])
+                    cv2.circle(self.maskoutput,tuple(cnt[cnt[:,:,1].argmin()][0]),10,[0,0,255])
+                    cv2.circle(self.maskoutput,tuple(cnt[cnt[:,:,0].argmax()][0]),10,[128,128,128])
+            ImgPoints=np.array([coords2d[0],coords2d[1],coords2d[2],coords2d[3],coords2d[4],coords2d[5]], dtype="double")
             
             #Actual Pnp algorithm, takes the points we calculated along with predefined points of target
-            __, rvec, tvec = cv2.solvePnP(self.ObjPoints,ImgPoints,self.camMatrix,self.distCoeffs)
+            ____,rvec,tvec= cv2.solvePnP(self.ObjPoints,ImgPoints,self.camMatrix,self.distCoeffs)
+                
+            #Math to get us to roll pitch yaw. I don't understand it either. Ask Mr. Rodrigues.
+           
+            #othermatrix
+            rvecmat=cv2.Rodrigues(rvec)[0]
+            rvecmatinv=rvecmat.transpose()
+            pzero_world=np.array(self.multiplyMatrix(rvecmatinv,-tvec))
+            self.angle2=math.atan2(pzero_world[0][0],pzero_world[2][0])
+            
+                
             
             #Chooses the values we need for path planning
-            self.angle=(((lcoordflt[0]+rcoordflt[0])/2)-640)/20
+            self.angle=(((lcoordflt[0]+rcoordflt[0])/2)-(self.w/2))/20
+            self.angle1=((math.atan2(tvec[0], tvec[2]))*180)/math.pi
             self.ret="T"
             self.yaw=(str(rvec[2]).strip('[]'))
             self.xval=(str(tvec[2]).strip('[]'))
-            self.yval=(str(tvec[1]).strip('[]'))
-
+            self.yval=(str(tvec[0]).strip('[]'))
+            
+    @staticmethod
+    def multiplyMatrix(X,Y):
+        result = [[0],[0],[0]]
+        for i in range(len(X)):
+        # iterate through columns of Y
+            for j in range(len(Y[0])):
+                # iterate through rows of Y
+                for k in range(len(Y)):
+                    value1=X[i][k]
+                    value2=Y[k][j]
+                    result[i][j] +=value1*value2
+        return result
 
     def parseSerial(self, str):
         jevois.LINFO("parseserial received command [{}]".format(str))
@@ -302,6 +369,25 @@ class RectangleDetector:
         if str == "latch":
             self.prevlcent=0
             self.prevrcent=0
-            self.resetcounter+=1
+            self.latchcounter+=1
             return "Reset Completed"
+        if str == "record":
+            self.vidcount=0
+            return "Recording Started"
+        if str == "stoprecord":
+            self.vidcount=1000
+            return "Recording Stopped"
+        if str == "capture":
+            self.captureval=True
+            return "Capturing Next Frame"
+        if str == "pause":
+            self.pauseval=True
+            self.pausecheck=True
+            return "Video Paused"
+        if str == "resume":
+            self.pauseval=False
+            return "Video Resumed"
+        if str == "readpause":
+            self.pauseval=True
+            return "Reading Last Paused Frame"
         return "ERR Unsupported command"
