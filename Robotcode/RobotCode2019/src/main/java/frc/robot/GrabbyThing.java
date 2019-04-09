@@ -44,14 +44,6 @@ public class GrabbyThing {
     public boolean stallProtectionActive;
     boolean hatchMode=false;
     public Timer stallTimer;
-    
-    //GamePiece gamePiece_in; 
-    GripperPos gripperPos_in;
-    WristPos wristPos_in;
-    // GrabbyStateMachine grabbyState_in;
-    // GrabbyStateMachine curState;
-    // GrabbyStateMachine prevState;
-    // GrabbyStateMachine nextState;
 
     public double currentLim = 40;
     public double curCurrentFromIntake;
@@ -105,73 +97,14 @@ public class GrabbyThing {
         wristAlign();
     }
 
-    // public enum GamePiece {
-    //     Cargo(0), Hatch(1);
-
-    //     public final int value;
-
-    //     private GamePiece(int value) {
-    //         this.value = value;
-    //     }
-                
-    //     public int toInt(){
-    //         return this.value;
-    //     }
-    // }
-
-    public enum GripperPos {
-        Expanded(0), Shrunken(1);
-
-        public final int value;
-
-        private GripperPos(int value) {
-            this.value = value;
-        }
-                
-        public int toInt(){
-            return this.value;
-        }
-    }
-    public enum WristPos {
-        LowHighPlace(0), MidPlace(1);
-        public final int value;
-        private WristPos(int value) {
-            this.value = value;
-        }
-        public int toInt(){
-            return this.value;
-        }
-    }
-    // public enum GrabbyStateMachine {
-
-    //     HatchReady(0),
-    //     CargoReady(1),
-    //     HatchHold(2),
-    //     CargoHold(3), 
-    //     HatchShoot(4), 
-    //     CargoShoot(5),
-    //     HatchIntake(6),
-    //     CargoIntake(7); 
-    
-    //     public final int value;
-    //     private GrabbyStateMachine(int value) {
-    //         this.value = value;
-    //     }
-
-    //     public int toInt() {
-    //         return this.value;
-    //     }    
-    // }
-    //Set Variables
-
-
     //Setting motors and solenoid Pos
     public void hatchGripMode() {
         if(cargoModeActive) {
             grabberPos.set(DoubleSolenoid.Value.kReverse);
             cargoModeActive = false;
         }
-    }   
+    }  
+     
     public void cargoGripMode() {
         if(!cargoModeActive) {
             grabberPos.set(DoubleSolenoid.Value.kForward);
@@ -204,46 +137,16 @@ public class GrabbyThing {
         zoeIsRight.set(ControlMode.PercentOutput, 0.25*intakeHatchMotorSpeedCal.get());
     }
 
-    public void switchZone() {
-        
-    }
     public void wristAlign() {
-        // if(wristInvert){
-        //     wristStabilization.set(true);
-        // }else{
-        //     wristStabilization.set(false);
-        // }
-        
-        // lowerWristLowPosSwitchCal = new Calibration("When Do We Bend Wrist Lower - Low Pos", -20);//to -5
-        // upperWristLowPosSwitchCal = new Calibration("When Do We Bend Wrist Upper - Low Pos", -5);
-        // lowerWristHighPosSwitchCal = new Calibration("When Do We Bend Wrist Lower - High Pos", 80);
-        // upperWristHighPosSwitchCal = new Calibration("When Do We Bend Wrist Upper - High Pos", 140); //Obviously more than the arm travels, but it doesn't matter
-
-         curArmPos = myArm.getActualArmHeight();
-
-         //Old Code curArmPos > lowerWristLowPosSwitchCal.get() && curArmPos < upperWristLowPosSwitchCal.get()
-            //curArmPos > lowerWristHighPosSwitchCal.get() && curArmPos < upperWristHighPosSwitchCal.get())
-        //  if(curArmPos > lowerWristLowPosSwitchCal.get() && curArmPos < upperWristLowPosSwitchCal.get() ) 
-        //  //||(curArmPos >) 
-        //  {
-        //     if(!wristIsAngled) {
-        //         wristIsAngled = true;
-        //         }
-        //     }
-        //     else{
-        //         if(wristIsAngled) {
-        //             wristIsAngled = false;
-        //         }
-        //     }
-            if(wristInvert){
-                    wristStabilization.set(!wristIsAngled);
-                }else{
-                    wristStabilization.set(wristIsAngled);
-                }
+        curArmPos = myArm.getActualArmHeight();
+        if(wristInvert){
+            wristStabilization.set(!wristIsAngled);
+        }else{
+            wristStabilization.set(wristIsAngled);
         }
+    }
 
-    public void checkStallProtection()
-    {
+    public void checkStallProtection() {
         double leftCurrent = pdp.getCurrent(RobotConstants.INTAKE_LEFT_MOTOR_PDP_PORT);
         double rightCurrent = pdp.getCurrent(RobotConstants.INTAKE_LEFT_MOTOR_PDP_PORT);
 
@@ -263,21 +166,20 @@ public class GrabbyThing {
         }
     }
     
-    
-    
 
     public void update(){
             
         checkStallProtection();
         wristAlign();
 
-        // TODO: Update these next few lines with button inputs from operator instead of just false!!
         intakeRequested = OperatorController.getInstance().getGampieceGrabRequest();
         ejectRequested = OperatorController.getInstance().getGampieceReleaseRequest();
+        
         hatchModeDesired = OperatorController.getInstance().getHatchMode();
         if(hatchModeDesired){
             hatchMode=true;
         }
+
         ballModeDesired = OperatorController.getInstance().getCargoMode();
         if(ballModeDesired){
             hatchMode=false;
@@ -287,8 +189,7 @@ public class GrabbyThing {
 
         if(hatchModeDesired) {
             hatchGripMode();
-        }
-        else {
+        } else {
             cargoGripMode();
         }
 
@@ -296,118 +197,33 @@ public class GrabbyThing {
             if(intakeRequested) {
                 if(stallProtectionActive) {
                     holdCargo();
-                }
-                else {
+                } else {
                     intakeCargo();
                 }
-            }
-            else if(ejectRequested) {
+            } else if(ejectRequested) {
                 stallProtectionActive = false;
                 ejectCargo();
-            }
-            else {
+            } else {
                 stallProtectionActive = false;
                 holdCargo();
             }
-        }
-        else {
+        } else {
             if(intakeRequested) {
                 if(stallProtectionActive) {
                     holdHatch();
-                }
-                else {
+                } else {
                     intakeHatch();
                 }
-            }
-            else if(ejectRequested) {
+            } else if(ejectRequested) {
                 stallProtectionActive = false;
                 ejectHatch();
-            }
-            else {
+            } else {
                 stallProtectionActive = false;
                 holdHatch();
             }
-        }
-
-        //Main update loop
-        //nextState = curState;
-
-        //Step 0 - save previous state
-        //prevState = curState;
-        
-        
-        // switch(curState) {
-        //     //Can switch States and is ready to grab a game piece
-        //     case HatchReady:
-        //         hatchGripMode();
-        //             if(intakeRequested) {
-        //                 nextState = GrabbyStateMachine.HatchIntake;
-        //             } else if(switchGamePiece) {
-        //                 nextState = GrabbyStateMachine.CargoReady;
-        //                 switchGamePiece = false;
-        //             }
-        //     break;
-
-        //     case CargoReady:
-        //         cargoGripMode();
-        //             if(intakeRequested) {
-        //                 nextState = GrabbyStateMachine.CargoIntake;
-        //             } else if(switchGamePiece) {
-        //                 nextState = GrabbyStateMachine.HatchReady;
-        //                 switchGamePiece = false;
-        //             }
-        //     break;
-
-        //     //Is currently holding a game piece
-        //     case HatchHold:
-        //         if(ejectRequested) {
-        //         nextState = GrabbyStateMachine.HatchShoot;
-        //         }
-        //         else {
-        //             holdHatch();
-        //         }
-        //     break;
-
-        //     case CargoHold:
-        //     if(ejectRequested){
-        //         nextState = GrabbyStateMachine.CargoShoot;
-        //     }
-        //     else {
-        //         holdCargo();
-        //     }
-        //     break;
-
-        //     //Shooting a Game Piece
-        //     case HatchShoot:
-        //         if(ejectRequested) {
-        //             ejectHatch();
-        //         }
-        //     break; 
-        //     case CargoShoot:
-        //         if(ejectRequested) {
-        //             ejectCargo();
-        //         }
-        //     break;
-
-        //     //Intaking a Game Piece 
-        //     case HatchIntake:
-        //         if(intakeRequested && !stallProtectionActive){
-        //             intakeHatch();
-        //         }
-        //         else {
-        //             nextState = GrabbyStateMachine.HatchHold;
-        //         }
-        //     break;
-        //     case CargoIntake:
-        //         if(intakeRequested && !stallProtectionActive && !ballGrabbed.get()){
-        //             intakeCargo();
-        //         } else {
-        //             nextState = GrabbyStateMachine.CargoHold;
-        //         }
-        //     break;
-        // } 
-      
+        } 
     }
+
     public boolean getIsBallInIntake() {
         return ballGrabbed.get();
     }
@@ -421,15 +237,6 @@ public class GrabbyThing {
         return hatchMode;
     }
 
-    
-    
-
-    // public boolean getCurGripperPos() {
-    //     return grabberPos.get();
-    // }
-    // public boolean getCurWristPos() {
-    //     return grabberPos.get();
-    // }
 
     public boolean getStallProtectionActive() {
         return stallProtectionActive;
