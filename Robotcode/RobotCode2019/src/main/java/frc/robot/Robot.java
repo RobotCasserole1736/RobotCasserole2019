@@ -310,30 +310,24 @@ public class Robot extends TimedRobot {
                 arm.setPositionCmd(ArmPos.IntakeCargo);
             } else if (operatorController.getArmPosReq() == ArmPosCmd.IntakeHatch) {
                 arm.setPositionCmd(ArmPos.IntakeHatch);
-                //TODO hatchmode is invverted because we couldn't find where it was wrong.
             } else if (operatorController.getArmPosReq() == ArmPosCmd.Lower) {
                 if(hatchMode) {
                     arm.setPositionCmd(ArmPos.LowerHatch);
-                }else {
+                } else {
                     arm.setPositionCmd(ArmPos.LowerCargo);
                 }
-                 //Let's just say we only do cargo now.
             } else if (operatorController.getArmPosReq() == ArmPosCmd.Middle) {
                 if(hatchMode) {
                     arm.setPositionCmd(ArmPos.MiddleHatch);
-                }else {
+                 } else {
                     arm.setPositionCmd(ArmPos.MiddleCargo);
                 }
-                
             } else if (operatorController.getArmPosReq() == ArmPosCmd.Top) {
                 if(hatchMode) {
                     arm.setPositionCmd(ArmPos.TopHatch);
-                }else{
+                } else {
                     arm.setPositionCmd(ArmPos.TopCargo);
                 }
-                
-            
-            //TODO might have broken manual override. fix at some point.
             } else if(operatorController.getArmManualPosCmd() != 0.0) {
                 arm.setManualMovementCmd(operatorController.getArmManualPosCmd());
             } else if(operatorController.getArmManualPosCmd() == 0.0 && operatorController.getPrevArmManualPosCmd()!=0){
@@ -343,8 +337,7 @@ public class Robot extends TimedRobot {
 
             if(driverController.extendCylReq) {
                 backSole.set(true);
-            }
-            else {
+            } else {
                 backSole.set(false);
             }
 
