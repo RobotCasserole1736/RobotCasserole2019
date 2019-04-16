@@ -174,13 +174,13 @@ public class DrivetrainReal implements DrivetrainInterface, PIDSource, PIDOutput
         gyroGain_I = new Calibration("Drivetrain Gyro Lock I Gain", 0.0); 
         gyroGain_D = new Calibration("Drivetrain Gyro Lock D Gain", 0.012); 
 
-        leftDtGain_P  = new Calibration("Drivetrain Left P Gain", 14.0); 
-        leftDtGain_I  = new Calibration("Drivetrain Left I Gain", 0.014); 
-        leftDtGain_D  = new Calibration("Drivetrain Left D Gain", 0.0); 
+        leftDtGain_P  = new Calibration("Drivetrain Left P Gain", 12.5); 
+        leftDtGain_I  = new Calibration("Drivetrain Left I Gain", 0.008); 
+        leftDtGain_D  = new Calibration("Drivetrain Left D Gain", 0.35); 
         leftDtGain_F  = new Calibration("Drivetrain Left F Gain", 2.0);
-        rightDtGain_P = new Calibration("Drivetrain Right P Gain", 14.0);
-        rightDtGain_I = new Calibration("Drivetrain Right I Gain", 0.014);
-        rightDtGain_D = new Calibration("Drivetrain Right D Gain", 0.0);
+        rightDtGain_P = new Calibration("Drivetrain Right P Gain", 12.5);
+        rightDtGain_I = new Calibration("Drivetrain Right I Gain", 0.008);
+        rightDtGain_D = new Calibration("Drivetrain Right D Gain", 0.35);
         rightDtGain_F = new Calibration("Drivetrain Right F Gain", 2.0);
 
         gyroCompGain_P = new Calibration("Drivetrain Gyro Compensation P Gain", 5.0);
