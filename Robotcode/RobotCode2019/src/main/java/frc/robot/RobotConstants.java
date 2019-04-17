@@ -99,7 +99,7 @@ public class RobotConstants {
     public static final String CAM_2_STREAM_URL = "http://10.17.36.10:1182/stream.mjpg";
     public static final double MAIN_LOOP_SAMPLE_RATE_S = 0.05; // 50ms update rate
     public static final double ROBOT_TRACK_WIDTH_FT = 22.0/12; // 22 inch  effective track width
-    public static final double WHEEL_RADIUS_FT = 8.75/2/12.0; //8.75 inch diameter wheels
+    public static final double WHEEL_RADIUS_FT = 8.75/(2*12.0*1.042); //8.75 inch diameter wheels with a rolling radius fudge factor
 
 
     

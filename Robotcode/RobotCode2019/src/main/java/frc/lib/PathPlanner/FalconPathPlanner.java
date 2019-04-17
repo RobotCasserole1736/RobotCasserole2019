@@ -686,20 +686,19 @@ public class FalconPathPlanner {
 
         final double[][] waypoints = new double[][] {
             {0,0},
-            {0,5},
-            {2,7},
-            {4,9},
-            {4,12}
+            {0,1.5},
+            {0,8.5},
+            {0,10}
     	};
     	
-        double totalTime = 4; // seconds
+        double totalTime = 10; // seconds
         double timeStep = 0.02; // period of control loop on Rio, seconds
         double robotTrackWidth = 2; // distance between left and right wheels, feet
 
         final FalconPathPlanner path = new FalconPathPlanner(waypoints);
 
-        path.setPathBeta(0.05);
-        path.setPathAlpha(0.5);
+        path.setPathBeta(0.1);
+        path.setPathAlpha(0.9);
         path.setVelocityAlpha(0.001);
         path.setVelocityBeta(0.9);
         path.calculate(totalTime, timeStep, robotTrackWidth);
