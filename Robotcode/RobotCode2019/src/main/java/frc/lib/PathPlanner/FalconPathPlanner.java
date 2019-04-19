@@ -686,10 +686,10 @@ public class FalconPathPlanner {
 
         final double[][] waypoints = new double[][] {
             {0,0},
-            {0,1.5},
-            {0,8.5},
-            {0,10}
-    	};
+            {1,0},
+            {9,10},
+            {10,10}
+            	};
     	
         double totalTime = 10; // seconds
         double timeStep = 0.02; // period of control loop on Rio, seconds
