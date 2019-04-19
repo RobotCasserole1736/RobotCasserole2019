@@ -170,6 +170,11 @@ public class GrabbyThing {
     public void update(){
             
         checkStallProtection();
+        if(Arm.getInstance().getActualArmHeight()>=-33 && Arm.getInstance().getActualArmHeight()<=-16 ){
+            wristIsAngled=true;
+        }else{
+            wristIsAngled=false;
+        }
         wristAlign();
 
         intakeRequested = OperatorController.getInstance().getGampieceGrabRequest();
