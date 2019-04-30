@@ -48,7 +48,7 @@ public class AutoSeqPathPlan extends AutoEvent {
 
     double initialHeading = 0;
 
-    final double PATH_DURATION_FROM_DISTANCE_RATIO = 0.75/1.0 ; //units of seconds per foot, because reasons
+    final double PATH_DURATION_FROM_DISTANCE_RATIO = 1.0/1.0 ; //units of seconds per foot, because reasons
 
     //final double JEVOIS_TO_PATH_PLAN_ANGLE_OFFSEST_DEG = 0.0;
 
@@ -110,8 +110,8 @@ public class AutoSeqPathPlan extends AutoEvent {
 
         //Calculate the smooth path
         path = new FalconPathPlanner(waypoints.toArray(new double[waypoints.size()][2]));
-        path.setPathBeta(0.1);
-        path.setPathAlpha(0.9);
+        path.setPathBeta(0.02);
+        path.setPathAlpha(0.5);
         path.setVelocityAlpha(0.001);
         path.setVelocityBeta(0.9);
         path.calculate(pathDurationSec, RobotConstants.MAIN_LOOP_SAMPLE_RATE_S, RobotConstants.ROBOT_TRACK_WIDTH_FT);

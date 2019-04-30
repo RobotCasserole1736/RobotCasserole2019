@@ -323,16 +323,16 @@ public class Arm {
 
        curArmAngle = INVERT_FACTOR*armEncoder.getPosition();
 
-       if (topOfMotion == true && topOfMotionPrev == false){
-           double expectedAngle = topLimitSwitchDegreeCal.get();
-           if(Math.abs(expectedAngle - curArmAngle) > 5.0){
-                //We just hit the top limit switch, and the error was bigger than one tooth at the bottom gear - we probably slipped a tooth.
-                //Reset encoder position at top
-                armEncoder.setPosition(convertArmDegToMotorRot(topLimitSwitchDegreeCal.get())); 
-                forceUpdate = true;
-                gearSkipCounter++;
-           }
-       } 
+    //    if (topOfMotion == true && topOfMotionPrev == false){
+    //        double expectedAngle = topLimitSwitchDegreeCal.get();
+    //        if(Math.abs(expectedAngle - curArmAngle) > 5.0){
+    //             //We just hit the top limit switch, and the error was bigger than one tooth at the bottom gear - we probably slipped a tooth.
+    //             //Reset encoder position at top
+    //             armEncoder.setPosition(convertArmDegToMotorRot(topLimitSwitchDegreeCal.get())); 
+    //             forceUpdate = true;
+    //             gearSkipCounter++;
+    //        }
+    //    } 
 
        if (bottomOfMotion == true && bottomOfMotionPrev == false){
            armEncoder.setPosition(convertArmDegToMotorRot(bottomLimitSwitchDegreeCal.get()));
@@ -370,30 +370,30 @@ public class Arm {
             sampleSensors();
             
             //Update the position based on what the driver requested
-            double gravComp = gravComp();
-            armPID.setReference(INVERT_FACTOR*curManMoveCmd*6.0 + INVERT_FACTOR*gravComp, ControlType.kVoltage);
-            desAngle = curArmAngle;
+            // double gravComp = gravComp();
+            // armPID.setReference(INVERT_FACTOR*curManMoveCmd*6.0 + INVERT_FACTOR*gravComp, ControlType.kVoltage);
+            // desAngle = curArmAngle;
 
-            //  if(curManMoveCmd != 0 || posIn == ArmPos.Disabled) {
-            //      armPID.setReference(INVERT_FACTOR*curManMoveCmd*6.0, ControlType.kVoltage);
-            //      desAngle = curArmAngle;
-            //  } else {
-            //      double desRotation = desAngle;
+             if(curManMoveCmd != 0 || posIn == ArmPos.Disabled) {
+                 armPID.setReference(INVERT_FACTOR*curManMoveCmd*6.0, ControlType.kVoltage);
+                 desAngle = curArmAngle;
+             } else {
+                 double desRotation = desAngle;
                 
-            //     //double gravComp = gravComp(); //Turns out, controls wise I guess we don't need this
+                //double gravComp = gravComp(); //Turns out, controls wise I guess we don't need this
 
-            //     //testDesVel = desRotation; //TEMP - test only
-            //     //armPID.setReference(INVERT_FACTOR*testDesVel, ControlType.kVelocity, 0, 0); //TEMP - test only
-            //     //armPID.setReference(INVERT_FACTOR*desRotation, ControlType.kPosition, 0, gravComp); // AKA not-smart motion
+                //testDesVel = desRotation; //TEMP - test only
+                //armPID.setReference(INVERT_FACTOR*testDesVel, ControlType.kVelocity, 0, 0); //TEMP - test only
+                //armPID.setReference(INVERT_FACTOR*desRotation, ControlType.kPosition, 0, gravComp); // AKA not-smart motion
 
-            //     //we've gotten reports that this is an expensive funciton call to make, so don't make it unless you need to?
-            //      if(desRotation != desRotationPrev || forceUpdate || true){ //Turns out we can't do this without new firmware
-            //          armPID.setReference(INVERT_FACTOR*desRotation, ControlType.kSmartMotion, 0, 0);
-            //          forceUpdate = false;
-            //      }
+                //we've gotten reports that this is an expensive funciton call to make, so don't make it unless you need to?
+                 if(desRotation != desRotationPrev || forceUpdate || true){ //Turns out we can't do this without new firmware
+                     armPID.setReference(INVERT_FACTOR*desRotation, ControlType.kSmartMotion, 0, 0);
+                     forceUpdate = false;
+                 }
                 
-            //      desRotationPrev = desRotation;
-            //  }
+                 desRotationPrev = desRotation;
+             }
 
         }
 

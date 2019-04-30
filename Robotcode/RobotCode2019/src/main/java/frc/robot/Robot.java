@@ -311,19 +311,19 @@ public class Robot extends TimedRobot {
             } else if (operatorController.getArmPosReq() == ArmPosCmd.IntakeHatch) {
                 arm.setPositionCmd(ArmPos.IntakeHatch);
             } else if (operatorController.getArmPosReq() == ArmPosCmd.Lower) {
-                if(hatchMode) {
+                if(!hatchMode) {
                     arm.setPositionCmd(ArmPos.LowerHatch);
                 } else {
                     arm.setPositionCmd(ArmPos.LowerCargo);
                 }
             } else if (operatorController.getArmPosReq() == ArmPosCmd.Middle) {
-                if(hatchMode) {
+                if(!hatchMode) {
                     arm.setPositionCmd(ArmPos.MiddleHatch);
                  } else {
                     arm.setPositionCmd(ArmPos.MiddleCargo);
                 }
             } else if (operatorController.getArmPosReq() == ArmPosCmd.Top) {
-                if(hatchMode) {
+                if(!hatchMode) {
                     arm.setPositionCmd(ArmPos.TopHatch);
                 } else {
                     arm.setPositionCmd(ArmPos.TopCargo);

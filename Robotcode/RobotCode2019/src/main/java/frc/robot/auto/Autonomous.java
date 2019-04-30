@@ -217,11 +217,23 @@ public class Autonomous {
                 if(autoMoveRequested == true){
                     //Add the arm movement
                     if(DriverController.getInstance().getAutoAlignLowPlaceReq()){
-                        seq.addEvent(new MoveArmLowPos(OpMode.Cargo));
+                        if(GrabbyThing.getInstance().getMode()){
+                            seq.addEvent(new MoveArmLowPos(OpMode.Hatch));
+                        }else{
+                            seq.addEvent(new MoveArmLowPos(OpMode.Cargo));
+                        }
                     } else if(DriverController.getInstance().getAutoAlignMidPlaceReq()){
-                        seq.addEvent(new MoveArmMidPos(OpMode.Cargo));
+                        if(GrabbyThing.getInstance().getMode()){
+                            seq.addEvent(new MoveArmMidPos(OpMode.Hatch));
+                        }else{
+                            seq.addEvent(new MoveArmMidPos(OpMode.Cargo));
+                        }
                     } else if(DriverController.getInstance().getAutoAlignHatchPickupReq()){
-                        seq.addEvent(new MoveArmIntakePos(OpMode.Hatch));
+                        if(GrabbyThing.getInstance().getMode()){
+                            seq.addEvent(new MoveArmIntakePos(OpMode.Hatch));
+                        }else{
+                            seq.addEvent(new MoveArmIntakePos(OpMode.Cargo));
+                        }
                     } else {
                         CrashTracker.logAndPrint("[Autonomous] Error invalid Autostate.");
                     }
