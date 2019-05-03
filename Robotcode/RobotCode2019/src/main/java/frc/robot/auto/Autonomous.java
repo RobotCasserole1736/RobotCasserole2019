@@ -10,6 +10,7 @@ import frc.robot.GrabbyThing;
 import frc.robot.JeVoisInterface;
 import frc.robot.LoopTiming;
 import frc.robot.Arm.OpMode;
+import frc.robot.auto.RemoveSlack;
 
 /*
  *******************************************************************************************
@@ -243,6 +244,7 @@ public class Autonomous {
                     if(!pp.getPathAvailable()){
                         nextState = StateEnum.autoError;
                     }
+                    seq.addEvent(new RemoveSlack());
                     seq.addEvent(pp);
                     nextState = StateEnum.addAllAutoEvents;
 
