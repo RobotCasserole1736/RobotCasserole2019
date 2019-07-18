@@ -1,7 +1,12 @@
 package frc.robot;
 
-import edu.wpi.first.wpilibj.Solenoid;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
+import edu.wpi.first.wpilibj.PWM;
+import edu.wpi.first.wpilibj.Servo;
+import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.VictorSP;
+import frc.lib.Calibration.Calibration;
 
 /*
  *******************************************************************************************
@@ -28,7 +33,8 @@ public class Climber {
 
     
 
-    Solenoid climbCyl;
+    Solenoid climbLeftCyl;
+    Solenoid climbRightCyl;
 
     /* Singleton stuff */
     private static Climber climbCtrl = null;
@@ -40,7 +46,8 @@ public class Climber {
 
     private Climber(){
         
-        climbCyl= new Solenoid(RobotConstants.CLIMBER_CYL);
+        climbLeftCyl= new Solenoid(RobotConstants.CLIMBER_LEFT_CYL);
+        climbRightCyl = new Solenoid(RobotConstants.CLIMBER_RIGHT_CYL);
 
     }
 
@@ -50,9 +57,11 @@ public class Climber {
         boolean release = OperatorController.getInstance().getClimberReleace();
         
                 if(enable && release){
-                    climbCyl.set(true);
+                    climbLeftCyl.set(true);
+                    climbRightCyl.set(true);
                 } else {
-                    climbCyl.set(false);
+                    climbLeftCyl.set(false);
+                    climbRightCyl.set(false);
                 }
            
         }
