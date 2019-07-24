@@ -47,7 +47,7 @@ public class Climber {
     private Climber(){
         
         climbLeftCyl= new Solenoid(RobotConstants.CLIMBER_LEFT_CYL);
-        climbRightCyl = new Solenoid(RobotConstants.CLIMBER_RIGHT_CYL);
+        //climbRightCyl = new Solenoid(RobotConstants.CLIMBER_RIGHT_CYL);
 
     }
 
@@ -58,10 +58,10 @@ public class Climber {
         
                 if(enable && release){
                     climbLeftCyl.set(true);
-                    climbRightCyl.set(true);
+                    //climbRightCyl.set(true);
                 } else {
                     climbLeftCyl.set(false);
-                    climbRightCyl.set(false);
+                    //climbRightCyl.set(false);
                 }
            
         }

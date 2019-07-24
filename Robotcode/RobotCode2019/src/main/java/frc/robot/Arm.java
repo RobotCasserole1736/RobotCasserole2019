@@ -190,14 +190,14 @@ public class Arm {
 
         /////Calibration Things\\\\\
         topCargoHeightCal    = new Calibration("Arm Cargo Level Pos Top Deg", 140);
-        midCargoHeightCal    = new Calibration("Arm Cargo Level Pos Mid Deg", 45);
+        midCargoHeightCal    = new Calibration("Arm Cargo Level Pos Mid Deg", 35);
         lowCargoHeightCal    = new Calibration("Arm Cargo Level Pos Bottom Deg", -7);
-        intakeCargoHeightCal = new Calibration("Arm Cargo Level Pos Intake Deg", -21);
+        intakeCargoHeightCal = new Calibration("Arm Cargo Level Pos Intake Deg", -43);
 
-        topHatchHeightCal    = new Calibration("Arm Hatch Level Pos Top Deg", 110);
-        midHatchHeightCal    = new Calibration("Arm Hatch Level Pos Mid Deg", 20);
+        topHatchHeightCal    = new Calibration("Arm Hatch Level Pos Top Deg", 65);
+        midHatchHeightCal    = new Calibration("Arm Hatch Level Pos Mid Deg", 23);
         lowHatchHeightCal    = new Calibration("Arm Hatch Level Pos Bottom Deg", -28);
-        intakeHatchHeightCal = new Calibration("Arm Hatch Level Pos Intake Deg", -21);
+        intakeHatchHeightCal = new Calibration("Arm Hatch Level Pos Intake Deg", -25);
 
         intakeDangerZoneUpperHeight = new Calibration("Arm Intake Danger Zone Upper Pos Deg", -45);
         
@@ -380,11 +380,11 @@ public class Arm {
              } else {
                  double desRotation = desAngle;
                 
-                //double gravComp = gravComp(); //Turns out, controls wise I guess we don't need this
+                double gravComp = gravComp(); //Turns out, controls wise I guess we don't need this
 
                 //testDesVel = desRotation; //TEMP - test only
                 //armPID.setReference(INVERT_FACTOR*testDesVel, ControlType.kVelocity, 0, 0); //TEMP - test only
-                //armPID.setReference(INVERT_FACTOR*desRotation, ControlType.kPosition, 0, gravComp); // AKA not-smart motion
+                armPID.setReference(INVERT_FACTOR*desRotation, ControlType.kPosition, 0, gravComp); // AKA not-smart motion
 
                 //we've gotten reports that this is an expensive funciton call to make, so don't make it unless you need to?
                  if(desRotation != desRotationPrev || forceUpdate || true){ //Turns out we can't do this without new firmware
