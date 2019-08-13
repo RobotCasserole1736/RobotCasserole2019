@@ -197,7 +197,7 @@ public class Arm {
         topHatchHeightCal    = new Calibration("Arm Hatch Level Pos Top Deg", 65);
         midHatchHeightCal    = new Calibration("Arm Hatch Level Pos Mid Deg", 23);
         lowHatchHeightCal    = new Calibration("Arm Hatch Level Pos Bottom Deg", -28);
-        intakeHatchHeightCal = new Calibration("Arm Hatch Level Pos Intake Deg", -25);
+        intakeHatchHeightCal = new Calibration("Arm Hatch Level Pos Intake Deg", 16);
 
         intakeDangerZoneUpperHeight = new Calibration("Arm Intake Danger Zone Upper Pos Deg", -45);
         
@@ -378,7 +378,7 @@ public class Arm {
                  armPID.setReference(INVERT_FACTOR*curManMoveCmd*6.0, ControlType.kVoltage);
                  desAngle = curArmAngle;
              } else {
-                 double desRotation = desAngle;
+                double desRotation = desAngle;
                 
                 double gravComp = gravComp(); //Turns out, controls wise I guess we don't need this
 

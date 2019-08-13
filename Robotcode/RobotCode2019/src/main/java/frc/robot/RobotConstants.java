@@ -84,8 +84,10 @@ public class RobotConstants {
     
 
     public static final int CLIMBER_EJECT_SOL = 4;
-    public static final int CLIMBER_LEFT_CYL = 7;
-    public static final int CLIMBER_RIGHT_CYL = 8;
+    public static final int CLIMBER_SERVO1=7;
+    public static final int CLIMBER_SERVO2=8;
+    //public static final int CLIMBER_LEFT_CYL = 7;
+    //public static final int CLIMBER_RIGHT_CYL = 8;
     
 
 

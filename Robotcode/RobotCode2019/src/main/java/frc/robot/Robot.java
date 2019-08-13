@@ -173,7 +173,7 @@ public class Robot extends TimedRobot {
             climber = Climber.getInstance();
 
             //Fake Climber
-            backSole = new Solenoid(RobotConstants.CLIMBER_EJECT_SOL);
+            //backSole = new Solenoid(RobotConstants.CLIMBER_EJECT_SOL);
         
 
             onboardAccel = new BuiltInAccelerometer();
@@ -336,9 +336,9 @@ public class Robot extends TimedRobot {
 
 
             if(driverController.extendCylReq) {
-                backSole.set(true);
+                //backSole.set(true);
             } else {
-                backSole.set(false);
+                //backSole.set(false);
             }
 
             arm.update();
