@@ -71,7 +71,8 @@ public class AutoSeqPathPlan extends AutoEvent {
 
         //This matrix is for the x and y position of the target. It is supposed to be a 2 X 1.
         double [] pointAheadOfEndMatrix = 
-            {tgt_pos_x_ft, tgt_pos_y_ft-1.5};
+        //TODO the cos element might be positive instead of negative. I need to have a target with me to test.
+            {tgt_pos_x_ft-(1.5*java.lang.Math.cos(targetAngleRad+(Math.PI/2))), tgt_pos_y_ft-(1.5*java.lang.Math.sin(targetAngleRad+(Math.PI/2)))};
 
         double [] endOfLineMatrix = 
             {tgt_pos_x_ft, tgt_pos_y_ft};
@@ -86,9 +87,9 @@ public class AutoSeqPathPlan extends AutoEvent {
         double targetAngleDeg=(targetAngleRad*180)/Math.PI;
         CrashTracker.logAndPrint("[AutoSeq Path Plan] Angle from Target (Deg) = " + targetAngleDeg+tgt_pos_angle_rad);
 
-        double [] wayPoint3 = multiplyMatrices(rotationMatrix, pointAheadOfEndMatrix);
+        double [] wayPoint3 = pointAheadOfEndMatrix;
 
-        double [] wayPoint4 = multiplyMatrices(rotationMatrix, endOfLineMatrix);
+        double [] wayPoint4 = endOfLineMatrix;
 
         double[] wp1 = 
             {0, 0};
