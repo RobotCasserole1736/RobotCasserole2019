@@ -45,10 +45,12 @@ public class AutoSeqPathPlan extends AutoEvent {
     double thisLoopTime;
 
     FalconPathPlanner path;
+    double xOffset = 6.0/12.0;
+    double yOffset= 32.0/12.0;
 
     double initialHeading = 0;
 
-    final double PATH_DURATION_FROM_DISTANCE_RATIO = 1.0/1.0 ; //units of seconds per foot, because reasons
+    final double PATH_DURATION_FROM_DISTANCE_RATIO = 1.0/2.0 ; //units of seconds per foot, because reasons
 
     //final double JEVOIS_TO_PATH_PLAN_ANGLE_OFFSEST_DEG = 0.0;
 
@@ -58,8 +60,8 @@ public class AutoSeqPathPlan extends AutoEvent {
      */
     public AutoSeqPathPlan(double tgt_pos_y_ft, double tgt_pos_x_ft, double tgt_pos_angle_rad){
         dt = Drivetrain.getInstance();
-
-        
+        tgt_pos_x_ft-=xOffset;
+        tgt_pos_y_ft-=yOffset;
         //Convert reference frames
         double targetAngleRad = tgt_pos_angle_rad;
 
@@ -72,7 +74,7 @@ public class AutoSeqPathPlan extends AutoEvent {
         //This matrix is for the x and y position of the target. It is supposed to be a 2 X 1.
         double [] pointAheadOfEndMatrix = 
         //TODO the cos element might be positive instead of negative. I need to have a target with me to test.
-            {tgt_pos_x_ft-(1.5*java.lang.Math.cos(targetAngleRad+(Math.PI/2))), tgt_pos_y_ft-(1.5*java.lang.Math.sin(targetAngleRad+(Math.PI/2)))};
+            {tgt_pos_x_ft+(1.5*java.lang.Math.cos(targetAngleRad+(Math.PI/2))), tgt_pos_y_ft-(1.5*java.lang.Math.sin(targetAngleRad+(Math.PI/2)))};
 
         double [] endOfLineMatrix = 
             {tgt_pos_x_ft, tgt_pos_y_ft};

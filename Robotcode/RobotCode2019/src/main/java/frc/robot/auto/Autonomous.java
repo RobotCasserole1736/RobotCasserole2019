@@ -266,7 +266,7 @@ public class Autonomous {
                 }
 
                 //Add the back-up motion
-                seq.addEvent(new Backup());
+                //seq.addEvent(new Backup());
 
 
                 //Fire off the sequencer
